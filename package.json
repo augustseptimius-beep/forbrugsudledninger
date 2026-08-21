@@ -1,0 +1,17 @@
+{
+  "name": "forbrugsudledninger",
+  "version": "1.0.0",
+  "description": "Consumption-based emission estimates for all 98 Danish municipalities. Static site, no backend.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "css": "tailwindcss -i web/styles/input.css -o web/styles/styles.css --minify",
+    "css:watch": "tailwindcss -i web/styles/input.css -o web/styles/styles.css --watch",
+    "serve": "python3 -m http.server 8000 --directory web"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  }
+}

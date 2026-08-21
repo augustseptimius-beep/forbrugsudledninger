@@ -1,0 +1,16 @@
+# OS / editor
+.DS_Store
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Bemærk: web/styles/styles.css er bevidst IKKE ignoreret.
+# Den genererede CSS committes, så repoet kan åbnes og bruges uden Node.
