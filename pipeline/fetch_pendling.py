@@ -16,13 +16,22 @@ med en faktor, der er sat, så Nordjylland rammer DTU's værdi præcist. Det
 holder alle fem regioner på DTU's målegrundlag frem for at blande to
 måleenheder, og Nordjyllands golden-testværdi er uændret pr. konstruktion.
 
-HVORFOR IKKE KOMMUNENIVEAU. AFSTB4 findes for alle 98 kommuner, og det er
-fristende at droppe den regionale proxy helt. Det ville være en forringelse
-forklædt som en forbedring: Thisted har kun +4,4 % pendlingsafstand mod
-regionens +18,6 %, fordi folk i en stor landkommune arbejder lokalt, men
-kører langt til indkøb, service og fritid. Pendling fanger arbejdsturen og
-misser resten, og netop resten er det, der adskiller land fra by. Sammenhængen
-er kun valideret på regionalt niveau, og opløsningen holdes derfor der."""
+KOMMUNENIVEAU. Afvigelsen beregnes for hver enkelt kommune, ikke kun pr.
+region. Det giver reel differentiering - en regional værdi ville give alle 34
+hovedstadskommuner samme transporttal og dermed ingen information overhovedet.
+Spændet er stort: Vordingborg +58 %, Frederiksberg -43 %.
+
+DEN KENDTE SKÆVHED, DER FØLGER MED. Pendling er kun arbejdsturen, og
+sammenhængen med samlet bilkørsel er kun valideret regionalt. På kommuneniveau
+er den ikke monoton i landlighed: landets 25 % tættest befolkede kommuner
+pendler 16,8 km i snit, den midterste halvdel 26,9 km, og de 25 % tyndest
+befolkede 26,1 km. Det er altså PENDLERBÆLTET, der pendler længst, ikke den
+ægte udkant, hvor der ikke er noget at pendle til.
+
+Samlet bilkørsel stiger formentlig monotont med landlighed, fordi alt bliver
+længere væk - ikke kun arbejdet. Derfor undervurderer denne proxy sandsynligvis
+perifere kommuner. Thisted er det tydeligste eksempel: +4,2 % kommunalt mod
++17,8 % for regionen. Skævheden er kendt, dokumenteret og skal stå ved tallet."""
 
 import dst_client
 from constants import PERIODER
@@ -45,7 +54,10 @@ REGIONSNAVNE = {
 
 
 def fetch_pendlingsafstand():
-    """Gennemsnitlig pendlingsafstand i km for land og de fem regioner."""
+    """Gennemsnitlig pendlingsafstand i km for land, regioner og kommuner.
+
+    Regionsnavne normaliseres ("Region Sjælland" -> "Sjælland"), så de matcher
+    kommuner.py. Kommunenavne står som DST skriver dem."""
     rows = dst_client.fetch(BASE, "AFSTB4", {
         "BOPOMR": "*",
         "SOCIO": "02",          # beskæftigede i alt
@@ -54,13 +66,15 @@ def fetch_pendlingsafstand():
     })
     ud = {}
     for r in rows:
-        omraade = r["BOPOMR"]
-        if omraade != "Hele landet" and omraade not in REGIONSNAVNE:
-            continue
         if r["INDHOLD"] in dst_client.INGEN_DATA_MARKORER:
             continue
+        omraade = r["BOPOMR"]
         ud[REGIONSNAVNE.get(omraade, omraade)] = _to_float(r["INDHOLD"])
     return ud
+
+
+def _afvigelse(km, land):
+    return (km - land) / land
 
 
 def beregn_bilkm_afvigelse(afstande):
@@ -74,9 +88,9 @@ def beregn_bilkm_afvigelse(afstande):
         raise ValueError("AFSTB4 gav ingen landsværdi - kan ikke beregne afvigelser")
 
     raa = {
-        region: (km - land) / land
+        region: _afvigelse(km, land)
         for region, km in afstande.items()
-        if region != "Hele landet"
+        if region in REGIONSNAVNE.values()
     }
     anker = raa.get(DTU_ANKERREGION)
     if not anker:
@@ -86,3 +100,24 @@ def beregn_bilkm_afvigelse(afstande):
     ud = {region: dev * faktor for region, dev in raa.items()}
     ud[DTU_ANKERREGION] = DTU_NORDJYLLAND  # præcis DTU-værdi, ikke afrundet gennem faktoren
     return ud, faktor
+
+
+def beregn_bilkm_afvigelse_kommune(afstande, faktor, kommuneliste):
+    """{kommunekode: bil-km-afvigelse} på DTU's målegrundlag.
+
+    Bruger samme kalibreringsfaktor som regionerne. Faktoren er udledt
+    regionalt og anvendes her som en national skalering - den retter niveauet,
+    ikke den kommunale spredning.
+
+    Kommuner, AFSTB4 ikke har en værdi for, udelades, så motoren kan vise
+    transporten som uoplyst frem for at gætte."""
+    land = afstande.get("Hele landet")
+    if not land:
+        raise ValueError("AFSTB4 gav ingen landsværdi - kan ikke beregne afvigelser")
+    ud = {}
+    for kode, navn, _region in kommuneliste:
+        km = afstande.get(navn)
+        if km is None:
+            continue
+        ud[kode] = _afvigelse(km, land) * faktor
+    return ud

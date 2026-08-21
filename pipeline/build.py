@@ -22,12 +22,12 @@ FORVENTEDE_FELTER = [
     "gini", "boliger_parcel", "boliger_raekke", "boliger_etage", "boligareal", "byggeri",
     "biler", "biler_el", "biler_plugin", "biler_diesel", "opv_boliger_ialt", "opv_olie",
     "opv_naturgas", "affald_kg", "genanvendelse_pct", "elco2_g_kwh", "boligpris_m2",
-    "ve_daekning_pct",
+    "ve_daekning_pct", "bilkm_afvigelse",
 ]
 
 
 def saml_kommune_post(navn, dst_data, boligpriser, kode=None, region=None,
-                      elco2=None, ve_daekning=None):
+                      elco2=None, ve_daekning=None, bilkm_kommune=None):
     """Samler ét kommune- (eller land-) objekt i motorens datakontrakt.
     Ren funktion - ingen I/O - så den kan testes uden netværk (Task 10)."""
     post = dict(dst_data.get(navn, {}))
@@ -42,6 +42,10 @@ def saml_kommune_post(navn, dst_data, boligpriser, kode=None, region=None,
     beregnet = (elco2 or {}).get(kode)
     post["elco2_g_kwh"] = beregnet if beregnet is not None else EL_CO2_MANUAL.get(navn)
     post["ve_daekning_pct"] = (ve_daekning or {}).get(kode)
+    # Kommunens egen bil-km-afvigelse. Mangler den, falder motoren tilbage til
+    # regionens værdi i konstanterne - og er også den ukendt, vises transporten
+    # som ikke opgjort frem for som nul.
+    post["bilkm_afvigelse"] = (bilkm_kommune or {}).get(kode)
     for felt in FORVENTEDE_FELTER:
         post.setdefault(felt, None)
     return post
@@ -60,12 +64,15 @@ def main():
     try:
         afstande = fetch_pendling.fetch_pendlingsafstand()
         bilkm, kalibrering = fetch_pendling.beregn_bilkm_afvigelse(afstande)
-        print(f"  {len(bilkm)} regioner, kalibreringsfaktor {kalibrering:.4f} mod DTU's Nordjylland.")
+        bilkm_kommune = fetch_pendling.beregn_bilkm_afvigelse_kommune(
+            afstande, kalibrering, KOMMUNER)
+        print(f"  {len(bilkm)} regioner og {len(bilkm_kommune)} kommuner, "
+              f"kalibreringsfaktor {kalibrering:.4f} mod DTU's Nordjylland.")
     except Exception as fejl:
         # Falder tilbage til den håndskrevne DTU-værdi frem for at udgive et
         # datasæt uden transporttal, hvis DST er nede ved den årlige kørsel.
         print(f"  ADVARSEL: kunne ikke hente AFSTB4 ({fejl}). Falder tilbage til kun Nordjylland.")
-        bilkm = dict(BILKM_AFVIGELSE_REGION)
+        bilkm, bilkm_kommune = dict(BILKM_AFVIGELSE_REGION), {}
 
     print("Henter Energi Data Service (el-CO2 pr. kommune, forbrugsvægtet)...")
     try:
@@ -103,7 +110,7 @@ def main():
     for kode, navn, region in KOMMUNER:
         kommune_poster.append(saml_kommune_post(
             navn, dst_data, boligpriser, kode=kode, region=region,
-            elco2=elco2, ve_daekning=ve_daekning))
+            elco2=elco2, ve_daekning=ve_daekning, bilkm_kommune=bilkm_kommune))
 
     output = {"land": land_post, "kommuner": kommune_poster}
     konstanter_output = dict(KONSTANTER)

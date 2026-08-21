@@ -530,7 +530,6 @@ export function renderAntagelser(sources, konst) {
     // kalibreret mod den. De to poster viser derfor hver sin halvdel af
     // regionstabellen, så metodesiden afspejler, hvor tallene kommer fra.
     DTU_TU: regionsListe(konst, (r) => r === ANKERREGION),
-    AFSTB4: regionsListe(konst, (r) => r !== ANKERREGION),
   };
 
   const poster = sources.antagelser.map((a) => `<div class="border-t border-gray-100 py-3">

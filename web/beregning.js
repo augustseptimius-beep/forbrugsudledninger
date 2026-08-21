@@ -32,9 +32,20 @@ export function byggeeffekt(byggeDev, konst) {
   };
 }
 
-/** Transporteffekt i ton via regional bil-km-proxy. Null hvis regionen er ukendt. */
-export function transporteffekt(region, konst) {
-  const dev = konst.bilkm_afvigelse_region[region];
+/** Kommunens bil-km-afvigelse. Kommunens egen værdi foretrækkes; findes den
+ *  ikke, arves regionens. Fallbacket holder uoplyst-mekanismen i live, hvis en
+ *  kommune en dag mangler i kilden, og det er det, der lader golden-testen
+ *  måle mod v5-regnearket, som slet ikke havde kommunale bil-km-tal. */
+export function bilkmAfvigelse(kommune, konst) {
+  if (kommune?.bilkm_afvigelse != null) return kommune.bilkm_afvigelse;
+  const regionalt = konst.bilkm_afvigelse_region?.[kommune?.region];
+  return regionalt == null ? null : regionalt;
+}
+
+/** Transporteffekt i ton. Null hvis hverken kommunen eller dens region har
+ *  en bil-km-afvigelse - så vises den som "ikke opgjort", ikke som nul. */
+export function transporteffekt(kommune, konst) {
+  const dev = bilkmAfvigelse(kommune, konst);
   if (dev == null) return null;
   return {
     low: konst.anker * konst.bilkorsel_andel.low * dev,
@@ -61,7 +72,7 @@ export function estimat(kommune, land, konst) {
 
   const ie = indkomsteffekt(incDev, konst);
   const be = byggeeffekt(byggeDev, konst);
-  const te = transporteffekt(kommune.region, konst);
+  const te = transporteffekt(kommune, konst);
 
   const uoplyst = te === null ? ["transport"] : [];
   const teBidrag = te ?? { low: 0, high: 0 };

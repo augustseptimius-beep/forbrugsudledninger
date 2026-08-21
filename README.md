@@ -25,12 +25,13 @@ Pick a municipality and you get:
 
 ## Known gaps, stated up front
 
-- **Transport rests on a regional proxy.** Every municipality in a region
-  inherits the same car-kilometre deviation. Only North Jutland's is measured
-  directly by DTU's travel survey, which has no public API. The other four are
-  derived from Statistics Denmark's commuting-distance table AFSTB4 and
-  calibrated so North Jutland reproduces the DTU figure exactly. Where the two
-  measures can be compared they agree to within 0.74 percentage points.
+- **Transport uses commuting distance as a proxy for all car travel.** Each
+  municipality gets its own figure from Statistics Denmark's table AFSTB4,
+  calibrated against DTU's travel survey, which measures car-kilometres
+  directly but publishes only one regional figure. Where the two can be
+  compared they agree to within 0.74 percentage points. The proxy is not
+  monotone in rurality: commuter belts travel furthest, not the true
+  periphery, so peripheral municipalities are probably understated.
 - **Grid CO2 per kWh credits local generation.** The figure follows Energinet's
   location-based municipal declaration: locally produced renewable energy
   consumed in the same municipality within the same hour counts as zero

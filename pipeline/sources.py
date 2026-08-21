@@ -49,6 +49,14 @@ KILDER = [
          ["biler", "biler_el", "biler_plugin", "biler_diesel"]),
     _dst("LABY25", "Husholdningsaffald og genanvendelse", "AFFALD_AAR",
          ["affald_kg", "genanvendelse_pct"]),
+    dict(_dst("AFSTB4", "Gennemsnitlig pendlingsafstand efter bopælsområde",
+              "PENDLING_AAR", ["bilkm_afvigelse"]),
+         forbehold="Bruges som proxy for bil-km pr. person, kalibreret mod DTU's "
+                   "målte tal for Nordjylland. Pendling er kun arbejdsturen, og "
+                   "sammenhængen er kun valideret regionalt. Sammenhængen er ikke "
+                   "monoton i landlighed: det er pendlerbæltet, der pendler længst, "
+                   "ikke den ægte udkant. Proxyen undervurderer derfor sandsynligvis "
+                   "perifere kommuner."),
     {
         "id": "BM010",
         "navn": "Boligpriser pr. kvadratmeter, realiserede handler",
@@ -100,22 +108,11 @@ ANTAGELSER = [
         "navn": "Transportvaneundersøgelsen, bil-km pr. region",
         "udbyder": "DTU",
         "url": "https://www.transportvaner.dk",
-        "anvendes_til": "bilkm_afvigelse_region (kalibreringsanker)",
+        "anvendes_til": "kalibrering af bil-km-afvigelsen for alle 98 kommuner",
         "forbehold": "Intet offentligt API. Kun Nordjylland er slået op direkte "
-                     "(+17,84 %). Værdien bruges som anker, som de øvrige fire "
-                     "regioner kalibreres mod.",
-    },
-    {
-        "id": "AFSTB4",
-        "navn": "Gennemsnitlig pendlingsafstand efter bopælsområde",
-        "udbyder": "Danmarks Statistik",
-        "url": "https://www.statistikbanken.dk/AFSTB4",
-        "anvendes_til": "bilkm_afvigelse_region (de fire regioner uden DTU-tal)",
-        "forbehold": "Pendling er kun arbejdsturen, ikke al bilkørsel. På "
-                     "regionalt niveau følger de to mål hinanden tæt: AFSTB4 "
-                     "giver Nordjylland +18,58 % mod DTU's +17,84 %. "
-                     "Sammenhængen er kun valideret regionalt, og tallene "
-                     "bruges derfor ikke på kommuneniveau.",
+                     "(+17,84 %). Værdien bruges som anker: alle kommunernes "
+                     "pendlingsbaserede afvigelser skaleres, så Nordjylland som "
+                     "region rammer den præcist.",
     },
     {
         "id": "ENS_GA",

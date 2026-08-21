@@ -81,10 +81,11 @@ Begge er overtaget fra doughnut-projektet, hvor de blev fundet nødvendige.
 `estimat()` returnerer `null` for komponenter, der ikke kan opgøres, og lister
 dem i `uoplyst`. Brugerfladen viser dem som "ikke opgjort".
 
-Baggrunden: `bilkm_afvigelse_region` indeholder kun Nordjylland. Hvis
-transporteffekten degraderer stiltiende til nul, læser 80+ kommuner et ukendt
-bidrag som en måling. Samme princip for `elco2_g_kwh`, der mangler for 96
-kommuner og vises som `–`.
+Baggrunden: transporteffekten hviler på en proxy, og hvis den degraderer
+stiltiende til nul, læser en kommune et ukendt bidrag som en måling. Motoren
+foretrækker kommunens eget `bilkm_afvigelse`, falder tilbage til regionens
+værdi i konstanterne, og viser først "ikke opgjort", når ingen af delene
+findes.
 
 Hvis du ændrer i `beregning.js`, så tjek at denne skelnen overlever.
 

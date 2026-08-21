@@ -60,3 +60,46 @@ class TestBilkmAfvigelse(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestKommuneAfvigelse(unittest.TestCase):
+    """Kommunale bil-km-afvigelser. Samme kalibrering som regionerne, fordi
+    faktoren retter niveauet, ikke den kommunale spredning."""
+
+    AFSTANDE_MED_KOMMUNER = dict(AFSTANDE, **{
+        "Thisted": 23.6, "Aalborg": 26.0, "Vordingborg": 36.3, "Frederiksberg": 12.4,
+    })
+    KOMMUNER = [(787, "Thisted", "Nordjylland"), (851, "Aalborg", "Nordjylland"),
+                (390, "Vordingborg", "Sjælland"), (147, "Frederiksberg", "Hovedstaden")]
+
+    def _bereg(self):
+        _, faktor = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
+        return fetch_pendling.beregn_bilkm_afvigelse_kommune(
+            self.AFSTANDE_MED_KOMMUNER, faktor, self.KOMMUNER)
+
+    def test_hver_kommune_faar_sin_egen_vaerdi(self):
+        ud = self._bereg()
+        self.assertEqual(len(set(ud.values())), 4, "fire forskellige afstande, fire forskellige tal")
+
+    def test_kommunen_afviger_fra_sin_region(self):
+        # Hele pointen med at gå til kommuneniveau. Thisted ligger langt under
+        # Nordjyllands regionsværdi.
+        regionalt, _ = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
+        ud = self._bereg()
+        self.assertLess(ud[787], regionalt["Nordjylland"] / 2)
+
+    def test_fortegn_foelger_afstanden(self):
+        ud = self._bereg()
+        self.assertGreater(ud[390], 0, "Vordingborg pendler langt")
+        self.assertLess(ud[147], 0, "Frederiksberg pendler kort")
+
+    def test_kommune_uden_afstand_udelades(self):
+        # Så motoren kan vise transporten som uoplyst frem for at gætte.
+        _, faktor = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
+        ud = fetch_pendling.beregn_bilkm_afvigelse_kommune(
+            AFSTANDE, faktor, [(999, "Findes Ikke", "Sjælland")])
+        self.assertEqual(ud, {})
+
+    def test_manglende_landsvaerdi_fejler(self):
+        with self.assertRaises(ValueError):
+            fetch_pendling.beregn_bilkm_afvigelse_kommune({"Thisted": 23.6}, 1.0, self.KOMMUNER)

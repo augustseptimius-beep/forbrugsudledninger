@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { afvigelse, indkomsteffekt, byggeriPr1000, byggeeffekt, transporteffekt, estimat, boligprisFolsomhed, driverTabel, beregnKommune } from "../web/beregning.js";
+import { afvigelse, indkomsteffekt, byggeriPr1000, byggeeffekt, transporteffekt, bilkmAfvigelse, estimat, boligprisFolsomhed, driverTabel, beregnKommune } from "../web/beregning.js";
 import { land, thisted, greve, konstanter } from "./fixtures.js";
 
 const naer = (a, b, tol = 1e-4) => assert.ok(Math.abs(a - b) < tol, `${a} ≈ ${b}`);
@@ -49,13 +49,13 @@ test("byggeeffekt: Greve (høj aktivitet) giver TILLÆG — fortegn vender korre
 });
 
 test("transporteffekt: Thisted (Nordjylland +17,84 %) matcher v5", () => {
-  const e = transporteffekt("Nordjylland", konstanter);
+  const e = transporteffekt({ region: "Nordjylland" }, konstanter);
   naer(e.low, 0.2141);
   naer(e.high, 0.2676);
 });
 
 test("transporteffekt: ukendt region giver null", () => {
-  assert.equal(transporteffekt("Atlantis", konstanter), null);
+  assert.equal(transporteffekt({ region: "Atlantis" }, konstanter), null);
 });
 
 test("estimat: Thisted reproducerer v5 EKSAKT (9,4102–9,9053 ton)", () => {
@@ -155,4 +155,37 @@ test("uoplyst: utilstrækkeligt datagrundlag har også feltet", () => {
   const r = beregnKommune(uden, land, kunNordjylland);
   assert.equal(r.estimat.utilstraekkeligt, true);
   assert.deepEqual(r.estimat.uoplyst, []);
+});
+
+
+// --- Kommunal bil-km-afvigelse går forud for regionens ---
+
+test("bilkmAfvigelse: kommunens egen værdi vinder over regionens", () => {
+  const k = { region: "Nordjylland", bilkm_afvigelse: 0.0425 };
+  assert.equal(bilkmAfvigelse(k, konstanter), 0.0425);
+});
+
+test("bilkmAfvigelse: uden egen værdi arves regionens", () => {
+  // Fallbacket er det, der lader golden-testen måle mod v5-regnearket, som
+  // slet ikke havde kommunale bil-km-tal.
+  const k = { region: "Nordjylland" };
+  assert.equal(bilkmAfvigelse(k, konstanter), konstanter.bilkm_afvigelse_region["Nordjylland"]);
+});
+
+test("bilkmAfvigelse: hverken kommune eller region giver null", () => {
+  assert.equal(bilkmAfvigelse({ region: "Atlantis" }, konstanter), null);
+});
+
+test("transporteffekt: kommunetallet ændrer resultatet", () => {
+  const uden = transporteffekt({ region: "Nordjylland" }, konstanter);
+  const med = transporteffekt({ region: "Nordjylland", bilkm_afvigelse: 0.0425 }, konstanter);
+  assert.ok(med.low < uden.low, "Thisteds egen afvigelse er markant lavere end regionens");
+});
+
+test("estimat: kommune uden eget tal og uden kendt region er uoplyst", () => {
+  const k = { ...greve, region: "Atlantis" };
+  const kunNord = { ...konstanter, bilkm_afvigelse_region: { Nordjylland: 0.178423236514523 } };
+  const r = estimat(k, land, kunNord);
+  assert.equal(r.komponenter.transporteffekt, null);
+  assert.deepEqual(r.uoplyst, ["transport"]);
 });
