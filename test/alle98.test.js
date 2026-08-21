@@ -71,3 +71,58 @@ test("kommuner med fuldt kerneinput får et estimat i en troværdig størrelseso
     assert.ok(low > 5 && high < 20, `${k.navn}: ${low}-${high} ton ligger uden for det plausible`);
   }
 });
+
+// --- El-CO2 og VE-dækning: mekanismen, ikke øjebliksbilledet ---
+// Assertionerne herunder er skrevet til at overleve en årlig opdatering.
+// De hænger på sammenhænge, der skal gælde uanset hvilket år der hentes,
+// ikke på konkrete værdier, der ændrer sig når nettet bliver renere.
+
+const medEl = () => data.kommuner.filter((k) => k.elco2_g_kwh != null && k.ve_daekning_pct != null);
+
+test("el-CO2 følger med VE-dækning for de kommuner, der har begge tal", () => {
+  const k = medEl();
+  if (k.length < 10) return; // datasæt uden el-data - intet at teste
+  assert.equal(k.length, data.kommuner.length,
+    "de to felter kommer fra samme kilde og skal være udfyldt samlet");
+});
+
+test("el-CO2 kan ikke være negativ", () => {
+  // Fortrængningen må aldrig overstige forbruget. Et negativt tal ville
+  // betyde, at overskudsproduktion blev krediteret som negativ udledning.
+  for (const k of medEl()) {
+    assert.ok(k.elco2_g_kwh >= 0, `${k.navn}: ${k.elco2_g_kwh} g/kWh`);
+  }
+});
+
+test("høj lokal VE-dækning giver lav el-CO2", () => {
+  // Kernemekanismen i Energinets lokationsbaserede metode. Vender fortegnet
+  // om, er fortrængningen regnet forkert vej.
+  const k = medEl();
+  if (k.length < 10) return;
+  const halvdel = Math.floor(k.length / 2);
+  const efterVE = [...k].sort((a, b) => b.ve_daekning_pct - a.ve_daekning_pct);
+  const gns = (liste) => liste.reduce((s, x) => s + x.elco2_g_kwh, 0) / liste.length;
+  const groenneste = gns(efterVE.slice(0, halvdel));
+  const mindstGroenne = gns(efterVE.slice(-halvdel));
+  assert.ok(groenneste < mindstGroenne,
+    `kommuner med høj VE-dækning skal have lavere el-CO2 (${groenneste.toFixed(1)} vs ${mindstGroenne.toFixed(1)})`);
+});
+
+test("landsværdien ligger inden for kommunernes spænd", () => {
+  const k = medEl();
+  if (k.length < 10 || data.land.elco2_g_kwh == null) return;
+  const vaerdier = k.map((x) => x.elco2_g_kwh);
+  assert.ok(data.land.elco2_g_kwh >= Math.min(...vaerdier), "landsværdi under alle kommuner");
+  assert.ok(data.land.elco2_g_kwh <= Math.max(...vaerdier), "landsværdi over alle kommuner");
+});
+
+test("VE-dækning er en procent, ikke en andel", () => {
+  // Forveksles 0-100 med 0-1, bliver driverkolonnen forkert med faktor 100.
+  const k = medEl();
+  if (k.length < 10) return;
+  assert.ok(k.some((x) => x.ve_daekning_pct > 1.5),
+    "mindst én kommune skal ligge over 1,5 - ellers er tallet en andel, ikke en procent");
+  for (const x of k) {
+    assert.ok(x.ve_daekning_pct >= 0, `${x.navn}: negativ VE-dækning`);
+  }
+});
