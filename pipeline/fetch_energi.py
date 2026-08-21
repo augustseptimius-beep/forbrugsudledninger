@@ -5,7 +5,7 @@ timedata, der kræver forbrugsvægtet aggregering. Det er præcis, hvad dette
 modul gør, med to datasæt fra Energi Data Service:
 
   DeclarationGridEmission   emission pr. kWh i netmixet, pr. time, pr. prisområde
-  RECoverageMunicipality    elforbrug pr. time pr. kommune (og lokal VE-dækning)
+  ReCoverageMunicipality    elforbrug pr. time pr. kommune (og lokal VE-dækning)
 
 Metoden følger Energinets lokationsbaserede kommunedeklaration: lokalt
 produceret vedvarende energi, der forbruges i kommunen samme time
@@ -70,7 +70,7 @@ def fetch_kommuneforbrug(aar=None, sov=None):
         {kommune: (VE-kWh, forbrug-kWh)})."""
     aar = aar or PERIODER["ELDEKLARATION_AAR"]
     kwargs = {"sov": sov} if sov else {}
-    raekker = eds_client.hent_alle("RECoverageMunicipality", {
+    raekker = eds_client.hent_alle("ReCoverageMunicipality", {
         "start": f"{aar}-01-01", "end": f"{int(aar) + 1}-01-01",
         "columns": "HourDK,MunicipalityNo,REekWhKeep,ConsumptionkWh",
     }, **kwargs)

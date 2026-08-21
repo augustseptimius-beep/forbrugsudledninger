@@ -120,7 +120,7 @@ byggeeffekt = anker &times; byggeandel &times; byggeafvigelse   (byggeandel 0 ti
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">De seksten drivere</h2>
+  <h2 class="text-xl font-semibold text-gray-900">De sytten drivere</h2>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Ud over hovedtallet sammenlignes seksten forhold med landsgennemsnittet.
     Kun tre af dem - disponibel indkomst, byggeaktivitet og den regionale bil-km-afvigelse -
     fødes ind i selve estimatet. De øvrige er kontekst.</p>
@@ -129,6 +129,27 @@ byggeeffekt = anker &times; byggeandel &times; byggeafvigelse   (byggeandel 0 ti
     over landsgennemsnittet er en fordel; en høj andel dieselbiler er ikke. Den vurdering
     kræver faglig, lokal læsning, og værktøjet foretager den ikke på dine vegne. Af samme
     grund rangordner det heller ikke forbrugskategorier.</p>
+
+  <h3 class="mt-6 font-semibold text-gray-900">El-CO2 og lokal VE-dækning</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">To af driverne hænger sammen og skal læses sammen. El-CO2 pr. kWh
+    beregnes af Energinets timedata for prisområdets netmix, vægtet med kommunens eget
+    timeforbrug. Oven i det følger metoden Energinets lokationsbaserede
+    kommunedeklaration: lokalt produceret vedvarende energi, der forbruges i kommunen
+    samme time, regnes som nul-emission og fortrænger strøm fra nettet.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Fortrængningen opgøres time for time, ikke på årsbasis. Det er ikke en
+    detalje: vinden blæser ikke nødvendigvis, når forbruget er højest, og en kommune kan
+    sagtens producere mere vedvarende energi end den bruger over et år uden at være dækket
+    i den enkelte time. Et årsgennemsnit ville systematisk overvurdere dækningen.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Det forbehold, der skal med:</strong> metoden krediterer lokal
+    produktion til lokalt forbrug. Set fra et rent forbrugsbaseret regnskab er det en
+    dobbeltregning - den grønne strøm, en vindkommune leverer, indgår også i det
+    landsdækkende mix, alle andre forbruger. Det er Energinets metodevalg, ikke vores, og
+    tallet står her, fordi det er det officielt udgivne. Det beskriver en kommunes
+    elprofil og egner sig ikke til at lægge sammen på tværs af kommuner.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Derfor står <em>lokal VE-dækning af elforbrug</em> ved siden af som
+    selvstændig driver. Uden den kan man ikke se, hvorfor en vindkommune ligger lavt på
+    el-CO2. Den er et produktionsmål, ikke et forbrugsmål, og kan overstige 100 % for
+    kommuner, der producerer mere, end de bruger.</p>
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
@@ -153,8 +174,10 @@ byggeeffekt = anker &times; byggeandel &times; byggeafvigelse   (byggeandel 0 ti
     <li><strong>Transport hviler på en regional proxy.</strong> Alle kommuner i en region
       arver samme bil-km-afvigelse, og kun Nordjyllands er målt direkte af DTU. De øvrige
       fire er udledt af pendlingsafstande og kalibreret mod DTU-tallet.</li>
-    <li><strong>El-CO2 pr. kWh mangler for 96 kommuner.</strong> Energinet udgiver tallet som
-      rå timedata, der kræver forbrugsvægtet aggregering.</li>
+    <li><strong>El-CO2 krediterer lokal produktion.</strong> Tallet følger Energinets
+      lokationsbaserede kommunedeklaration, hvor lokalt produceret vedvarende energi, der
+      forbruges i kommunen samme time, regnes som nul-emission. Det beskriver kommunens
+      elprofil godt og egner sig ikke til at lægge sammen på tværs af kommuner.</li>
     <li><strong>Byggekoefficienten hviler på ét kalibreringspunkt.</strong> Den kan justeres,
       hvis en bedre national kilde til byggeriets aftryksandel dukker op.</li>
     <li><strong>Kommunalt indk&oslash;bsaftryk indg&aring;r ikke.</strong> Det findes ikke

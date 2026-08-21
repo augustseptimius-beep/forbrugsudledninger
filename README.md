@@ -18,7 +18,7 @@ Pick a municipality and you get:
   figure of roughly 10 tonnes CO2e.
 - A breakdown into anchor, income effect, transport effect and construction
   effect. The composition carries the insight, not the total.
-- All 16 drivers compared against the national average, with direction shown
+- All 17 drivers compared against the national average, with direction shown
   by shape as well as colour.
 - Explicit "not quantified" markers wherever the underlying data does not
   exist. Never a silent zero.
@@ -31,8 +31,13 @@ Pick a municipality and you get:
   derived from Statistics Denmark's commuting-distance table AFSTB4 and
   calibrated so North Jutland reproduces the DTU figure exactly. Where the two
   measures can be compared they agree to within 0.74 percentage points.
-- **Grid CO2 per kWh is missing for 96 municipalities.** Energinet publishes it
-  as raw hourly data that needs consumption-weighted aggregation.
+- **Grid CO2 per kWh credits local generation.** The figure follows Energinet's
+  location-based municipal declaration: locally produced renewable energy
+  consumed in the same municipality within the same hour counts as zero
+  emission and displaces grid electricity. It describes a municipality's
+  electricity profile well, and it is not suitable for adding up across
+  municipalities. Local renewable coverage is shown alongside it as a separate
+  driver so the reader can see what drives the number.
 - **The construction coefficient is calibrated against one municipality**
   (Thisted) as a reference point.
 - **The assumption cells are estimates, not measurements.** They live in one
