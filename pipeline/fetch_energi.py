@@ -33,8 +33,23 @@ import eds_client
 from constants import PERIODER
 
 # Den danske miljødeklaration bruger 125 %-metoden til at fordele brændsel
-# mellem el og varme i kraftvarmeværker.
+# mellem el og varme i kraftvarmeværker. Bekræftet i Energistyrelsens
+# metodenotat "El-emissionsfaktoren (2024-2035)", som bruger samme metode.
 BRAENDSELSMETODE = "125%"
+
+# ÅBENT PUNKT: vi bruger CO2-kolonnen, ikke en fuld CO2e.
+# Datasættet har også CH4PerkWh og N2OPerkWh, men uden dokumenterede enheder.
+# I et stikprøvedøgn stod CO2PerkWh til 23,1 mens CH4PerkWh stod til 74,7 -
+# det kan ikke være gram metan, for det ville betyde mere metan end CO2 fra
+# forbrænding. Sandsynligvis milligram, hvilket med AR5-faktoren ville lægge
+# omkring 11 % oveni. Det er ikke bekræftet, og en gættet enhedsomregning
+# ville være værre end et præcist mærket CO2-tal.
+#
+# Betydningen er begrænset: en proportional forhøjelse rammer alle kommuner
+# ens, og driveren viser afvigelsen fra landsgennemsnittet, ikke absolutte
+# niveauer. Størrelsesordenen er kontrolleret mod Energistyrelsens
+# fremskrivning for 2025 (DK1 60,0 og DK2 57,3 g CO2e/kWh) mod vores
+# beregnede 65,9 og 40,9 g CO2/kWh.
 EMISSIONSKOLONNE = "CO2PerkWh"
 
 # Prisområdegrænsen følger Storebælt: DK1 er Jylland og Fyn, DK2 er Sjælland,
