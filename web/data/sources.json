@@ -1,0 +1,215 @@
+{
+  "genereret": "2026-08-21",
+  "kilder": [
+    {
+      "id": "FOLK1A",
+      "navn": "Folketal efter område",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/FOLK1A",
+      "felter": [
+        "folketal",
+        "folketal_forrige"
+      ],
+      "periode": "2026K1"
+    },
+    {
+      "id": "ARE207",
+      "navn": "Areal efter område",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/ARE207",
+      "felter": [
+        "areal"
+      ],
+      "periode": "2025"
+    },
+    {
+      "id": "INDKP101",
+      "navn": "Disponibel indkomst efter område",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/INDKP101",
+      "felter": [
+        "disp_indkomst"
+      ],
+      "periode": "2024"
+    },
+    {
+      "id": "FORMUE12",
+      "navn": "Nettoformue efter område",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/FORMUE12",
+      "felter": [
+        "formue_gns",
+        "formue_median"
+      ],
+      "periode": "2024"
+    },
+    {
+      "id": "IFOR41",
+      "navn": "Gini-koefficient efter område",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/IFOR41",
+      "felter": [
+        "gini"
+      ],
+      "periode": "2024"
+    },
+    {
+      "id": "BOL101",
+      "navn": "Boliger efter anvendelse",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/BOL101",
+      "felter": [
+        "boliger_parcel",
+        "boliger_raekke",
+        "boliger_etage"
+      ],
+      "periode": "2025"
+    },
+    {
+      "id": "BOL103",
+      "navn": "Boliger efter størrelse",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/BOL103",
+      "felter": [
+        "boligareal"
+      ],
+      "periode": "2025"
+    },
+    {
+      "id": "BOL102",
+      "navn": "Boliger efter opvarmningsform",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/BOL102",
+      "felter": [
+        "opv_boliger_ialt",
+        "opv_olie",
+        "opv_naturgas"
+      ],
+      "periode": "2026"
+    },
+    {
+      "id": "BYGV33",
+      "navn": "Fuldført byggeri efter område",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/BYGV33",
+      "felter": [
+        "byggeri"
+      ],
+      "periode": "2024"
+    },
+    {
+      "id": "BIL54",
+      "navn": "Personbiler efter drivmiddel",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/BIL54",
+      "felter": [
+        "biler",
+        "biler_el",
+        "biler_plugin",
+        "biler_diesel"
+      ],
+      "periode": "2026M01"
+    },
+    {
+      "id": "LABY25",
+      "navn": "Husholdningsaffald og genanvendelse",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/LABY25",
+      "felter": [
+        "affald_kg",
+        "genanvendelse_pct"
+      ],
+      "periode": "2023"
+    },
+    {
+      "id": "BM010",
+      "navn": "Boligpriser pr. kvadratmeter, realiserede handler",
+      "udbyder": "Finans Danmark",
+      "metode": "api",
+      "licens": "Finans Danmarks vilkår",
+      "url": "https://rkr.statistikbank.dk/BM010",
+      "felter": [
+        "boligpris_m2"
+      ],
+      "forbehold": "Kvartalstal baseret på realiserede handler. For små kommuner med få handler er tallet volatilt.",
+      "periode": "2025K4"
+    },
+    {
+      "id": "ENERGINET_MILJODEKLARATION",
+      "navn": "CO2 pr. kWh el, kommunedeklaration",
+      "udbyder": "Energinet",
+      "metode": "manuel",
+      "licens": "Energinets vilkår",
+      "url": "https://energinet.dk/data-om-energi/co2-pr-kwh-el-kommune/",
+      "felter": [
+        "elco2_g_kwh"
+      ],
+      "forbehold": "Findes kun som rå timedata, der kræver forbrugsvægtet aggregering. Kun Hele landet og Thisted er opgjort; 96 kommuner mangler og vises som streg.",
+      "periode": null
+    }
+  ],
+  "antagelser": [
+    {
+      "id": "DTU_TU",
+      "navn": "Transportvaneundersøgelsen, bil-km pr. region",
+      "udbyder": "DTU",
+      "url": "https://www.transportvaner.dk",
+      "anvendes_til": "bilkm_afvigelse_region",
+      "forbehold": "Intet offentligt API. Kun Nordjylland er slået op. For de fire øvrige regioner vises transporteffekten som ikke opgjort, ikke som nul."
+    },
+    {
+      "id": "ENS_GA",
+      "navn": "Global Afrapportering, dansk forbrugsaftryk pr. indbygger",
+      "udbyder": "Energistyrelsen",
+      "url": "https://ens.dk",
+      "anvendes_til": "anker (10,0 ton CO2e)",
+      "forbehold": "Nationalt gennemsnit, opgørelsesår 2023."
+    },
+    {
+      "id": "CONCITO_ELAST",
+      "navn": "Sammenhæng mellem indkomst og klimaaftryk",
+      "udbyder": "CONCITO",
+      "url": "https://concito.dk",
+      "anvendes_til": "elasticitet (0,30-0,50) og bilkorsel_andel (0,12-0,15)",
+      "forbehold": "Skøn, ikke en målt størrelse."
+    },
+    {
+      "id": "BYGGEANDEL_KALIBRERING",
+      "navn": "Byggeriets aftryksandel, kalibreret koefficient",
+      "udbyder": "Eget skøn",
+      "url": "",
+      "anvendes_til": "byggeandel (0,0-0,0456045)",
+      "forbehold": "Kalibreret så Thisted reproducerer det oprindelige regnearks interval. Ikke en uafhængigt målt størrelse."
+    },
+    {
+      "id": "BOLIGUDGIFT_MODREGNING",
+      "navn": "Andel af indkomstgab modsvaret af lavere boligudgift",
+      "udbyder": "Eget skøn",
+      "url": "",
+      "anvendes_til": "boligudgift_modregning (0,45)",
+      "forbehold": "Ræsonneret til et mønster med billig bolig og lav indkomst. Følsomheden vises kun, når det mønster gælder."
+    }
+  ]
+}

@@ -1,7 +1,6 @@
 """Orkestrerer hele datapipelinen. Kør: python3 pipeline/build.py
-Skriver web/data/data.json og udskriver en valideringsrapport til stdout
-(jf. spec §5.5). Kildemetadata-filen (sources.json) hører til Plan 3's
-widget-arbejde og produceres ikke her."""
+Skriver web/data/data.json og web/data/sources.json og udskriver en
+valideringsrapport til stdout (jf. spec §5.5)."""
 
 import json
 import os
@@ -9,10 +8,12 @@ import sys
 
 import fetch_dst
 import fetch_boligpriser
+import sources
 from constants import KONSTANTER, BILKM_AFVIGELSE_REGION, EL_CO2_MANUAL
 from kommuner import KOMMUNER
 
 DATA_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "data.json")
+SOURCES_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "sources.json")
 
 FORVENTEDE_FELTER = [
     "disp_indkomst", "folketal", "folketal_forrige", "areal", "formue_gns", "formue_median",
@@ -65,6 +66,10 @@ def main():
     with open(DATA_JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     print(f"Skrev {DATA_JSON_PATH}")
+
+    with open(SOURCES_JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(sources.byg_sources(), f, ensure_ascii=False, indent=2)
+    print(f"Skrev {SOURCES_JSON_PATH}")
 
     # --- Valideringsrapport ---
     print("\n--- Valideringsrapport ---")
