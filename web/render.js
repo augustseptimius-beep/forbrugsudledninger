@@ -424,3 +424,74 @@ export function renderForside() {
     </div>
     <div id="resultater" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>`;
 }
+
+// ---------- Kilder og antagelser (metodesiden) ----------
+
+const METODE_MAERKAT = {
+  api: { tekst: "API", klasse: "bg-gray-100 text-gray-700" },
+  manuel: { tekst: "Manuel", klasse: "bg-amber-100 text-amber-800" },
+};
+
+/** Kildetabellen. Perioder kommer fra sources.json, som pipelinen genererer,
+ *  så årstallene ikke kan drive fra det, der faktisk blev hentet. */
+export function renderKilder(sources) {
+  const raekker = sources.kilder.map((k) => {
+    const m = METODE_MAERKAT[k.metode] ?? METODE_MAERKAT.api;
+    const navn = k.url
+      ? `<a href="${esc(k.url)}" target="_blank" rel="noopener"
+           class="underline hover:text-gray-900">${esc(k.navn)}</a>`
+      : esc(k.navn);
+    return `<tr class="border-t border-gray-100">
+      <td class="py-2 pr-3 text-sm"><span class="font-mono text-xs text-gray-900">${esc(k.id)}</span></td>
+      <td class="py-2 px-3 text-sm text-gray-700">${navn}${k.forbehold ? forbehold(k.forbehold) : ""}</td>
+      <td class="py-2 px-3 text-sm text-gray-600 whitespace-nowrap">${esc(k.udbyder)}</td>
+      <td class="py-2 px-3 text-sm text-gray-600 whitespace-nowrap">${esc(k.periode) || MANGLER}</td>
+      <td class="py-2 px-3 text-sm whitespace-nowrap">
+        <span class="rounded px-1.5 py-0.5 text-[10px] font-medium ${m.klasse}">${m.tekst}</span></td>
+      <td class="py-2 pl-3 text-xs text-gray-500 whitespace-nowrap">${esc(k.licens)}</td>
+    </tr>`;
+  }).join("");
+
+  return `<div class="overflow-x-auto">
+    <table class="w-full min-w-[40rem]">
+      <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
+        <th class="py-2 pr-3 text-left font-medium">Tabel</th>
+        <th class="py-2 px-3 text-left font-medium">Kilde</th>
+        <th class="py-2 px-3 text-left font-medium">Udbyder</th>
+        <th class="py-2 px-3 text-left font-medium">Periode</th>
+        <th class="py-2 px-3 text-left font-medium">Hentning</th>
+        <th class="py-2 pl-3 text-left font-medium">Licens</th>
+      </tr></thead>
+      <tbody>${raekker}</tbody>
+    </table>
+    <p class="mt-3 text-xs text-gray-500">Genereret ${esc(sources.genereret)}.</p>
+  </div>`;
+}
+
+/** Antagelsescellerne med deres faktiske værdier. Værdierne læses fra
+ *  konstanterne i data.json, ikke skrevet i hånden, så siden ikke kan komme
+ *  til at påstå noget andet end det, motoren regner med. */
+export function renderAntagelser(sources, konst) {
+  const vaerdier = {
+    ENS_GA: ton(konst.anker),
+    CONCITO_ELAST: `elasticitet ${tal(konst.elasticitet.low, 2)} til ${tal(konst.elasticitet.high, 2)}, ` +
+      `bilkørselsandel ${tal(konst.bilkorsel_andel.low, 2)} til ${tal(konst.bilkorsel_andel.high, 2)}`,
+    BYGGEANDEL_KALIBRERING: `${tal(konst.byggeandel.low, 2)} til ${tal(konst.byggeandel.high, 4)}`,
+    BOLIGUDGIFT_MODREGNING: andel(konst.boligudgift_modregning),
+    DTU_TU: Object.entries(konst.bilkm_afvigelse_region ?? {})
+      .map(([region, v]) => `${esc(region)} ${pct(v)}`).join(", ") || "ingen regioner opgjort",
+  };
+
+  const poster = sources.antagelser.map((a) => `<div class="border-t border-gray-100 py-3">
+    <div class="flex items-baseline justify-between gap-3 flex-wrap">
+      <span class="text-sm font-medium text-gray-900">${esc(a.navn)}</span>
+      <span class="text-sm tabular-nums text-gray-900">${vaerdier[a.id] ?? MANGLER}</span>
+    </div>
+    <p class="mt-1 text-xs text-gray-500">Anvendes til ${esc(a.anvendes_til)}.
+      Ophav: ${a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener"
+        class="underline hover:text-gray-700">${esc(a.udbyder)}</a>` : esc(a.udbyder)}.
+      ${esc(a.forbehold)}</p>
+  </div>`).join("");
+
+  return `<div>${poster}</div>`;
+}

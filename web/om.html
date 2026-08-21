@@ -44,7 +44,70 @@
 </div>
 
 <main class="mx-auto max-w-6xl px-4 py-6">
-<div id="om-indhold"></div>
+<div class="space-y-6 max-w-3xl">
+
+<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 class="text-xl font-semibold text-gray-900">Hvad det er</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Et frit tilg&aelig;ngeligt v&aelig;rkt&oslash;j, der estimerer
+    forbrugsbaserede udledninger pr. borger for alle 98 danske kommuner ud fra offentlige
+    data. Det er t&aelig;nkt som et startpunkt for kommunalt klimaarbejde - s&aelig;rligt
+    for arbejdet med vidensgrundlag og forbrugskategorier i en klimahandlingsplan.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Metoden er en generalisering af en analyse, der oprindeligt blev lavet for
+    &eacute;n kommune. Al kode og dokumentation er &aring;ben, s&aring; metoden kan
+    efterpr&oslash;ves, kritiseres og forbedres.</p>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 class="text-xl font-semibold text-gray-900">Hvad det ikke er</h2>
+  <ul class="mt-3 space-y-2 text-sm text-gray-700 list-disc pl-5">
+    <li>Det er <strong>ikke en myndighedsopg&oslash;relse</strong>. Ingen myndighed
+      st&aring;r bag tallene, og de er ikke godkendt af nogen.</li>
+    <li>Det er <strong>ikke en m&aring;ling</strong>, men et modelberegnet sk&oslash;n med
+      eksplicitte antagelser.</li>
+    <li>Det <strong>rangordner ikke</strong> forbrugskategorier og fort&aelig;ller ikke,
+      hvad en kommune b&oslash;r prioritere. Den vurdering er et fagligt og politisk
+      sk&oslash;n, og v&aelig;rkt&oslash;jet samler kun evidensen.</li>
+    <li>Det er <strong>ikke egnet til at rangordne kommuner mod hinanden</strong>.
+      Us&aelig;kkerheden p&aring; det enkelte tal er st&oslash;rre end forskellen mellem
+      mange kommuner.</li>
+  </ul>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 class="text-xl font-semibold text-gray-900">L&aelig;g det ind p&aring; jeres egen side</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">En kommunes visning kan indlejres i en anden hjemmeside. Parameteren
+    <code class="rounded bg-gray-100 px-1 py-0.5 text-xs">embed=1</code> skjuler menu,
+    sidehoved og sidefod, s&aring; kun selve visningen er tilbage.</p>
+  <code class="mt-3 block overflow-x-auto whitespace-pre rounded-md bg-gray-900 p-3 text-xs text-gray-100">&lt;iframe src="index.html?kommune=787&amp;embed=1"
+        width="100%" height="1600" style="border:0"
+        title="Forbrugsbaserede udledninger"&gt;&lt;/iframe&gt;</code>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Udskift <code class="rounded bg-gray-100 px-1 py-0.5 text-xs">787</code> med
+    jeres egen kommunekode og
+    <code class="rounded bg-gray-100 px-1 py-0.5 text-xs">index.html</code> med sidens fulde
+    adresse. Ansvarsfraskrivelsen f&oslash;lger ikke med i embed-visningen, s&aring; skriv
+    selv ved siden af, at der er tale om et uofficielt sk&oslash;n.</p>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 class="text-xl font-semibold text-gray-900">Data og opdatering</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Datagrundlaget hentes fra offentlige API'er &eacute;n gang om &aring;ret og
+    ligger som statiske filer. Der er ingen server, ingen database og ingen sporing af
+    bes&oslash;gende. Siden fungerer, fordi alle beregninger sker i din egen browser.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Se <a href="metode.html" class="underline hover:text-gray-900">metodesiden</a>
+    for kilder, formler og de antagelser, estimatet hviler p&aring;.</p>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 class="text-xl font-semibold text-gray-900">Licens og ansvar</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Koden er udgivet under MIT-licens og kan frit bruges og &aelig;ndres. Data
+    fra Danmarks Statistik er CC BY 4.0. &Oslash;vrige kilder har hver deres vilk&aring;r,
+    som fremg&aring;r af metodesiden.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">V&aelig;rkt&oslash;jet stilles til r&aring;dighed som det er, uden nogen
+    form for garanti. Bruger man tallene i en beslutning, er ansvaret for den beslutning
+    ens eget.</p>
+</div>
+
+</div>
 </main>
 
 <footer class="no-print no-embed border-t border-gray-200 bg-white mt-12">
