@@ -150,7 +150,7 @@ export function driverTabel(kommune, land) {
       else if (d.type === "difference") afv = kv - lv;
     }
     return {
-      navn: d.navn, enhed: d.enhed,
+      navn: d.navn, enhed: d.enhed, type: d.type,
       kommuneVaerdi: kv, landVaerdi: lv, afvigelse: afv,
       retning: afv == null ? "kontekst" : afv > 0 ? "over land" : afv < 0 ? "under land" : "på niveau",
     };
