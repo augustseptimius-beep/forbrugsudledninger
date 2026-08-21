@@ -124,7 +124,7 @@ export function forbehold(tekst) {
   );
 }
 
-const KORT = "rounded-lg border border-gray-200 bg-white";
+const KORT = "kort-print rounded-lg border border-gray-200 bg-white";
 
 // ---------- Hovedtal ----------
 
@@ -162,6 +162,16 @@ export function renderHovedtal(b) {
       snævrere end virkeligheden.` : `Følgende kunne ikke opgøres: ${esc(uoplyst.join(", "))}.`}
     </div>`;
 
+  const printknap = `<button type="button" onclick="window.print()"
+      class="no-print no-embed mt-4 inline-flex items-center gap-1.5 rounded-md border
+             border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700
+             hover:bg-gray-50 hover:border-gray-400 transition-colors">
+      <svg viewBox="0 0 16 16" class="h-4 w-4" aria-hidden="true" fill="none"
+        stroke="currentColor" stroke-width="1.5">
+        <path d="M4 6V2h8v4M4 12H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1"/>
+        <rect x="4" y="10" width="8" height="4"/></svg>
+      Print eller gem som PDF</button>`;
+
   return `<section class="${KORT} p-5 sm:p-6">${hoved}
     <p class="mt-3 text-sm text-gray-600">Estimeret forbrugsbaseret aftryk pr. borger</p>
     <p class="mt-1">
@@ -172,6 +182,7 @@ export function renderHovedtal(b) {
       gennemsnit på cirka 10 ton pr. borger. Intervallet er et førsteordens-skøn, ikke en
       måling, og sammensætningen nedenfor bærer mere indsigt end totalen.</p>
     ${advarsel}
+    ${printknap}
   </section>`;
 }
 

@@ -1,0 +1,54 @@
+name: Udgiv til GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Kun én udgivelse ad gangen. Igangværende kørsel afbrydes ikke, så en
+# halvfærdig udgivelse ikke kan efterlade siden i en mærkelig tilstand.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  byg-og-udgiv:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.udgiv.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Installér afhængigheder
+        run: npm ci
+
+      - name: Byg CSS
+        run: npm run css
+
+      - name: Kør tests
+        # Bevidst før udgivelse: en rød test skal stoppe udgivelsen, ikke
+        # bare farve et badge rødt. Testene dækker både beregningsmotoren og
+        # at alle 98 kommuner kan renderes mod det ægte datasæt.
+        run: npm test
+
+      - uses: actions/configure-pages@v5
+
+      - name: Pak web-mappen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+
+      - name: Udgiv
+        id: udgiv
+        uses: actions/deploy-pages@v4

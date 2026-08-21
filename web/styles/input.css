@@ -4,12 +4,13 @@
 @source "../*.html";
 @source "../*.js";
 
-/* Print. Doughnuts mønster: display:none på .no-print, så der ikke bliver
-   plads i layoutet og dermed ingen spøgelsessider. */
-#print-view { display: none; }
+/* Print. display:none på .no-print frem for visibility:hidden, så elementet
+   ikke optager plads i layoutet og dermed ikke giver tomme spøgelsessider.
+   Selve indholdet printes som det er - vi har ingen separat printvisning,
+   fordi kommunevisningen allerede er læsbar på papir. */
 @media print {
   .no-print { display: none !important; }
-  #print-view { display: block !important; }
+  .kort-print { border: 1px solid #d1d5db !important; break-inside: avoid; }
   @page { margin: 1.5cm; }
 }
 

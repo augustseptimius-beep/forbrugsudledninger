@@ -1,0 +1,32 @@
+name: Tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Installér pytest
+        # Pipelinen kører på ren stdlib (urllib, csv, io) og har ingen
+        # køre-afhængigheder. Kun testrunneren skal installeres.
+        run: pip install pytest
+      - name: Kør pipeline-tests
+        working-directory: pipeline
+        run: python -m pytest -q
