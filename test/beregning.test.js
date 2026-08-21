@@ -1,191 +1,108 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { afvigelse, indkomsteffekt, byggeriPr1000, byggeeffekt, transporteffekt, bilkmAfvigelse, estimat, boligprisFolsomhed, driverTabel, beregnKommune } from "../web/beregning.js";
-import { land, thisted, greve, konstanter } from "./fixtures.js";
+import { afvigelse, byggeriPr1000, driverTabel, driverePrKategori, beregnKommune, KATEGORI }
+  from "../web/beregning.js";
+import { land, thisted, greve } from "./fixtures.js";
 
 const naer = (a, b, tol = 1e-4) => assert.ok(Math.abs(a - b) < tol, `${a} ≈ ${b}`);
+const find = (t, navn) => t.find((d) => d.navn === navn);
 
-test("afvigelse: Thisteds indkomst ligger 12,08 % under land", () => {
-  naer(afvigelse(thisted.disp_indkomst, land.disp_indkomst), -0.120786);
+// --- afvigelse ---
+
+test("afvigelse: fortegn følger retningen", () => {
+  naer(afvigelse(90, 100), -0.1);
+  naer(afvigelse(110, 100), 0.1);
+  assert.equal(afvigelse(100, 100), 0);
 });
 
-test("afvigelse: manglende værdi giver null", () => {
+test("afvigelse: manglende input giver null, ikke nul", () => {
   assert.equal(afvigelse(null, 100), null);
   assert.equal(afvigelse(100, null), null);
+  assert.equal(afvigelse(100, 0), null, "division med nul må ikke give Infinity");
 });
 
-test("indkomsteffekt: Thisted (under land) er negativ, matcher v5", () => {
-  const dev = afvigelse(thisted.disp_indkomst, land.disp_indkomst);
-  const e = indkomsteffekt(dev, konstanter);
-  naer(e.low, -0.3624);   // anker × dev × 0,30
-  naer(e.high, -0.6039);  // anker × dev × 0,50
+// --- byggeriPr1000 ---
+
+test("byggeriPr1000: normaliserer mod folketal", () => {
+  naer(byggeriPr1000({ byggeri: 103, folketal: 42572 }), 2.41945);
 });
 
-test("indkomsteffekt: Greve (over land) er POSITIV — fanger fortegnsfejl", () => {
-  const dev = afvigelse(greve.disp_indkomst, land.disp_indkomst);
-  const e = indkomsteffekt(dev, konstanter);
-  assert.ok(e.low > 0, "en naiv -ABS()-port ville give negativ her");
-  naer(e.low, 0.1967);
-  naer(e.high, 0.3279);
+test("byggeriPr1000: manglende input giver null", () => {
+  assert.equal(byggeriPr1000({ byggeri: null, folketal: 100 }), null);
+  assert.equal(byggeriPr1000({ byggeri: 10, folketal: 0 }), null);
 });
 
-test("byggeriPr1000: Thisted og land", () => {
-  naer(byggeriPr1000(land), 4.30928, 1e-3);
-  naer(byggeriPr1000(thisted), 2.41943, 1e-3);
-});
-
-test("byggeeffekt: Thisted (lav aktivitet) giver reduktion 0 til -0,2 ton (v5)", () => {
-  const dev = afvigelse(byggeriPr1000(thisted), byggeriPr1000(land));
-  const e = byggeeffekt(dev, konstanter);
-  naer(e.low, 0.0);     // byggeandel.low = 0
-  naer(e.high, -0.2);   // kalibreret til v5's høje ende
-});
-
-test("byggeeffekt: Greve (høj aktivitet) giver TILLÆG — fortegn vender korrekt", () => {
-  const dev = afvigelse(byggeriPr1000(greve), byggeriPr1000(land));
-  const e = byggeeffekt(dev, konstanter);
-  assert.ok(e.high > 0, "byggetung kommune skal give positivt bidrag");
-  naer(e.high, 0.5119);
-});
-
-test("transporteffekt: Thisted (Nordjylland +17,84 %) matcher v5", () => {
-  const e = transporteffekt({ region: "Nordjylland" }, konstanter);
-  naer(e.low, 0.2141);
-  naer(e.high, 0.2676);
-});
-
-test("transporteffekt: ukendt region giver null", () => {
-  assert.equal(transporteffekt({ region: "Atlantis" }, konstanter), null);
-});
-
-test("estimat: Thisted reproducerer v5 EKSAKT (9,4102–9,9053 ton)", () => {
-  const r = estimat(thisted, land, konstanter);
-  assert.equal(r.utilstraekkeligt, false);
-  naer(r.aftryk.low, 9.4102, 1e-3);
-  naer(r.aftryk.high, 9.9053, 1e-3);
-});
-
-test("estimat: Greve ligger over ankeret (rigere + bygger mere)", () => {
-  const r = estimat(greve, land, konstanter);
-  assert.ok(r.aftryk.low > 10, `Greve low ${r.aftryk.low} skal være > 10`);
-  assert.ok(r.aftryk.high > 10);
-});
-
-test("boligpris: Thisted (billig bolig + lav indkomst) vises, halverer effekten", () => {
-  const f = boligprisFolsomhed(thisted, land, konstanter);
-  assert.equal(f.vises, true);
-  naer(f.justeret.low, -0.1993);
-  naer(f.justeret.high, -0.3322);
-});
-
-test("boligpris: Greve (dyr bolig + høj indkomst) undertrykkes — ingen falsk symmetri", () => {
-  const f = boligprisFolsomhed(greve, land, konstanter);
-  assert.equal(f.vises, false);
-  // Når følsomheden ikke vises, må der ikke lækkes et vildledende tal til en consumer.
-  assert.equal(f.justeret, null);
-  assert.equal(f.reeltGab, null);
-});
-
-const findDriver = (tabel, navn) => tabel.find((d) => d.navn === navn);
-
-test("driverTabel: parcelhus-andel og diesel-andel matcher v5", () => {
-  const t = driverTabel(thisted, land);
-  naer(findDriver(t, "Parcelhus-andel").afvigelse, 0.65508, 1e-4);
-  naer(findDriver(t, "Diesel-andel").afvigelse, 0.52526, 1e-4);
-});
+// --- driverTabel ---
 
 test("driverTabel: befolkningsudvikling bruger DIFFERENCE, ikke relativ", () => {
-  const t = driverTabel(thisted, land);
-  naer(findDriver(t, "Befolkningsudvikling").afvigelse, -0.0084358, 1e-5);
+  // To vækstrater er allerede procenter; en relativ afvigelse mellem dem
+  // ville være procent af procent og dermed meningsløs.
+  const d = find(driverTabel(thisted, land), "Befolkningsudvikling");
+  assert.equal(d.type, "difference");
+  naer(d.afvigelse, d.kommuneVaerdi - d.landVaerdi);
 });
 
-test("driverTabel: manglende driver (Greve affald) giver afvigelse null", () => {
-  const t = driverTabel(greve, land);
-  assert.equal(findDriver(t, "Husholdningsaffald").afvigelse, null);
+test("driverTabel: Gini er kontekst uden afvigelse", () => {
+  const d = find(driverTabel(thisted, land), "Gini-koefficient");
+  assert.equal(d.type, "ingen");
+  assert.equal(d.afvigelse, null);
+  assert.equal(d.retning, "kontekst");
 });
 
-test("beregnKommune: manglende kerneinput (indkomst) → utilstrækkeligt, intet aftryk", () => {
-  const udenIndkomst = { ...thisted, disp_indkomst: null };
-  const r = beregnKommune(udenIndkomst, land, konstanter);
-  assert.equal(r.estimat.utilstraekkeligt, true);
-  assert.equal(r.estimat.aftryk, null);
-  assert.ok(r.manglende.includes("disp_indkomst"));
+test("driverTabel: hver indikator hører til en CONCITO-kategori", () => {
+  const gyldige = new Set(Object.values(KATEGORI));
+  for (const d of driverTabel(thisted, land)) {
+    assert.ok(gyldige.has(d.kategori), `${d.navn} har ukendt kategori ${d.kategori}`);
+  }
 });
 
-test("beregnKommune: manglende enkeltdriver (Greve affald) → estimat beregnes stadig", () => {
-  const r = beregnKommune(greve, land, konstanter);
-  assert.equal(r.estimat.utilstraekkeligt, false);
-  assert.ok(r.manglende.includes("affald_kg"));
+test("driverTabel: pendlingsafstand vises i km uden omregning", () => {
+  const d = find(driverTabel(thisted, land), "Gennemsnitlig pendlingsafstand");
+  assert.equal(d.enhed, "km");
+  assert.equal(d.kommuneVaerdi, thisted.pendlingsafstand_km);
+  assert.equal(d.kategori, KATEGORI.TRANSPORT);
 });
 
-// --- §6: uoplyste komponenter må ikke degradere til nul ---
-// Fixturens konstanter har en neutral 0-stub for Sjælland, som ville skjule
-// forskellen mellem "målt til nul" og "ikke opgjort". Produktionen har kun
-// Nordjylland, så det er den situation, der skal testes.
-const kunNordjylland = {
-  ...konstanter,
-  bilkm_afvigelse_region: { "Nordjylland": 0.178423236514523 },
-};
+// --- gruppering ---
 
-test("uoplyst: region uden DTU-tal giver null-komponent, ikke nul", () => {
-  const r = beregnKommune(greve, land, kunNordjylland);
-  assert.equal(r.estimat.komponenter.transporteffekt, null);
-  assert.deepEqual(r.estimat.uoplyst, ["transport"]);
+test("driverePrKategori: transport står først", () => {
+  const g = driverePrKategori(driverTabel(thisted, land));
+  assert.equal(g[0].kategori, KATEGORI.TRANSPORT,
+    "transport er CONCITO's største kategori og skal læses først");
 });
 
-test("uoplyst: region med DTU-tal giver tom uoplyst-liste", () => {
-  const r = beregnKommune(thisted, land, kunNordjylland);
-  assert.deepEqual(r.estimat.uoplyst, []);
-  assert.ok(r.estimat.komponenter.transporteffekt !== null);
+test("driverePrKategori: hver indikator optræder præcis én gang", () => {
+  const drivere = driverTabel(thisted, land);
+  const grupperet = driverePrKategori(drivere).flatMap((g) => g.drivere);
+  assert.equal(grupperet.length, drivere.length);
+  assert.equal(new Set(grupperet.map((d) => d.navn)).size, drivere.length);
 });
 
-test("uoplyst: intervallet er aritmetisk uændret af markeringen", () => {
-  const medStub = {
-    ...konstanter,
-    bilkm_afvigelse_region: { "Nordjylland": 0.178423236514523, "Sjælland": 0 },
-  };
-  const a = beregnKommune(greve, land, kunNordjylland).estimat.aftryk;
-  const b = beregnKommune(greve, land, medStub).estimat.aftryk;
-  assert.equal(a.low, b.low);
-  assert.equal(a.high, b.high);
+test("driverePrKategori: tomme kategorier udelades", () => {
+  const g = driverePrKategori([{ navn: "x", kategori: KATEGORI.TRANSPORT }]);
+  assert.equal(g.length, 1);
 });
 
-test("uoplyst: utilstrækkeligt datagrundlag har også feltet", () => {
-  const uden = { ...greve, disp_indkomst: null };
-  const r = beregnKommune(uden, land, kunNordjylland);
-  assert.equal(r.estimat.utilstraekkeligt, true);
-  assert.deepEqual(r.estimat.uoplyst, []);
+// --- beregnKommune ---
+
+test("beregnKommune: bærer navn, kode og region videre", () => {
+  const r = beregnKommune(thisted, land);
+  assert.equal(r.navn, "Thisted");
+  assert.equal(r.kode, 787);
+  assert.equal(r.region, "Nordjylland");
 });
 
-
-// --- Kommunal bil-km-afvigelse går forud for regionens ---
-
-test("bilkmAfvigelse: kommunens egen værdi vinder over regionens", () => {
-  const k = { region: "Nordjylland", bilkm_afvigelse: 0.0425 };
-  assert.equal(bilkmAfvigelse(k, konstanter), 0.0425);
+test("beregnKommune: lister manglende felter", () => {
+  const r = beregnKommune(greve, land);
+  for (const f of ["affald_kg", "genanvendelse_pct", "elco2_g_kwh", "ve_daekning_pct"]) {
+    assert.ok(r.manglende.includes(f), `${f} skulle være markeret som manglende`);
+  }
 });
 
-test("bilkmAfvigelse: uden egen værdi arves regionens", () => {
-  // Fallbacket er det, der lader golden-testen måle mod v5-regnearket, som
-  // slet ikke havde kommunale bil-km-tal.
-  const k = { region: "Nordjylland" };
-  assert.equal(bilkmAfvigelse(k, konstanter), konstanter.bilkm_afvigelse_region["Nordjylland"]);
-});
-
-test("bilkmAfvigelse: hverken kommune eller region giver null", () => {
-  assert.equal(bilkmAfvigelse({ region: "Atlantis" }, konstanter), null);
-});
-
-test("transporteffekt: kommunetallet ændrer resultatet", () => {
-  const uden = transporteffekt({ region: "Nordjylland" }, konstanter);
-  const med = transporteffekt({ region: "Nordjylland", bilkm_afvigelse: 0.0425 }, konstanter);
-  assert.ok(med.low < uden.low, "Thisteds egen afvigelse er markant lavere end regionens");
-});
-
-test("estimat: kommune uden eget tal og uden kendt region er uoplyst", () => {
-  const k = { ...greve, region: "Atlantis" };
-  const kunNord = { ...konstanter, bilkm_afvigelse_region: { Nordjylland: 0.178423236514523 } };
-  const r = estimat(k, land, kunNord);
-  assert.equal(r.komponenter.transporteffekt, null);
-  assert.deepEqual(r.uoplyst, ["transport"]);
+test("beregnKommune: intet felt i modellen hedder aftryk eller estimat", () => {
+  // Værktøjet beregner ikke et kommunalt aftryk. Dukker feltet op igen, er
+  // der sneget en ukildebelagt koefficient ind.
+  const r = beregnKommune(thisted, land);
+  assert.ok(!("estimat" in r));
+  assert.ok(!("aftryk" in r));
 });

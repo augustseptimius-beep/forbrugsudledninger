@@ -3,11 +3,10 @@
 Ved den årlige genkøring:
 1. Opdatér PERIODER til de nyeste tilgængelige perioder for hver kilde
    (kør build.py - valideringsrapporten viser, om en tabel har nyere data).
-2. BILKM_AFVIGELSE_REGION og EL_CO2_MANUAL er nu SIKKERHEDSNET, ikke
-   datakilder. Begge hentes automatisk (fetch_pendling.py og
-   fetch_energi.py). Rør dem kun, hvis kilderne selv ændrer sig.
-3. Konstanterne i KONSTANTER (anker, elasticitet mv.) er metodiske antagelser,
-   ikke datapunkter - opdatér kun hvis metoden selv ændres."""
+2. EL_CO2_MANUAL er et sikkerhedsnet, ikke en datakilde - el-CO2 hentes
+   automatisk i fetch_energi.py. Rør den kun, hvis kilden selv ændrer sig.
+3. Der er ingen beregningskoefficienter i denne fil. De nationale
+   sammenligningstal står afskrevet med sidehenvisning i concito.py."""
 
 # --- Periodekonstanter: ÅRETS ét sted at redigere ved opdatering ---
 PERIODER = {
@@ -27,30 +26,31 @@ PERIODER = {
     "ELDEKLARATION_AAR": "2025",
 }
 
-# --- Konstanter til beregningsmotoren. Porteret 1:1 fra Plan 1's test/fixtures.js -
-#     ÆNDR IKKE disse uden at køre Plan 1's golden tests igen (test/golden.test.js). ---
-KONSTANTER = {
-    "anker": 10.0,
-    "elasticitet": {"low": 0.30, "high": 0.50},
-    "bilkorsel_andel": {"low": 0.12, "high": 0.15},
-    "byggeandel": {"low": 0.0, "high": 0.0456045},
-    "boligudgift_modregning": 0.45,
-}
-
-# --- KALIBRERINGSANKER: DTU Transportvaneundersøgelsen (bil-km pr. region) ---
-# Kun Nordjylland er slået op direkte (v5-regnearket, udtræk juli 2026).
-# transportvaner.dk har intet offentligt API.
+# --- INGEN BEREGNINGSKOEFFICIENTER HER ---
 #
-# De fire øvrige regioner udledes nu automatisk af DST's AFSTB4
-# (gennemsnitlig pendlingsafstand efter bopælsområde) i fetch_pendling.py,
-# kalibreret så Nordjylland rammer værdien herunder præcist. Se modulets
-# docstring for validering og for hvorfor tallene IKKE bruges på kommuneniveau.
+# Denne fil indeholdt tidligere KONSTANTER med et nationalt anker, en
+# indkomstelasticitet, en bilkørselsandel, en byggeandel og en
+# boligudgiftsmodregning, samt BILKM_AFVIGELSE_REGION. Alt sammen er fjernet,
+# fordi ingen af tallene kunne kildebelægges:
 #
-# Dette dict er dermed to ting: kalibreringens anker, og et sikkerhedsnet,
-# hvis DST ikke svarer ved den årlige kørsel.
-BILKM_AFVIGELSE_REGION = {
-    "Nordjylland": 0.178423236514523,
-}
+#   anker 10,0 ton             CONCITO (2023) s. 8 citerer Energistyrelsens
+#                              Global Afrapportering 2023 for 11 ton, ikke 10.
+#   elasticitet 0,30-0,50      Findes hverken i CONCITO (2023) eller NIRAS (2024).
+#   bilkorsel_andel 0,12-0,15  CONCITO (2023) s. 17, figur 8, opgør kørsel i
+#                              personlige transportmidler til 1,0 ton af
+#                              transportens 3,1 - cirka 9 % af aftrykket,
+#                              ikke 12-15 %.
+#   byggeandel 0,0456045       Kalibreret til at reproducere én kommunes
+#                              tidligere resultat. Kurvetilpasning uden kilde.
+#   boligudgift_modregning 0,45  Ræsonneret, ingen kilde.
+#   bilkm_afvigelse_region     Kun Nordjylland havde et DTU-tal; de øvrige fire
+#                              blev udledt af pendlingsafstande og kalibreret.
+#                              Både proxyen og kalibreringen var vores egne valg.
+#
+# Værktøjet beregner derfor ikke længere et kommunalt aftryk i ton. De
+# nationale sammenligningstal står afskrevet med sidehenvisning i concito.py.
+# Skal der igen beregnes et kommunalt aftryk, skal datagrundlaget fra NIRAS'
+# anbefaling først skaffes - se NIRAS_ANBEFALINGER i concito.py.
 
 # --- SIKKERHEDSNET: Energinet miljødeklaration (el-CO2 pr. kommune, g/kWh) ---
 # Værdierne herunder er aflæst manuelt fra v5-regnearket. De bruges KUN, hvis

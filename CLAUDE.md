@@ -11,6 +11,10 @@
 
 - **Projekt:** Forbrugsbaserede udledninger for alle 98 danske kommuner.
   Offentlig, statisk side uden server eller database.
+- **Grundprincip:** værktøjet træffer ingen metodiske beslutninger. Hvert tal er
+  enten hentet fra et offentligt register eller afskrevet fra en navngiven
+  rapport med sidehenvisning. Der beregnes intet kommunalt klimaaftryk - se
+  forklaringen i `pipeline/constants.py`.
 - **Stak:** Vanilla ES-moduler, Tailwind CSS 4 via CLI, Python til pipelinen.
   Ingen React, ingen bundler, ingen runtime-afhængigheder.
 - **Udgivelse:** GitHub Actions bygger CSS, kører testene og udgiver `web/`
@@ -74,9 +78,15 @@ React-komponent, hvis platformen senere flettes ind i doughnut-projektet.
 
 Begge er overtaget fra doughnut-projektet, hvor de blev fundet nødvendige.
 
-## Den vigtigste regel i koden
+## De to vigtigste regler i koden
 
-**Manglende data må aldrig vises som nul.**
+**1. Ingen ukildebelagte tal.** Dukker der en koefficient op, som ikke kan
+føres tilbage til en navngiven side i en navngiven rapport, hører den ikke
+hjemme i modellen. `pipeline/concito.py` indeholder de nationale tal som ren
+afskrift med sidehenvisning; `pipeline/constants.py` forklarer, hvilke
+koefficienter der er fjernet og hvorfor.
+
+**2. Manglende data må aldrig vises som nul.**
 
 `estimat()` returnerer `null` for komponenter, der ikke kan opgøres, og lister
 dem i `uoplyst`. Brugerfladen viser dem som "ikke opgjort".

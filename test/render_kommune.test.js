@@ -1,152 +1,141 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { beregnKommune } from "../web/beregning.js";
-import { renderHovedtal, renderNedbrydning, renderDriverTabel, renderBoligpris, renderKommune }
-  from "../web/render.js";
-import { land, thisted, greve, konstanter } from "./fixtures.js";
+import { renderNationaltAftryk, renderIndikatorer, renderHuller,
+         renderKommuneOverskrift, renderKommune } from "../web/render.js";
+import { land, thisted, greve } from "./fixtures.js";
 
-// Produktionens konstanter: kun Nordjylland har et DTU-tal.
-const prod = { ...konstanter, bilkm_afvigelse_region: { "Nordjylland": 0.178423236514523 } };
+const concito = JSON.parse(readFileSync(new URL("../web/data/concito.json", import.meta.url)));
+const bThisted = beregnKommune(thisted, land);
+const bGreve = beregnKommune(greve, land);
 
-const bThisted = beregnKommune(thisted, land, prod);
-const bGreve = beregnKommune(greve, land, prod);
-const bUden = beregnKommune({ ...greve, disp_indkomst: null }, land, prod);
+// --- Det nationale grundlag ---
 
-// ---------- Hovedtal ----------
-
-test("hovedtal: viser interval og kommunenavn", () => {
-  const h = renderHovedtal(bThisted);
-  assert.ok(h.includes("Thisted"), "kommunenavn skal stå der");
-  assert.ok(h.includes("9,4 - 9,9"), "intervallet skal stå der");
-  assert.ok(h.includes("ton"), "enheden skal stå der");
+test("nationalt aftryk: viser kildens tal, ikke et beregnet", () => {
+  const h = renderNationaltAftryk(concito);
+  assert.ok(h.includes("11,0 ton"), "Energistyrelsens tal skal stå der");
+  assert.ok(h.includes("2021"), "opgørelsesåret skal fremgå");
 });
 
-test("hovedtal: utilstrækkeligt datagrundlag giver ingen tal", () => {
-  const h = renderHovedtal(bUden);
-  assert.ok(h.includes("Utilstrækkeligt datagrundlag"));
-  assert.ok(!/\d,\d\s*-\s*\d,\d/.test(h), "der må ikke stå et interval");
+test("nationalt aftryk: hvert tal har en sidehenvisning", () => {
+  const h = renderNationaltAftryk(concito);
+  assert.ok(/s\.\s*8/.test(h), "det nationale tal skal henvise til s. 8");
+  assert.ok(/s\.\s*16/.test(h), "kategorifordelingen skal henvise til s. 16");
 });
 
-test("hovedtal: uoplyst komponent giver synlig ufuldstændigheds-advarsel", () => {
-  const h = renderHovedtal(bGreve);
-  assert.ok(h.toLowerCase().includes("ufuldstændigt"), "skal sige at estimatet er ufuldstændigt");
-  assert.ok(h.toLowerCase().includes("transport"), "skal nævne hvad der mangler");
-});
-
-test("hovedtal: fuldt oplyst kommune får ingen advarsel", () => {
-  const h = renderHovedtal(bThisted);
-  assert.ok(!h.toLowerCase().includes("ufuldstændigt"));
-});
-
-// ---------- Nedbrydning ----------
-
-// Hjælper: træk netop den ene komponentrække ud, så assertions ikke kan
-// bestå ved et tilfælde, fordi et andet tal et andet sted ser rigtigt ud.
-function komponentRaekke(html, komponent) {
-  const efter = html.split(`data-komponent="${komponent}"`)[1];
-  assert.ok(efter, `fandt ingen række for ${komponent}`);
-  return efter.split("</li>")[0];
-}
-
-test("nedbrydning: uoplyst transport står som ikke opgjort, ikke som nul", () => {
-  const raekke = komponentRaekke(renderNedbrydning(bGreve, prod), "transport");
-  assert.ok(raekke.toLowerCase().includes("ikke opgjort"));
-  assert.ok(!raekke.includes("ton"), "en uoplyst komponent må slet ikke have et tal");
-  assert.ok(!raekke.includes("<rect"), "og heller ikke en søjle med længde nul");
-});
-
-test("nedbrydning: oplyst transport har både tal og søjle", () => {
-  const raekke = komponentRaekke(renderNedbrydning(bThisted, prod), "transport");
-  assert.ok(raekke.includes("ton"));
-  assert.ok(raekke.includes("<rect"));
-  assert.ok(!raekke.toLowerCase().includes("ikke opgjort"));
-});
-
-test("nedbrydning: oplyst transport vises som tal", () => {
-  const n = renderNedbrydning(bThisted, prod);
-  assert.ok(!n.toLowerCase().includes("ikke opgjort"));
-  assert.ok(n.includes("Transport"));
-});
-
-test("nedbrydning: alle fire komponenter er navngivet", () => {
-  const n = renderNedbrydning(bThisted, prod);
-  for (const navn of ["Anker", "Indkomst", "Transport", "Byggeri"]) {
-    assert.ok(n.includes(navn), `mangler ${navn}`);
+test("nationalt aftryk: alle 15 kategorier vises", () => {
+  const h = renderNationaltAftryk(concito);
+  for (const k of concito.kategorier) {
+    assert.ok(h.includes(k.navn), `mangler ${k.navn}`);
   }
 });
 
-test("nedbrydning: utilstrækkeligt datagrundlag giver tom streng", () => {
-  assert.equal(renderNedbrydning(bUden, prod), "");
+test("nationalt aftryk: kildens uoverensstemmelser står i outputtet", () => {
+  // CONCITO's egne tal summerer ikke. Det skal læseren kunne se.
+  const h = renderNationaltAftryk(concito);
+  assert.ok(h.includes("12,8"), "afvigelsen mellem kategorisum og nationalt tal skal vises");
 });
 
-// ---------- Driver-tabel ----------
-
-test("drivertabel: har en række pr. driver", () => {
-  const d = renderDriverTabel(bThisted);
-  const raekker = (d.match(/<tr/g) || []).length;
-  assert.equal(raekker, 18, "17 drivere plus én headerrække");
+test("nationalt aftryk: linker til kilden", () => {
+  const h = renderNationaltAftryk(concito);
+  assert.ok(h.includes("concito.dk"), "der skal være et link til rapporten");
 });
 
-test("drivertabel: manglende driver vises som tankestreg", () => {
-  const d = renderDriverTabel(bGreve); // Greve mangler affald og elco2
-  assert.ok(d.includes("–"), "manglende værdi skal vises som tankestreg");
+// --- Kommunens indikatorer ---
+
+test("indikatorer: grupperet efter CONCITO-kategori med transport først", () => {
+  const h = renderIndikatorer(bThisted, concito);
+  const iTransport = h.indexOf("Transport");
+  const iBoliger = h.indexOf("Boliger");
+  assert.ok(iTransport >= 0 && iBoliger > iTransport);
 });
 
-test("drivertabel: de to volatile drivere bærer forbehold ved tallet", () => {
-  const d = renderDriverTabel(bThisted);
-  assert.ok(d.includes("El-CO2"), "elco2-driveren skal være med");
-  assert.ok(d.includes("Boligpris"), "boligpris-driveren skal være med");
-  assert.ok(d.includes("Lokal VE-dækning"), "VE-dækningen skal stå ved siden af el-CO2");
-  const forbehold = (d.match(/tip-boks/g) || []).length;
-  assert.ok(forbehold >= 3, `forventede mindst 3 forbehold, fandt ${forbehold}`);
+test("indikatorer: hver kategori bærer CONCITO's nationale tal", () => {
+  const h = renderIndikatorer(bThisted, concito);
+  assert.ok(h.includes("3,1 ton"), "transportens nationale tal skal stå ved kategorien");
+  assert.ok(h.includes("1,0 ton"), "kørsel i personlige transportmidler skal stå der");
 });
 
-test("drivertabel: bruger egen tooltip, ikke browserens title", () => {
-  const d = renderDriverTabel(bThisted);
-  assert.ok(!/\stitle="/.test(d), "native title har 0,5-1 sek forsinkelse - brug .tip");
+test("indikatorer: alle 19 nøgletal vises", () => {
+  const h = renderIndikatorer(bThisted, concito);
+  const raekker = (h.match(/<tr/g) || []).length;
+  const grupper = bThisted.grupper.length;
+  assert.equal(raekker, bThisted.drivere.length + grupper,
+    "én række pr. nøgletal plus én headerrække pr. kategori");
 });
 
-// ---------- Boligpris-følsomhed ----------
-
-test("boligpris: Thisted har gyldigt mønster og får indhold", () => {
-  assert.equal(bThisted.boligpris.vises, true);
-  assert.ok(renderBoligpris(bThisted).length > 0);
+test("indikatorer: manglende værdi vises som tankestreg", () => {
+  const h = renderIndikatorer(bGreve, concito);
+  assert.ok(h.includes("–"));
 });
 
-test("boligpris: Greve har ugyldigt mønster og får tom streng", () => {
-  assert.equal(bGreve.boligpris.vises, false);
-  assert.equal(renderBoligpris(bGreve), "", "aldrig et tal uden gyldigt mønster");
+test("indikatorer: bruger egen tooltip, ikke browserens title", () => {
+  const h = renderIndikatorer(bThisted, concito);
+  assert.ok(!/\stitle="/.test(h));
+  assert.ok(h.includes("tip-boks"));
 });
 
-// ---------- Samlet kommunevisning ----------
+test("indikatorer: pendlingsafstand vises i km, ikke omregnet", () => {
+  const h = renderIndikatorer(bThisted, concito);
+  assert.ok(h.includes("Gennemsnitlig pendlingsafstand"));
+  assert.ok(h.includes("23,6"), "Thisteds faktiske km skal stå der");
+  assert.ok(!h.includes("bil-km"), "der må ikke stå en omregnet bil-km-værdi");
+});
 
-test("kommunevisning: indeholder alle sektioner i rigtig rækkefølge", () => {
-  const k = renderKommune(bThisted, prod);
-  const iHoved = k.indexOf("Thisted");
-  const iNed = k.indexOf("Anker");
-  const iDriv = k.indexOf("Disponibel indkomst");
-  assert.ok(iHoved >= 0 && iNed > iHoved, "nedbrydning efter hovedtal");
-  assert.ok(iDriv > iNed, "drivertabel efter nedbrydning - sammensætningen først");
+// --- Hullerne ---
+
+test("huller: fødevarehullet står eksplicit", () => {
+  const h = renderHuller(concito);
+  assert.ok(h.includes("Fødevarer"));
+  assert.ok(h.includes("2,5 ton"), "den nationale fødevareudledning skal stå der");
+  assert.ok(h.includes("1,4 ton"), "oksekødets andel skal stå der");
+});
+
+test("huller: forklarer hvorfor der ikke beregnes et samlet tal", () => {
+  const h = renderHuller(concito);
+  assert.ok(h.includes("NIRAS"));
+  for (const a of concito.niras_anbefalinger) {
+    assert.ok(h.includes(a.omraade), `mangler NIRAS' anbefaling om ${a.omraade}`);
+  }
+  assert.ok(/s\.\s*20/.test(h), "transportanbefalingen skal have sidehenvisning");
+});
+
+// --- Samlet ---
+
+test("kommunevisning: rækkefølge er kommune, nationalt, nøgletal, huller", () => {
+  const h = renderKommune(bThisted, concito);
+  const i1 = h.indexOf("Thisted");
+  const i2 = h.indexOf("Danmarks forbrugsudledning");
+  const i3 = h.indexOf("Disponibel indkomst");
+  const i4 = h.indexOf("Hvad værktøjet ikke kan vise");
+  assert.ok(i1 < i2 && i2 < i3 && i3 < i4, `rækkefølge forkert: ${[i1, i2, i3, i4]}`);
 });
 
 test("kommunevisning: intet output indeholder undefined, NaN eller null", () => {
-  for (const b of [bThisted, bGreve, bUden]) {
-    const k = renderKommune(b, prod);
-    assert.ok(!k.includes("undefined"), `${b.navn}: undefined lækket til output`);
-    assert.ok(!k.includes("NaN"), `${b.navn}: NaN lækket til output`);
-    assert.ok(!/>\s*null\s*</.test(k), `${b.navn}: null lækket til output`);
+  for (const b of [bThisted, bGreve]) {
+    const h = renderKommune(b, concito);
+    assert.ok(!h.includes("undefined"), `${b.navn}: undefined`);
+    assert.ok(!h.includes("NaN"), `${b.navn}: NaN`);
+    assert.ok(!/>\s*null\s*</.test(h), `${b.navn}: null`);
   }
 });
 
-test("kommunevisning: forbeholdet følger med, også når sidehovedet skjules", () => {
-  // I embed-tilstand skjules header med den store ansvarsfraskrivelse. En
-  // indlejret widget må ikke stå tilbage med et tal og intet forbehold.
-  const k = renderKommune(bThisted, prod);
-  const sektion = k.split("Uofficielt førsteordens-skøn")[1];
-  assert.ok(sektion, "den kompakte fraskrivelse mangler");
-  const foer = k.slice(0, k.indexOf("Uofficielt førsteordens-skøn"));
-  const afsnit = k.slice(k.lastIndexOf("<section", k.indexOf("Uofficielt førsteordens-skøn")));
-  assert.ok(!afsnit.slice(0, 200).includes("no-embed"),
-    "fraskrivelsen må ikke være mærket no-embed - så forsvinder den i en iframe");
-  assert.ok(foer.length > 0);
+test("kommunevisning: intet samlet aftryk i ton påstås", () => {
+  const h = renderKommune(bThisted, concito);
+  assert.ok(!/aftryk pr\. borger/i.test(h), "værktøjet beregner ikke et kommunalt aftryk");
+  assert.ok(h.includes("lægger dem ikke sammen"), "det skal siges eksplicit");
+});
+
+test("kommunevisning: forbeholdet overlever embed-tilstand", () => {
+  const h = renderKommune(bThisted, concito);
+  const i = h.indexOf("Uofficielt værktøj");
+  assert.ok(i > 0);
+  const afsnit = h.slice(h.lastIndexOf("<section", i), i);
+  assert.ok(!afsnit.includes("no-embed"));
+});
+
+test("overskrift: viser kommunekode og region", () => {
+  const h = renderKommuneOverskrift(bThisted);
+  assert.ok(h.includes("787") && h.includes("Nordjylland"));
 });

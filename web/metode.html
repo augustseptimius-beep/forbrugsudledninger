@@ -36,10 +36,11 @@
 <div class="no-print no-embed border-b border-amber-200 bg-amber-50">
   <div class="mx-auto max-w-6xl px-4 py-2 text-xs text-amber-900">
     <strong class="font-semibold">Uofficielt værktøj.</strong>
-    Tallene er førsteordens-skøn beregnet ud fra offentlige data, ikke en
-    myndighedsopgørelse og ikke en måling. De er retningsgivende og skal
-    læses sammen med deres forbehold.
-    <a href="metode.html" class="underline hover:text-amber-950">Se metode og forbehold</a>.
+    Tallene er faktuelle nøgletal fra offentlige registre, stillet op mod
+    landsgennemsnittet og sat ved siden af CONCITO's nationale opgørelse.
+    Værktøjet beregner ikke et klimaaftryk for kommunen og er ikke en
+    myndighedsopgørelse.
+    <a href="metode.html" class="underline hover:text-amber-950">Se metode og kilder</a>.
   </div>
 </div>
 
@@ -47,158 +48,131 @@
 <div class="space-y-6">
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Hvad er et forbrugsbaseret aftryk?</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">En kommunes almindelige klimaregnskab opgør de udledninger, der sker
-    <em>inden for</em> kommunegrænsen. Et forbrugsbaseret aftryk gør noget andet: det opgør
-    de udledninger, borgernes forbrug giver anledning til, uanset hvor i verden de finder
-    sted. Tøj syet i Asien, oksekød opdrættet i Sydamerika og elektronik samlet i Kina tæller
-    med i den kommune, hvor det bliver købt og brugt.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det gør billedet mere retvisende, og det gør det sværere. Der findes ingen
-    officiel kommuneopgørelse af forbrugsbaserede udledninger i Danmark. Dette værktøj laver
-    et <strong>førsteordens-skøn</strong> ved at tage det nationale gennemsnit og justere det
-    for de forhold ved en kommune, der faktisk kan måles.</p>
+  <h2 class="text-xl font-semibold text-gray-900">Hvad værktøjet gør</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det stiller en kommunes offentligt tilgængelige nøgletal op mod
+    landsgennemsnittet, og sætter dem ved siden af CONCITO's nationale opgørelse af
+    danskernes forbrugsbaserede udledninger. Ikke andet.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Værktøjet beregner ikke et klimaaftryk for kommunen.</strong> Det
+    lægger ikke tal sammen, vægter dem ikke og omregner dem ikke til ton CO2e. Hver
+    eneste værdi på en kommuneside er enten hentet direkte fra et offentligt register
+    eller afskrevet fra en navngiven rapport med sidehenvisning.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Fortolkningen af, hvad tallene betyder for CO2, ligger hos CONCITO. Vi
+    gengiver deres opgørelse; vi laver ikke vores egen.</p>
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Grundmodellen</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Estimatet bygges op fra et nationalt anker og tre justeringer:</p>
-  <code class="mt-3 block overflow-x-auto whitespace-pre rounded-md bg-gray-900 p-3 text-xs text-gray-100">aftryk pr. borger = anker + indkomsteffekt + transporteffekt + byggeeffekt</code>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hver justering udtrykkes som et interval, ikke som ét tal, fordi de
-    underliggende elasticiteter er skøn med spænd. Intervallerne lægges sammen, så den lave
-    ende samler alle de laveste bidrag og den høje ende alle de højeste.</p>
-
-  <h3 class="mt-6 font-semibold text-gray-900">Indkomsteffekt</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Højere disponibel indkomst betyder mere forbrug og dermed større aftryk.
-    CONCITO finder en sammenhæng på 3-5 % større aftryk pr. 10 % højere indkomst.</p>
-  <code class="mt-3 block overflow-x-auto whitespace-pre rounded-md bg-gray-900 p-3 text-xs text-gray-100">indkomstafvigelse = (kommunens indkomst - landets) / landets
-indkomsteffekt = anker &times; indkomstafvigelse &times; elasticitet   (elasticitet 0,30 til 0,50)</code>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Fortegnet følger afvigelsen. En kommune med lavere indkomst end landet får
-    et fradrag, en kommune med højere får et tillæg. Det lyder selvfølgeligt, men er værd at
-    fremhæve: den oprindelige regnearksmodel var skrevet til én kommune under gennemsnittet
-    og ville have givet forkert fortegn for cirka halvdelen af landets kommuner.</p>
-
-  <h3 class="mt-6 font-semibold text-gray-900">Transporteffekt</h3>
-  <code class="mt-3 block overflow-x-auto whitespace-pre rounded-md bg-gray-900 p-3 text-xs text-gray-100">transporteffekt = anker &times; bilk&oslash;rselsandel &times; regionens bil-km-afvigelse</code>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Bilkørselsandelen er 0,12 til 0,15, svarende til at transport udgør omkring
-    en fjerdedel af aftrykket og personbiler cirka halvdelen af det.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Bil-km-afvigelsen opgøres for hver enkelt kommune ud fra Danmarks
-    Statistiks tabel AFSTB4, gennemsnitlig pendlingsafstand efter bopælsområde. Tallene
-    kalibreres mod DTU's transportvaneundersøgelse, som er den egentlige kilde til bil-km
-    pr. person, men som kun har noget offentligt tal for Nordjylland (+17,8 %). Alle
-    kommuners afvigelser skaleres, så Nordjylland som region rammer den værdi præcist.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Hvorfor pendling som proxy:</strong> på regionalt niveau følger de to mål
-    hinanden tæt. På det ene punkt, hvor de kan sammenlignes, giver pendlingsafstanden
-    Nordjylland +18,6 % mod DTU's +17,8 % - 0,74 procentpoint fra hinanden. To metodisk
-    uafhængige mål, der lander samme sted.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Den skævhed, der følger med:</strong> pendling er kun arbejdsturen, og
-    sammenhængen er kun valideret regionalt. På kommuneniveau er den ikke monoton i
-    landlighed. Landets 25 % tættest befolkede kommuner pendler 16,8 km i snit, den
-    midterste halvdel 26,9 km, og de 25 % tyndest befolkede 26,1 km. Det er altså
-    pendlerbæltet, der pendler længst - ikke den ægte udkant, hvor der ikke er noget at
-    pendle til.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Samlet bilkørsel stiger formentlig monotont med landlighed, fordi alt bliver
-    længere væk, ikke kun arbejdet. Derfor undervurderer denne proxy sandsynligvis
-    perifere kommuner. Thisted er det tydeligste eksempel: +4,2 % målt på pendling mod
-    +17,8 % for regionen som helhed. Det er en kendt skævhed, og den skal læses med.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Alternativet - at give alle kommuner i en region samme tal - ville flytte
-    problemet frem for at løse det: alle 34 hovedstadskommuner ville få samme
-    transporttal, og driveren ville ikke skelne Frederiksberg fra Dragør. Kommunetallet
-    er skævt på en kendt måde; regionstallet er blindt.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Har en kommune ingen værdi i kilden, arves regionens. Findes den heller ikke,
-    vises transportbidraget som <em>ikke opgjort</em> - ikke som nul. Forskellen betyder
-    noget: nul er en måling, ikke opgjort er en erkendelse.</p>
-
-  <h3 class="mt-6 font-semibold text-gray-900">Byggeeffekt</h3>
-  <code class="mt-3 block overflow-x-auto whitespace-pre rounded-md bg-gray-900 p-3 text-xs text-gray-100">byggeafvigelse = afvigelse i fuldf&oslash;rt byggeri pr. 1.000 indbyggere
-byggeeffekt = anker &times; byggeandel &times; byggeafvigelse   (byggeandel 0 til 0,0456)</code>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Byggematerialer har et betydeligt aftryk, og en kommune der bygger meget,
-    trækker op. Koefficienten er kalibreret, så en referencekommune reproducerer det
-    oprindelige regnearks interval. Det er en svaghed, og den står her frem for at være
-    gemt væk: koefficienten hviler på ét kalibreringspunkt, ikke på en uafhængig måling.</p>
-
-  <h3 class="mt-6 font-semibold text-gray-900">Boligpris-følsomhed</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">En sekundær, illustrativ beregning, som <em>ikke</em> indgår i hovedtallet.
-    Bor man billigt, frigør det købekraft til andet forbrug, så en del af et lavere
-    indkomstgab ikke slår igennem som lavere forbrug. Modregningen er sat til 45 %.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Den vises <strong>kun</strong> for kommuner med både lavere indkomst og
-    lavere boligpriser end landsgennemsnittet. For kommuner med dyre boliger og høj indkomst
-    vender logikken, og en symmetrisk anvendelse ville være forkert. Derfor udelades noten
-    helt frem for at blive vist som en tilsyneladende neutral korrektion.</p>
+  <h2 class="text-xl font-semibold text-gray-900">Hvorfor der ikke står et samlet tal</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">En tidligere version af dette værktøj beregnede et estimeret aftryk pr.
+    borger. Det hvilede på fem koefficienter, og ingen af dem kunne kildebelægges:</p>
+  <div class="mt-3 overflow-x-auto">
+    <table class="w-full min-w-[34rem] text-sm">
+      <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
+        <th class="py-2 pr-3 text-left font-medium">Koefficient</th>
+        <th class="py-2 px-3 text-left font-medium">Brugt værdi</th>
+        <th class="py-2 pl-3 text-left font-medium">Hvad kilden faktisk siger</th>
+      </tr></thead>
+      <tbody class="text-gray-700">
+        <tr class="border-t border-gray-100"><td class="py-2 pr-3">Nationalt anker</td>
+          <td class="py-2 px-3 tabular-nums">10,0 ton</td>
+          <td class="py-2 pl-3">CONCITO (2023) s. 8 citerer Energistyrelsens Global
+            Afrapportering 2023 for <strong>11 ton</strong>, ikke 10</td></tr>
+        <tr class="border-t border-gray-100"><td class="py-2 pr-3">Indkomstelasticitet</td>
+          <td class="py-2 px-3 tabular-nums">0,30-0,50</td>
+          <td class="py-2 pl-3">Findes hverken i CONCITO (2023) eller NIRAS (2024)</td></tr>
+        <tr class="border-t border-gray-100"><td class="py-2 pr-3">Bilkørselsandel</td>
+          <td class="py-2 px-3 tabular-nums">0,12-0,15</td>
+          <td class="py-2 pl-3">CONCITO (2023) s. 17, figur 8, opgør kørsel i personlige
+            transportmidler til <strong>1,0 ton af 3,1</strong> - cirka 9 % af aftrykket,
+            ikke 12-15 %</td></tr>
+        <tr class="border-t border-gray-100"><td class="py-2 pr-3">Byggeandel</td>
+          <td class="py-2 px-3 tabular-nums">0-0,0456</td>
+          <td class="py-2 pl-3">Kalibreret til at reproducere én kommunes tidligere
+            resultat. Ingen kilde</td></tr>
+        <tr class="border-t border-gray-100"><td class="py-2 pr-3">Boligudgiftsmodregning</td>
+          <td class="py-2 px-3 tabular-nums">0,45</td>
+          <td class="py-2 pl-3">Ræsonneret. Ingen kilde</td></tr>
+        <tr class="border-t border-gray-100"><td class="py-2 pr-3">Bil-km pr. region</td>
+          <td class="py-2 px-3 tabular-nums">proxy</td>
+          <td class="py-2 pl-3">Pendlingsafstand omregnet og kalibreret af os. Pendling
+            er kun arbejdsturen</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">De er fjernet, og estimatet med dem. Pendlingsafstanden står nu som det, den
+    er: kilometer fra Danmarks Statistik.</p>
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">De sytten drivere</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Ud over hovedtallet sammenlignes seksten forhold med landsgennemsnittet.
-    Kun tre af dem - disponibel indkomst, byggeaktivitet og den regionale bil-km-afvigelse -
-    fødes ind i selve estimatet. De øvrige er kontekst.</p>
+  <h2 class="text-xl font-semibold text-gray-900">Hvad der skulle til for at beregne et kommunalt aftryk</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">NIRAS udarbejdede i 2024 for CONCITO og C40 Cities en anbefaling til netop
+    en sådan model. Den hviler på fire dele, og tre af dem er ikke offentligt
+    tilgængelige:</p>
+  <ul class="mt-3 space-y-2 text-sm text-gray-700 max-w-3xl list-disc pl-5">
+    <li><strong>Transport:</strong> DTU's Transportvaneundersøgelse, som kan estimere
+      privat transportarbejde på kommuneniveau fordelt på transportform.
+      <em>Kræver aftale om kommercielle vilkår.</em> (s. 20, afsnit 4.2.6)</li>
+    <li><strong>Energiforbrug:</strong> Energistyrelsens Energi- og CO2-Regnskab på
+      adresseniveau. <em>Kræver dataaftale.</em> (s. 18, afsnit 4.2.3)</li>
+    <li><strong>Øvrigt forbrug:</strong> en kommerciel forbrugersegmenteringsmodel
+      kombineret med Danmarks Statistiks Forbrugsundersøgelse.
+      <em>Kommerciel.</em> (s. 26, afsnit 4.2.10)</li>
+    <li><strong>Offentligt forbrug og investeringer:</strong> fordeles ligeligt på alle
+      borgere, og varierer dermed ikke mellem kommuner. (s. 29, afsnit 4.3.1)</li>
+  </ul>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Indtil det datagrundlag foreligger, kan et kommunalt aftryk ikke beregnes
+    uden at opfinde koefficienter. Det gør dette værktøj ikke.</p>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 class="text-xl font-semibold text-gray-900">Danmarks forbrugsudledning</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Tallene herunder er de nationale sammenligningstal, afskrevet fra CONCITO
+    med sidehenvisning. De vises på hver kommuneside.</p>
+  <div id="nationalt" class="mt-4"></div>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 class="text-xl font-semibold text-gray-900">Nøgletallene og hvordan de sammenlignes</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hvert nøgletal vises som kommunens værdi, landsgennemsnittet og forskellen
+    mellem dem. Forskellen er en relativ afvigelse, altså (kommune minus land) divideret
+    med land, undtagen for befolkningsudvikling, hvor to procenter trækkes fra hinanden
+    og resultatet er procentpoint.</p>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Retningspilen viser, om kommunen ligger over eller under landsgennemsnittet.
-    Den siger bevidst <strong>ikke</strong>, om det er godt eller skidt. En høj andel elbiler
-    over landsgennemsnittet er en fordel; en høj andel dieselbiler er ikke. Den vurdering
-    kræver faglig, lokal læsning, og værktøjet foretager den ikke på dine vegne. Af samme
-    grund rangordner det heller ikke forbrugskategorier.</p>
-
-  <h3 class="mt-6 font-semibold text-gray-900">El-CO2 og lokal VE-dækning</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">To af driverne hænger sammen og skal læses sammen. El-CO2 pr. kWh
-    beregnes af Energinets timedata for prisområdets netmix, vægtet med kommunens eget
-    timeforbrug. Oven i det følger metoden Energinets lokationsbaserede
-    kommunedeklaration: lokalt produceret vedvarende energi, der forbruges i kommunen
-    samme time, regnes som nul-emission og fortrænger strøm fra nettet.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Fortrængningen opgøres time for time, ikke på årsbasis. Det er ikke en
-    detalje: vinden blæser ikke nødvendigvis, når forbruget er højest, og en kommune kan
-    sagtens producere mere vedvarende energi end den bruger over et år uden at være dækket
-    i den enkelte time. Et årsgennemsnit ville systematisk overvurdere dækningen.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Det forbehold, der skal med:</strong> metoden krediterer lokal
-    produktion til lokalt forbrug. Set fra et rent forbrugsbaseret regnskab er det en
-    dobbeltregning - den grønne strøm, en vindkommune leverer, indgår også i det
-    landsdækkende mix, alle andre forbruger. Det er Energinets metodevalg, ikke vores, og
-    tallet står her, fordi det er det officielt udgivne. Det beskriver en kommunes
-    elprofil og egner sig ikke til at lægge sammen på tværs af kommuner.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Tallet dækker CO2, ikke fuld CO2e.
-    Energinets datasæt indeholder også metan og lattergas, men uden dokumenterede
-    enheder, og en gættet omregning ville være værre end et præcist mærket CO2-tal. Det
-    betyder formentlig, at niveauet er omkring 10 % for lavt. Driveren viser afvigelsen
-    fra landsgennemsnittet, og en forhøjelse ville ramme alle kommuner nogenlunde ens.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Derfor står <em>lokal VE-dækning af elforbrug</em> ved siden af som
-    selvstændig driver. Uden den kan man ikke se, hvorfor en vindkommune ligger lavt på
-    el-CO2. Den er et produktionsmål, ikke et forbrugsmål, og kan overstige 100 % for
-    kommuner, der producerer mere, end de bruger.</p>
-</div>
-
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Antagelser</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Fem tal i modellen er skøn, ikke målinger. De er samlet ét sted i koden
-    (<code class="rounded bg-gray-100 px-1 py-0.5 text-xs">pipeline/constants.py</code>) og
-    gengives her, så de kan efterprøves og om nødvendigt bestrides.</p>
-  <div id="antagelser" class="mt-4"></div>
+    Den siger bevidst <strong>ikke</strong>, om det er godt eller skidt. En høj andel
+    elbiler over landsgennemsnittet er en fordel; en høj andel dieselbiler er ikke.
+    Værktøjet foretager ikke den vurdering, og det rangordner heller ikke kategorier
+    eller kommuner.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Nøgletallene er grupperet efter den forbrugskategori, de vedrører. Grupperingen
+    er beskrivende: den siger hvilken af CONCITO's kategorier et tal handler om, ikke
+    hvor meget det betyder for udledningen.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Mangler et tal, står der en tankestreg. Aldrig et nul.</p>
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
   <h2 class="text-xl font-semibold text-gray-900">Kilder</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Årstal og perioder herunder er ikke skrevet i hånden. De genereres af
-    datapipelinen ud fra det, der faktisk blev hentet ved sidste kørsel, så de ikke kan
-    drive fra virkeligheden.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Årstal og perioder er ikke skrevet i hånden. De genereres af datapipelinen ud
+    fra det, der faktisk blev hentet ved sidste kørsel.</p>
   <div id="kilder" class="mt-4"></div>
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Kendte begrænsninger</h2>
-  <ul class="mt-3 space-y-3 text-sm text-gray-700 max-w-3xl list-disc pl-5">
-    <li><strong>Transport hviler på pendlingsafstand som proxy for al bilkørsel.</strong>
-      Kun Nordjylland er målt direkte af DTU og bruges til kalibrering. Proxyen er ikke
-      monoton i landlighed og undervurderer sandsynligvis perifere kommuner.</li>
-    <li><strong>El-CO2 krediterer lokal produktion.</strong> Tallet følger Energinets
-      lokationsbaserede kommunedeklaration, hvor lokalt produceret vedvarende energi, der
-      forbruges i kommunen samme time, regnes som nul-emission. Det beskriver kommunens
-      elprofil godt og egner sig ikke til at lægge sammen på tværs af kommuner.</li>
-    <li><strong>Byggekoefficienten hviler på ét kalibreringspunkt.</strong> Den kan justeres,
-      hvis en bedre national kilde til byggeriets aftryksandel dukker op.</li>
-    <li><strong>Kommunalt indk&oslash;bsaftryk indg&aring;r ikke.</strong> Det findes ikke
-      &aring;bent for alle 98 kommuner. Affald og genanvendelse bruges som indikator for
-      forbrugsprodukter i stedet.</li>
-    <li><strong>Estimatet er et f&oslash;rsteordens-sk&oslash;n, ikke en m&aring;ling.</strong>
-      Sammens&aelig;tningen b&aelig;rer indsigten. Totaltallet alene b&oslash;r ikke bruges
-      til at rangordne kommuner mod hinanden.</li>
-  </ul>
+  <h2 class="text-xl font-semibold text-gray-900">Faglige referencer</h2>
+  <div id="referencer" class="mt-2"></div>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 class="text-xl font-semibold text-gray-900">To metodenoter, der ikke er vores egne</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>El-CO2 pr. kWh</strong> beregnes af Energinets timedata for
+    prisområdets netmix, vægtet med kommunens eget timeforbrug, og følger Energinets
+    lokationsbaserede kommunedeklaration: lokalt produceret vedvarende energi, der
+    forbruges i kommunen samme time, regnes som nul-emission. Det er Energinets
+    metodevalg. Set fra et rent forbrugsbaseret regnskab er det en dobbeltregning, fordi
+    den grønne strøm også indgår i det landsdækkende mix, alle andre forbruger. Tallet
+    dækker CO2, ikke fuld CO2e: datasættet har også metan og lattergas, men uden
+    dokumenterede enheder, og en gættet omregning ville være værre end et præcist mærket
+    CO2-tal.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Lokal VE-dækning</strong> står ved siden af, fordi el-CO2-tallet ellers
+    er uigennemskueligt: uden dækningsgraden kan man ikke se, hvorfor en vindkommune
+    ligger lavt. Den er et produktionsmål, ikke et forbrugsmål, og kan overstige 100 %.</p>
 </div>
 
 </div>

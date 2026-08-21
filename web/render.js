@@ -134,41 +134,226 @@ export function forbehold(tekst) {
 
 const KORT = "kort-print rounded-lg border border-gray-200 bg-white";
 
-// ---------- Hovedtal ----------
+// ---------- Danmarks forbrugsudledning (CONCITO) ----------
 
-/** Estimatet med interval, eller en ærlig melding om at det ikke kan beregnes. */
-export function renderHovedtal(b) {
+function kildeHenvisning(c, side, tekst) {
+  const k = c.kilder.find((x) => x.id === "CONCITO_2023");
+  const label = tekst || `${k.udgiver} (${k.aar}) s. ${side}`;
+  return `<a href="${esc(k.url)}" target="_blank" rel="noopener"
+    class="underline decoration-dotted hover:text-gray-900">${esc(label)}</a>`;
+}
+
+/** CONCITO's nationale opgørelse. Samme for alle kommuner - det er et
+ *  nationalt tal, og værktøjet regner det ikke om til kommuneniveau. */
+export function renderNationaltAftryk(c) {
+  const n = c.nationalt_aftryk;
+  const maks = Math.max(...c.kategorier.map((k) => k.ton));
+
+  const rækker = c.kategorier.map((k) => `<li class="flex items-center gap-3 py-1.5">
+      <span class="w-44 shrink-0 text-sm text-gray-700">${esc(k.navn)}</span>
+      <span class="flex-1 min-w-0">
+        <span class="block h-2.5 rounded-sm bg-gray-300" style="width:${(k.ton / maks * 100).toFixed(1)}%"></span>
+      </span>
+      <span class="w-24 shrink-0 text-right text-sm tabular-nums text-gray-900 whitespace-nowrap">
+        ${tal(k.ton, 1)} ton</span>
+      <span class="w-12 shrink-0 text-right text-xs tabular-nums text-gray-500">${k.pct}&nbsp;%</span>
+    </li>`).join("");
+
+  const andre = c.andre_opgoerelser.map((o) =>
+    `<li>${esc(o.navn)}: <strong>${tal(o.ton, 1)} ton</strong> (${kildeHenvisning(c, o.side)})</li>`).join("");
+
+  const noter = c.noter.map((n) =>
+    `<li class="mt-2"><strong class="font-medium text-gray-700">${esc(n.emne)}.</strong>
+      ${esc(n.tekst)}</li>`).join("");
+
+  return `<section class="${KORT} p-5 sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Danmarks forbrugsudledning</h2>
+    <p class="mt-1 text-sm text-gray-600 max-w-3xl">Tallene herunder er nationale og
+      gælder hele landet. De er ikke beregnet af dette værktøj, men afskrevet fra
+      ${kildeHenvisning(c, n.side, "CONCITO's rapport")} med sidehenvisning.</p>
+
+    <p class="mt-4">
+      <span class="text-3xl font-bold tracking-tight text-gray-900">${tal(n.ton, 1)} ton CO2e</span>
+      <span class="ml-2 text-sm text-gray-600">pr. dansker, ${esc(n.aar)}</span>
+    </p>
+    <p class="mt-1 text-xs text-gray-500">${esc(n.opgoerelse)}, gengivet i
+      ${kildeHenvisning(c, n.side)}: &raquo;${esc(n.citat)}&laquo;</p>
+
+    <h3 class="mt-6 text-sm font-semibold text-gray-900">Fordelt på varegrupper og tjenester</h3>
+    <p class="text-xs text-gray-500">${kildeHenvisning(c, 16)}, figur 7</p>
+    <ul class="mt-3 divide-y divide-gray-100">${rækker}</ul>
+
+    <details class="mt-5 text-xs text-gray-500">
+      <summary class="cursor-pointer font-medium text-gray-600 hover:text-gray-900">
+        Forbehold ved de nationale tal</summary>
+      <ul class="mt-2 space-y-1">${noter}</ul>
+      <p class="mt-3 font-medium text-gray-600">Andre offentliggjorte opgørelser:</p>
+      <ul class="mt-1 list-disc pl-5 space-y-1">${andre}</ul>
+    </details>
+  </section>`;
+}
+
+// ---------- Kommunens indikatorer ----------
+
+const DRIVER_FORBEHOLD = {
+  "El-CO2 pr. kWh":
+    "Beregnet af Energinets timedata, vægtet med kommunens eget timeforbrug. Følger " +
+    "Energinets lokationsbaserede metode, hvor lokalt produceret vedvarende energi, " +
+    "der forbruges samme time, regnes som nul-emission. Dækker CO2, ikke fuld CO2e.",
+  "Lokal VE-dækning af elforbrug":
+    "Lokal vedvarende produktion sat i forhold til kommunens eget elforbrug, time for " +
+    "time. Et produktionsmål, ikke et forbrugsmål: strømmen eksporteres til det fælles " +
+    "net. Kan overstige 100 %.",
+  "Boligpris pr. m²":
+    "Kvartalstal fra realiserede handler. I kommuner med få handler svinger tallet " +
+    "meget fra kvartal til kvartal.",
+  "Gennemsnitlig pendlingsafstand":
+    "Afstand til arbejde for beskæftigede med bopæl i kommunen. Siger intet om " +
+    "transportmiddel og dækker kun arbejdsturen, ikke indkøb, fritid og andre ærinder.",
+  "Genanvendelsesprocent":
+    "Opgjort efter kommunens indberetning til Danmarks Statistik. Definitionen af, " +
+    "hvad der tæller som genanvendt, har ændret sig over tid.",
+};
+
+const ALLEREDE_PROCENT = new Set([
+  "Lokal VE-dækning af elforbrug", "Genanvendelsesprocent",
+]);
+
+function andel(v) {
+  if (v == null || !Number.isFinite(v)) return MANGLER;
+  return `${formatér(v * 100, 1)} %`;
+}
+
+function driverVaerdi(d, v) {
+  if (v == null || !Number.isFinite(v)) return MANGLER;
+  if (ALLEREDE_PROCENT.has(d.navn)) return `${formatér(v, 1)} %`;
+  if (d.enhed === "pct.") return d.type === "difference" ? pct(v) : andel(v);
+  const a = Math.abs(v);
+  return tal(v, a >= 100 ? 0 : a >= 10 ? 1 : 2);
+}
+
+function driverAfvigelse(d) {
+  if (d.afvigelse == null) return MANGLER;
+  return d.type === "difference" ? `${pct(d.afvigelse)}-point` : pct(d.afvigelse);
+}
+
+function indikatorTabel(drivere, kommuneNavn) {
+  const rækker = drivere.map((d) => {
+    const fb = DRIVER_FORBEHOLD[d.navn];
+    const tom = d.kommuneVaerdi == null;
+    return `<tr class="border-t border-gray-100 ${tom ? "text-gray-400" : ""}">
+      <td class="py-2 pr-3 text-sm text-gray-700">
+        <span class="font-medium text-gray-900">${esc(d.navn)}</span>${fb ? forbehold(fb) : ""}
+        <span class="block text-xs text-gray-500">${esc(d.enhed)}</span></td>
+      <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap ${tom ? "" : "font-medium text-gray-900"}">
+        ${driverVaerdi(d, d.kommuneVaerdi)}</td>
+      <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-600">
+        ${driverVaerdi(d, d.landVaerdi)}</td>
+      <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-700">
+        ${driverAfvigelse(d)}</td>
+      <td class="py-2 pl-3 text-right">${retningsMarkoer(d.retning)}</td>
+    </tr>`;
+  }).join("");
+
+  return `<div class="mt-3 overflow-x-auto">
+    <table class="w-full min-w-[34rem]">
+      <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
+        <th class="py-2 pr-3 text-left font-medium">Nøgletal</th>
+        <th class="py-2 px-3 text-right font-medium">${esc(kommuneNavn)}</th>
+        <th class="py-2 px-3 text-right font-medium">Hele landet</th>
+        <th class="py-2 px-3 text-right font-medium">Forskel</th>
+        <th class="py-2 pl-3 text-right font-medium"><span class="sr-only">Retning</span></th>
+      </tr></thead>
+      <tbody>${rækker}</tbody>
+    </table>
+  </div>`;
+}
+
+// Hvad CONCITO opgør nationalt for hver af de kategorier, indikatorerne er
+// grupperet under. Teksterne er afskrift, ikke fortolkning.
+function kategoriKontekst(c, kategori) {
+  const find = (navn) => c.kategorier.find((k) => k.navn === navn);
+  const t = find("Transport");
+  if (kategori === "Transport" && t) {
+    const bil = c.transport_underkategorier.find((x) => x.navn.startsWith("Kørsel"));
+    return `CONCITO opgør transport til <strong>${tal(t.ton, 1)} ton</strong> pr. dansker
+      (${t.pct}&nbsp;% af aftrykket), ${kildeHenvisning(c, t.side)}. Heraf udgør kørsel i
+      personlige transportmidler <strong>${tal(bil.ton, 1)} ton</strong>
+      (${bil.pct_af_transport}&nbsp;% af transporten), ${kildeHenvisning(c, bil.side)}.`;
+  }
+  const b = find("Boliger");
+  if (kategori === "Boliger" && b) {
+    return `CONCITO opgør boliger til <strong>${tal(b.ton, 1)} ton</strong> pr. dansker
+      (${b.pct}&nbsp;%), ${kildeHenvisning(c, b.side)}.`;
+  }
+  const e = find("El og varme");
+  if (kategori === "El og varme" && e) {
+    return `CONCITO opgør el og varme til <strong>${tal(e.ton, 1)} ton</strong> pr. dansker
+      (${e.pct}&nbsp;%), ${kildeHenvisning(c, e.side)}.`;
+  }
+  if (kategori === "Øvrigt forbrug") {
+    return `CONCITO opgør ikke en samlet kategori med dette navn. Nøgletallene herunder
+      vedrører flere af de mindre varegrupper - tøj, møbler, elektronik, fritid og
+      personlig pleje - som tilsammen udgør omkring en tiendedel af aftrykket,
+      ${kildeHenvisning(c, 16)}.`;
+  }
+  return `Nøgletal, der beskriver kommunen, men ikke peger på én bestemt
+    forbrugskategori.`;
+}
+
+/** Kommunens nøgletal, grupperet efter den CONCITO-kategori de vedrører. */
+export function renderIndikatorer(b, c) {
+  const afsnit = b.grupper.map((g) => `<section class="${KORT} p-5 sm:p-6 mt-6">
+      <h3 class="text-lg font-semibold text-gray-900">${esc(g.kategori)}</h3>
+      <p class="mt-1 text-sm text-gray-600 max-w-3xl">${kategoriKontekst(c, g.kategori)}</p>
+      ${indikatorTabel(g.drivere, b.navn)}
+    </section>`).join("");
+  return afsnit;
+}
+
+// ---------- Hvad værktøjet ikke kan vise ----------
+
+/** De huller, der er kendte og bevidste. Skal stå i outputtet, ikke gemmes. */
+export function renderHuller(c) {
+  const mad = c.kategorier.find((k) => k.navn === "Fødevarer");
+  const okse = c.foedevare_underkategorier.find((x) => x.navn === "Oksekød");
+  const anbefalinger = c.niras_anbefalinger.map((a) => `<li class="mt-2">
+      <strong class="font-medium text-gray-700">${esc(a.omraade)}.</strong>
+      ${esc(a.anbefaling)}
+      <span class="block text-gray-500">${esc(a.tilgaengelighed)}
+        (NIRAS 2024, afsnit ${esc(a.afsnit)}, s. ${esc(a.side)})</span>
+    </li>`).join("");
+  const niras = c.kilder.find((k) => k.id === "NIRAS_2024");
+
+  return `<section class="${KORT} p-5 sm:p-6 mt-6">
+    <h3 class="text-lg font-semibold text-gray-900">Hvad værktøjet ikke kan vise</h3>
+
+    <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Fødevarer.</strong>
+      CONCITO opgør fødevarer til <strong>${tal(mad.ton, 1)} ton</strong> pr. dansker
+      (${mad.pct}&nbsp;%), heraf oksekød alene <strong>${tal(okse.ton, 1)} ton</strong>
+      (${okse.pct_af_foedevarer}&nbsp;% af fødevarerne), ${kildeHenvisning(c, okse.side)}.
+      Det er den næststørste kategori i det nationale aftryk, og der findes ingen
+      offentligt tilgængelig kommunal indikator for den. Værktøjet er derfor blindt
+      på en femtedel af aftrykket.</p>
+
+    <p class="mt-3 text-sm text-gray-700 max-w-3xl"><strong>Et samlet kommunalt tal.</strong>
+      Værktøjet beregner ikke, hvor mange ton CO2e en kommunes borgere udleder. Et
+      sådant tal ville kræve koefficienter, der ikke findes i nogen af kilderne.
+      <a href="${esc(niras.url)}" target="_blank" rel="noopener"
+        class="underline decoration-dotted hover:text-gray-900">NIRAS' anbefaling til
+        en kommunal beregningsmodel</a> hviler på datagrundlag, der ikke er offentligt
+      tilgængelige:</p>
+    <ul class="mt-2 text-sm text-gray-700 max-w-3xl">${anbefalinger}</ul>
+  </section>`;
+}
+
+// ---------- Samlet kommunevisning ----------
+
+export function renderKommuneOverskrift(b) {
   const meta = [
     b.kode != null ? `Kommunekode ${esc(b.kode)}` : null,
     b.region ? `Region ${esc(b.region)}` : null,
   ].filter(Boolean).join(" &middot; ");
-
-  const hoved = `<div class="flex items-baseline justify-between gap-3 flex-wrap">
-      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">${esc(b.navn)}</h2>
-      <span class="text-xs text-gray-500">${meta}</span>
-    </div>`;
-
-  if (b.estimat.utilstraekkeligt) {
-    return `<section class="${KORT} p-5 sm:p-6">${hoved}
-      <p class="mt-4 text-lg font-semibold text-gray-700">Utilstrækkeligt datagrundlag</p>
-      <p class="mt-1 text-sm text-gray-600 max-w-2xl">Et eller flere af de kerneinput,
-        estimatet hviler på (disponibel indkomst, personbiler, fuldført byggeri), mangler
-        for denne kommune. Vi viser hellere ingenting end et tal, vi ikke kan stå inde for.
-        Driverne nedenfor kan stadig læses hver for sig.</p>
-    </section>`;
-  }
-
-  const { low, high } = b.estimat.aftryk;
-  const uoplyst = b.estimat.uoplyst ?? [];
-
-  const advarsel = uoplyst.length === 0 ? "" :
-    `<div class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-      <strong class="font-semibold">Estimatet er ufuldstændigt.</strong>
-      ${uoplyst.includes("transport") ? `Transportbidraget kan ikke opgøres for denne kommune,
-      fordi den regionale bil-km-afvigelse kun er slået op for Nordjylland. Bidraget er
-      hverken lagt til eller trukket fra - det er ukendt, og intervallet herover er derfor
-      snævrere end virkeligheden.` : `Følgende kunne ikke opgøres: ${esc(uoplyst.join(", "))}.`}
-    </div>`;
 
   const printknap = `<button type="button" onclick="window.print()"
       class="no-print no-embed mt-4 inline-flex items-center gap-1.5 rounded-md border
@@ -180,289 +365,38 @@ export function renderHovedtal(b) {
         <rect x="4" y="10" width="8" height="4"/></svg>
       Print eller gem som PDF</button>`;
 
-  return `<section class="${KORT} p-5 sm:p-6">${hoved}
-    <p class="mt-3 text-sm text-gray-600">Estimeret forbrugsbaseret aftryk pr. borger</p>
-    <p class="mt-1">
-      <span class="text-4xl sm:text-5xl font-bold tracking-tight text-gray-900">${interval(low, high)}</span>
-      <span class="ml-2 text-lg text-gray-600">ton CO2e</span>
-    </p>
-    <p class="mt-2 text-sm text-gray-600 max-w-2xl">Til sammenligning ligger det nationale
-      gennemsnit på cirka 10 ton pr. borger. Intervallet er et førsteordens-skøn, ikke en
-      måling, og sammensætningen nedenfor bærer mere indsigt end totalen.</p>
-    ${advarsel}
+  return `<section class="mb-6">
+    <div class="flex items-baseline justify-between gap-3 flex-wrap">
+      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">${esc(b.navn)}</h2>
+      <span class="text-xs text-gray-500">${meta}</span>
+    </div>
+    <p class="mt-2 text-sm text-gray-600 max-w-3xl">Kommunens offentligt tilgængelige
+      nøgletal sammenlignet med landsgennemsnittet, grupperet efter den forbrugskategori
+      de vedrører. Alle tal er hentet direkte fra de kilder, der står på
+      <a href="metode.html" class="underline hover:text-gray-900">metodesiden</a>.
+      Værktøjet lægger dem ikke sammen til et samlet klimaaftryk - se hvorfor nederst.</p>
     ${printknap}
   </section>`;
 }
 
-// ---------- Nedbrydning ----------
-
-const KOMPONENTER = [
-  { noegle: "indkomsteffekt", id: "indkomst", navn: "Indkomst",
-    forklaring: "Højere disponibel indkomst end landsgennemsnittet trækker aftrykket op, lavere trækker det ned." },
-  { noegle: "transporteffekt", id: "transport", navn: "Transport",
-    forklaring: "Regional bil-km-afvigelse. Nordjylland er målt direkte af DTU; de fire øvrige regioner er udledt af pendlingsafstande og kalibreret mod DTU-tallet." },
-  { noegle: "byggeeffekt", id: "byggeri", navn: "Byggeri",
-    forklaring: "Fuldført byggeri pr. 1.000 indbyggere sammenlignet med landsgennemsnittet." },
-];
-
-function soejle(lav, hoj, skala) {
-  // Bar omkring en midterakse: negativt til venstre, positivt til højre.
-  const MIDTE = 50, BREDDE = 50;
-  const x1 = MIDTE + (Math.min(lav, hoj) / skala) * BREDDE;
-  const x2 = MIDTE + (Math.max(lav, hoj) / skala) * BREDDE;
-  const bredde = Math.max(x2 - x1, 0.8); // synlig streg selv ved nul-bredt interval
-  return `<svg viewBox="0 0 100 12" preserveAspectRatio="none" class="h-3 w-full" aria-hidden="true">
-      <line x1="50" y1="0" x2="50" y2="12" stroke="currentColor" stroke-width="0.5" class="text-gray-300"/>
-      <rect x="${x1.toFixed(2)}" y="3" width="${bredde.toFixed(2)}" height="6" rx="1"
-        fill="currentColor" class="text-gray-400"/>
-    </svg>`;
-}
-
-/** Anker plus de tre effekter. Placeret over driver-tabellen med vilje:
- *  sammensætningen bærer indsigten, ikke totaltallet. */
-export function renderNedbrydning(b, konst) {
-  if (b.estimat.utilstraekkeligt) return "";
-  const k = b.estimat.komponenter;
-
-  const skala = Math.max(
-    0.5,
-    ...KOMPONENTER.flatMap(({ noegle }) => {
-      const v = k[noegle];
-      return v ? [Math.abs(v.low), Math.abs(v.high)] : [0];
-    })
-  );
-
-  const raekker = KOMPONENTER.map(({ noegle, id, navn, forklaring }) => {
-    const v = k[noegle];
-    // Stablet layout frem for tre kolonner: på en 375 px skærm ville en
-    // midterkolonne mellem to faste kolonner blive presset til en splint.
-    // Her får søjlen fuld bredde i alle skærmstørrelser.
-    const overskrift = (hoejre) => `<div class="flex items-baseline justify-between gap-3">
-        <span class="text-sm font-medium text-gray-700">${navn}</span>
-        <span class="text-sm whitespace-nowrap">${hoejre}</span>
-      </div>`;
-
-    if (v == null) {
-      return `<li data-komponent="${id}" class="py-2.5">
-        ${overskrift(`<span class="text-gray-500 italic">ikke opgjort</span>${forbehold(forklaring)}`)}
-        <div class="mt-1.5 h-3 w-full rounded-sm border border-dashed border-gray-300 bg-gray-50"></div>
-      </li>`;
-    }
-    return `<li data-komponent="${id}" class="py-2.5">
-      ${overskrift(`<span class="text-gray-700">${intervalTil(v.low, v.high)} ton</span>${forbehold(forklaring)}`)}
-      <div class="mt-1.5">${soejle(v.low, v.high, skala)}</div>
-    </li>`;
-  }).join("");
-
-  const { low, high } = b.estimat.aftryk;
-
-  return `<section class="${KORT} p-5 sm:p-6 mt-6">
-    <h3 class="text-lg font-semibold text-gray-900">Hvad tallet er sat sammen af</h3>
-    <p class="mt-1 text-sm text-gray-600 max-w-2xl">Estimatet starter ved det nationale anker
-      og justeres for de tre forhold, der kan opgøres på kommuneniveau.</p>
-    <div class="mt-4 flex items-baseline justify-between gap-3 border-b border-gray-100 pb-2">
-      <span class="text-sm font-medium text-gray-700">Anker
-        <span class="text-xs font-normal text-gray-500">nationalt gennemsnit</span></span>
-      <span class="text-sm text-gray-700 whitespace-nowrap">${ton(konst.anker)}</span>
-    </div>
-    <ul class="divide-y divide-gray-100">${raekker}</ul>
-    <div class="mt-2 flex items-baseline justify-between gap-3 border-t-2 border-gray-200 pt-3">
-      <span class="text-sm font-semibold text-gray-900">Resultat</span>
-      <span class="text-sm font-semibold text-gray-900 whitespace-nowrap">${interval(low, high)} ton</span>
-    </div>
-  </section>`;
-}
-
-// ---------- Driver-tabel ----------
-
-// Forbehold, der skal stå VED tallet, ikke gemt i et metodeafsnit. Uden dem
-// ligner en tom celle en fejl frem for en kendt begrænsning.
-const DRIVER_FORBEHOLD = {
-  "El-CO2 pr. kWh":
-    "Beregnet af Energinets timedata, vægtet med kommunens eget timeforbrug. Følger " +
-    "Energinets lokationsbaserede metode, hvor lokalt produceret vedvarende energi, " +
-    "der forbruges samme time, regnes som nul-emission. Tallet beskriver kommunens " +
-    "elprofil og egner sig ikke til at lægge sammen på tværs af kommuner.",
-  "Boligpris pr. m²":
-    "Kvartalstal fra realiserede handler. I kommuner med få handler svinger tallet " +
-    "meget fra kvartal til kvartal og skal læses med varsomhed.",
-  "Lokal VE-dækning af elforbrug":
-    "Lokal vedvarende produktion sat i forhold til kommunens eget elforbrug, time " +
-    "for time. Et produktionsmål, ikke et forbrugsmål: strømmen eksporteres til " +
-    "det fælles net. Kan overstige 100 % for kommuner, der producerer mere end de " +
-    "bruger. Det er denne dækning, der trækker el-CO2-tallet ned i vindkommuner.",
-};
-
-// De tre drivere, der faktisk fødes ind i hovedtallet. De øvrige 13 er kontekst.
-const I_ESTIMATET = new Set(["Disponibel indkomst", "Byggeaktivitet"]);
-
-/** Andel som procent uden fortegn: en andel er et niveau, ikke en ændring. */
-function andel(v) {
-  if (v == null || !Number.isFinite(v)) return MANGLER;
-  return `${formatér(v * 100, 1)} %`;
-}
-
-// Drivere hvis råværdi allerede ER en procent (0-100), ikke en andel (0-1).
-const ALLEREDE_PROCENT = new Set(["Lokal VE-dækning af elforbrug"]);
-
-function driverVaerdi(d, v) {
-  if (v == null || !Number.isFinite(v)) return MANGLER;
-  if (ALLEREDE_PROCENT.has(d.navn)) return `${formatér(v, 1)}\u00A0%`;
-  if (d.enhed === "pct.") return d.type === "difference" ? pct(v) : andel(v);
-  const a = Math.abs(v);
-  return tal(v, a >= 100 ? 0 : a >= 10 ? 1 : 2);
-}
-
-function driverAfvigelse(d) {
-  if (d.afvigelse == null) return MANGLER;
-  // En forskel mellem to andele er procentpoint, ikke en relativ afvigelse.
-  return d.type === "difference" ? `${pct(d.afvigelse)}-point` : pct(d.afvigelse);
-}
-
-/** Alle 16 drivere mod landsgennemsnittet. Ren visning og kontekst - motoren
- *  rangordner ikke, og tabellen vurderer derfor heller ikke. */
-export function renderDriverTabel(b) {
-  const raekker = b.drivere.map((d) => {
-    const fb = DRIVER_FORBEHOLD[d.navn];
-    // Mellemrummet foran badgen er bevidst: uden det læser en skærmlæser
-    // "Disponibel indkomsti estimatet" som ét ord.
-    const badge = I_ESTIMATET.has(d.navn)
-      ? ' <span class="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium ' +
-        'text-gray-600 align-middle whitespace-nowrap">i estimatet</span>'
-      : "";
-    const tom = d.kommuneVaerdi == null;
-    return `<tr class="border-t border-gray-100 ${tom ? "text-gray-400" : ""}">
-      <td class="py-2 pr-3 text-sm text-gray-700">
-        <span class="font-medium text-gray-900">${esc(d.navn)}</span>${badge}${fb ? forbehold(fb) : ""}
-        <span class="block text-xs text-gray-500">${esc(d.enhed)}</span>
-      </td>
-      <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap ${tom ? "" : "font-medium text-gray-900"}">
-        ${driverVaerdi(d, d.kommuneVaerdi)}</td>
-      <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-600">
-        ${driverVaerdi(d, d.landVaerdi)}</td>
-      <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-700">
-        ${driverAfvigelse(d)}</td>
-      <td class="py-2 pl-3 text-right">${retningsMarkoer(d.retning)}</td>
-    </tr>`;
-  }).join("");
-
-  return `<section class="${KORT} p-5 sm:p-6 mt-6">
-    <h3 class="text-lg font-semibold text-gray-900">Kommunens profil mod landsgennemsnittet</h3>
-    <p class="mt-1 text-sm text-gray-600 max-w-2xl">Seksten forhold, der tilsammen beskriver
-      forbrugsmønstret. Tre af dem fødes ind i hovedtallet; resten er kontekst, der hjælper
-      med at forstå det. Pilen viser retning, ikke om noget er godt eller skidt - den
-      vurdering hører til den lokale faglige læsning.</p>
-    <div class="mt-4 overflow-x-auto">
-      <table class="w-full min-w-[36rem]">
-        <thead>
-          <tr class="text-xs uppercase tracking-wide text-gray-500">
-            <th class="py-2 pr-3 text-left font-medium">Driver</th>
-            <th class="py-2 px-3 text-right font-medium">${esc(b.navn)}</th>
-            <th class="py-2 px-3 text-right font-medium">Hele landet</th>
-            <th class="py-2 px-3 text-right font-medium">Afvigelse</th>
-            <th class="py-2 pl-3 text-right font-medium"><span class="sr-only">Retning</span></th>
-          </tr>
-        </thead>
-        <tbody>${raekker}</tbody>
-      </table>
-    </div>
-  </section>`;
-}
-
-// ---------- Boligpris-følsomhed ----------
-
-/** Illustrativ følsomhed. Vises kun ved gyldigt mønster - billigere bolig OG
- *  lavere indkomst - fordi modregningen er ræsonneret til netop det mønster.
- *  Aldrig som en falsk symmetrisk korrektion. */
-export function renderBoligpris(b) {
-  if (!b.boligpris || !b.boligpris.vises) return "";
-  const { reeltGab, justeret } = b.boligpris;
-  return `<section class="${KORT} p-5 sm:p-6 mt-6">
-    <h3 class="text-lg font-semibold text-gray-900">Følsomhed: billigere boliger</h3>
-    <p class="mt-1 text-sm text-gray-600 max-w-2xl">Kommunen har både lavere indkomst og
-      lavere boligpriser end landsgennemsnittet. En del af indkomstgabet modsvares derfor
-      af lavere boligudgifter og frigør købekraft til andet forbrug. Regner man med det,
-      bliver det reelle forbrugsgab mindre.</p>
-    <dl class="mt-4 grid gap-4 sm:grid-cols-2">
-      <div><dt class="text-xs uppercase tracking-wide text-gray-500">Reelt forbrugsgab</dt>
-        <dd class="mt-0.5 text-xl font-semibold text-gray-900">${pct(reeltGab)}</dd></div>
-      <div><dt class="text-xs uppercase tracking-wide text-gray-500">Justeret indkomsteffekt</dt>
-        <dd class="mt-0.5 text-xl font-semibold text-gray-900">${intervalTil(justeret.low, justeret.high)} ton</dd></div>
-    </dl>
-    <p class="mt-4 text-xs text-gray-500 max-w-2xl">Illustrativ, ikke en del af hovedtallet.
-      Modregningen på 45 % er et skøn, ræsonneret til netop dette mønster, og vises derfor
-      ikke for kommuner med dyre boliger og høj indkomst, hvor logikken vender.</p>
-  </section>`;
-}
-
-// ---------- Samlet kommunevisning ----------
-
-/** Rækkefølgen er bevidst: tal, så sammensætning, så profil. Sammensætningen
- *  bærer mere indsigt end totalen og skal læses før driverne. */
-export function renderKommune(b, konst) {
+/** Rækkefølge: kommunens overskrift, det nationale grundlag, kommunens
+ *  nøgletal pr. kategori, og til sidst hvad der ikke kan vises. */
+export function renderKommune(b, c) {
   return [
-    renderHovedtal(b),
-    renderNedbrydning(b, konst),
-    renderDriverTabel(b),
-    renderBoligpris(b),
-    // Bevidst UDEN no-embed: sidens store ansvarsfraskrivelse sidder i
-    // sidehovedet og forsvinder i embed-tilstand. En indlejret widget, der
-    // viser et autoritativt udseende tal helt uden forbehold, er præcis den
-    // risiko, hele resten af designet gardér imod, så en kompakt udgave
-    // følger med selve visningen.
-    `<section class="mt-6 text-xs text-gray-500 max-w-3xl space-y-2">
-      <p><strong class="font-semibold text-gray-600">Uofficielt førsteordens-skøn.</strong>
-        Ikke en myndighedsopgørelse og ikke en måling. Tallet er beregnet ud fra offentlige
-        data med eksplicitte antagelser og er retningsgivende, ikke præcist. Det er ikke
-        egnet til at rangordne kommuner mod hinanden.</p>
-      <p>Kilder: Danmarks Statistik (11 tabeller), Finans Danmark BM010, Energinet og DTU.
-        Årstal og tabel-id står på <a href="metode.html" class="underline hover:text-gray-700">metodesiden</a>,
-        sammen med formlerne og de antagelser, estimatet hviler på.</p>
+    renderKommuneOverskrift(b),
+    renderNationaltAftryk(c),
+    renderIndikatorer(b, c),
+    renderHuller(c),
+    `<section class="mt-6 text-xs text-gray-500 max-w-3xl">
+      <p><strong class="font-semibold text-gray-600">Uofficielt værktøj.</strong>
+        Ingen myndighed står bag. Tallene er faktuelle nøgletal fra offentlige
+        registre, sammenholdt med CONCITO's nationale opgørelse. De er ikke en
+        beregning af kommunens klimaaftryk og egner sig ikke til at rangordne
+        kommuner mod hinanden. Kilder med tabel-id, årstal og sidehenvisning står på
+        <a href="metode.html" class="underline hover:text-gray-700">metodesiden</a>.</p>
     </section>`,
   ].filter(Boolean).join("\n");
 }
-
-// ---------- Forside ----------
-
-/** Kommunekort til søgeresultatet. Mønster fra doughnuts KommuneSearch. */
-export function renderKommuneKort(kommuner) {
-  if (kommuner.length === 0) {
-    return `<p class="col-span-full py-8 text-center text-gray-500">Ingen kommuner fundet.</p>`;
-  }
-  return kommuner.map((k) => `<a href="?kommune=${encodeURIComponent(k.kode)}"
-      class="block rounded-lg border border-gray-200 bg-white p-4 no-underline
-             hover:border-green-600 hover:bg-green-50 hover:shadow-md transition-all">
-      <h3 class="text-lg font-semibold text-gray-900">${esc(k.navn)}</h3>
-      <p class="mt-1 text-sm text-gray-500">Region ${esc(k.region)}</p>
-    </a>`).join("");
-}
-
-/** Forsidens hero og søgefelt. */
-export function renderForside() {
-  return `<div class="mb-10 text-center">
-      <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Hvad fylder forbruget i din kommune?</h2>
-      <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">Et forbrugsbaseret klimaaftryk
-        tæller de udledninger, borgernes forbrug giver anledning til - også dem, der sker uden
-        for kommunegrænsen og uden for Danmark. Slå din kommune op og se estimatet, og hvad
-        det er sat sammen af.</p>
-    </div>
-    <div class="mb-8">
-      <div class="relative">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" fill="none"
-          stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <label for="soeg" class="sr-only">Søg efter en kommune</label>
-        <input id="soeg" type="search" autocomplete="off" placeholder="Søg efter en kommune ..."
-          class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white
-                 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent">
-      </div>
-      <p id="soege-status" class="text-sm text-gray-600 mt-2" role="status" aria-live="polite"></p>
-    </div>
-    <div id="resultater" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>`;
-}
-
 // ---------- Kilder og antagelser (metodesiden) ----------
 
 const METODE_MAERKAT = {
@@ -506,42 +440,59 @@ export function renderKilder(sources) {
   </div>`;
 }
 
-/** Antagelsescellerne med deres faktiske værdier. Værdierne læses fra
- *  konstanterne i data.json, ikke skrevet i hånden, så siden ikke kan komme
- *  til at påstå noget andet end det, motoren regner med. */
-const ANKERREGION = "Nordjylland";
-
-function regionsListe(konst, filter) {
-  const poster = Object.entries(konst.bilkm_afvigelse_region ?? {})
-    .filter(([region]) => filter(region))
-    .sort(([a], [b]) => a.localeCompare(b, "da"))
-    .map(([region, v]) => `${esc(region)} ${pct(v)}`);
-  return poster.join(", ") || "ingen regioner opgjort";
-}
-
-export function renderAntagelser(sources, konst) {
-  const vaerdier = {
-    ENS_GA: ton(konst.anker),
-    CONCITO_ELAST: `elasticitet ${tal(konst.elasticitet.low, 2)} til ${tal(konst.elasticitet.high, 2)}, ` +
-      `bilkørselsandel ${tal(konst.bilkorsel_andel.low, 2)} til ${tal(konst.bilkorsel_andel.high, 2)}`,
-    BYGGEANDEL_KALIBRERING: `${tal(konst.byggeandel.low, 2)} til ${tal(konst.byggeandel.high, 4)}`,
-    BOLIGUDGIFT_MODREGNING: andel(konst.boligudgift_modregning),
-    // DTU har kun målt Nordjylland; de øvrige fire er udledt af AFSTB4 og
-    // kalibreret mod den. De to poster viser derfor hver sin halvdel af
-    // regionstabellen, så metodesiden afspejler, hvor tallene kommer fra.
-    DTU_TU: regionsListe(konst, (r) => r === ANKERREGION),
-  };
-
-  const poster = sources.antagelser.map((a) => `<div class="border-t border-gray-100 py-3">
-    <div class="flex items-baseline justify-between gap-3 flex-wrap">
-      <span class="text-sm font-medium text-gray-900">${esc(a.navn)}</span>
-      <span class="text-sm tabular-nums text-gray-900">${vaerdier[a.id] ?? MANGLER}</span>
+/** De faglige referencer bag de nationale sammenligningstal.
+ *  Der er ingen antagelser at vise: værktøjet indeholder ingen koefficienter. */
+export function renderReferencer(sources) {
+  const poster = (sources.referencer || []).map((r) => `<div class="border-t border-gray-100 py-3">
+    <div class="text-sm font-medium text-gray-900">
+      <a href="${esc(r.url)}" target="_blank" rel="noopener"
+         class="underline hover:text-gray-700">${esc(r.navn)}</a>
+      <span class="font-normal text-gray-500">&middot; ${esc(r.udgiver)}, ${esc(r.aar)}</span>
     </div>
-    <p class="mt-1 text-xs text-gray-500">Anvendes til ${esc(a.anvendes_til)}.
-      Ophav: ${a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener"
-        class="underline hover:text-gray-700">${esc(a.udbyder)}</a>` : esc(a.udbyder)}.
-      ${esc(a.forbehold)}</p>
+    <p class="mt-1 text-xs text-gray-500">Anvendes til: ${esc(r.anvendes_til)}.</p>
+    <p class="mt-0.5 text-xs text-gray-500">Sidehenvisninger: ${esc(r.sider)}.</p>
   </div>`).join("");
-
   return `<div>${poster}</div>`;
 }
+
+// ---------- Forside ----------
+
+/** Kommunekort til søgeresultatet. Mønster fra doughnuts KommuneSearch. */
+export function renderKommuneKort(kommuner) {
+  if (kommuner.length === 0) {
+    return `<p class="col-span-full py-8 text-center text-gray-500">Ingen kommuner fundet.</p>`;
+  }
+  return kommuner.map((k) => `<a href="?kommune=${encodeURIComponent(k.kode)}"
+      class="block rounded-lg border border-gray-200 bg-white p-4 no-underline
+             hover:border-green-600 hover:bg-green-50 hover:shadow-md transition-all">
+      <h3 class="text-lg font-semibold text-gray-900">${esc(k.navn)}</h3>
+      <p class="mt-1 text-sm text-gray-500">Region ${esc(k.region)}</p>
+    </a>`).join("");
+}
+
+/** Forsidens hero og søgefelt. */
+export function renderForside() {
+  return `<div class="mb-10 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Hvordan ser din kommune ud?</h2>
+      <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">Et forbrugsbaseret klimaaftryk
+        tæller de udledninger, borgernes forbrug giver anledning til - også dem, der sker
+        uden for kommunegrænsen og uden for Danmark. Slå din kommune op og se dens nøgletal
+        mod landsgennemsnittet, sat ved siden af CONCITO's nationale opgørelse.</p>
+    </div>
+    <div class="mb-8">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" fill="none"
+          stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <label for="soeg" class="sr-only">Søg efter en kommune</label>
+        <input id="soeg" type="search" autocomplete="off" placeholder="Søg efter en kommune ..."
+          class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white
+                 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent">
+      </div>
+      <p id="soege-status" class="text-sm text-gray-600 mt-2" role="status" aria-live="polite"></p>
+    </div>
+    <div id="resultater" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>`;
+}
+

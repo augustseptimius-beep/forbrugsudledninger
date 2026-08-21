@@ -11,6 +11,7 @@ export const land = {
   opv_boliger_ialt: 2872738, opv_olie: 92448, opv_naturgas: 334724,
   affald_kg: 543, genanvendelse_pct: 58,
   elco2_g_kwh: 51.8, boligpris_m2: 18439,
+  ve_daekning_pct: 28.3, pendlingsafstand_km: 22.6,
 };
 
 export const thisted = {
@@ -23,6 +24,7 @@ export const thisted = {
   opv_boliger_ialt: 20515, opv_olie: 1582, opv_naturgas: 958,
   affald_kg: 508, genanvendelse_pct: 45,
   elco2_g_kwh: 26.7, boligpris_m2: 7430,
+  ve_daekning_pct: 79.7, pendlingsafstand_km: 23.6,
 };
 
 export const greve = {
@@ -35,16 +37,10 @@ export const greve = {
   opv_boliger_ialt: 22856, opv_olie: 319, opv_naturgas: 9040,
   affald_kg: null, genanvendelse_pct: null, // "-" i regnearket
   elco2_g_kwh: null, boligpris_m2: 30347,
+  ve_daekning_pct: null, pendlingsafstand_km: 20.7,
 };
 
-export const konstanter = {
-  anker: 10.0,
-  elasticitet: { low: 0.30, high: 0.50 },
-  bilkorsel_andel: { low: 0.12, high: 0.15 },
-  byggeandel: { low: 0.0, high: 0.0456045 }, // kalibreret så Thisted rammer v5's 0–0,2 ton
-  boligudgift_modregning: 0.45,
-  bilkm_afvigelse_region: {
-    "Nordjylland": 0.178423236514523,
-    "Sjælland": 0, // NEUTRAL TESTSTUB — reel DTU-værdi hentes i Plan 2's pipeline
-  },
-};
+// Der er ingen koefficienter i modellen længere. Fixturen indeholdt tidligere
+// et anker, en elasticitet, en bilkørselsandel, en byggeandel og en
+// boligudgiftsmodregning; ingen af dem kunne kildebelægges, og de er fjernet
+// sammen med det estimat, de indgik i. Se pipeline/constants.py.

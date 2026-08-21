@@ -1,105 +1,62 @@
-"""Tests for udledningen af regional bil-km-afvigelse fra pendlingsafstande.
-Ingen netværk - kalibreringslogikken testes mod kendte tal."""
+"""fetch_pendling leverer km som DST opgør dem - intet andet.
+
+Modulet indeholdt tidligere en omregning fra pendlingsafstand til
+bil-kilometer og en kalibrering mod DTU's ene regionale tal. Begge var
+metodiske beslutninger uden kilde og er fjernet. Testene holder dem ude."""
 import unittest
+from unittest.mock import patch
 
 import fetch_pendling
 
 
-AFSTANDE = {
-    "Hele landet": 22.6,
-    "Hovedstaden": 15.8,
-    "Sjælland": 29.0,
-    "Syddanmark": 25.7,
-    "Midtjylland": 24.6,
-    "Nordjylland": 26.8,
-}
+SVAR = [
+    {"BOPOMR": "Hele landet", "INDHOLD": "22,6"},
+    {"BOPOMR": "Region Nordjylland", "INDHOLD": "26,8"},
+    {"BOPOMR": "Region Sjælland", "INDHOLD": "29,0"},
+    {"BOPOMR": "Thisted", "INDHOLD": "23,6"},
+    {"BOPOMR": "Vordingborg", "INDHOLD": "36,3"},
+    {"BOPOMR": "Ukendt Sted", "INDHOLD": ".."},
+]
 
 
-class TestBilkmAfvigelse(unittest.TestCase):
-    def test_alle_fem_regioner_faar_en_vaerdi(self):
-        dev, _ = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
-        self.assertEqual(set(dev), {"Hovedstaden", "Sjælland", "Syddanmark",
-                                    "Midtjylland", "Nordjylland"})
+class TestFetchPendlingsafstand(unittest.TestCase):
+    def _hent(self):
+        with patch.object(fetch_pendling.dst_client, "fetch", return_value=SVAR):
+            return fetch_pendling.fetch_pendlingsafstand()
 
-    def test_ankerregionen_rammer_dtus_vaerdi_eksakt(self):
-        # Nordjylland er det eneste direkte målte punkt. Rammer det ikke DTU's
-        # tal præcist, er de fire øvrige regioner på et andet målegrundlag.
-        dev, _ = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
-        self.assertEqual(dev["Nordjylland"], fetch_pendling.DTU_NORDJYLLAND)
+    def test_returnerer_raa_km_uden_omregning(self):
+        ud = self._hent()
+        self.assertEqual(ud["Thisted"], 23.6)
+        self.assertEqual(ud["Vordingborg"], 36.3)
+        self.assertEqual(ud["Hele landet"], 22.6)
 
-    def test_kalibreringsfaktoren_er_taet_paa_en(self):
-        # AFSTB4 giver Nordjylland +18,58 % mod DTU's +17,84 %. Faktoren skal
-        # derfor ligge lige under 1. Ligger den langt fra, er de to mål holdt
-        # op mod hinanden forkert.
-        _, faktor = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
-        self.assertAlmostEqual(faktor, 0.9601, places=3)
+    def test_regionsnavne_normaliseres_saa_de_matcher_kommuner_py(self):
+        ud = self._hent()
+        self.assertIn("Nordjylland", ud)
+        self.assertNotIn("Region Nordjylland", ud)
 
-    def test_fortegn_foelger_afstanden(self):
-        dev, _ = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
-        self.assertLess(dev["Hovedstaden"], 0, "kortere pendling end land skal give negativt")
-        self.assertGreater(dev["Sjælland"], 0, "længere pendling end land skal give positivt")
+    def test_manglende_data_udelades(self):
+        # DST's ".." betyder ingen data, ikke nul.
+        self.assertNotIn("Ukendt Sted", self._hent())
 
-    def test_raekkefoelge_bevares_fra_afstandene(self):
-        dev, _ = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
-        efter_afstand = sorted(("Hovedstaden", "Midtjylland", "Syddanmark",
-                                "Nordjylland", "Sjælland"), key=lambda r: AFSTANDE[r])
-        efter_dev = sorted(dev, key=lambda r: dev[r])
-        self.assertEqual(efter_afstand, efter_dev)
+    def test_komma_som_decimalseparator_parses(self):
+        self.assertIsInstance(self._hent()["Thisted"], float)
 
-    def test_manglende_landsvaerdi_fejler_frem_for_at_gaette(self):
-        with self.assertRaises(ValueError):
-            fetch_pendling.beregn_bilkm_afvigelse({"Sjælland": 29.0})
 
-    def test_manglende_ankerregion_fejler(self):
-        # Uden ankeret kan kalibreringen ikke sættes, og de fire regioner ville
-        # ende på et andet grundlag end DTU's. Bedre at fejle end at udgive.
-        uden = {k: v for k, v in AFSTANDE.items() if k != "Nordjylland"}
-        with self.assertRaises(ValueError):
-            fetch_pendling.beregn_bilkm_afvigelse(uden)
+class TestIngenOmregning(unittest.TestCase):
+    def test_de_fjernede_funktioner_er_ikke_kommet_tilbage(self):
+        for navn in ("beregn_bilkm_afvigelse", "beregn_bilkm_afvigelse_kommune",
+                     "DTU_NORDJYLLAND"):
+            self.assertFalse(hasattr(fetch_pendling, navn),
+                             f"{navn} var en metodisk beslutning uden kilde")
+
+    def test_modulet_indeholder_ingen_kalibrering(self):
+        kilde = open(fetch_pendling.__file__, encoding="utf-8").read()
+        # Ordet må gerne stå i forklaringen af hvad der er fjernet, men ikke
+        # som en tildeling.
+        self.assertNotIn("faktor =", kilde)
+        self.assertNotIn("kalibrering =", kilde)
 
 
 if __name__ == "__main__":
     unittest.main()
-
-
-class TestKommuneAfvigelse(unittest.TestCase):
-    """Kommunale bil-km-afvigelser. Samme kalibrering som regionerne, fordi
-    faktoren retter niveauet, ikke den kommunale spredning."""
-
-    AFSTANDE_MED_KOMMUNER = dict(AFSTANDE, **{
-        "Thisted": 23.6, "Aalborg": 26.0, "Vordingborg": 36.3, "Frederiksberg": 12.4,
-    })
-    KOMMUNER = [(787, "Thisted", "Nordjylland"), (851, "Aalborg", "Nordjylland"),
-                (390, "Vordingborg", "Sjælland"), (147, "Frederiksberg", "Hovedstaden")]
-
-    def _bereg(self):
-        _, faktor = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
-        return fetch_pendling.beregn_bilkm_afvigelse_kommune(
-            self.AFSTANDE_MED_KOMMUNER, faktor, self.KOMMUNER)
-
-    def test_hver_kommune_faar_sin_egen_vaerdi(self):
-        ud = self._bereg()
-        self.assertEqual(len(set(ud.values())), 4, "fire forskellige afstande, fire forskellige tal")
-
-    def test_kommunen_afviger_fra_sin_region(self):
-        # Hele pointen med at gå til kommuneniveau. Thisted ligger langt under
-        # Nordjyllands regionsværdi.
-        regionalt, _ = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
-        ud = self._bereg()
-        self.assertLess(ud[787], regionalt["Nordjylland"] / 2)
-
-    def test_fortegn_foelger_afstanden(self):
-        ud = self._bereg()
-        self.assertGreater(ud[390], 0, "Vordingborg pendler langt")
-        self.assertLess(ud[147], 0, "Frederiksberg pendler kort")
-
-    def test_kommune_uden_afstand_udelades(self):
-        # Så motoren kan vise transporten som uoplyst frem for at gætte.
-        _, faktor = fetch_pendling.beregn_bilkm_afvigelse(AFSTANDE)
-        ud = fetch_pendling.beregn_bilkm_afvigelse_kommune(
-            AFSTANDE, faktor, [(999, "Findes Ikke", "Sjælland")])
-        self.assertEqual(ud, {})
-
-    def test_manglende_landsvaerdi_fejler(self):
-        with self.assertRaises(ValueError):
-            fetch_pendling.beregn_bilkm_afvigelse_kommune({"Thisted": 23.6}, 1.0, self.KOMMUNER)

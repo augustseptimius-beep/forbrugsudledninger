@@ -50,13 +50,10 @@ KILDER = [
     _dst("LABY25", "Husholdningsaffald og genanvendelse", "AFFALD_AAR",
          ["affald_kg", "genanvendelse_pct"]),
     dict(_dst("AFSTB4", "Gennemsnitlig pendlingsafstand efter bopælsområde",
-              "PENDLING_AAR", ["bilkm_afvigelse"]),
-         forbehold="Bruges som proxy for bil-km pr. person, kalibreret mod DTU's "
-                   "målte tal for Nordjylland. Pendling er kun arbejdsturen, og "
-                   "sammenhængen er kun valideret regionalt. Sammenhængen er ikke "
-                   "monoton i landlighed: det er pendlerbæltet, der pendler længst, "
-                   "ikke den ægte udkant. Proxyen undervurderer derfor sandsynligvis "
-                   "perifere kommuner."),
+              "PENDLING_AAR", ["pendlingsafstand_km"]),
+         forbehold="Afstanden til arbejde for beskæftigede med bopæl i kommunen. "
+                   "Den siger intet om transportmiddel og dækker kun arbejdsturen, "
+                   "ikke indkøb, fritid og andre ærinder."),
     {
         "id": "BM010",
         "navn": "Boligpriser pr. kvadratmeter, realiserede handler",
@@ -100,53 +97,34 @@ KILDER = [
     },
 ]
 
-# Kilder til metodens antagelser. Leverer ingen felter i data.json, men skal
-# stå på metodesiden, fordi de er forudsætninger for hovedtallet.
-ANTAGELSER = [
+# Faglige referencer. Værktøjet indeholder ingen antagelser eller
+# koefficienter længere, så listen her er ikke antagelser, men de rapporter,
+# de nationale sammenligningstal er afskrevet fra. Selve tallene med
+# sidehenvisning ligger i concito.py.
+REFERENCER = [
     {
-        "id": "DTU_TU",
-        "navn": "Transportvaneundersøgelsen, bil-km pr. region",
-        "udbyder": "DTU",
-        "url": "https://www.transportvaner.dk",
-        "anvendes_til": "kalibrering af bil-km-afvigelsen for alle 98 kommuner",
-        "forbehold": "Intet offentligt API. Kun Nordjylland er slået op direkte "
-                     "(+17,84 %). Værdien bruges som anker: alle kommunernes "
-                     "pendlingsbaserede afvigelser skaleres, så Nordjylland som "
-                     "region rammer den præcist.",
+        "id": "CONCITO_2023",
+        "navn": "Danmarks globale forbrugsudledninger",
+        "udgiver": "CONCITO",
+        "aar": 2023,
+        "url": "https://concito.dk/udgivelser/danmarks-globale-forbrugsudledninger",
+        "anvendes_til": "Danmarks samlede forbrugsudledning pr. indbygger og "
+                        "fordelingen på varegrupper og tjenester",
+        "sider": "s. 8 (nationalt tal), s. 16 figur 7 (varegrupper), "
+                 "s. 17 figur 8 (transport), s. 17 (fødevarer), s. 30 (forbrugsprofiler)",
     },
     {
-        "id": "ENS_GA",
-        "navn": "Global Afrapportering, dansk forbrugsaftryk pr. indbygger",
-        "udbyder": "Energistyrelsen",
-        "url": "https://ens.dk",
-        "anvendes_til": "anker (10,0 ton CO2e)",
-        "forbehold": "Nationalt gennemsnit, opgørelsesår 2023.",
-    },
-    {
-        "id": "CONCITO_ELAST",
-        "navn": "Sammenhæng mellem indkomst og klimaaftryk",
-        "udbyder": "CONCITO",
-        "url": "https://concito.dk",
-        "anvendes_til": "elasticitet (0,30-0,50) og bilkorsel_andel (0,12-0,15)",
-        "forbehold": "Skøn, ikke en målt størrelse.",
-    },
-    {
-        "id": "BYGGEANDEL_KALIBRERING",
-        "navn": "Byggeriets aftryksandel, kalibreret koefficient",
-        "udbyder": "Eget skøn",
-        "url": "",
-        "anvendes_til": "byggeandel (0,0-0,0456045)",
-        "forbehold": "Kalibreret så Thisted reproducerer det oprindelige "
-                     "regnearks interval. Ikke en uafhængigt målt størrelse.",
-    },
-    {
-        "id": "BOLIGUDGIFT_MODREGNING",
-        "navn": "Andel af indkomstgab modsvaret af lavere boligudgift",
-        "udbyder": "Eget skøn",
-        "url": "",
-        "anvendes_til": "boligudgift_modregning (0,45)",
-        "forbehold": "Ræsonneret til et mønster med billig bolig og lav "
-                     "indkomst. Følsomheden vises kun, når det mønster gælder.",
+        "id": "NIRAS_2024",
+        "navn": "Forbrugsbaserede klimaaftryk på lokalt niveau",
+        "udgiver": "NIRAS for CONCITO og C40 Cities",
+        "aar": 2024,
+        "url": "https://concito.dk/udgivelser/forbrugsbaserede-klimaaftryk-paa-lokalt-niveau",
+        "anvendes_til": "Anbefalinger til, hvordan et kommunalt forbrugsaftryk bør "
+                        "opgøres - og dermed forklaringen på, hvorfor dette værktøj "
+                        "ikke selv beregner et",
+        "sider": "s. 18 afsnit 4.2.3 (energi), s. 20 afsnit 4.2.6 (transport), "
+                 "s. 26 afsnit 4.2.10 (øvrigt forbrug), s. 29 afsnit 4.3.1 "
+                 "(offentligt forbrug)",
     },
 ]
 
@@ -163,5 +141,5 @@ def byg_sources():
     return {
         "genereret": date.today().isoformat(),
         "kilder": kilder,
-        "antagelser": ANTAGELSER,
+        "referencer": REFERENCER,
     }

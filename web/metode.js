@@ -2,7 +2,7 @@
 // datafiler frem for at stå skrevet i HTML, så årstal og værdier ikke kan
 // drive fra det, motoren faktisk regner med.
 
-import { renderKilder, renderAntagelser } from "./render.js";
+import { renderKilder, renderReferencer, renderNationaltAftryk } from "./render.js";
 
 async function hent(sti) {
   const svar = await fetch(sti);
@@ -15,15 +15,19 @@ function fejl(el, besked) {
 }
 
 const kilderEl = document.getElementById("kilder");
-const antagelserEl = document.getElementById("antagelser");
+const referencerEl = document.getElementById("referencer");
+const nationaltEl = document.getElementById("nationalt");
 
 try {
-  const [sources, data] = await Promise.all([hent("data/sources.json"), hent("data/data.json")]);
+  const [sources, concito] = await Promise.all([
+    hent("data/sources.json"), hent("data/concito.json")]);
   if (kilderEl) kilderEl.innerHTML = renderKilder(sources);
-  if (antagelserEl) antagelserEl.innerHTML = renderAntagelser(sources, data.konstanter);
+  if (referencerEl) referencerEl.innerHTML = renderReferencer(sources);
+  if (nationaltEl) nationaltEl.innerHTML = renderNationaltAftryk(concito);
 } catch (e) {
   const besked = `Kunne ikke hente kildeoversigten (${e.message}).
-    Formlerne og forbeholdene ovenfor gælder uanset.`;
+    Forbeholdene ovenfor gælder uanset.`;
   fejl(kilderEl, besked);
-  fejl(antagelserEl, besked);
+  fejl(referencerEl, besked);
+  fejl(nationaltEl, besked);
 }

@@ -14,3 +14,4 @@ node_modules/
 
 # Bemærk: web/styles/styles.css er bevidst IKKE ignoreret.
 # Den genererede CSS committes, så repoet kan åbnes og bruges uden Node.
+.el_cache.json

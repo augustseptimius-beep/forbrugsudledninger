@@ -1,25 +1,16 @@
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+"""constants.py må kun indeholde periodeangivelser og et sikkerhedsnet.
+
+Den indeholdt tidligere fem beregningskoefficienter - et nationalt anker, en
+indkomstelasticitet, en bilkørselsandel, en byggeandel og en
+boligudgiftsmodregning - som ingen af dem kunne kildebelægges. Testene her
+holder dem ude igen."""
+import re
 import unittest
-from constants import KONSTANTER, BILKM_AFVIGELSE_REGION, EL_CO2_MANUAL, PERIODER
 
-class TestConstants(unittest.TestCase):
-    def test_konstanter_matcher_plan1_fixture(self):
-        self.assertEqual(KONSTANTER["anker"], 10.0)
-        self.assertEqual(KONSTANTER["elasticitet"], {"low": 0.30, "high": 0.50})
-        self.assertEqual(KONSTANTER["byggeandel"]["high"], 0.0456045)
-        self.assertEqual(KONSTANTER["boligudgift_modregning"], 0.45)
+import constants
 
-    def test_dtu_har_kun_nordjylland_kendt(self):
-        self.assertAlmostEqual(BILKM_AFVIGELSE_REGION["Nordjylland"], 0.178423236514523)
-        for region in ("Hovedstaden", "Sjælland", "Syddanmark", "Midtjylland"):
-            self.assertNotIn(region, BILKM_AFVIGELSE_REGION)
 
-    def test_el_co2_har_kun_land_og_thisted_kendt(self):
-        self.assertEqual(EL_CO2_MANUAL["Hele landet"], 51.8)
-        self.assertEqual(EL_CO2_MANUAL["Thisted"], 26.7)
-        self.assertNotIn("Greve", EL_CO2_MANUAL)
-
+class TestPerioder(unittest.TestCase):
     def test_perioder_indeholder_alle_forventede_noegler(self):
         forventede = {
             "FOLK_KVARTAL", "FOLK_KVARTAL_FORRIGE", "AREAL_AAR", "INDKOMST_AAR",
@@ -27,7 +18,31 @@ class TestConstants(unittest.TestCase):
             "BYGGERI_AAR", "BILER_MAANED", "AFFALD_AAR", "BOLIGPRIS_KVARTAL",
             "PENDLING_AAR", "ELDEKLARATION_AAR",
         }
-        self.assertEqual(set(PERIODER.keys()), forventede)
+        self.assertEqual(set(constants.PERIODER.keys()), forventede)
+
+    def test_alle_perioder_er_strenge(self):
+        for noegle, vaerdi in constants.PERIODER.items():
+            self.assertIsInstance(vaerdi, str, f"{noegle} skal være en streng")
+
+
+class TestIngenKoefficienter(unittest.TestCase):
+    def test_de_fjernede_koefficienter_er_ikke_kommet_tilbage(self):
+        for navn in ("KONSTANTER", "BILKM_AFVIGELSE_REGION"):
+            self.assertFalse(hasattr(constants, navn),
+                             f"{navn} kunne ikke kildebelægges og skal blive ude")
+
+    def test_ingen_ukildebelagte_talkonstanter(self):
+        # Alt på modulniveau skal være enten PERIODER eller EL_CO2_MANUAL.
+        offentlige = {n for n in dir(constants) if n.isupper()}
+        self.assertEqual(offentlige, {"PERIODER", "EL_CO2_MANUAL"})
+
+    def test_el_co2_manual_er_maerket_som_sikkerhedsnet(self):
+        # Uden mærkatet ville næste læser tro, det er en datakilde og bruge
+        # to håndaflæste værdier frem for de 98 beregnede.
+        kilde = open(constants.__file__, encoding="utf-8").read()
+        foran = kilde[:kilde.index("EL_CO2_MANUAL = {")]
+        self.assertIn("SIKKERHEDSNET", foran.upper())
+
 
 if __name__ == "__main__":
     unittest.main()

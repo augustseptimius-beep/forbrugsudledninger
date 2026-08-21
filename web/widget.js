@@ -42,24 +42,25 @@ function visForside(data) {
   input.focus({ preventScroll: true });
 }
 
-function visKommune(data, kommune) {
-  const b = beregnKommune(kommune, data.land, data.konstanter);
+function visKommune(data, concito, kommune) {
+  const b = beregnKommune(kommune, data.land);
   document.title = `${kommune.navn} - Forbrugsbaserede udledninger`;
   app.innerHTML = `
     <a href="index.html" class="no-embed inline-flex items-center gap-1 text-sm text-gray-500
        hover:text-gray-900 transition-colors mb-4 no-print">
       <span aria-hidden="true">&larr;</span> Alle kommuner
     </a>
-    ${renderKommune(b, data.konstanter)}`;
+    ${renderKommune(b, concito)}`;
 }
 
 async function start() {
   anvendEmbed();
-  let data;
+  let data, concito;
   try {
-    const svar = await fetch("data/data.json");
-    if (!svar.ok) throw new Error(`HTTP ${svar.status}`);
-    data = await svar.json();
+    const [d, c] = await Promise.all([fetch("data/data.json"), fetch("data/concito.json")]);
+    if (!d.ok) throw new Error(`data.json: HTTP ${d.status}`);
+    if (!c.ok) throw new Error(`concito.json: HTTP ${c.status}`);
+    [data, concito] = await Promise.all([d.json(), c.json()]);
   } catch (fejl) {
     visFejl(`Kunne ikke hente datagrundlaget (${fejl.message}). Siden skal serveres over
       http, ikke åbnes direkte fra filsystemet.`);
@@ -77,7 +78,7 @@ async function start() {
       <a href="index.html" class="underline">Se listen over alle kommuner</a>.`);
     return;
   }
-  visKommune(data, kommune);
+  visKommune(data, concito, kommune);
 }
 
 start();

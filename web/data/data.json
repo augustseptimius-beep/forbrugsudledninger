@@ -24,7 +24,8 @@
     "navn": "Hele landet",
     "boligpris_m2": 18429,
     "elco2_g_kwh": 43.35114220750178,
-    "ve_daekning_pct": 28.321668880158423
+    "ve_daekning_pct": 28.321668880158423,
+    "pendlingsafstand_km": 22.6
   },
   "kommuner": [
     {
@@ -54,7 +55,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 61088,
       "elco2_g_kwh": 41.65573096258222,
-      "ve_daekning_pct": 3.1671568688851037
+      "ve_daekning_pct": 3.1671568688851037,
+      "pendlingsafstand_km": 13.0
     },
     {
       "folketal": 106150,
@@ -83,7 +85,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 85901,
       "elco2_g_kwh": 42.78922933603361,
-      "ve_daekning_pct": 0.28942799555874843
+      "ve_daekning_pct": 0.28942799555874843,
+      "pendlingsafstand_km": 12.4
     },
     {
       "folketal": 14474,
@@ -112,7 +115,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 40630,
       "elco2_g_kwh": 41.192511957146635,
-      "ve_daekning_pct": 2.005507226355164
+      "ve_daekning_pct": 2.005507226355164,
+      "pendlingsafstand_km": 18.2
     },
     {
       "folketal": 44214,
@@ -141,7 +145,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 39328,
       "elco2_g_kwh": 41.65491445871342,
-      "ve_daekning_pct": 1.1954713147246225
+      "ve_daekning_pct": 1.1954713147246225,
+      "pendlingsafstand_km": 13.8
     },
     {
       "folketal": 29262,
@@ -170,7 +175,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 27817,
       "elco2_g_kwh": 41.99378353311298,
-      "ve_daekning_pct": 1.058566818209306
+      "ve_daekning_pct": 1.058566818209306,
+      "pendlingsafstand_km": 14.1
     },
     {
       "folketal": 53950,
@@ -199,7 +205,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 34846,
       "elco2_g_kwh": 41.72116768121392,
-      "ve_daekning_pct": 1.092468569151997
+      "ve_daekning_pct": 1.092468569151997,
+      "pendlingsafstand_km": 14.4
     },
     {
       "folketal": 40990,
@@ -228,7 +235,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 32896,
       "elco2_g_kwh": 41.96774193665898,
-      "ve_daekning_pct": 1.3248021870661633
+      "ve_daekning_pct": 1.3248021870661633,
+      "pendlingsafstand_km": 14.2
     },
     {
       "folketal": 75106,
@@ -257,7 +265,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 68140,
       "elco2_g_kwh": 42.36943076327173,
-      "ve_daekning_pct": 0.5687035284294902
+      "ve_daekning_pct": 0.5687035284294902,
+      "pendlingsafstand_km": 14.8
     },
     {
       "folketal": 71185,
@@ -286,7 +295,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 48677,
       "elco2_g_kwh": 40.30027985357695,
-      "ve_daekning_pct": 0.5906905034607008
+      "ve_daekning_pct": 0.5906905034607008,
+      "pendlingsafstand_km": 12.8
     },
     {
       "folketal": 25834,
@@ -315,7 +325,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 34377,
       "elco2_g_kwh": 42.162288432540315,
-      "ve_daekning_pct": 0.2811681331473473
+      "ve_daekning_pct": 0.2811681331473473,
+      "pendlingsafstand_km": 14.0
     },
     {
       "folketal": 32030,
@@ -344,7 +355,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 36949,
       "elco2_g_kwh": 41.83914611093375,
-      "ve_daekning_pct": 1.4856039236337055
+      "ve_daekning_pct": 1.4856039236337055,
+      "pendlingsafstand_km": 12.5
     },
     {
       "folketal": 54228,
@@ -373,7 +385,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 41153,
       "elco2_g_kwh": 38.30465068590531,
-      "ve_daekning_pct": 12.14334302938207
+      "ve_daekning_pct": 12.14334302938207,
+      "pendlingsafstand_km": 13.7
     },
     {
       "folketal": 60458,
@@ -402,7 +415,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 28854,
       "elco2_g_kwh": 41.3607487934747,
-      "ve_daekning_pct": 2.3386510359077826
+      "ve_daekning_pct": 2.3386510359077826,
+      "pendlingsafstand_km": 18.3
     },
     {
       "folketal": 24685,
@@ -431,7 +445,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 27655,
       "elco2_g_kwh": 41.4711418798425,
-      "ve_daekning_pct": 2.6998443250773634
+      "ve_daekning_pct": 2.6998443250773634,
+      "pendlingsafstand_km": 16.3
     },
     {
       "folketal": 58614,
@@ -460,7 +475,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 54252,
       "elco2_g_kwh": 40.92070411527517,
-      "ve_daekning_pct": 0.7359164110245833
+      "ve_daekning_pct": 0.7359164110245833,
+      "pendlingsafstand_km": 15.0
     },
     {
       "folketal": 45138,
@@ -489,7 +505,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 41782,
       "elco2_g_kwh": 42.38816177169471,
-      "ve_daekning_pct": 1.399339416649001
+      "ve_daekning_pct": 1.399339416649001,
+      "pendlingsafstand_km": 12.6
     },
     {
       "folketal": 18689,
@@ -518,7 +535,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 35003,
       "elco2_g_kwh": 41.65623549419504,
-      "ve_daekning_pct": 2.0531106047912324
+      "ve_daekning_pct": 2.0531106047912324,
+      "pendlingsafstand_km": 15.9
     },
     {
       "folketal": 26496,
@@ -547,7 +565,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 34608,
       "elco2_g_kwh": 41.342724424316174,
-      "ve_daekning_pct": 3.949787637549105
+      "ve_daekning_pct": 3.949787637549105,
+      "pendlingsafstand_km": 20.2
     },
     {
       "folketal": 46240,
@@ -576,7 +595,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 29325,
       "elco2_g_kwh": 41.35804656120655,
-      "ve_daekning_pct": 2.8208489592455637
+      "ve_daekning_pct": 2.8208489592455637,
+      "pendlingsafstand_km": 20.5
     },
     {
       "folketal": 42445,
@@ -605,7 +625,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 33262,
       "elco2_g_kwh": 41.43900868602486,
-      "ve_daekning_pct": 2.4046661205820183
+      "ve_daekning_pct": 2.4046661205820183,
+      "pendlingsafstand_km": 23.0
     },
     {
       "folketal": 47450,
@@ -634,7 +655,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 20812,
       "elco2_g_kwh": 39.6154821375385,
-      "ve_daekning_pct": 4.454287332216012
+      "ve_daekning_pct": 4.454287332216012,
+      "pendlingsafstand_km": 24.6
     },
     {
       "folketal": 42874,
@@ -663,7 +685,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 41752,
       "elco2_g_kwh": 41.626299105210535,
-      "ve_daekning_pct": 1.9595114236113365
+      "ve_daekning_pct": 1.9595114236113365,
+      "pendlingsafstand_km": 17.5
     },
     {
       "folketal": 41787,
@@ -692,7 +715,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 20448,
       "elco2_g_kwh": 40.55292913626031,
-      "ve_daekning_pct": 2.922819052513599
+      "ve_daekning_pct": 2.922819052513599,
+      "pendlingsafstand_km": 27.9
     },
     {
       "folketal": 31738,
@@ -721,7 +745,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 18310,
       "elco2_g_kwh": 40.60148631962383,
-      "ve_daekning_pct": 4.731140513841855
+      "ve_daekning_pct": 4.731140513841855,
+      "pendlingsafstand_km": 25.7
     },
     {
       "folketal": 64244,
@@ -750,7 +775,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 31204,
       "elco2_g_kwh": 36.45478319216654,
-      "ve_daekning_pct": 11.128335572649787
+      "ve_daekning_pct": 11.128335572649787,
+      "pendlingsafstand_km": 24.0
     },
     {
       "folketal": 55182,
@@ -779,7 +805,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 29772,
       "elco2_g_kwh": 39.07995832541246,
-      "ve_daekning_pct": 6.345292248915148
+      "ve_daekning_pct": 6.345292248915148,
+      "pendlingsafstand_km": 21.3
     },
     {
       "folketal": 25354,
@@ -808,7 +835,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 43302,
       "elco2_g_kwh": 42.27277520688069,
-      "ve_daekning_pct": 0.41042487592925964
+      "ve_daekning_pct": 0.41042487592925964,
+      "pendlingsafstand_km": 21.3
     },
     {
       "folketal": 57912,
@@ -837,7 +865,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 48237,
       "elco2_g_kwh": 41.79367450693623,
-      "ve_daekning_pct": 1.319027812068017
+      "ve_daekning_pct": 1.319027812068017,
+      "pendlingsafstand_km": 19.3
     },
     {
       "folketal": 38677,
@@ -866,7 +895,8 @@
       "region": "Hovedstaden",
       "boligpris_m2": 10893,
       "elco2_g_kwh": 19.896922459530266,
-      "ve_daekning_pct": 61.35988557564137
+      "ve_daekning_pct": 61.35988557564137,
+      "pendlingsafstand_km": 25.9
     },
     {
       "folketal": 54120,
@@ -895,7 +925,8 @@
       "region": "Sjælland",
       "boligpris_m2": 30347,
       "elco2_g_kwh": 41.098325016345406,
-      "ve_daekning_pct": 3.6308578000462823
+      "ve_daekning_pct": 3.6308578000462823,
+      "pendlingsafstand_km": 20.5
     },
     {
       "folketal": 63962,
@@ -924,7 +955,8 @@
       "region": "Sjælland",
       "boligpris_m2": 23913,
       "elco2_g_kwh": 39.01488135831822,
-      "ve_daekning_pct": 7.871775083737299
+      "ve_daekning_pct": 7.871775083737299,
+      "pendlingsafstand_km": 26.6
     },
     {
       "folketal": 29879,
@@ -953,7 +985,8 @@
       "region": "Sjælland",
       "boligpris_m2": 19724,
       "elco2_g_kwh": 39.30885144594684,
-      "ve_daekning_pct": 9.460195437912367
+      "ve_daekning_pct": 9.460195437912367,
+      "pendlingsafstand_km": 29.7
     },
     {
       "folketal": 92697,
@@ -982,7 +1015,8 @@
       "region": "Sjælland",
       "boligpris_m2": 31592,
       "elco2_g_kwh": 41.974886171362705,
-      "ve_daekning_pct": 0.5448689083323834
+      "ve_daekning_pct": 0.5448689083323834,
+      "pendlingsafstand_km": 22.9
     },
     {
       "folketal": 25040,
@@ -1011,7 +1045,8 @@
       "region": "Sjælland",
       "boligpris_m2": 32652,
       "elco2_g_kwh": 37.683972113048675,
-      "ve_daekning_pct": 10.911243704903855
+      "ve_daekning_pct": 10.911243704903855,
+      "pendlingsafstand_km": 24.6
     },
     {
       "folketal": 38143,
@@ -1040,7 +1075,8 @@
       "region": "Sjælland",
       "boligpris_m2": 13363,
       "elco2_g_kwh": 20.893954101960976,
-      "ve_daekning_pct": 56.17141797485391
+      "ve_daekning_pct": 56.17141797485391,
+      "pendlingsafstand_km": 33.2
     },
     {
       "folketal": 59119,
@@ -1069,7 +1105,8 @@
       "region": "Sjælland",
       "boligpris_m2": 7597,
       "elco2_g_kwh": 20.24846328726501,
-      "ve_daekning_pct": 60.861524791007085
+      "ve_daekning_pct": 60.861524791007085,
+      "pendlingsafstand_km": 32.2
     },
     {
       "folketal": 75009,
@@ -1098,7 +1135,8 @@
       "region": "Sjælland",
       "boligpris_m2": 15882,
       "elco2_g_kwh": 30.18618403425717,
-      "ve_daekning_pct": 37.93984875778309
+      "ve_daekning_pct": 37.93984875778309,
+      "pendlingsafstand_km": 29.6
     },
     {
       "folketal": 47954,
@@ -1127,7 +1165,8 @@
       "region": "Sjælland",
       "boligpris_m2": 10876,
       "elco2_g_kwh": 31.794004042956907,
-      "ve_daekning_pct": 27.37924815962836
+      "ve_daekning_pct": 27.37924815962836,
+      "pendlingsafstand_km": 27.4
     },
     {
       "folketal": 38533,
@@ -1156,7 +1195,8 @@
       "region": "Sjælland",
       "boligpris_m2": 4756,
       "elco2_g_kwh": 7.673468408257751,
-      "ve_daekning_pct": 88.5309699772726
+      "ve_daekning_pct": 88.5309699772726,
+      "pendlingsafstand_km": 32.3
     },
     {
       "folketal": 85163,
@@ -1185,7 +1225,8 @@
       "region": "Sjælland",
       "boligpris_m2": 14746,
       "elco2_g_kwh": 34.87784108415159,
-      "ve_daekning_pct": 24.255206018089396
+      "ve_daekning_pct": 24.255206018089396,
+      "pendlingsafstand_km": 30.7
     },
     {
       "folketal": 31988,
@@ -1214,7 +1255,8 @@
       "region": "Sjælland",
       "boligpris_m2": 10163,
       "elco2_g_kwh": 40.325766598055125,
-      "ve_daekning_pct": 4.848372074689954
+      "ve_daekning_pct": 4.848372074689954,
+      "pendlingsafstand_km": 29.9
     },
     {
       "folketal": 36010,
@@ -1243,7 +1285,8 @@
       "region": "Sjælland",
       "boligpris_m2": 16840,
       "elco2_g_kwh": 39.83207669612109,
-      "ve_daekning_pct": 7.985762620000527
+      "ve_daekning_pct": 7.985762620000527,
+      "pendlingsafstand_km": 31.4
     },
     {
       "folketal": 80959,
@@ -1272,7 +1315,8 @@
       "region": "Sjælland",
       "boligpris_m2": 12316,
       "elco2_g_kwh": 30.24253936617577,
-      "ve_daekning_pct": 35.66610953344667
+      "ve_daekning_pct": 35.66610953344667,
+      "pendlingsafstand_km": 30.9
     },
     {
       "folketal": 30853,
@@ -1301,7 +1345,8 @@
       "region": "Sjælland",
       "boligpris_m2": 12089,
       "elco2_g_kwh": 35.69975379665421,
-      "ve_daekning_pct": 17.94223365727569
+      "ve_daekning_pct": 17.94223365727569,
+      "pendlingsafstand_km": 33.4
     },
     {
       "folketal": 23842,
@@ -1330,7 +1375,8 @@
       "region": "Sjælland",
       "boligpris_m2": 14506,
       "elco2_g_kwh": 36.65753038050497,
-      "ve_daekning_pct": 17.055037177713228
+      "ve_daekning_pct": 17.055037177713228,
+      "pendlingsafstand_km": 31.6
     },
     {
       "folketal": 44831,
@@ -1359,7 +1405,8 @@
       "region": "Sjælland",
       "boligpris_m2": 9546,
       "elco2_g_kwh": 27.38183074594669,
-      "ve_daekning_pct": 37.80310043879915
+      "ve_daekning_pct": 37.80310043879915,
+      "pendlingsafstand_km": 36.3
     },
     {
       "folketal": 40369,
@@ -1388,7 +1435,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 8031,
       "elco2_g_kwh": 47.04931261692119,
-      "ve_daekning_pct": 40.22504705483424
+      "ve_daekning_pct": 40.22504705483424,
+      "pendlingsafstand_km": 27.9
     },
     {
       "folketal": 52328,
@@ -1417,7 +1465,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 8761,
       "elco2_g_kwh": 63.649697245296224,
-      "ve_daekning_pct": 10.908661175219935
+      "ve_daekning_pct": 10.908661175219935,
+      "pendlingsafstand_km": 27.5
     },
     {
       "folketal": 24299,
@@ -1446,7 +1495,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 13536,
       "elco2_g_kwh": 54.35493876308154,
-      "ve_daekning_pct": 32.92696119172759
+      "ve_daekning_pct": 32.92696119172759,
+      "pendlingsafstand_km": 25.7
     },
     {
       "folketal": 11841,
@@ -1475,7 +1525,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 6755,
       "elco2_g_kwh": 31.19889145711056,
-      "ve_daekning_pct": 68.44423068889324
+      "ve_daekning_pct": 68.44423068889324,
+      "pendlingsafstand_km": 29.8
     },
     {
       "folketal": 40625,
@@ -1504,7 +1555,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 13550,
       "elco2_g_kwh": 59.091702123551826,
-      "ve_daekning_pct": 19.193981537087797
+      "ve_daekning_pct": 19.193981537087797,
+      "pendlingsafstand_km": 30.0
     },
     {
       "folketal": 29179,
@@ -1533,7 +1585,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 8144,
       "elco2_g_kwh": 57.75018310173196,
-      "ve_daekning_pct": 23.02484866591629
+      "ve_daekning_pct": 23.02484866591629,
+      "pendlingsafstand_km": 27.4
     },
     {
       "folketal": 32401,
@@ -1562,7 +1615,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 10186,
       "elco2_g_kwh": 61.69129693754664,
-      "ve_daekning_pct": 15.31823550839603
+      "ve_daekning_pct": 15.31823550839603,
+      "pendlingsafstand_km": 29.3
     },
     {
       "folketal": 213168,
@@ -1591,7 +1645,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 18918,
       "elco2_g_kwh": 48.406468460344016,
-      "ve_daekning_pct": 25.335504313878072
+      "ve_daekning_pct": 25.335504313878072,
+      "pendlingsafstand_km": 24.2
     },
     {
       "folketal": 60027,
@@ -1620,7 +1675,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 14005,
       "elco2_g_kwh": 51.241405383584315,
-      "ve_daekning_pct": 28.924922557425592
+      "ve_daekning_pct": 28.924922557425592,
+      "pendlingsafstand_km": 28.5
     },
     {
       "folketal": 5766,
@@ -1649,7 +1705,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 7138,
       "elco2_g_kwh": 32.20723150176411,
-      "ve_daekning_pct": 69.38493924404628
+      "ve_daekning_pct": 69.38493924404628,
+      "pendlingsafstand_km": 23.2
     },
     {
       "folketal": 27200,
@@ -1678,7 +1735,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 10483,
       "elco2_g_kwh": 39.762548159765416,
-      "ve_daekning_pct": 53.66246874281394
+      "ve_daekning_pct": 53.66246874281394,
+      "pendlingsafstand_km": 24.3
     },
     {
       "folketal": 114947,
@@ -1707,7 +1765,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 12921,
       "elco2_g_kwh": 46.73578456442127,
-      "ve_daekning_pct": 45.74980485461509
+      "ve_daekning_pct": 45.74980485461509,
+      "pendlingsafstand_km": 21.5
     },
     {
       "folketal": 3332,
@@ -1736,7 +1795,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 10906,
       "elco2_g_kwh": 59.70957720738714,
-      "ve_daekning_pct": 21.32401441287385
+      "ve_daekning_pct": 21.32401441287385,
+      "pendlingsafstand_km": 26.1
     },
     {
       "folketal": 52939,
@@ -1765,7 +1825,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 12660,
       "elco2_g_kwh": 66.04758369384908,
-      "ve_daekning_pct": 0.020844268787421412
+      "ve_daekning_pct": 0.020844268787421412,
+      "pendlingsafstand_km": 24.2
     },
     {
       "folketal": 55218,
@@ -1794,7 +1855,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 9194,
       "elco2_g_kwh": 60.47047538937168,
-      "ve_daekning_pct": 15.483102709392698
+      "ve_daekning_pct": 15.483102709392698,
+      "pendlingsafstand_km": 27.7
     },
     {
       "folketal": 96214,
@@ -1823,7 +1885,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 13827,
       "elco2_g_kwh": 57.84922847417265,
-      "ve_daekning_pct": 19.117779834524082
+      "ve_daekning_pct": 19.117779834524082,
+      "pendlingsafstand_km": 26.9
     },
     {
       "folketal": 74123,
@@ -1852,7 +1915,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 9171,
       "elco2_g_kwh": 55.45438778313891,
-      "ve_daekning_pct": 22.294259215164274
+      "ve_daekning_pct": 22.294259215164274,
+      "pendlingsafstand_km": 22.3
     },
     {
       "folketal": 36174,
@@ -1881,7 +1945,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 5692,
       "elco2_g_kwh": 44.072572660079416,
-      "ve_daekning_pct": 50.54938889435613
+      "ve_daekning_pct": 50.54938889435613,
+      "pendlingsafstand_km": 25.5
     },
     {
       "folketal": 49468,
@@ -1910,7 +1975,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 8543,
       "elco2_g_kwh": 42.10431373643532,
-      "ve_daekning_pct": 52.58961306401145
+      "ve_daekning_pct": 52.58961306401145,
+      "pendlingsafstand_km": 25.3
     },
     {
       "folketal": 42641,
@@ -1939,7 +2005,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 8077,
       "elco2_g_kwh": 46.684133078866,
-      "ve_daekning_pct": 41.39832436582686
+      "ve_daekning_pct": 41.39832436582686,
+      "pendlingsafstand_km": 27.8
     },
     {
       "folketal": 123250,
@@ -1968,7 +2035,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 14782,
       "elco2_g_kwh": 48.22929177660699,
-      "ve_daekning_pct": 35.8750606683396
+      "ve_daekning_pct": 35.8750606683396,
+      "pendlingsafstand_km": 27.2
     },
     {
       "folketal": 58405,
@@ -1997,7 +2065,8 @@
       "region": "Syddanmark",
       "boligpris_m2": 8499,
       "elco2_g_kwh": 41.949116104996094,
-      "ve_daekning_pct": 45.992474322329635
+      "ve_daekning_pct": 45.992474322329635,
+      "pendlingsafstand_km": 25.2
     },
     {
       "folketal": 49773,
@@ -2026,7 +2095,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 15133,
       "elco2_g_kwh": 51.930122002496496,
-      "ve_daekning_pct": 33.28746206729992
+      "ve_daekning_pct": 33.28746206729992,
+      "pendlingsafstand_km": 26.3
     },
     {
       "folketal": 48578,
@@ -2055,7 +2125,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 10191,
       "elco2_g_kwh": 61.85929485746262,
-      "ve_daekning_pct": 11.805432232175512
+      "ve_daekning_pct": 11.805432232175512,
+      "pendlingsafstand_km": 24.8
     },
     {
       "folketal": 98806,
@@ -2084,7 +2155,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 14270,
       "elco2_g_kwh": 64.46593384317858,
-      "ve_daekning_pct": 5.610489963888938
+      "ve_daekning_pct": 5.610489963888938,
+      "pendlingsafstand_km": 23.5
     },
     {
       "folketal": 36477,
@@ -2113,7 +2185,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 6788,
       "elco2_g_kwh": 45.3913237639018,
-      "ve_daekning_pct": 45.24052688228158
+      "ve_daekning_pct": 45.24052688228158,
+      "pendlingsafstand_km": 26.3
     },
     {
       "folketal": 24310,
@@ -2142,7 +2215,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 16560,
       "elco2_g_kwh": 50.391505777018594,
-      "ve_daekning_pct": 41.84426146388043
+      "ve_daekning_pct": 41.84426146388043,
+      "pendlingsafstand_km": 23.9
     },
     {
       "folketal": 100564,
@@ -2171,7 +2245,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 10891,
       "elco2_g_kwh": 14.31582178311191,
-      "ve_daekning_pct": 87.07381935114412
+      "ve_daekning_pct": 87.07381935114412,
+      "pendlingsafstand_km": 26.0
     },
     {
       "folketal": 3617,
@@ -2200,7 +2275,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 13413,
       "elco2_g_kwh": 21.755049445569163,
-      "ve_daekning_pct": 80.94569573980958
+      "ve_daekning_pct": 80.94569573980958,
+      "pendlingsafstand_km": 20.2
     },
     {
       "folketal": 102753,
@@ -2229,7 +2305,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 17139,
       "elco2_g_kwh": 57.69556944652018,
-      "ve_daekning_pct": 14.73963641430896
+      "ve_daekning_pct": 14.73963641430896,
+      "pendlingsafstand_km": 28.3
     },
     {
       "folketal": 66352,
@@ -2258,7 +2335,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 21810,
       "elco2_g_kwh": 61.68638195482132,
-      "ve_daekning_pct": 10.908229358391939
+      "ve_daekning_pct": 10.908229358391939,
+      "pendlingsafstand_km": 26.4
     },
     {
       "folketal": 44394,
@@ -2287,7 +2365,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 13607,
       "elco2_g_kwh": 52.83546259570987,
-      "ve_daekning_pct": 31.775483130368766
+      "ve_daekning_pct": 31.775483130368766,
+      "pendlingsafstand_km": 31.6
     },
     {
       "folketal": 378361,
@@ -2316,7 +2395,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 29213,
       "elco2_g_kwh": 59.2215710786031,
-      "ve_daekning_pct": 9.73680046451125
+      "ve_daekning_pct": 9.73680046451125,
+      "pendlingsafstand_km": 22.5
     },
     {
       "folketal": 90546,
@@ -2345,7 +2425,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 10797,
       "elco2_g_kwh": 18.592114851019353,
-      "ve_daekning_pct": 77.03023331121943
+      "ve_daekning_pct": 77.03023331121943,
+      "pendlingsafstand_km": 23.4
     },
     {
       "folketal": 59324,
@@ -2374,7 +2455,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 11213,
       "elco2_g_kwh": 28.083129665301772,
-      "ve_daekning_pct": 74.2194584777595
+      "ve_daekning_pct": 74.2194584777595,
+      "pendlingsafstand_km": 24.8
     },
     {
       "folketal": 43305,
@@ -2403,7 +2485,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 9549,
       "elco2_g_kwh": 52.461044418210534,
-      "ve_daekning_pct": 32.26562231951607
+      "ve_daekning_pct": 32.26562231951607,
+      "pendlingsafstand_km": 25.0
     },
     {
       "folketal": 18596,
@@ -2432,7 +2515,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 6186,
       "elco2_g_kwh": 8.183058057056233,
-      "ve_daekning_pct": 93.56264106273976
+      "ve_daekning_pct": 93.56264106273976,
+      "pendlingsafstand_km": 24.2
     },
     {
       "folketal": 55405,
@@ -2461,7 +2545,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 7115,
       "elco2_g_kwh": 19.080332210279963,
-      "ve_daekning_pct": 84.15778269588309
+      "ve_daekning_pct": 84.15778269588309,
+      "pendlingsafstand_km": 22.7
     },
     {
       "folketal": 44104,
@@ -2490,7 +2575,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 7214,
       "elco2_g_kwh": 32.60830232971751,
-      "ve_daekning_pct": 65.37107047892479
+      "ve_daekning_pct": 65.37107047892479,
+      "pendlingsafstand_km": 22.9
     },
     {
       "folketal": 20122,
@@ -2519,7 +2605,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 7266,
       "elco2_g_kwh": 35.89716355282785,
-      "ve_daekning_pct": 65.58707494435919
+      "ve_daekning_pct": 65.58707494435919,
+      "pendlingsafstand_km": 24.8
     },
     {
       "folketal": 97874,
@@ -2548,7 +2635,8 @@
       "region": "Midtjylland",
       "boligpris_m2": 11548,
       "elco2_g_kwh": 50.388759615987546,
-      "ve_daekning_pct": 30.86684627415976
+      "ve_daekning_pct": 30.86684627415976,
+      "pendlingsafstand_km": 25.7
     },
     {
       "folketal": 36529,
@@ -2577,7 +2665,8 @@
       "region": "Nordjylland",
       "boligpris_m2": 8979,
       "elco2_g_kwh": 31.172799531457457,
-      "ve_daekning_pct": 69.29891748831926
+      "ve_daekning_pct": 69.29891748831926,
+      "pendlingsafstand_km": 29.8
     },
     {
       "folketal": 57523,
@@ -2606,7 +2695,8 @@
       "region": "Nordjylland",
       "boligpris_m2": 8849,
       "elco2_g_kwh": 51.5614348952193,
-      "ve_daekning_pct": 31.30243771200792
+      "ve_daekning_pct": 31.30243771200792,
+      "pendlingsafstand_km": 28.5
     },
     {
       "folketal": 62979,
@@ -2635,7 +2725,8 @@
       "region": "Nordjylland",
       "boligpris_m2": 8352,
       "elco2_g_kwh": 42.32230619744483,
-      "ve_daekning_pct": 51.20389153449937
+      "ve_daekning_pct": 51.20389153449937,
+      "pendlingsafstand_km": 26.8
     },
     {
       "folketal": 37998,
@@ -2664,7 +2755,8 @@
       "region": "Nordjylland",
       "boligpris_m2": 8024,
       "elco2_g_kwh": 18.349319947459886,
-      "ve_daekning_pct": 83.6852032980086
+      "ve_daekning_pct": 83.6852032980086,
+      "pendlingsafstand_km": 29.8
     },
     {
       "folketal": 1683,
@@ -2693,7 +2785,8 @@
       "region": "Nordjylland",
       "boligpris_m2": null,
       "elco2_g_kwh": 49.11837900982469,
-      "ve_daekning_pct": 32.304458532136806
+      "ve_daekning_pct": 32.304458532136806,
+      "pendlingsafstand_km": 22.5
     },
     {
       "folketal": 41541,
@@ -2722,7 +2815,8 @@
       "region": "Nordjylland",
       "boligpris_m2": 7856,
       "elco2_g_kwh": 43.06733841589326,
-      "ve_daekning_pct": 50.152183588606924
+      "ve_daekning_pct": 50.152183588606924,
+      "pendlingsafstand_km": 27.6
     },
     {
       "folketal": 19344,
@@ -2751,7 +2845,8 @@
       "region": "Nordjylland",
       "boligpris_m2": 4954,
       "elco2_g_kwh": 29.718347335248932,
-      "ve_daekning_pct": 72.7941834687303
+      "ve_daekning_pct": 72.7941834687303,
+      "pendlingsafstand_km": 20.8
     },
     {
       "folketal": 31280,
@@ -2780,7 +2875,8 @@
       "region": "Nordjylland",
       "boligpris_m2": 12399,
       "elco2_g_kwh": 47.55491238996458,
-      "ve_daekning_pct": 45.533995892473115
+      "ve_daekning_pct": 45.533995892473115,
+      "pendlingsafstand_km": 30.3
     },
     {
       "folketal": 42572,
@@ -2809,7 +2905,8 @@
       "region": "Nordjylland",
       "boligpris_m2": 7430,
       "elco2_g_kwh": 23.114001838586113,
-      "ve_daekning_pct": 79.65243123026347
+      "ve_daekning_pct": 79.65243123026347,
+      "pendlingsafstand_km": 23.6
     },
     {
       "folketal": 35632,
@@ -2838,7 +2935,8 @@
       "region": "Nordjylland",
       "boligpris_m2": 7107,
       "elco2_g_kwh": 28.540472850906635,
-      "ve_daekning_pct": 74.4967461754242
+      "ve_daekning_pct": 74.4967461754242,
+      "pendlingsafstand_km": 26.0
     },
     {
       "folketal": 226033,
@@ -2867,30 +2965,8 @@
       "region": "Nordjylland",
       "boligpris_m2": 16347,
       "elco2_g_kwh": 58.2594181734143,
-      "ve_daekning_pct": 17.750499202542454
+      "ve_daekning_pct": 17.750499202542454,
+      "pendlingsafstand_km": 26.0
     }
-  ],
-  "konstanter": {
-    "anker": 10.0,
-    "elasticitet": {
-      "low": 0.3,
-      "high": 0.5
-    },
-    "bilkorsel_andel": {
-      "low": 0.12,
-      "high": 0.15
-    },
-    "byggeandel": {
-      "low": 0.0,
-      "high": 0.0456045
-    },
-    "boligudgift_modregning": 0.45,
-    "bilkm_afvigelse_region": {
-      "Hovedstaden": -0.28887571626160874,
-      "Sjælland": 0.2718830270697493,
-      "Syddanmark": 0.13169334123690976,
-      "Midtjylland": 0.08496344595929668,
-      "Nordjylland": 0.178423236514523
-    }
-  }
+  ]
 }

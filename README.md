@@ -2,47 +2,42 @@
 
 **Live site: https://augustseptimius-beep.github.io/forbrugsudledninger/**
 
-A static, serverless tool that estimates the consumption-based greenhouse gas
-footprint per resident for every Danish municipality, and shows the 16 drivers
-that explain the difference from the national average.
+A static, serverless reference tool. For every Danish municipality it shows the
+publicly available key figures alongside the national average, and sets them
+next to CONCITO's national account of Danish consumption-based emissions.
 
-**This is an unofficial first-order estimate, not an official inventory.**
-It is a starting point for municipal climate planning. Every figure carries its
-caveats in the interface rather than in a footnote.
+**Every number is either read from a public register or transcribed from a named
+report with a page reference.** The tool performs no modelling of its own.
 
 ## What it does
 
 Pick a municipality and you get:
 
-- An estimated footprint per resident, as a range, anchored to the national
-  figure of roughly 10 tonnes CO2e.
-- A breakdown into anchor, income effect, transport effect and construction
-  effect. The composition carries the insight, not the total.
-- All 17 drivers compared against the national average, with direction shown
-  by shape as well as colour.
-- Explicit "not quantified" markers wherever the underlying data does not
+- **Denmark's national consumption footprint** as published by CONCITO: 11 tonnes
+  CO2e per person, broken down across 15 categories. Transcribed from the report
+  with page references and links, not calculated here.
+- **The municipality's own key figures** compared against the national average,
+  grouped by the consumption category they relate to. Every figure comes straight
+  from a named public register.
+- **Explicit "not quantified" markers** wherever the underlying data does not
   exist. Never a silent zero.
 
-## Known gaps, stated up front
+## What it deliberately does not do
 
-- **Transport uses commuting distance as a proxy for all car travel.** Each
-  municipality gets its own figure from Statistics Denmark's table AFSTB4,
-  calibrated against DTU's travel survey, which measures car-kilometres
-  directly but publishes only one regional figure. Where the two can be
-  compared they agree to within 0.74 percentage points. The proxy is not
-  monotone in rurality: commuter belts travel furthest, not the true
-  periphery, so peripheral municipalities are probably understated.
-- **Grid CO2 per kWh credits local generation.** The figure follows Energinet's
-  location-based municipal declaration: locally produced renewable energy
-  consumed in the same municipality within the same hour counts as zero
-  emission and displaces grid electricity. It describes a municipality's
-  electricity profile well, and it is not suitable for adding up across
-  municipalities. Local renewable coverage is shown alongside it as a separate
-  driver so the reader can see what drives the number.
-- **The construction coefficient is calibrated against one municipality**
-  (Thisted) as a reference point.
-- **The assumption cells are estimates, not measurements.** They live in one
-  place, `pipeline/constants.py`, and are reproduced openly on the method page.
+**It does not calculate a climate footprint for the municipality.** An earlier
+version did, resting on five coefficients - a national anchor, an income
+elasticity, a car-travel share, a construction share and a housing-cost offset.
+None of them could be traced to a source: the anchor contradicted CONCITO
+(2023) p. 8, the car-travel share contradicted CONCITO (2023) p. 17 fig. 8, the
+elasticity appears in neither CONCITO (2023) nor NIRAS (2024), and the
+construction share was fitted to reproduce one municipality's earlier result.
+They have been removed, and the estimate with them.
+
+NIRAS's 2024 recommendation to CONCITO and C40 Cities for a municipal model
+rests on DTU's travel survey (p. 20), the Danish Energy Agency's address-level
+energy accounts (p. 18) and a commercial consumer segmentation model (p. 26).
+None of those are openly available. Until they are, a municipal footprint cannot
+be computed without inventing coefficients, and this tool does not.
 
 ## Method
 
