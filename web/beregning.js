@@ -43,12 +43,17 @@ export function transporteffekt(region, konst) {
 }
 
 /** Samlet førsteordens-estimat pr. borger med interval.
- *  Kerneinput (indkomst, biler, byggeri) skal være til stede; ellers utilstrækkeligt. */
+ *  Kerneinput (indkomst, biler, byggeri) skal være til stede; ellers utilstrækkeligt.
+ *
+ *  Komponenter, der ikke kan opgøres, returneres som null og listes i `uoplyst`.
+ *  De bidrager med nul til intervallet - aritmetisk som før - men brugerfladen
+ *  skal vise dem som "ikke opgjort", aldrig som et målt nul. Uden den skelnen
+ *  læser de fire regioner uden DTU-transporttal et ukendt bidrag som en måling. */
 export function estimat(kommune, land, konst) {
   const kerneMangler =
     kommune.disp_indkomst == null || kommune.biler == null || kommune.byggeri == null;
   if (kerneMangler) {
-    return { utilstraekkeligt: true, komponenter: null, aftryk: null };
+    return { utilstraekkeligt: true, komponenter: null, aftryk: null, uoplyst: [] };
   }
 
   const incDev = afvigelse(kommune.disp_indkomst, land.disp_indkomst);
@@ -56,15 +61,19 @@ export function estimat(kommune, land, konst) {
 
   const ie = indkomsteffekt(incDev, konst);
   const be = byggeeffekt(byggeDev, konst);
-  const te = transporteffekt(kommune.region, konst) ?? { low: 0, high: 0 };
+  const te = transporteffekt(kommune.region, konst);
 
-  const lav = konst.anker + Math.min(ie.low, ie.high) + Math.min(te.low, te.high) + Math.min(be.low, be.high);
-  const hoj = konst.anker + Math.max(ie.low, ie.high) + Math.max(te.low, te.high) + Math.max(be.low, be.high);
+  const uoplyst = te === null ? ["transport"] : [];
+  const teBidrag = te ?? { low: 0, high: 0 };
+
+  const lav = konst.anker + Math.min(ie.low, ie.high) + Math.min(teBidrag.low, teBidrag.high) + Math.min(be.low, be.high);
+  const hoj = konst.anker + Math.max(ie.low, ie.high) + Math.max(teBidrag.low, teBidrag.high) + Math.max(be.low, be.high);
 
   return {
     utilstraekkeligt: false,
     komponenter: { indkomsteffekt: ie, transporteffekt: te, byggeeffekt: be },
     aftryk: { low: lav, high: hoj },
+    uoplyst,
   };
 }
 

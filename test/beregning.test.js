@@ -117,3 +117,42 @@ test("beregnKommune: manglende enkeltdriver (Greve affald) → estimat beregnes 
   assert.equal(r.estimat.utilstraekkeligt, false);
   assert.ok(r.manglende.includes("affald_kg"));
 });
+
+// --- §6: uoplyste komponenter må ikke degradere til nul ---
+// Fixturens konstanter har en neutral 0-stub for Sjælland, som ville skjule
+// forskellen mellem "målt til nul" og "ikke opgjort". Produktionen har kun
+// Nordjylland, så det er den situation, der skal testes.
+const kunNordjylland = {
+  ...konstanter,
+  bilkm_afvigelse_region: { "Nordjylland": 0.178423236514523 },
+};
+
+test("uoplyst: region uden DTU-tal giver null-komponent, ikke nul", () => {
+  const r = beregnKommune(greve, land, kunNordjylland);
+  assert.equal(r.estimat.komponenter.transporteffekt, null);
+  assert.deepEqual(r.estimat.uoplyst, ["transport"]);
+});
+
+test("uoplyst: region med DTU-tal giver tom uoplyst-liste", () => {
+  const r = beregnKommune(thisted, land, kunNordjylland);
+  assert.deepEqual(r.estimat.uoplyst, []);
+  assert.ok(r.estimat.komponenter.transporteffekt !== null);
+});
+
+test("uoplyst: intervallet er aritmetisk uændret af markeringen", () => {
+  const medStub = {
+    ...konstanter,
+    bilkm_afvigelse_region: { "Nordjylland": 0.178423236514523, "Sjælland": 0 },
+  };
+  const a = beregnKommune(greve, land, kunNordjylland).estimat.aftryk;
+  const b = beregnKommune(greve, land, medStub).estimat.aftryk;
+  assert.equal(a.low, b.low);
+  assert.equal(a.high, b.high);
+});
+
+test("uoplyst: utilstrækkeligt datagrundlag har også feltet", () => {
+  const uden = { ...greve, disp_indkomst: null };
+  const r = beregnKommune(uden, land, kunNordjylland);
+  assert.equal(r.estimat.utilstraekkeligt, true);
+  assert.deepEqual(r.estimat.uoplyst, []);
+});
