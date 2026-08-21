@@ -55,9 +55,17 @@ export function ton(v) {
  *  elasticitetens lave og høje ende, ikke til den mindste og største værdi,
  *  så for negative effekter er low det største tal. Uden sortering ville
  *  indkomsteffekten stå som "-0,4 - -0,6", hvilket læses forkert. */
-export function interval(a, b) {
+export function interval(a, b, adskiller = " - ") {
   if (a == null || b == null || !Number.isFinite(a) || !Number.isFinite(b)) return MANGLER;
-  return `${formatér(Math.min(a, b), 1)} - ${formatér(Math.max(a, b), 1)}`;
+  return `${formatér(Math.min(a, b), 1)}${adskiller}${formatér(Math.max(a, b), 1)}`;
+}
+
+/** Interval med ordet "til" i stedet for en streg. Bruges hvor tallene kan
+ *  være negative: "-0,6 - -0,4" er reelt ulæseligt, mens "-0,6 til -0,4"
+ *  ikke er til at misforstå. Hovedtallet er altid positivt og beholder
+ *  stregen, fordi den ser bedre ud i stor visning. */
+export function intervalTil(a, b) {
+  return interval(a, b, " til ");
 }
 
 // ---------- Retningsmarkør ----------
@@ -226,22 +234,23 @@ export function renderNedbrydning(b, konst) {
 
   const raekker = KOMPONENTER.map(({ noegle, id, navn, forklaring }) => {
     const v = k[noegle];
-    const venstre = `<div class="w-24 shrink-0 text-sm font-medium text-gray-700">${navn}</div>`;
+    // Stablet layout frem for tre kolonner: på en 375 px skærm ville en
+    // midterkolonne mellem to faste kolonner blive presset til en splint.
+    // Her får søjlen fuld bredde i alle skærmstørrelser.
+    const overskrift = (hoejre) => `<div class="flex items-baseline justify-between gap-3">
+        <span class="text-sm font-medium text-gray-700">${navn}</span>
+        <span class="text-sm whitespace-nowrap">${hoejre}</span>
+      </div>`;
+
     if (v == null) {
-      return `<li data-komponent="${id}" class="flex items-center gap-3 py-2">
-        ${venstre}
-        <div class="flex-1 min-w-0">
-          <div class="h-3 w-full rounded-sm border border-dashed border-gray-300 bg-gray-50"></div>
-        </div>
-        <div class="w-40 shrink-0 text-right text-sm text-gray-500 italic">ikke opgjort
-          ${forbehold(forklaring)}</div>
+      return `<li data-komponent="${id}" class="py-2.5">
+        ${overskrift(`<span class="text-gray-500 italic">ikke opgjort</span>${forbehold(forklaring)}`)}
+        <div class="mt-1.5 h-3 w-full rounded-sm border border-dashed border-gray-300 bg-gray-50"></div>
       </li>`;
     }
-    return `<li data-komponent="${id}" class="flex items-center gap-3 py-2">
-      ${venstre}
-      <div class="flex-1 min-w-0">${soejle(v.low, v.high, skala)}</div>
-      <div class="w-40 shrink-0 text-right text-sm text-gray-700 whitespace-nowrap">
-        ${interval(v.low, v.high)} ton${forbehold(forklaring)}</div>
+    return `<li data-komponent="${id}" class="py-2.5">
+      ${overskrift(`<span class="text-gray-700">${intervalTil(v.low, v.high)} ton</span>${forbehold(forklaring)}`)}
+      <div class="mt-1.5">${soejle(v.low, v.high, skala)}</div>
     </li>`;
   }).join("");
 
@@ -251,17 +260,15 @@ export function renderNedbrydning(b, konst) {
     <h3 class="text-lg font-semibold text-gray-900">Hvad tallet er sat sammen af</h3>
     <p class="mt-1 text-sm text-gray-600 max-w-2xl">Estimatet starter ved det nationale anker
       og justeres for de tre forhold, der kan opgøres på kommuneniveau.</p>
-    <div class="mt-4 flex items-center gap-3 border-b border-gray-100 pb-2">
-      <div class="w-24 shrink-0 text-sm font-medium text-gray-700">Anker</div>
-      <div class="flex-1 min-w-0 text-xs text-gray-500">nationalt gennemsnit</div>
-      <div class="w-40 shrink-0 text-right text-sm text-gray-700 whitespace-nowrap">${ton(konst.anker)}</div>
+    <div class="mt-4 flex items-baseline justify-between gap-3 border-b border-gray-100 pb-2">
+      <span class="text-sm font-medium text-gray-700">Anker
+        <span class="text-xs font-normal text-gray-500">nationalt gennemsnit</span></span>
+      <span class="text-sm text-gray-700 whitespace-nowrap">${ton(konst.anker)}</span>
     </div>
     <ul class="divide-y divide-gray-100">${raekker}</ul>
-    <div class="mt-2 flex items-center gap-3 border-t-2 border-gray-200 pt-3">
-      <div class="w-24 shrink-0 text-sm font-semibold text-gray-900">Resultat</div>
-      <div class="flex-1 min-w-0"></div>
-      <div class="w-40 shrink-0 text-right text-sm font-semibold text-gray-900 whitespace-nowrap">
-        ${interval(low, high)} ton</div>
+    <div class="mt-2 flex items-baseline justify-between gap-3 border-t-2 border-gray-200 pt-3">
+      <span class="text-sm font-semibold text-gray-900">Resultat</span>
+      <span class="text-sm font-semibold text-gray-900 whitespace-nowrap">${interval(low, high)} ton</span>
     </div>
   </section>`;
 }
@@ -369,7 +376,7 @@ export function renderBoligpris(b) {
       <div><dt class="text-xs uppercase tracking-wide text-gray-500">Reelt forbrugsgab</dt>
         <dd class="mt-0.5 text-xl font-semibold text-gray-900">${pct(reeltGab)}</dd></div>
       <div><dt class="text-xs uppercase tracking-wide text-gray-500">Justeret indkomsteffekt</dt>
-        <dd class="mt-0.5 text-xl font-semibold text-gray-900">${interval(justeret.low, justeret.high)} ton</dd></div>
+        <dd class="mt-0.5 text-xl font-semibold text-gray-900">${intervalTil(justeret.low, justeret.high)} ton</dd></div>
     </dl>
     <p class="mt-4 text-xs text-gray-500 max-w-2xl">Illustrativ, ikke en del af hovedtallet.
       Modregningen på 45 % er et skøn, ræsonneret til netop dette mønster, og vises derfor
@@ -387,7 +394,16 @@ export function renderKommune(b, konst) {
     renderNedbrydning(b, konst),
     renderDriverTabel(b),
     renderBoligpris(b),
-    `<section class="mt-6 text-xs text-gray-500 max-w-3xl">
+    // Bevidst UDEN no-embed: sidens store ansvarsfraskrivelse sidder i
+    // sidehovedet og forsvinder i embed-tilstand. En indlejret widget, der
+    // viser et autoritativt udseende tal helt uden forbehold, er præcis den
+    // risiko, hele resten af designet gardér imod, så en kompakt udgave
+    // følger med selve visningen.
+    `<section class="mt-6 text-xs text-gray-500 max-w-3xl space-y-2">
+      <p><strong class="font-semibold text-gray-600">Uofficielt førsteordens-skøn.</strong>
+        Ikke en myndighedsopgørelse og ikke en måling. Tallet er beregnet ud fra offentlige
+        data med eksplicitte antagelser og er retningsgivende, ikke præcist. Det er ikke
+        egnet til at rangordne kommuner mod hinanden.</p>
       <p>Kilder: Danmarks Statistik (11 tabeller), Finans Danmark BM010, Energinet og DTU.
         Årstal og tabel-id står på <a href="metode.html" class="underline hover:text-gray-700">metodesiden</a>,
         sammen med formlerne og de antagelser, estimatet hviler på.</p>

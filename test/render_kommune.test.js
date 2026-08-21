@@ -136,3 +136,16 @@ test("kommunevisning: intet output indeholder undefined, NaN eller null", () => 
     assert.ok(!/>\s*null\s*</.test(k), `${b.navn}: null lækket til output`);
   }
 });
+
+test("kommunevisning: forbeholdet følger med, også når sidehovedet skjules", () => {
+  // I embed-tilstand skjules header med den store ansvarsfraskrivelse. En
+  // indlejret widget må ikke stå tilbage med et tal og intet forbehold.
+  const k = renderKommune(bThisted, prod);
+  const sektion = k.split("Uofficielt førsteordens-skøn")[1];
+  assert.ok(sektion, "den kompakte fraskrivelse mangler");
+  const foer = k.slice(0, k.indexOf("Uofficielt førsteordens-skøn"));
+  const afsnit = k.slice(k.lastIndexOf("<section", k.indexOf("Uofficielt førsteordens-skøn")));
+  assert.ok(!afsnit.slice(0, 200).includes("no-embed"),
+    "fraskrivelsen må ikke være mærket no-embed - så forsvinder den i en iframe");
+  assert.ok(foer.length > 0);
+});

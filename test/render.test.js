@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, tal, pct, ton, interval, retningsMarkoer } from "../web/render.js";
+import { esc, tal, pct, ton, interval, intervalTil, retningsMarkoer } from "../web/render.js";
 
 test("esc: escaper de fem farlige tegn", () => {
   assert.equal(esc('<a href="x">&\'</a>'), "&lt;a href=&quot;x&quot;&gt;&amp;&#39;&lt;/a&gt;");
@@ -48,6 +48,13 @@ test("interval: vises altid stigende, uanset argumentrækkefølge", () => {
   // ikke til den mindste og største værdi. For negative effekter er low
   // derfor det største tal, og et interval skrevet "-0,4 - -0,6" læses forkert.
   assert.equal(interval(-0.3624, -0.6039), "-0,6 - -0,4");
+});
+
+test("intervalTil: bruger ordet til, hvor tallene kan være negative", () => {
+  // "-0,6 - -0,4" er reelt ulæseligt. Hovedtallet er altid positivt og
+  // beholder stregen, fordi den ser bedre ud i stor visning.
+  assert.equal(intervalTil(-0.3624, -0.6039), "-0,6 til -0,4");
+  assert.equal(intervalTil(0.2141, 0.2676), "0,2 til 0,3");
 });
 
 test("tal: negativt nul vises som nul", () => {
