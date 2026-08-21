@@ -52,7 +52,19 @@ def test_byg_sources_udfylder_perioder():
         assert "periode_noegle" not in kilde, "periode_noegle er intern og må ikke ud i json"
 
 
-def test_antagelser_er_med():
+def test_referencer_er_med_og_har_sidehenvisninger():
+    # Testede tidligere for en liste af ANTAGELSER. Der er ingen antagelser
+    # tilbage - koefficienterne er fjernet, fordi de ikke kunne kildebelægges.
+    # Tilbage står de to rapporter, de nationale tal er afskrevet fra.
     ud = sources.byg_sources()
-    ids = {a["id"] for a in ud["antagelser"]}
-    assert "DTU_TU" in ids, "transport-proxyen skal stå på metodesiden"
+    ids = {r["id"] for r in ud["referencer"]}
+    assert ids == {"CONCITO_2023", "NIRAS_2024"}
+    for r in ud["referencer"]:
+        assert r["url"].startswith("https://"), f"{r['id']} mangler link"
+        assert "s. " in r["sider"], f"{r['id']} mangler sidehenvisninger"
+        assert r["anvendes_til"], f"{r['id']} mangler formål"
+
+
+def test_ingen_antagelser_tilbage():
+    assert "antagelser" not in sources.byg_sources()
+    assert not hasattr(sources, "ANTAGELSER")
