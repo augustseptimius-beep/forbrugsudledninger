@@ -15,9 +15,17 @@ test("kilder: hver kilde får en række med id, udbyder og periode", () => {
   assert.ok(h.includes("2026K1"), "perioden skal komme fra sources.json, ikke fra en håndskrevet tekst");
 });
 
-test("kilder: manuelle kilder er mærket som sådan", () => {
+test("kilder: hver kilde bærer sin hentemetode", () => {
+  // Testede tidligere, at der FANDTES en manuel kilde, og fejlede da den
+  // sidste blev automatiseret. Nu testes mekanismen: hver kilde skal vise,
+  // hvordan den er hentet, uanset hvilke metoder der er i brug.
   const h = renderKilder(sources);
-  assert.ok(h.toLowerCase().includes("manuel"), "en manuel kilde skal kunne skelnes fra en API-kilde");
+  const maerkater = h.match(/>(API|Manuel)</g) || [];
+  assert.equal(maerkater.length, sources.kilder.length,
+    "hver kilde skal have præcis ét hentemetode-mærkat");
+  for (const k of sources.kilder) {
+    assert.ok(["api", "manuel"].includes(k.metode), `${k.id} har ukendt metode ${k.metode}`);
+  }
 });
 
 test("kilder: forbehold vises som tooltip, ikke som browser-title", () => {

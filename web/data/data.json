@@ -23,7 +23,8 @@
     "genanvendelse_pct": 58,
     "navn": "Hele landet",
     "boligpris_m2": 18429,
-    "elco2_g_kwh": 51.8
+    "elco2_g_kwh": 43.35114220750178,
+    "ve_daekning_pct": 28.321668880158423
   },
   "kommuner": [
     {
@@ -52,7 +53,8 @@
       "kode": 101,
       "region": "Hovedstaden",
       "boligpris_m2": 61088,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.65573096258222,
+      "ve_daekning_pct": 3.1671568688851037
     },
     {
       "folketal": 106150,
@@ -80,7 +82,8 @@
       "kode": 147,
       "region": "Hovedstaden",
       "boligpris_m2": 85901,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 42.78922933603361,
+      "ve_daekning_pct": 0.28942799555874843
     },
     {
       "folketal": 14474,
@@ -108,7 +111,8 @@
       "kode": 155,
       "region": "Hovedstaden",
       "boligpris_m2": 40630,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.192511957146635,
+      "ve_daekning_pct": 2.005507226355164
     },
     {
       "folketal": 44214,
@@ -136,7 +140,8 @@
       "kode": 185,
       "region": "Hovedstaden",
       "boligpris_m2": 39328,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.65491445871342,
+      "ve_daekning_pct": 1.1954713147246225
     },
     {
       "folketal": 29262,
@@ -164,7 +169,8 @@
       "kode": 165,
       "region": "Hovedstaden",
       "boligpris_m2": 27817,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.99378353311298,
+      "ve_daekning_pct": 1.058566818209306
     },
     {
       "folketal": 53950,
@@ -192,7 +198,8 @@
       "kode": 151,
       "region": "Hovedstaden",
       "boligpris_m2": 34846,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.72116768121392,
+      "ve_daekning_pct": 1.092468569151997
     },
     {
       "folketal": 40990,
@@ -220,7 +227,8 @@
       "kode": 153,
       "region": "Hovedstaden",
       "boligpris_m2": 32896,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.96774193665898,
+      "ve_daekning_pct": 1.3248021870661633
     },
     {
       "folketal": 75106,
@@ -248,7 +256,8 @@
       "kode": 157,
       "region": "Hovedstaden",
       "boligpris_m2": 68140,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 42.36943076327173,
+      "ve_daekning_pct": 0.5687035284294902
     },
     {
       "folketal": 71185,
@@ -276,7 +285,8 @@
       "kode": 159,
       "region": "Hovedstaden",
       "boligpris_m2": 48677,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 40.30027985357695,
+      "ve_daekning_pct": 0.5906905034607008
     },
     {
       "folketal": 25834,
@@ -304,7 +314,8 @@
       "kode": 161,
       "region": "Hovedstaden",
       "boligpris_m2": 34377,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 42.162288432540315,
+      "ve_daekning_pct": 0.2811681331473473
     },
     {
       "folketal": 32030,
@@ -332,7 +343,8 @@
       "kode": 163,
       "region": "Hovedstaden",
       "boligpris_m2": 36949,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.83914611093375,
+      "ve_daekning_pct": 1.4856039236337055
     },
     {
       "folketal": 54228,
@@ -360,7 +372,8 @@
       "kode": 167,
       "region": "Hovedstaden",
       "boligpris_m2": 41153,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 38.30465068590531,
+      "ve_daekning_pct": 12.14334302938207
     },
     {
       "folketal": 60458,
@@ -388,7 +401,8 @@
       "kode": 169,
       "region": "Hovedstaden",
       "boligpris_m2": 28854,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.3607487934747,
+      "ve_daekning_pct": 2.3386510359077826
     },
     {
       "folketal": 24685,
@@ -416,7 +430,8 @@
       "kode": 183,
       "region": "Hovedstaden",
       "boligpris_m2": 27655,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.4711418798425,
+      "ve_daekning_pct": 2.6998443250773634
     },
     {
       "folketal": 58614,
@@ -444,7 +459,8 @@
       "kode": 173,
       "region": "Hovedstaden",
       "boligpris_m2": 54252,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 40.92070411527517,
+      "ve_daekning_pct": 0.7359164110245833
     },
     {
       "folketal": 45138,
@@ -472,7 +488,8 @@
       "kode": 175,
       "region": "Hovedstaden",
       "boligpris_m2": 41782,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 42.38816177169471,
+      "ve_daekning_pct": 1.399339416649001
     },
     {
       "folketal": 18689,
@@ -500,7 +517,8 @@
       "kode": 187,
       "region": "Hovedstaden",
       "boligpris_m2": 35003,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.65623549419504,
+      "ve_daekning_pct": 2.0531106047912324
     },
     {
       "folketal": 26496,
@@ -528,7 +546,8 @@
       "kode": 201,
       "region": "Hovedstaden",
       "boligpris_m2": 34608,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.342724424316174,
+      "ve_daekning_pct": 3.949787637549105
     },
     {
       "folketal": 46240,
@@ -556,7 +575,8 @@
       "kode": 240,
       "region": "Hovedstaden",
       "boligpris_m2": 29325,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.35804656120655,
+      "ve_daekning_pct": 2.8208489592455637
     },
     {
       "folketal": 42445,
@@ -584,7 +604,8 @@
       "kode": 210,
       "region": "Hovedstaden",
       "boligpris_m2": 33262,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.43900868602486,
+      "ve_daekning_pct": 2.4046661205820183
     },
     {
       "folketal": 47450,
@@ -612,7 +633,8 @@
       "kode": 250,
       "region": "Hovedstaden",
       "boligpris_m2": 20812,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 39.6154821375385,
+      "ve_daekning_pct": 4.454287332216012
     },
     {
       "folketal": 42874,
@@ -640,7 +662,8 @@
       "kode": 190,
       "region": "Hovedstaden",
       "boligpris_m2": 41752,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.626299105210535,
+      "ve_daekning_pct": 1.9595114236113365
     },
     {
       "folketal": 41787,
@@ -668,7 +691,8 @@
       "kode": 270,
       "region": "Hovedstaden",
       "boligpris_m2": 20448,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 40.55292913626031,
+      "ve_daekning_pct": 2.922819052513599
     },
     {
       "folketal": 31738,
@@ -696,7 +720,8 @@
       "kode": 260,
       "region": "Hovedstaden",
       "boligpris_m2": 18310,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 40.60148631962383,
+      "ve_daekning_pct": 4.731140513841855
     },
     {
       "folketal": 64244,
@@ -724,7 +749,8 @@
       "kode": 217,
       "region": "Hovedstaden",
       "boligpris_m2": 31204,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 36.45478319216654,
+      "ve_daekning_pct": 11.128335572649787
     },
     {
       "folketal": 55182,
@@ -752,7 +778,8 @@
       "kode": 219,
       "region": "Hovedstaden",
       "boligpris_m2": 29772,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 39.07995832541246,
+      "ve_daekning_pct": 6.345292248915148
     },
     {
       "folketal": 25354,
@@ -780,7 +807,8 @@
       "kode": 223,
       "region": "Hovedstaden",
       "boligpris_m2": 43302,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 42.27277520688069,
+      "ve_daekning_pct": 0.41042487592925964
     },
     {
       "folketal": 57912,
@@ -808,7 +836,8 @@
       "kode": 230,
       "region": "Hovedstaden",
       "boligpris_m2": 48237,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.79367450693623,
+      "ve_daekning_pct": 1.319027812068017
     },
     {
       "folketal": 38677,
@@ -836,7 +865,8 @@
       "kode": 400,
       "region": "Hovedstaden",
       "boligpris_m2": 10893,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 19.896922459530266,
+      "ve_daekning_pct": 61.35988557564137
     },
     {
       "folketal": 54120,
@@ -864,7 +894,8 @@
       "kode": 253,
       "region": "Sjælland",
       "boligpris_m2": 30347,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.098325016345406,
+      "ve_daekning_pct": 3.6308578000462823
     },
     {
       "folketal": 63962,
@@ -892,7 +923,8 @@
       "kode": 259,
       "region": "Sjælland",
       "boligpris_m2": 23913,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 39.01488135831822,
+      "ve_daekning_pct": 7.871775083737299
     },
     {
       "folketal": 29879,
@@ -920,7 +952,8 @@
       "kode": 350,
       "region": "Sjælland",
       "boligpris_m2": 19724,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 39.30885144594684,
+      "ve_daekning_pct": 9.460195437912367
     },
     {
       "folketal": 92697,
@@ -948,7 +981,8 @@
       "kode": 265,
       "region": "Sjælland",
       "boligpris_m2": 31592,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.974886171362705,
+      "ve_daekning_pct": 0.5448689083323834
     },
     {
       "folketal": 25040,
@@ -976,7 +1010,8 @@
       "kode": 269,
       "region": "Sjælland",
       "boligpris_m2": 32652,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 37.683972113048675,
+      "ve_daekning_pct": 10.911243704903855
     },
     {
       "folketal": 38143,
@@ -1004,7 +1039,8 @@
       "kode": 320,
       "region": "Sjælland",
       "boligpris_m2": 13363,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 20.893954101960976,
+      "ve_daekning_pct": 56.17141797485391
     },
     {
       "folketal": 59119,
@@ -1032,7 +1068,8 @@
       "kode": 376,
       "region": "Sjælland",
       "boligpris_m2": 7597,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 20.24846328726501,
+      "ve_daekning_pct": 60.861524791007085
     },
     {
       "folketal": 75009,
@@ -1060,7 +1097,8 @@
       "kode": 316,
       "region": "Sjælland",
       "boligpris_m2": 15882,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 30.18618403425717,
+      "ve_daekning_pct": 37.93984875778309
     },
     {
       "folketal": 47954,
@@ -1088,7 +1126,8 @@
       "kode": 326,
       "region": "Sjælland",
       "boligpris_m2": 10876,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 31.794004042956907,
+      "ve_daekning_pct": 27.37924815962836
     },
     {
       "folketal": 38533,
@@ -1116,7 +1155,8 @@
       "kode": 360,
       "region": "Sjælland",
       "boligpris_m2": 4756,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 7.673468408257751,
+      "ve_daekning_pct": 88.5309699772726
     },
     {
       "folketal": 85163,
@@ -1144,7 +1184,8 @@
       "kode": 370,
       "region": "Sjælland",
       "boligpris_m2": 14746,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 34.87784108415159,
+      "ve_daekning_pct": 24.255206018089396
     },
     {
       "folketal": 31988,
@@ -1172,7 +1213,8 @@
       "kode": 306,
       "region": "Sjælland",
       "boligpris_m2": 10163,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 40.325766598055125,
+      "ve_daekning_pct": 4.848372074689954
     },
     {
       "folketal": 36010,
@@ -1200,7 +1242,8 @@
       "kode": 329,
       "region": "Sjælland",
       "boligpris_m2": 16840,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 39.83207669612109,
+      "ve_daekning_pct": 7.985762620000527
     },
     {
       "folketal": 80959,
@@ -1228,7 +1271,8 @@
       "kode": 330,
       "region": "Sjælland",
       "boligpris_m2": 12316,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 30.24253936617577,
+      "ve_daekning_pct": 35.66610953344667
     },
     {
       "folketal": 30853,
@@ -1256,7 +1300,8 @@
       "kode": 340,
       "region": "Sjælland",
       "boligpris_m2": 12089,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 35.69975379665421,
+      "ve_daekning_pct": 17.94223365727569
     },
     {
       "folketal": 23842,
@@ -1284,7 +1329,8 @@
       "kode": 336,
       "region": "Sjælland",
       "boligpris_m2": 14506,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 36.65753038050497,
+      "ve_daekning_pct": 17.055037177713228
     },
     {
       "folketal": 44831,
@@ -1312,7 +1358,8 @@
       "kode": 390,
       "region": "Sjælland",
       "boligpris_m2": 9546,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 27.38183074594669,
+      "ve_daekning_pct": 37.80310043879915
     },
     {
       "folketal": 40369,
@@ -1340,7 +1387,8 @@
       "kode": 420,
       "region": "Syddanmark",
       "boligpris_m2": 8031,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 47.04931261692119,
+      "ve_daekning_pct": 40.22504705483424
     },
     {
       "folketal": 52328,
@@ -1368,7 +1416,8 @@
       "kode": 430,
       "region": "Syddanmark",
       "boligpris_m2": 8761,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 63.649697245296224,
+      "ve_daekning_pct": 10.908661175219935
     },
     {
       "folketal": 24299,
@@ -1396,7 +1445,8 @@
       "kode": 440,
       "region": "Syddanmark",
       "boligpris_m2": 13536,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 54.35493876308154,
+      "ve_daekning_pct": 32.92696119172759
     },
     {
       "folketal": 11841,
@@ -1424,7 +1474,8 @@
       "kode": 482,
       "region": "Syddanmark",
       "boligpris_m2": 6755,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 31.19889145711056,
+      "ve_daekning_pct": 68.44423068889324
     },
     {
       "folketal": 40625,
@@ -1452,7 +1503,8 @@
       "kode": 410,
       "region": "Syddanmark",
       "boligpris_m2": 13550,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 59.091702123551826,
+      "ve_daekning_pct": 19.193981537087797
     },
     {
       "folketal": 29179,
@@ -1480,7 +1532,8 @@
       "kode": 480,
       "region": "Syddanmark",
       "boligpris_m2": 8144,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 57.75018310173196,
+      "ve_daekning_pct": 23.02484866591629
     },
     {
       "folketal": 32401,
@@ -1508,7 +1561,8 @@
       "kode": 450,
       "region": "Syddanmark",
       "boligpris_m2": 10186,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 61.69129693754664,
+      "ve_daekning_pct": 15.31823550839603
     },
     {
       "folketal": 213168,
@@ -1536,7 +1590,8 @@
       "kode": 461,
       "region": "Syddanmark",
       "boligpris_m2": 18918,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 48.406468460344016,
+      "ve_daekning_pct": 25.335504313878072
     },
     {
       "folketal": 60027,
@@ -1564,7 +1619,8 @@
       "kode": 479,
       "region": "Syddanmark",
       "boligpris_m2": 14005,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 51.241405383584315,
+      "ve_daekning_pct": 28.924922557425592
     },
     {
       "folketal": 5766,
@@ -1592,7 +1648,8 @@
       "kode": 492,
       "region": "Syddanmark",
       "boligpris_m2": 7138,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 32.20723150176411,
+      "ve_daekning_pct": 69.38493924404628
     },
     {
       "folketal": 27200,
@@ -1620,7 +1677,8 @@
       "kode": 530,
       "region": "Syddanmark",
       "boligpris_m2": 10483,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 39.762548159765416,
+      "ve_daekning_pct": 53.66246874281394
     },
     {
       "folketal": 114947,
@@ -1648,7 +1706,8 @@
       "kode": 561,
       "region": "Syddanmark",
       "boligpris_m2": 12921,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 46.73578456442127,
+      "ve_daekning_pct": 45.74980485461509
     },
     {
       "folketal": 3332,
@@ -1676,7 +1735,8 @@
       "kode": 563,
       "region": "Syddanmark",
       "boligpris_m2": 10906,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 59.70957720738714,
+      "ve_daekning_pct": 21.32401441287385
     },
     {
       "folketal": 52939,
@@ -1704,7 +1764,8 @@
       "kode": 607,
       "region": "Syddanmark",
       "boligpris_m2": 12660,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 66.04758369384908,
+      "ve_daekning_pct": 0.020844268787421412
     },
     {
       "folketal": 55218,
@@ -1732,7 +1793,8 @@
       "kode": 510,
       "region": "Syddanmark",
       "boligpris_m2": 9194,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 60.47047538937168,
+      "ve_daekning_pct": 15.483102709392698
     },
     {
       "folketal": 96214,
@@ -1760,7 +1822,8 @@
       "kode": 621,
       "region": "Syddanmark",
       "boligpris_m2": 13827,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 57.84922847417265,
+      "ve_daekning_pct": 19.117779834524082
     },
     {
       "folketal": 74123,
@@ -1788,7 +1851,8 @@
       "kode": 540,
       "region": "Syddanmark",
       "boligpris_m2": 9171,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 55.45438778313891,
+      "ve_daekning_pct": 22.294259215164274
     },
     {
       "folketal": 36174,
@@ -1816,7 +1880,8 @@
       "kode": 550,
       "region": "Syddanmark",
       "boligpris_m2": 5692,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 44.072572660079416,
+      "ve_daekning_pct": 50.54938889435613
     },
     {
       "folketal": 49468,
@@ -1844,7 +1909,8 @@
       "kode": 573,
       "region": "Syddanmark",
       "boligpris_m2": 8543,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 42.10431373643532,
+      "ve_daekning_pct": 52.58961306401145
     },
     {
       "folketal": 42641,
@@ -1872,7 +1938,8 @@
       "kode": 575,
       "region": "Syddanmark",
       "boligpris_m2": 8077,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 46.684133078866,
+      "ve_daekning_pct": 41.39832436582686
     },
     {
       "folketal": 123250,
@@ -1900,7 +1967,8 @@
       "kode": 630,
       "region": "Syddanmark",
       "boligpris_m2": 14782,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 48.22929177660699,
+      "ve_daekning_pct": 35.8750606683396
     },
     {
       "folketal": 58405,
@@ -1928,7 +1996,8 @@
       "kode": 580,
       "region": "Syddanmark",
       "boligpris_m2": 8499,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 41.949116104996094,
+      "ve_daekning_pct": 45.992474322329635
     },
     {
       "folketal": 49773,
@@ -1956,7 +2025,8 @@
       "kode": 710,
       "region": "Midtjylland",
       "boligpris_m2": 15133,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 51.930122002496496,
+      "ve_daekning_pct": 33.28746206729992
     },
     {
       "folketal": 48578,
@@ -1984,7 +2054,8 @@
       "kode": 766,
       "region": "Midtjylland",
       "boligpris_m2": 10191,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 61.85929485746262,
+      "ve_daekning_pct": 11.805432232175512
     },
     {
       "folketal": 98806,
@@ -2012,7 +2083,8 @@
       "kode": 615,
       "region": "Midtjylland",
       "boligpris_m2": 14270,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 64.46593384317858,
+      "ve_daekning_pct": 5.610489963888938
     },
     {
       "folketal": 36477,
@@ -2040,7 +2112,8 @@
       "kode": 707,
       "region": "Midtjylland",
       "boligpris_m2": 6788,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 45.3913237639018,
+      "ve_daekning_pct": 45.24052688228158
     },
     {
       "folketal": 24310,
@@ -2068,7 +2141,8 @@
       "kode": 727,
       "region": "Midtjylland",
       "boligpris_m2": 16560,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 50.391505777018594,
+      "ve_daekning_pct": 41.84426146388043
     },
     {
       "folketal": 100564,
@@ -2096,7 +2170,8 @@
       "kode": 730,
       "region": "Midtjylland",
       "boligpris_m2": 10891,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 14.31582178311191,
+      "ve_daekning_pct": 87.07381935114412
     },
     {
       "folketal": 3617,
@@ -2124,7 +2199,8 @@
       "kode": 741,
       "region": "Midtjylland",
       "boligpris_m2": 13413,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 21.755049445569163,
+      "ve_daekning_pct": 80.94569573980958
     },
     {
       "folketal": 102753,
@@ -2152,7 +2228,8 @@
       "kode": 740,
       "region": "Midtjylland",
       "boligpris_m2": 17139,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 57.69556944652018,
+      "ve_daekning_pct": 14.73963641430896
     },
     {
       "folketal": 66352,
@@ -2180,7 +2257,8 @@
       "kode": 746,
       "region": "Midtjylland",
       "boligpris_m2": 21810,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 61.68638195482132,
+      "ve_daekning_pct": 10.908229358391939
     },
     {
       "folketal": 44394,
@@ -2208,7 +2286,8 @@
       "kode": 706,
       "region": "Midtjylland",
       "boligpris_m2": 13607,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 52.83546259570987,
+      "ve_daekning_pct": 31.775483130368766
     },
     {
       "folketal": 378361,
@@ -2236,7 +2315,8 @@
       "kode": 751,
       "region": "Midtjylland",
       "boligpris_m2": 29213,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 59.2215710786031,
+      "ve_daekning_pct": 9.73680046451125
     },
     {
       "folketal": 90546,
@@ -2264,7 +2344,8 @@
       "kode": 657,
       "region": "Midtjylland",
       "boligpris_m2": 10797,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 18.592114851019353,
+      "ve_daekning_pct": 77.03023331121943
     },
     {
       "folketal": 59324,
@@ -2292,7 +2373,8 @@
       "kode": 661,
       "region": "Midtjylland",
       "boligpris_m2": 11213,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 28.083129665301772,
+      "ve_daekning_pct": 74.2194584777595
     },
     {
       "folketal": 43305,
@@ -2320,7 +2402,8 @@
       "kode": 756,
       "region": "Midtjylland",
       "boligpris_m2": 9549,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 52.461044418210534,
+      "ve_daekning_pct": 32.26562231951607
     },
     {
       "folketal": 18596,
@@ -2348,7 +2431,8 @@
       "kode": 665,
       "region": "Midtjylland",
       "boligpris_m2": 6186,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 8.183058057056233,
+      "ve_daekning_pct": 93.56264106273976
     },
     {
       "folketal": 55405,
@@ -2376,7 +2460,8 @@
       "kode": 760,
       "region": "Midtjylland",
       "boligpris_m2": 7115,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 19.080332210279963,
+      "ve_daekning_pct": 84.15778269588309
     },
     {
       "folketal": 44104,
@@ -2404,7 +2489,8 @@
       "kode": 779,
       "region": "Midtjylland",
       "boligpris_m2": 7214,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 32.60830232971751,
+      "ve_daekning_pct": 65.37107047892479
     },
     {
       "folketal": 20122,
@@ -2432,7 +2518,8 @@
       "kode": 671,
       "region": "Midtjylland",
       "boligpris_m2": 7266,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 35.89716355282785,
+      "ve_daekning_pct": 65.58707494435919
     },
     {
       "folketal": 97874,
@@ -2460,7 +2547,8 @@
       "kode": 791,
       "region": "Midtjylland",
       "boligpris_m2": 11548,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 50.388759615987546,
+      "ve_daekning_pct": 30.86684627415976
     },
     {
       "folketal": 36529,
@@ -2488,7 +2576,8 @@
       "kode": 810,
       "region": "Nordjylland",
       "boligpris_m2": 8979,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 31.172799531457457,
+      "ve_daekning_pct": 69.29891748831926
     },
     {
       "folketal": 57523,
@@ -2516,7 +2605,8 @@
       "kode": 813,
       "region": "Nordjylland",
       "boligpris_m2": 8849,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 51.5614348952193,
+      "ve_daekning_pct": 31.30243771200792
     },
     {
       "folketal": 62979,
@@ -2544,7 +2634,8 @@
       "kode": 860,
       "region": "Nordjylland",
       "boligpris_m2": 8352,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 42.32230619744483,
+      "ve_daekning_pct": 51.20389153449937
     },
     {
       "folketal": 37998,
@@ -2572,7 +2663,8 @@
       "kode": 849,
       "region": "Nordjylland",
       "boligpris_m2": 8024,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 18.349319947459886,
+      "ve_daekning_pct": 83.6852032980086
     },
     {
       "folketal": 1683,
@@ -2600,7 +2692,8 @@
       "kode": 825,
       "region": "Nordjylland",
       "boligpris_m2": null,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 49.11837900982469,
+      "ve_daekning_pct": 32.304458532136806
     },
     {
       "folketal": 41541,
@@ -2628,7 +2721,8 @@
       "kode": 846,
       "region": "Nordjylland",
       "boligpris_m2": 7856,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 43.06733841589326,
+      "ve_daekning_pct": 50.152183588606924
     },
     {
       "folketal": 19344,
@@ -2656,7 +2750,8 @@
       "kode": 773,
       "region": "Nordjylland",
       "boligpris_m2": 4954,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 29.718347335248932,
+      "ve_daekning_pct": 72.7941834687303
     },
     {
       "folketal": 31280,
@@ -2684,7 +2779,8 @@
       "kode": 840,
       "region": "Nordjylland",
       "boligpris_m2": 12399,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 47.55491238996458,
+      "ve_daekning_pct": 45.533995892473115
     },
     {
       "folketal": 42572,
@@ -2712,7 +2808,8 @@
       "kode": 787,
       "region": "Nordjylland",
       "boligpris_m2": 7430,
-      "elco2_g_kwh": 26.7
+      "elco2_g_kwh": 23.114001838586113,
+      "ve_daekning_pct": 79.65243123026347
     },
     {
       "folketal": 35632,
@@ -2740,7 +2837,8 @@
       "kode": 820,
       "region": "Nordjylland",
       "boligpris_m2": 7107,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 28.540472850906635,
+      "ve_daekning_pct": 74.4967461754242
     },
     {
       "folketal": 226033,
@@ -2768,7 +2866,8 @@
       "kode": 851,
       "region": "Nordjylland",
       "boligpris_m2": 16347,
-      "elco2_g_kwh": null
+      "elco2_g_kwh": 58.2594181734143,
+      "ve_daekning_pct": 17.750499202542454
     }
   ],
   "konstanter": {
