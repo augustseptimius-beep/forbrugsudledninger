@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metode og data - Forbrugsbaserede udledninger</title>
+<meta name="description" content="Estimerede forbrugsbaserede udledninger pr. borger for alle 98 danske kommuner. Uofficielt førsteordens-skøn bygget på offentlige data.">
+<link rel="stylesheet" href="styles/styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><circle cx=%2216%22 cy=%2216%22 r=%2213%22 fill=%22none%22 stroke=%22%23059669%22 stroke-width=%223%22/><line x1=%225%22 y1=%2216%22 x2=%2227%22 y2=%2216%22 stroke=%22%23f59e0b%22 stroke-width=%223%22/></svg>">
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
+
+<header class="no-print no-embed border-b border-gray-200 bg-white">
+  <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-2 sm:gap-4">
+    <a href="index.html" class="flex items-center gap-2.5 no-underline shrink-0 mr-auto">
+      <svg class="h-7 w-7 sm:h-8 sm:w-8 shrink-0" viewBox="0 0 32 32" role="img" aria-label="Logo">
+        <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="3" class="text-emerald-600"/>
+        <line x1="5" y1="16" x2="27" y2="16" stroke="currentColor" stroke-width="3" class="text-amber-500"/>
+      </svg>
+      <h1 class="text-sm sm:text-lg font-semibold text-gray-900">
+        <span class="hidden sm:inline">Forbrugsbaserede udledninger</span>
+        <span class="sm:hidden">Forbrugsudledninger</span>
+      </h1>
+    </a>
+    <nav class="flex items-center gap-3 sm:gap-5 text-xs sm:text-sm">
+      <a href="index.html" class="text-gray-500 hover:text-gray-900 transition-colors">Kommuner</a>
+      <a href="metode.html" class="text-gray-900 font-medium transition-colors">
+        <span class="sm:hidden">Metode</span>
+        <span class="hidden sm:inline">Metode og data</span>
+      </a>
+      <a href="om.html" class="text-gray-500 hover:text-gray-900 transition-colors">Om</a>
+    </nav>
+  </div>
+</header>
+
+<div class="no-print no-embed border-b border-amber-200 bg-amber-50">
+  <div class="mx-auto max-w-6xl px-4 py-2 text-xs text-amber-900">
+    <strong class="font-semibold">Uofficielt værktøj.</strong>
+    Tallene er førsteordens-skøn beregnet ud fra offentlige data, ikke en
+    myndighedsopgørelse og ikke en måling. De er retningsgivende og skal
+    læses sammen med deres forbehold.
+    <a href="metode.html" class="underline hover:text-amber-950">Se metode og forbehold</a>.
+  </div>
+</div>
+
+<main class="mx-auto max-w-6xl px-4 py-6">
+<div id="metode-indhold"></div>
+</main>
+
+<footer class="no-print no-embed border-t border-gray-200 bg-white mt-12">
+  <div class="mx-auto max-w-6xl px-4 py-4 text-center text-xs text-gray-500">
+    Data:
+    <a href="https://www.dst.dk" target="_blank" rel="noopener" class="underline hover:text-gray-700">Danmarks Statistik</a>
+    (CC BY 4.0) &middot;
+    <a href="https://rkr.statistikbank.dk" target="_blank" rel="noopener" class="underline hover:text-gray-700">Finans Danmark</a> &middot;
+    <a href="https://energinet.dk" target="_blank" rel="noopener" class="underline hover:text-gray-700">Energinet</a> &middot;
+    <a href="https://www.transportvaner.dk" target="_blank" rel="noopener" class="underline hover:text-gray-700">DTU</a>
+    <br class="sm:hidden">
+    <span class="hidden sm:inline">&middot;</span>
+    Kode under MIT-licens &middot;
+    <a href="om.html" class="underline hover:text-gray-700">Om værktøjet</a>
+  </div>
+</footer>
+
+<script type="module" src="metode.js"></script>
+</body>
+</html>
