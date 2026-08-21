@@ -1,5 +1,6 @@
 """Tests for den forbrugsvægtede el-CO2-beregning. Ingen netværk."""
 import unittest
+import unittest.mock
 
 import fetch_energi
 import kommuner
@@ -136,3 +137,30 @@ class TestLandsgennemsnit(unittest.TestCase):
 
     def test_tomt_grundlag_giver_none(self):
         self.assertIsNone(fetch_energi.landsgennemsnit({}, {}))
+
+
+class TestDeklarationFilter(unittest.TestCase):
+    """Serverfilteret indeholder et procenttegn og kan fejle stille. Uden en
+    klientside-vagt ville alle tre brændselsmetoder blande sig sammen, og
+    dict-opbygningen ville beholde den sidste række pr. time."""
+
+    def _raekker(self):
+        return [
+            {"PriceArea": "DK1", "HourDK": "t1", "FuelAllocationMethod": "125%", "CO2PerkWh": 60.0},
+            {"PriceArea": "DK1", "HourDK": "t1", "FuelAllocationMethod": "200%", "CO2PerkWh": 70.0},
+            {"PriceArea": "DK1", "HourDK": "t1", "FuelAllocationMethod": "Total", "CO2PerkWh": 90.0},
+        ]
+
+    def test_vaelger_125_procent_selvom_serveren_sender_alle(self):
+        with unittest.mock.patch.object(fetch_energi.eds_client, "hent_alle",
+                                        return_value=self._raekker()):
+            d = fetch_energi.fetch_deklaration("2025")
+        self.assertEqual(d[("DK1", "t1")], 60.0,
+                         "må ikke ende med den sidste række, når filteret svigter")
+
+    def test_fejler_hoejlydt_hvis_metoden_slet_ikke_findes(self):
+        kun_forkerte = [r for r in self._raekker() if r["FuelAllocationMethod"] != "125%"]
+        with unittest.mock.patch.object(fetch_energi.eds_client, "hent_alle",
+                                        return_value=kun_forkerte):
+            with self.assertRaises(ValueError):
+                fetch_energi.fetch_deklaration("2025")

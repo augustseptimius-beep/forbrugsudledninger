@@ -73,11 +73,19 @@ def fetch_deklaration(aar=None, sov=None):
         "columns": f"HourDK,PriceArea,FuelAllocationMethod,{EMISSIONSKOLONNE}",
         "filter": '{"FuelAllocationMethod":["%s"]}' % BRAENDSELSMETODE,
     }, **kwargs)
-    return {
-        (r["PriceArea"], r["HourDK"]): r[EMISSIONSKOLONNE]
-        for r in raekker
-        if r[EMISSIONSKOLONNE] is not None
-    }
+
+    # Serverfilteret indeholder et procenttegn i værdien og kan derfor fejle
+    # stille. Sker det, kommer alle tre brændselsmetoder tilbage, og en naiv
+    # dict-opbygning ville beholde den sidste række pr. time - et forkert tal
+    # uden nogen fejlmeddelelse. Derfor filtreres der ALTID også her.
+    beholdt = [r for r in raekker
+               if r.get("FuelAllocationMethod") == BRAENDSELSMETODE
+               and r.get(EMISSIONSKOLONNE) is not None]
+    if not beholdt:
+        raise ValueError(
+            f"deklarationen gav ingen rækker med metoden {BRAENDSELSMETODE} "
+            f"(fik {len(raekker)} rækker i alt)")
+    return {(r["PriceArea"], r["HourDK"]): r[EMISSIONSKOLONNE] for r in beholdt}
 
 
 def fetch_kommuneforbrug(aar=None, sov=None):
