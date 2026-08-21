@@ -17,6 +17,10 @@ export function esc(v) {
 const MANGLER = "–"; // tankestreg, ikke bindestreg: markerer fravær af data
 
 function formatér(v, dec) {
+  // 0 gange et negativt tal giver -0 i IEEE 754, og Intl formaterer det
+  // trofast som "-0,0". Byggeeffektens lave ende rammer præcis det, så
+  // negativt nul normaliseres væk her ét sted for alle formateringer.
+  if (v === 0) v = 0;
   return new Intl.NumberFormat("da-DK", {
     minimumFractionDigits: dec,
     maximumFractionDigits: dec,
@@ -46,10 +50,14 @@ export function ton(v) {
   return `${formatér(v, 1)} ton`;
 }
 
-/** Interval mellem to tal, enkelt dash som husreglen foreskriver. */
-export function interval(lav, hoj) {
-  if (lav == null || hoj == null || !Number.isFinite(lav) || !Number.isFinite(hoj)) return MANGLER;
-  return `${formatér(lav, 1)} - ${formatér(hoj, 1)}`;
+/** Interval mellem to tal, enkelt dash som husreglen foreskriver.
+ *  Vises altid stigende: komponenternes low og high refererer til
+ *  elasticitetens lave og høje ende, ikke til den mindste og største værdi,
+ *  så for negative effekter er low det største tal. Uden sortering ville
+ *  indkomsteffekten stå som "-0,4 - -0,6", hvilket læses forkert. */
+export function interval(a, b) {
+  if (a == null || b == null || !Number.isFinite(a) || !Number.isFinite(b)) return MANGLER;
+  return `${formatér(Math.min(a, b), 1)} - ${formatér(Math.max(a, b), 1)}`;
 }
 
 // ---------- Retningsmarkør ----------
@@ -287,8 +295,10 @@ function driverAfvigelse(d) {
 export function renderDriverTabel(b) {
   const raekker = b.drivere.map((d) => {
     const fb = DRIVER_FORBEHOLD[d.navn];
+    // Mellemrummet foran badgen er bevidst: uden det læser en skærmlæser
+    // "Disponibel indkomsti estimatet" som ét ord.
     const badge = I_ESTIMATET.has(d.navn)
-      ? '<span class="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium ' +
+      ? ' <span class="ml-2 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium ' +
         'text-gray-600 align-middle whitespace-nowrap">i estimatet</span>'
       : "";
     const tom = d.kommuneVaerdi == null;
@@ -372,4 +382,45 @@ export function renderKommune(b, konst) {
         sammen med formlerne og de antagelser, estimatet hviler på.</p>
     </section>`,
   ].filter(Boolean).join("\n");
+}
+
+// ---------- Forside ----------
+
+/** Kommunekort til søgeresultatet. Mønster fra doughnuts KommuneSearch. */
+export function renderKommuneKort(kommuner) {
+  if (kommuner.length === 0) {
+    return `<p class="col-span-full py-8 text-center text-gray-500">Ingen kommuner fundet.</p>`;
+  }
+  return kommuner.map((k) => `<a href="?kommune=${encodeURIComponent(k.kode)}"
+      class="block rounded-lg border border-gray-200 bg-white p-4 no-underline
+             hover:border-green-600 hover:bg-green-50 hover:shadow-md transition-all">
+      <h3 class="text-lg font-semibold text-gray-900">${esc(k.navn)}</h3>
+      <p class="mt-1 text-sm text-gray-500">Region ${esc(k.region)}</p>
+    </a>`).join("");
+}
+
+/** Forsidens hero og søgefelt. */
+export function renderForside() {
+  return `<div class="mb-10 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Hvad fylder forbruget i din kommune?</h2>
+      <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">Et forbrugsbaseret klimaaftryk
+        tæller de udledninger, borgernes forbrug giver anledning til - også dem, der sker uden
+        for kommunegrænsen og uden for Danmark. Slå din kommune op og se estimatet, og hvad
+        det er sat sammen af.</p>
+    </div>
+    <div class="mb-8">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" fill="none"
+          stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <label for="soeg" class="sr-only">Søg efter en kommune</label>
+        <input id="soeg" type="search" autocomplete="off" placeholder="Søg efter en kommune ..."
+          class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white
+                 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent">
+      </div>
+      <p id="soege-status" class="text-sm text-gray-600 mt-2" role="status" aria-live="polite"></p>
+    </div>
+    <div id="resultater" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>`;
 }

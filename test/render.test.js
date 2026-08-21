@@ -43,6 +43,20 @@ test("interval: to tal med enkelt dash", () => {
   assert.equal(interval(9.4102, 9.9053), "9,4 - 9,9");
 });
 
+test("interval: vises altid stigende, uanset argumentrækkefølge", () => {
+  // Komponenternes low/high refererer til elasticitetens lave og høje ende,
+  // ikke til den mindste og største værdi. For negative effekter er low
+  // derfor det største tal, og et interval skrevet "-0,4 - -0,6" læses forkert.
+  assert.equal(interval(-0.3624, -0.6039), "-0,6 - -0,4");
+});
+
+test("tal: negativt nul vises som nul", () => {
+  // 0 gange et negativt tal giver -0 i IEEE 754, og Intl formaterer det
+  // trofast som "-0,0". Byggeeffektens lave ende rammer præcis det.
+  assert.equal(tal(-0, 1), "0,0");
+  assert.equal(interval(-0, -0.2), "-0,2 - 0,0");
+});
+
 test("retningsMarkoer: de fire retninger har hver sin form", () => {
   const op = retningsMarkoer("over land");
   const ned = retningsMarkoer("under land");
