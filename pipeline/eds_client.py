@@ -13,8 +13,15 @@ import urllib.request
 
 BASE_URL = "https://api.energidataservice.dk"
 TIMEOUT_SEKUNDER = 120
-MAKS_FORSOEG = 6
+# API'et rate-limiter hårdt: pauser på 30-60 sekunder er normale, når man
+# henter et helt års timedata. Seks forsøg rakte ikke til at komme igennem
+# én side, så tålmodigheden er sat op frem for at lade den årlige kørsel
+# fejle halvvejs.
+MAKS_FORSOEG = 15
 SIDESTOERRELSE = 100000
+# Pause mellem sider. Billigere at vente lidt frivilligt end at blive afvist
+# og skulle vente den tid, API'et dikterer.
+PAUSE_MELLEM_SIDER = 5
 
 
 def _hent_en_gang(url):
@@ -64,4 +71,4 @@ def hent_alle(dataset, params, sov=time.sleep):
         if len(raekker) < SIDESTOERRELSE:
             return alle
         offset += SIDESTOERRELSE
-        sov(1)
+        sov(PAUSE_MELLEM_SIDER)

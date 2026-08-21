@@ -130,6 +130,11 @@ const DRIVERE = [
   { navn: "Husholdningsaffald", enhed: "kg/pers.", val: (m) => m.affald_kg, type: "relativ" },
   { navn: "El-CO2 pr. kWh", enhed: "g/kWh", val: (m) => m.elco2_g_kwh, type: "relativ" },
   { navn: "Boligpris pr. m²", enhed: "kr./m²", val: (m) => m.boligpris_m2, type: "relativ" },
+  // Lokal VE-dækning er et PRODUKTIONSMÅL og hører logisk sammen med el-CO2:
+  // Energinets kommunedeklaration krediterer lokalt forbrugt vedvarende
+  // energi som nul-emission, så uden dækningsgraden kan en læser ikke se,
+  // hvorfor en vindkommune ligger lavt på el-CO2.
+  { navn: "Lokal VE-dækning af elforbrug", enhed: "pct.", val: (m) => m.ve_daekning_pct, type: "relativ" },
 ];
 
 /** Sikker beregning: returnerer null hvis resultatet ikke er et endeligt tal
@@ -163,6 +168,7 @@ const FORVENTEDE_FELTER = [
   "gini", "boliger_parcel", "boliger_raekke", "boliger_etage", "boligareal", "byggeri",
   "biler", "biler_el", "biler_plugin", "biler_diesel", "opv_boliger_ialt", "opv_olie",
   "opv_naturgas", "affald_kg", "genanvendelse_pct", "elco2_g_kwh", "boligpris_m2",
+  "ve_daekning_pct",
 ];
 
 /** Fuld beregning for én kommune: estimat + boligpris-følsomhed + driver-tabel + manglende felter. */

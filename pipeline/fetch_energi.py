@@ -139,3 +139,15 @@ def prisomraader(kommuner):
         for kode, _navn, region in kommuner
         if region in PRISOMRAADE_PR_REGION
     }
+
+
+def landsgennemsnit(elco2, aars_forbrug):
+    """Forbrugsvægtet landsgennemsnit af kommunernes el-CO2.
+
+    Vægtes med forbrug, ikke med antal kommuner: Læsø og København skal
+    ikke tælle lige meget, når tallet skal sammenlignes med en kommunes eget."""
+    kommuner_med_tal = [k for k in elco2 if aars_forbrug.get(k)]
+    samlet = sum(aars_forbrug[k] for k in kommuner_med_tal)
+    if not samlet:
+        return None
+    return sum(elco2[k] * aars_forbrug[k] for k in kommuner_med_tal) / samlet

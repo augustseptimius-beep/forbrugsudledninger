@@ -279,11 +279,18 @@ export function renderNedbrydning(b, konst) {
 // ligner en tom celle en fejl frem for en kendt begrænsning.
 const DRIVER_FORBEHOLD = {
   "El-CO2 pr. kWh":
-    "Kun opgjort for Hele landet og Thisted. Energinet udgiver tallet som rå timedata, " +
-    "der kræver forbrugsvægtet aggregering, så 96 kommuner står uden værdi.",
+    "Beregnet af Energinets timedata, vægtet med kommunens eget timeforbrug. Følger " +
+    "Energinets lokationsbaserede metode, hvor lokalt produceret vedvarende energi, " +
+    "der forbruges samme time, regnes som nul-emission. Tallet beskriver kommunens " +
+    "elprofil og egner sig ikke til at lægge sammen på tværs af kommuner.",
   "Boligpris pr. m²":
     "Kvartalstal fra realiserede handler. I kommuner med få handler svinger tallet " +
     "meget fra kvartal til kvartal og skal læses med varsomhed.",
+  "Lokal VE-dækning af elforbrug":
+    "Lokal vedvarende produktion sat i forhold til kommunens eget elforbrug, time " +
+    "for time. Et produktionsmål, ikke et forbrugsmål: strømmen eksporteres til " +
+    "det fælles net. Kan overstige 100 % for kommuner, der producerer mere end de " +
+    "bruger. Det er denne dækning, der trækker el-CO2-tallet ned i vindkommuner.",
 };
 
 // De tre drivere, der faktisk fødes ind i hovedtallet. De øvrige 13 er kontekst.
@@ -295,8 +302,12 @@ function andel(v) {
   return `${formatér(v * 100, 1)} %`;
 }
 
+// Drivere hvis råværdi allerede ER en procent (0-100), ikke en andel (0-1).
+const ALLEREDE_PROCENT = new Set(["Lokal VE-dækning af elforbrug"]);
+
 function driverVaerdi(d, v) {
   if (v == null || !Number.isFinite(v)) return MANGLER;
+  if (ALLEREDE_PROCENT.has(d.navn)) return `${formatér(v, 1)}\u00A0%`;
   if (d.enhed === "pct.") return d.type === "difference" ? pct(v) : andel(v);
   const a = Math.abs(v);
   return tal(v, a >= 100 ? 0 : a >= 10 ? 1 : 2);

@@ -3,8 +3,9 @@
 Ved den årlige genkøring:
 1. Opdatér PERIODER til de nyeste tilgængelige perioder for hver kilde
    (kør build.py - valideringsrapporten viser, om en tabel har nyere data).
-2. Tjek om BILKM_AFVIGELSE_REGION eller EL_CO2_MANUAL kan udfyldes mere -
-   se vejledningen ved hver tabel nedenfor.
+2. BILKM_AFVIGELSE_REGION og EL_CO2_MANUAL er nu SIKKERHEDSNET, ikke
+   datakilder. Begge hentes automatisk (fetch_pendling.py og
+   fetch_energi.py). Rør dem kun, hvis kilderne selv ændrer sig.
 3. Konstanterne i KONSTANTER (anker, elasticitet mv.) er metodiske antagelser,
    ikke datapunkter - opdatér kun hvis metoden selv ændres."""
 
@@ -36,22 +37,29 @@ KONSTANTER = {
     "boligudgift_modregning": 0.45,
 }
 
-# --- MANUEL KILDE 1: DTU Transportvaneundersøgelsen (bil-km-afvigelse pr. region) ---
-# Kun Nordjylland er kendt (fra v5-regnearket, udtræk juli 2026). transportvaner.dk
-# har intet offentligt API - de fire øvrige regioner skal slås op manuelt:
-#   1. Gå til transportvaner.dk (selvbetjening).
-#   2. Vælg mål: trafikarbejde, transportmiddel: bil, periode: seneste 10 år (gns.).
-#   3. Slå op for hver af: Hovedstaden, Sjælland, Syddanmark, Midtjylland.
-#   4. Afvigelse = (region_km - land_km) / land_km. Tilføj som ny nøgle nedenfor.
+# --- KALIBRERINGSANKER: DTU Transportvaneundersøgelsen (bil-km pr. region) ---
+# Kun Nordjylland er slået op direkte (v5-regnearket, udtræk juli 2026).
+# transportvaner.dk har intet offentligt API.
+#
+# De fire øvrige regioner udledes nu automatisk af DST's AFSTB4
+# (gennemsnitlig pendlingsafstand efter bopælsområde) i fetch_pendling.py,
+# kalibreret så Nordjylland rammer værdien herunder præcist. Se modulets
+# docstring for validering og for hvorfor tallene IKKE bruges på kommuneniveau.
+#
+# Dette dict er dermed to ting: kalibreringens anker, og et sikkerhedsnet,
+# hvis DST ikke svarer ved den årlige kørsel.
 BILKM_AFVIGELSE_REGION = {
     "Nordjylland": 0.178423236514523,
 }
 
-# --- MANUEL KILDE 2: Energinet miljødeklaration (el-CO2 pr. kommune, g/kWh) ---
-# Kun land og Thisted er kendt (fra v5-regnearket). Findes ikke som færdig årstabel
-# via API'et - kun som rå timedata, der kræver forbrugsvægtet aggregering.
-# Årlig opdatering: besøg https://energinet.dk/data-om-energi/co2-pr-kwh-el-kommune/
-# og aflæs den offentliggjorte kommunedeklaration for det seneste år.
+# --- SIKKERHEDSNET: Energinet miljødeklaration (el-CO2 pr. kommune, g/kWh) ---
+# Værdierne herunder er aflæst manuelt fra v5-regnearket. De bruges KUN, hvis
+# Energi Data Service ikke svarer ved den årlige kørsel.
+#
+# Til daglig beregnes tallet nu for alle 98 kommuner i fetch_energi.py ud fra
+# Energinets rå timedata - præcis den forbrugsvægtede aggregering, denne
+# kommentar tidligere beskrev som ikke-automatiserbar. Metoden følger
+# Energinets lokationsbaserede kommunedeklaration.
 EL_CO2_MANUAL = {
     "Hele landet": 51.8,
     "Thisted": 26.7,

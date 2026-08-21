@@ -62,17 +62,33 @@ KILDER = [
                      "kommuner med få handler er tallet volatilt.",
     },
     {
-        "id": "ENERGINET_MILJODEKLARATION",
-        "navn": "CO2 pr. kWh el, kommunedeklaration",
-        "udbyder": "Energinet",
-        "metode": "manuel",
-        "periode_noegle": None,
+        "id": "ENERGINET_DEKLARATION",
+        "navn": "Miljødeklaration, emission pr. kWh i netmixet (timedata)",
+        "udbyder": "Energinet via Energi Data Service",
+        "metode": "api",
+        "periode_noegle": "ELDEKLARATION_AAR",
         "licens": "Energinets vilkår",
-        "url": "https://energinet.dk/data-om-energi/co2-pr-kwh-el-kommune/",
+        "url": "https://www.energidataservice.dk/tso-electricity/DeclarationGridEmission",
         "felter": ["elco2_g_kwh"],
-        "forbehold": "Findes kun som rå timedata, der kræver forbrugsvægtet "
-                     "aggregering. Kun Hele landet og Thisted er opgjort; "
-                     "96 kommuner mangler og vises som streg.",
+        "forbehold": "Timedata pr. prisområde, aggregeret med kommunens eget "
+                     "timeforbrug. Lokalt produceret vedvarende energi, der "
+                     "forbruges samme time, regnes som nul-emission efter "
+                     "Energinets lokationsbaserede metode. Det krediterer "
+                     "lokal produktion til lokalt forbrug og egner sig derfor "
+                     "ikke til at lægge sammen på tværs af kommuner.",
+    },
+    {
+        "id": "ENERGINET_VE_DAEKNING",
+        "navn": "Lokal VE-dækning og elforbrug pr. kommune (timedata)",
+        "udbyder": "Energinet via Energi Data Service",
+        "metode": "api",
+        "periode_noegle": "ELDEKLARATION_AAR",
+        "licens": "Energinets vilkår",
+        "url": "https://www.energidataservice.dk/tso-electricity/ReCoverageMunicipality",
+        "felter": ["ve_daekning_pct"],
+        "forbehold": "Lokal vedvarende produktion sat i forhold til kommunens "
+                     "eget forbrug. Et produktionsmål, ikke et forbrugsmål - "
+                     "kan overstige 100 % for kommuner, der eksporterer strøm.",
     },
 ]
 

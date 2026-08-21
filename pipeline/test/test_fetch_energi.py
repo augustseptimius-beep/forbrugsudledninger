@@ -120,3 +120,19 @@ class TestFortraengning(unittest.TestCase):
         ud = fetch_energi.beregn_elco2(
             {(1, "t1"): 100.0}, {("DK1", "t1"): 66.0}, {1: "DK1"})
         self.assertAlmostEqual(ud[1], 66.0)
+
+
+class TestLandsgennemsnit(unittest.TestCase):
+    def test_vaegtes_med_forbrug_ikke_med_antal_kommuner(self):
+        # En lille kommune med meget lav emission må ikke trække
+        # landsgennemsnittet ned, som var den lige så stor som hovedstaden.
+        elco2 = {1: 10.0, 2: 100.0}
+        forbrug = {1: 1.0, 2: 99.0}
+        self.assertAlmostEqual(fetch_energi.landsgennemsnit(elco2, forbrug), 99.1)
+
+    def test_kommuner_uden_forbrug_udelades(self):
+        self.assertAlmostEqual(
+            fetch_energi.landsgennemsnit({1: 50.0, 2: 999.0}, {1: 100.0}), 50.0)
+
+    def test_tomt_grundlag_giver_none(self):
+        self.assertIsNone(fetch_energi.landsgennemsnit({}, {}))

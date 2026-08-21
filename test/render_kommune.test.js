@@ -84,7 +84,7 @@ test("nedbrydning: utilstrækkeligt datagrundlag giver tom streng", () => {
 test("drivertabel: har en række pr. driver", () => {
   const d = renderDriverTabel(bThisted);
   const raekker = (d.match(/<tr/g) || []).length;
-  assert.equal(raekker, 17, "16 drivere plus én headerrække");
+  assert.equal(raekker, 18, "17 drivere plus én headerrække");
 });
 
 test("drivertabel: manglende driver vises som tankestreg", () => {
@@ -96,8 +96,9 @@ test("drivertabel: de to volatile drivere bærer forbehold ved tallet", () => {
   const d = renderDriverTabel(bThisted);
   assert.ok(d.includes("El-CO2"), "elco2-driveren skal være med");
   assert.ok(d.includes("Boligpris"), "boligpris-driveren skal være med");
+  assert.ok(d.includes("Lokal VE-dækning"), "VE-dækningen skal stå ved siden af el-CO2");
   const forbehold = (d.match(/tip-boks/g) || []).length;
-  assert.ok(forbehold >= 2, `forventede mindst 2 forbehold, fandt ${forbehold}`);
+  assert.ok(forbehold >= 3, `forventede mindst 3 forbehold, fandt ${forbehold}`);
 });
 
 test("drivertabel: bruger egen tooltip, ikke browserens title", () => {

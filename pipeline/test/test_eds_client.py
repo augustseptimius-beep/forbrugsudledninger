@@ -55,7 +55,7 @@ class TestHent(unittest.TestCase):
 
     def test_giver_op_efter_maks_forsoeg(self):
         afvis = FalskSvar({"statusCode": 429, "message": "Try again in 1 seconds."})
-        with patch("urllib.request.urlopen", side_effect=[afvis] * 10):
+        with patch("urllib.request.urlopen", side_effect=[afvis] * (eds_client.MAKS_FORSOEG + 2)):
             with self.assertRaises(RuntimeError):
                 eds_client.hent("X", {}, sov=lambda s: None)
 
