@@ -509,6 +509,16 @@ export function renderKilder(sources) {
 /** Antagelsescellerne med deres faktiske værdier. Værdierne læses fra
  *  konstanterne i data.json, ikke skrevet i hånden, så siden ikke kan komme
  *  til at påstå noget andet end det, motoren regner med. */
+const ANKERREGION = "Nordjylland";
+
+function regionsListe(konst, filter) {
+  const poster = Object.entries(konst.bilkm_afvigelse_region ?? {})
+    .filter(([region]) => filter(region))
+    .sort(([a], [b]) => a.localeCompare(b, "da"))
+    .map(([region, v]) => `${esc(region)} ${pct(v)}`);
+  return poster.join(", ") || "ingen regioner opgjort";
+}
+
 export function renderAntagelser(sources, konst) {
   const vaerdier = {
     ENS_GA: ton(konst.anker),
@@ -516,8 +526,11 @@ export function renderAntagelser(sources, konst) {
       `bilkørselsandel ${tal(konst.bilkorsel_andel.low, 2)} til ${tal(konst.bilkorsel_andel.high, 2)}`,
     BYGGEANDEL_KALIBRERING: `${tal(konst.byggeandel.low, 2)} til ${tal(konst.byggeandel.high, 4)}`,
     BOLIGUDGIFT_MODREGNING: andel(konst.boligudgift_modregning),
-    DTU_TU: Object.entries(konst.bilkm_afvigelse_region ?? {})
-      .map(([region, v]) => `${esc(region)} ${pct(v)}`).join(", ") || "ingen regioner opgjort",
+    // DTU har kun målt Nordjylland; de øvrige fire er udledt af AFSTB4 og
+    // kalibreret mod den. De to poster viser derfor hver sin halvdel af
+    // regionstabellen, så metodesiden afspejler, hvor tallene kommer fra.
+    DTU_TU: regionsListe(konst, (r) => r === ANKERREGION),
+    AFSTB4: regionsListe(konst, (r) => r !== ANKERREGION),
   };
 
   const poster = sources.antagelser.map((a) => `<div class="border-t border-gray-100 py-3">

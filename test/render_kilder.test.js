@@ -46,3 +46,22 @@ test("antagelser: intet output lækker undefined eller NaN", () => {
   assert.ok(!h.includes("undefined"));
   assert.ok(!h.includes("NaN"));
 });
+
+test("antagelser: hver antagelse har en udfyldt værdi, ikke en tankestreg", () => {
+  // En ny antagelse i sources.py uden tilsvarende værdi-opslag i render.js
+  // ville stå med streg på metodesiden - synlig kun for den, der kigger.
+  const h = renderAntagelser(sources, data.konstanter);
+  for (const a of sources.antagelser) {
+    const efter = h.split(a.navn)[1] ?? "";
+    const vaerdicelle = efter.split("</div>")[0];
+    assert.ok(!vaerdicelle.includes("–"),
+      `${a.id} mangler en værdi-visning i render.js' vaerdier-opslag`);
+  }
+});
+
+test("antagelser: transportregionerne fordeles på deres faktiske ophav", () => {
+  const h = renderAntagelser(sources, data.konstanter);
+  const dtu = h.split("Transportvaneundersøgelsen")[1].split("</div>")[0];
+  assert.ok(dtu.includes("Nordjylland"), "DTU skal vise sin egen målte region");
+  assert.ok(!dtu.includes("Sjælland"), "DTU har ikke målt Sjælland");
+});
