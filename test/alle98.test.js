@@ -31,18 +31,35 @@ test("intet kommuneoutput lækker undefined, NaN eller null", () => {
 });
 
 test("uoplyst transport vises aldrig som et tal", () => {
-  let uoplyste = 0;
+  // Assertionen gælder MEKANISMEN, ikke hvor mange kommuner der p.t. mangler
+  // data. En tidligere version krævede over 70 uoplyste kommuner og brød
+  // sammen, da hullet blev lukket - en test, der fejler når verden bliver
+  // bedre, tester det forkerte.
   for (const k of data.kommuner) {
     const b = beregnKommune(k, data.land, data.konstanter);
     if (!b.estimat.uoplyst?.includes("transport")) continue;
-    uoplyste++;
     const html = renderKommune(b, data.konstanter);
     const raekke = html.split('data-komponent="transport"')[1].split("</li>")[0];
     assert.ok(raekke.toLowerCase().includes("ikke opgjort"), `${k.navn}: transport uden markering`);
     assert.ok(!raekke.includes("ton"), `${k.navn}: uoplyst transport har fået et tal`);
   }
-  // Kun Nordjylland har et DTU-tal, så langt de fleste kommuner skal ramme her.
-  assert.ok(uoplyste > 70, `forventede mange uoplyste, fandt ${uoplyste}`);
+});
+
+test("hver kommunes region har en bil-km-afvigelse", () => {
+  // Fanger, at en region falder ud af konstanterne ved en årlig opdatering,
+  // og at transporten dermed stille ville blive uoplyst igen.
+  const kendte = Object.keys(data.konstanter.bilkm_afvigelse_region);
+  const regioner = [...new Set(data.kommuner.map((k) => k.region))];
+  const mangler = regioner.filter((r) => !kendte.includes(r));
+  assert.deepEqual(mangler, [], `regioner uden bil-km-afvigelse: ${mangler}`);
+});
+
+test("bil-km-afvigelserne er kalibreret til DTU's ankerværdi", () => {
+  // Nordjylland er det eneste direkte målte punkt og skal ramme DTU's tal
+  // præcist, ellers er kalibreringen skredet.
+  const nord = data.konstanter.bilkm_afvigelse_region["Nordjylland"];
+  assert.ok(Math.abs(nord - 0.178423236514523) < 1e-9,
+    `Nordjylland skal være DTU's værdi eksakt, var ${nord}`);
 });
 
 test("kommuner med fuldt kerneinput får et estimat i en troværdig størrelsesorden", () => {

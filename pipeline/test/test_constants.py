@@ -25,6 +25,7 @@ class TestConstants(unittest.TestCase):
             "FOLK_KVARTAL", "FOLK_KVARTAL_FORRIGE", "AREAL_AAR", "INDKOMST_AAR",
             "FORMUE_AAR", "GINI_AAR", "BOLIGER_AAR", "OPVARMNING_AAR",
             "BYGGERI_AAR", "BILER_MAANED", "AFFALD_AAR", "BOLIGPRIS_KVARTAL",
+            "PENDLING_AAR", "ELDEKLARATION_AAR",
         }
         self.assertEqual(set(PERIODER.keys()), forventede)
 

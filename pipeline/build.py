@@ -8,6 +8,7 @@ import sys
 
 import fetch_dst
 import fetch_boligpriser
+import fetch_pendling
 import sources
 from constants import KONSTANTER, BILKM_AFVIGELSE_REGION, EL_CO2_MANUAL
 from kommuner import KOMMUNER
@@ -48,6 +49,17 @@ def main():
     dst_data = fetch_dst.fetch_all_dst()
     print(f"  {len(dst_data)} områder hentet.")
 
+    print("Henter DST AFSTB4 (pendlingsafstand -> regional bil-km-afvigelse)...")
+    try:
+        afstande = fetch_pendling.fetch_pendlingsafstand()
+        bilkm, kalibrering = fetch_pendling.beregn_bilkm_afvigelse(afstande)
+        print(f"  {len(bilkm)} regioner, kalibreringsfaktor {kalibrering:.4f} mod DTU's Nordjylland.")
+    except Exception as fejl:
+        # Falder tilbage til den håndskrevne DTU-værdi frem for at udgive et
+        # datasæt uden transporttal, hvis DST er nede ved den årlige kørsel.
+        print(f"  ADVARSEL: kunne ikke hente AFSTB4 ({fejl}). Falder tilbage til kun Nordjylland.")
+        bilkm = dict(BILKM_AFVIGELSE_REGION)
+
     print("Henter Finans Danmark BM010 (boligpriser)...")
     boligpriser = fetch_boligpriser.fetch_boligpris()
     print(f"  {len(boligpriser)} områder hentet.")
@@ -59,7 +71,7 @@ def main():
 
     output = {"land": land_post, "kommuner": kommune_poster}
     konstanter_output = dict(KONSTANTER)
-    konstanter_output["bilkm_afvigelse_region"] = dict(BILKM_AFVIGELSE_REGION)
+    konstanter_output["bilkm_afvigelse_region"] = bilkm
     output["konstanter"] = konstanter_output
 
     os.makedirs(os.path.dirname(DATA_JSON_PATH), exist_ok=True)

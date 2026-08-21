@@ -84,10 +84,22 @@ ANTAGELSER = [
         "navn": "Transportvaneundersøgelsen, bil-km pr. region",
         "udbyder": "DTU",
         "url": "https://www.transportvaner.dk",
-        "anvendes_til": "bilkm_afvigelse_region",
-        "forbehold": "Intet offentligt API. Kun Nordjylland er slået op. For de "
-                     "fire øvrige regioner vises transporteffekten som ikke "
-                     "opgjort, ikke som nul.",
+        "anvendes_til": "bilkm_afvigelse_region (kalibreringsanker)",
+        "forbehold": "Intet offentligt API. Kun Nordjylland er slået op direkte "
+                     "(+17,84 %). Værdien bruges som anker, som de øvrige fire "
+                     "regioner kalibreres mod.",
+    },
+    {
+        "id": "AFSTB4",
+        "navn": "Gennemsnitlig pendlingsafstand efter bopælsområde",
+        "udbyder": "Danmarks Statistik",
+        "url": "https://www.statistikbanken.dk/AFSTB4",
+        "anvendes_til": "bilkm_afvigelse_region (de fire regioner uden DTU-tal)",
+        "forbehold": "Pendling er kun arbejdsturen, ikke al bilkørsel. På "
+                     "regionalt niveau følger de to mål hinanden tæt: AFSTB4 "
+                     "giver Nordjylland +18,58 % mod DTU's +17,84 %. "
+                     "Sammenhængen er kun valideret regionalt, og tallene "
+                     "bruges derfor ikke på kommuneniveau.",
     },
     {
         "id": "ENS_GA",

@@ -200,7 +200,7 @@ const KOMPONENTER = [
   { noegle: "indkomsteffekt", id: "indkomst", navn: "Indkomst",
     forklaring: "Højere disponibel indkomst end landsgennemsnittet trækker aftrykket op, lavere trækker det ned." },
   { noegle: "transporteffekt", id: "transport", navn: "Transport",
-    forklaring: "Regional bil-km-afvigelse. Kun Nordjylland er slået op hos DTU." },
+    forklaring: "Regional bil-km-afvigelse. Nordjylland er målt direkte af DTU; de fire øvrige regioner er udledt af pendlingsafstande og kalibreret mod DTU-tallet." },
   { noegle: "byggeeffekt", id: "byggeri", navn: "Byggeri",
     forklaring: "Fuldført byggeri pr. 1.000 indbyggere sammenlignet med landsgennemsnittet." },
 ];

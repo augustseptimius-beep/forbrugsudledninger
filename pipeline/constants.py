@@ -22,6 +22,8 @@ PERIODER = {
     "BILER_MAANED": "2026M01",
     "AFFALD_AAR": "2023",
     "BOLIGPRIS_KVARTAL": "2025K4",
+    "PENDLING_AAR": "2024",
+    "ELDEKLARATION_AAR": "2025",
 }
 
 # --- Konstanter til beregningsmotoren. Porteret 1:1 fra Plan 1's test/fixtures.js -

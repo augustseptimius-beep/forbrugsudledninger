@@ -25,10 +25,12 @@ Pick a municipality and you get:
 
 ## Known gaps, stated up front
 
-- **Transport is only quantified for North Jutland.** The regional car-kilometre
-  deviation comes from DTU's national travel survey, which has no public API.
-  Only one of five regions has been looked up, so the transport component is
-  shown as not quantified for the rest.
+- **Transport rests on a regional proxy.** Every municipality in a region
+  inherits the same car-kilometre deviation. Only North Jutland's is measured
+  directly by DTU's travel survey, which has no public API. The other four are
+  derived from Statistics Denmark's commuting-distance table AFSTB4 and
+  calibrated so North Jutland reproduces the DTU figure exactly. Where the two
+  measures can be compared they agree to within 0.74 percentage points.
 - **Grid CO2 per kWh is missing for 96 municipalities.** Energinet publishes it
   as raw hourly data that needs consumption-weighted aggregation.
 - **The construction coefficient is calibrated against one municipality**
