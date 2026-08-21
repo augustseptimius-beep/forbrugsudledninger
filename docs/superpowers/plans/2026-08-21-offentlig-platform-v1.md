@@ -1,6 +1,10 @@
 # Offentlig platform v1 (explorer) - implementeringsplan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Status: UDFØRT 2026-08-21.** Alle 14 tasks er gennemført og siden er
+> udgivet på https://augustseptimius-beep.github.io/forbrugsudledninger/
+> Afvigelser fra planen er dokumenteret i commit-beskederne.
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Udgive en offentlig, statisk side hvor en medarbejder i enhver af Danmarks 98 kommuner kan slå sin kommunes forbrugsbaserede udledningsestimat op, med ærlig markering af hvad der ikke er opgjort.
 
@@ -49,7 +53,7 @@ Adskillelsen mellem `render.js` og `widget.js` er planens vigtigste strukturvalg
 - Create: `~/Documents/GitHub/forbrugsudledninger/` med `pipeline/`, `web/`, `test/`, `docs/`
 - Create: `package.json`, `.gitignore`, `LICENSE`, `README.md`, `CLAUDE.md`
 
-- [ ] **Step 1: Opret mappen og kopiér kode**
+- [x] **Step 1: Opret mappen og kopiér kode**
 
 ```bash
 SRC="$HOME/Claude/Projects/Forbrugsbaserede udledninger"
@@ -69,7 +73,7 @@ Forventet: `docs  pipeline  test  web`
 
 Bemærk: ingen `.docx`, `.pdf`, `.xlsx` eller `.rtf` kopieres. Kontrollér med `find "$DST" -type f \( -name '*.docx' -o -name '*.pdf' -o -name '*.xlsx' -o -name '*.rtf' \)` - den skal give tomt output.
 
-- [ ] **Step 2: Skriv `.gitignore`**
+- [x] **Step 2: Skriv `.gitignore`**
 
 ```
 # OS / editor
@@ -89,7 +93,7 @@ node_modules/
 
 Bemærk: `web/styles/styles.css` er **ikke** ignoreret. Den genererede CSS committes med vilje, så repoet kan åbnes og bruges uden Node.
 
-- [ ] **Step 3: Skriv `package.json`**
+- [x] **Step 3: Skriv `package.json`**
 
 ```json
 {
@@ -111,11 +115,11 @@ Bemærk: `web/styles/styles.css` er **ikke** ignoreret. Den genererede CSS commi
 }
 ```
 
-- [ ] **Step 4: Skriv `LICENSE`**
+- [x] **Step 4: Skriv `LICENSE`**
 
 MIT-licens, indehaver "August Septimius Krogh", år 2026. Brug den officielle MIT-tekst ordret.
 
-- [ ] **Step 5: Skriv `README.md` (engelsk)**
+- [x] **Step 5: Skriv `README.md` (engelsk)**
 
 ```markdown
 # Consumption-based emissions for Denmark's 98 municipalities
@@ -173,11 +177,11 @@ Code is MIT. Data from Statistics Denmark is CC BY 4.0 and credited in the
 site footer.
 ```
 
-- [ ] **Step 6: Skriv `CLAUDE.md` (dansk teknisk onboarding)**
+- [x] **Step 6: Skriv `CLAUDE.md` (dansk teknisk onboarding)**
 
 Efter samme mønster som doughnuts. Skal indeholde: TL;DR, projektstruktur, hvordan man kører lokalt, de tre lag (pipeline, motor, brugerflade), hvor antagelserne bor (`pipeline/constants.py`), hvordan årlig opdatering foregår, og husreglen om enkelt dash.
 
-- [ ] **Step 7: Init git og verificér at alt stadig virker**
+- [x] **Step 7: Init git og verificér at alt stadig virker**
 
 ```bash
 cd ~/Documents/GitHub/forbrugsudledninger
@@ -194,7 +198,7 @@ cd pipeline && python3 -m pytest -q && cd ..
 
 Forventet: 38 Python-tests grønne.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add -A
@@ -214,7 +218,7 @@ Dette er specens §6 og planens vigtigste indholdsændring.
 - Modify: `web/beregning.js` (funktionen `estimat`)
 - Test: `test/beregning.test.js`
 
-- [ ] **Step 1: Skriv de fejlende tests**
+- [x] **Step 1: Skriv de fejlende tests**
 
 Tilføj nederst i `test/beregning.test.js`:
 
@@ -255,12 +259,12 @@ test("uoplyst: utilstrækkeligt datagrundlag har også feltet", () => {
 });
 ```
 
-- [ ] **Step 2: Kør testene og bekræft at de fejler**
+- [x] **Step 2: Kør testene og bekræft at de fejler**
 
 Run: `npm test`
 Forventet: fire fejl. De to første på `transporteffekt` der er `{low: 0, high: 0}` i stedet for `null`, og på `uoplyst` der er `undefined`.
 
-- [ ] **Step 3: Ret `estimat()` i `web/beregning.js`**
+- [x] **Step 3: Ret `estimat()` i `web/beregning.js`**
 
 Erstat hele funktionen:
 
@@ -301,12 +305,12 @@ export function estimat(kommune, land, konst) {
 }
 ```
 
-- [ ] **Step 4: Kør alle tests**
+- [x] **Step 4: Kør alle tests**
 
 Run: `npm test`
 Forventet: alle grønne, inklusive de to golden tests. Thisted er nordjysk og har et ægte tal, så §8.1 er upåvirket. Greve-testen asserterer ikke på transportkomponenten, så §8.2 er upåvirket.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add web/beregning.js test/beregning.test.js
@@ -327,7 +331,7 @@ og lister den i uoplyst."
 - Create: `pipeline/test/test_sources.py`
 - Modify: `pipeline/build.py`
 
-- [ ] **Step 1: Skriv den fejlende test**
+- [x] **Step 1: Skriv den fejlende test**
 
 Opret `pipeline/test/test_sources.py`:
 
@@ -386,12 +390,12 @@ def test_byg_sources_udfylder_perioder():
         assert "periode_noegle" not in kilde, "periode_noegle er intern og må ikke ud i json"
 ```
 
-- [ ] **Step 2: Kør testen og bekræft at den fejler**
+- [x] **Step 2: Kør testen og bekræft at den fejler**
 
 Run: `cd pipeline && python3 -m pytest test/test_sources.py -q`
 Forventet: FAIL med `ModuleNotFoundError: No module named 'sources'`
 
-- [ ] **Step 3: Skriv `pipeline/sources.py`**
+- [x] **Step 3: Skriv `pipeline/sources.py`**
 
 ```python
 """Kildekatalog til metodesiden. Ren data plus én funktion - ingen netværk.
@@ -516,12 +520,12 @@ def byg_sources():
     }
 ```
 
-- [ ] **Step 4: Kør testen og bekræft at den passerer**
+- [x] **Step 4: Kør testen og bekræft at den passerer**
 
 Run: `cd pipeline && python3 -m pytest test/test_sources.py -q`
 Forventet: 6 passed
 
-- [ ] **Step 5: Kobl den på `build.py`**
+- [x] **Step 5: Kobl den på `build.py`**
 
 Ret docstringen øverst i `pipeline/build.py`:
 
@@ -547,7 +551,7 @@ Tilføj i `main()`, umiddelbart efter `print(f"Skrev {DATA_JSON_PATH}")`:
     print(f"Skrev {SOURCES_JSON_PATH}")
 ```
 
-- [ ] **Step 6: Generér filen uden at røre netværket**
+- [x] **Step 6: Generér filen uden at røre netværket**
 
 `build.py` henter fra API'er, og det skal ikke være nødvendigt for at få `sources.json`. Kør derfor bare kildedelen:
 
@@ -563,12 +567,12 @@ print('ok')
 Run: `python3 -m json.tool ../web/data/sources.json | head -20`
 Forventet: gyldig JSON med `genereret`, `kilder` og `antagelser`.
 
-- [ ] **Step 7: Kør alle Python-tests**
+- [x] **Step 7: Kør alle Python-tests**
 
 Run: `cd pipeline && python3 -m pytest -q`
 Forventet: 44 passed (38 gamle plus 6 nye)
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add pipeline/sources.py pipeline/test/test_sources.py pipeline/build.py web/data/sources.json
@@ -595,8 +599,8 @@ følger det, der faktisk blev hentet."
 
 **Files:** Create `web/styles/input.css`, `web/index.html`, `web/metode.html`, `web/om.html`
 
-- [ ] **Step 1:** `npm install`
-- [ ] **Step 2:** Skriv `web/styles/input.css`:
+- [x] **Step 1:** `npm install`
+- [x] **Step 2:** Skriv `web/styles/input.css`:
 
 ```css
 @import "tailwindcss";
@@ -616,12 +620,12 @@ body.embed .no-embed { display: none !important; }
 body.embed { background: white; }
 ```
 
-- [ ] **Step 3:** Skriv sideskallen i alle tre HTML-filer. Fælles struktur:
+- [x] **Step 3:** Skriv sideskallen i alle tre HTML-filer. Fælles struktur:
   `<html lang="da">`, `<body class="min-h-screen bg-gray-50 text-gray-900 antialiased">`,
   header med `no-print no-embed`, `<main class="mx-auto max-w-6xl px-4 py-6">`,
   footer med `no-print no-embed` og kildekredit, og en fast ansvarsfraskrivelse.
   Navigation: Kommuner, Metode og data, Om.
-- [ ] **Step 4:** Skriv `Start udviklerserver.command` i rodmappen (spec §9)
+- [x] **Step 4:** Skriv `Start udviklerserver.command` i rodmappen (spec §9)
 
 ```bash
 #!/bin/bash
@@ -637,9 +641,9 @@ Samme bekvemmelighed som doughnut-projektet har. Brug `127.0.0.1`, ikke
 `localhost` - sidstnævnte kan resolve til IPv6 og fejle, hvilket doughnuts
 CLAUDE.md udtrykkeligt advarer om.
 
-- [ ] **Step 5:** `npm run css`, verificér at `web/styles/styles.css` er skrevet
-- [ ] **Step 6:** `npm run serve`, åbn siden, bekræft at skallen ser ud som doughnut
-- [ ] **Step 7:** Commit
+- [x] **Step 5:** `npm run css`, verificér at `web/styles/styles.css` er skrevet
+- [x] **Step 6:** `npm run serve`, åbn siden, bekræft at skallen ser ud som doughnut
+- [x] **Step 7:** Commit
 
 ## Task 5: `render.js` - formatering og retningsmarkør
 
@@ -657,11 +661,11 @@ Kontrakt (bindende, testene asserterer på den):
 
 `retningsMarkoer` er arvet fra doughnuts `TrendMarker`: **formen bærer retningen, farven forstærker den**, fordi cirka 8 % af mænd er farveblinde. Hver markør har `role="img"` og `aria-label`.
 
-- [ ] **Step 1:** Skriv `test/render.test.js` med mindst: escaping af `<`, `tal(null)` giver `–`, `tal(1234.5, 1)` giver `1.234,5`, `pct(0.1784)` giver `+17,8 %`, `pct(-0.1208)` giver `-12,1 %`, hver af de fire retninger giver forskellig SVG-form
-- [ ] **Step 2:** Kør, bekræft fejl
-- [ ] **Step 3:** Implementér `web/render.js`
-- [ ] **Step 4:** Kør, bekræft grønt
-- [ ] **Step 5:** Commit
+- [x] **Step 1:** Skriv `test/render.test.js` med mindst: escaping af `<`, `tal(null)` giver `–`, `tal(1234.5, 1)` giver `1.234,5`, `pct(0.1784)` giver `+17,8 %`, `pct(-0.1208)` giver `-12,1 %`, hver af de fire retninger giver forskellig SVG-form
+- [x] **Step 2:** Kør, bekræft fejl
+- [x] **Step 3:** Implementér `web/render.js`
+- [x] **Step 4:** Kør, bekræft grønt
+- [x] **Step 5:** Commit
 
 ## Task 6: Hovedtal med ufuldstændigheds-mærkning
 
@@ -674,8 +678,8 @@ Kontrakt (bindende, testene asserterer på den):
 - `b.estimat.uoplyst.length > 0` giver en synlig advarsel med ordet "ufuldstændigt" og hvilke komponenter der mangler
 - Aldrig strengen `"0,0 ton"` for en uoplyst komponent
 
-- [ ] **Step 1:** Tests for de tre tilfælde, inkl. en assertion om at output for Greve med kun-Nordjylland-konstanter **ikke** indeholder `0,0`
-- [ ] **Step 2-5:** Kør fejl, implementér, kør grønt, commit
+- [x] **Step 1:** Tests for de tre tilfælde, inkl. en assertion om at output for Greve med kun-Nordjylland-konstanter **ikke** indeholder `0,0`
+- [x] **Step 2-5:** Kør fejl, implementér, kør grønt, commit
 
 ## Task 7: Nedbrydning som vandfaldsgraf
 
@@ -685,8 +689,8 @@ Kontrakt (bindende, testene asserterer på den):
 
 Uoplyste komponenter tegnes som et skraveret felt med teksten "ikke opgjort", ikke som en søjle med højde nul. Det er hele pointen i §6, og en nul-højde-søjle ville genindføre præcis den fejl.
 
-- [ ] **Step 1:** Test: uoplyst transport giver `ikke opgjort` i output og ingen `<rect>` med `height="0"`
-- [ ] **Step 2-5:** Kør fejl, implementér, kør grønt, commit
+- [x] **Step 1:** Test: uoplyst transport giver `ikke opgjort` i output og ingen `<rect>` med `height="0"`
+- [x] **Step 2-5:** Kør fejl, implementér, kør grønt, commit
 
 ## Task 8: Driver-tabel med egen tooltip
 
@@ -698,8 +702,8 @@ Tooltip skrives selv, ikke via `title`. Doughnut gjorde det, fordi browserens na
 
 To drivere bærer et fast forbehold ved selve tallet: **El-CO2 pr. kWh** (mangler for 96 kommuner) og **Boligpris pr. m²** (volatil ved få handler).
 
-- [ ] **Step 1:** Tests: 16 rækker, manglende driver giver `–`, forbehold optræder ved de to nævnte drivere
-- [ ] **Step 2-5:** Kør fejl, implementér, kør grønt, commit
+- [x] **Step 1:** Tests: 16 rækker, manglende driver giver `–`, forbehold optræder ved de to nævnte drivere
+- [x] **Step 2-5:** Kør fejl, implementér, kør grønt, commit
 
 ## Task 9: Boligpris-følsomhed og kommunevisning samlet
 
@@ -709,8 +713,8 @@ To drivere bærer et fast forbehold ved selve tallet: **El-CO2 pr. kWh** (mangle
 
 `renderKommune(b, konst)`: samler hovedtal, nedbrydning, driver-tabel, boligpris og kildehenvisning i den rækkefølge.
 
-- [ ] **Step 1:** Tests: Greve giver tom boligpris-sektion, Thisted giver indhold
-- [ ] **Step 2-5:** Kør fejl, implementér, kør grønt, commit
+- [x] **Step 1:** Tests: Greve giver tom boligpris-sektion, Thisted giver indhold
+- [x] **Step 2-5:** Kør fejl, implementér, kør grønt, commit
 
 ## Task 10: `widget.js` - datahentning, søgning og routing
 
@@ -724,9 +728,9 @@ Tyndt lag. Ingen forretningslogik, ingen formatering - alt det bor i `render.js`
 - Søgefelt filtrerer mens der skrives, mønster fra doughnuts `KommuneSearch`
 - Kommunekode i URL'en, ikke navn: koden er stabil og allerede nøgle i `data.json`, og den undgår problemer med æ, ø og å i query-strengen
 
-- [ ] **Step 1:** Implementér
-- [ ] **Step 2:** `npm run serve`, verificér manuelt: forside, søgning, `?kommune=787` (Thisted, har transporttal), `?kommune=253` (Greve, uoplyst transport), `?kommune=825` (Læsø, småkommune med huller), `?kommune=999` (ukendt)
-- [ ] **Step 3:** Commit
+- [x] **Step 1:** Implementér
+- [x] **Step 2:** `npm run serve`, verificér manuelt: forside, søgning, `?kommune=787` (Thisted, har transporttal), `?kommune=253` (Greve, uoplyst transport), `?kommune=825` (Læsø, småkommune med huller), `?kommune=999` (ukendt)
+- [x] **Step 3:** Commit
 
 ## Task 11: metode.html og om.html med indhold
 
@@ -734,9 +738,9 @@ Tyndt lag. Ingen forretningslogik, ingen formatering - alt det bor i `render.js`
 
 Metodesiden: formlerne skrevet ud, de fem antagelsesceller med kilde og årstal, kildelisten renderet fra `sources.json`, og de kendte begrænsninger fra specens §14. Om-siden: hvad værktøjet er, hvem der står bag, hvad det ikke er, hvordan det opdateres.
 
-- [ ] **Step 1:** Skriv indholdet
-- [ ] **Step 2:** Renderer kildelisten fra `sources.json`, så årstallene aldrig kan drive fra dataen
-- [ ] **Step 3:** Commit
+- [x] **Step 1:** Skriv indholdet
+- [x] **Step 2:** Renderer kildelisten fra `sources.json`, så årstallene aldrig kan drive fra dataen
+- [x] **Step 3:** Commit
 
 ## Task 12: Render-test for alle 98 kommuner
 
@@ -746,7 +750,7 @@ Kører `beregnKommune` plus `renderKommune` for alle 98 kommuner mod ægte `data
 
 Assertions: ingen kaster, ingen output indeholder `undefined`, `NaN` eller `null` som synlig tekst, og hver kommune giver ikke-tom HTML.
 
-- [ ] **Step 1-5:** Skriv, kør fejl hvis nogen, ret, kør grønt, commit
+- [x] **Step 1-5:** Skriv, kør fejl hvis nogen, ret, kør grønt, commit
 
 ## Task 13: GitHub Actions-udgivelse
 
@@ -756,14 +760,14 @@ Trin: checkout, opsæt Node 22, `npm ci`, `npm run css`, `npm test`, `actions/up
 
 Testene kører før udgivelse med vilje: en rød test skal stoppe udgivelsen, ikke bare farve et badge rødt.
 
-- [ ] **Step 1-2:** Skriv workflowet, commit
+- [x] **Step 1-2:** Skriv workflowet, commit
 
 ## Task 14: Offentliggørelse
 
 **KRÆVER EJERENS UDTRYKKELIGE JA PÅ DAGEN.** Alt indtil her er lokalt og kan fortrydes. Dette trin kan ikke.
 
-- [ ] **Step 1:** Verificér at intet fortroligt er med: `git ls-files | grep -iE '\.(docx|pdf|xlsx|rtf)$'` skal give tomt output
-- [ ] **Step 2:** `gh repo create forbrugsudledninger --public --source . --remote origin --push`
-- [ ] **Step 3:** Aktivér Pages med kilde "GitHub Actions"
-- [ ] **Step 4:** Verificér den udgivne side, herunder `?kommune=253` som viser uoplyst transport
-- [ ] **Step 5:** Rapportér URL'en til ejeren
+- [x] **Step 1:** Verificér at intet fortroligt er med: `git ls-files | grep -iE '\.(docx|pdf|xlsx|rtf)$'` skal give tomt output
+- [x] **Step 2:** `gh repo create forbrugsudledninger --public --source . --remote origin --push`
+- [x] **Step 3:** Aktivér Pages med kilde "GitHub Actions"
+- [x] **Step 4:** Verificér den udgivne side, herunder `?kommune=253` som viser uoplyst transport
+- [x] **Step 5:** Rapportér URL'en til ejeren
