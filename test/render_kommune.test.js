@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { beregnKommune, optaelSignaler } from "../web/beregning.js";
-import { renderNationaltAftryk, renderIndikatorer, renderHuller, renderOverblik,
+import { renderNationaltAftryk, renderIndikatorer, renderHuller, renderFund,
          renderKommuneOverskrift, renderKommune } from "../web/render.js";
 import { land, thisted, greve } from "./fixtures.js";
 
@@ -57,14 +57,6 @@ test("indikatorer: hver kategori bærer CONCITO's nationale tal", () => {
   assert.ok(h.includes("1,0 ton"), "kørsel i personlige transportmidler skal stå der");
 });
 
-test("indikatorer: alle 19 nøgletal vises", () => {
-  const h = renderIndikatorer(bThisted, concito);
-  const raekker = (h.match(/<tr/g) || []).length;
-  const grupper = bThisted.grupper.length;
-  assert.equal(raekker, bThisted.drivere.length + grupper,
-    "én række pr. nøgletal plus én headerrække pr. kategori");
-});
-
 test("indikatorer: manglende værdi vises som tankestreg", () => {
   const h = renderIndikatorer(bGreve, concito);
   assert.ok(h.includes("–"));
@@ -103,13 +95,15 @@ test("huller: forklarer hvorfor der ikke beregnes et samlet tal", () => {
 
 // --- Samlet ---
 
-test("kommunevisning: rækkefølge er kommune, nationalt, nøgletal, huller", () => {
+test("kommunevisning: fundene står før tabellen", () => {
+  // Konkrete fund først, detaljerne bagefter - ikke omvendt.
   const h = renderKommune(bThisted, concito);
-  const i1 = h.indexOf("Thisted");
-  const i2 = h.indexOf("Danmarks forbrugsudledning");
-  const i3 = h.indexOf("Disponibel indkomst");
-  const i4 = h.indexOf("Hvad værktøjet ikke kan vise");
-  assert.ok(i1 < i2 && i2 < i3 && i3 < i4, `rækkefølge forkert: ${[i1, i2, i3, i4]}`);
+  const iNavn = h.indexOf("Thisted");
+  const iFund = h.indexOf("Det stikker ud");
+  const iTabel = h.indexOf("Alle nøgletal");
+  const iHuller = h.indexOf("Hvad værktøjet ikke kan vise");
+  assert.ok(iNavn < iFund && iFund < iTabel && iTabel < iHuller,
+    `rækkefølge forkert: ${[iNavn, iFund, iTabel, iHuller]}`);
 });
 
 test("kommunevisning: intet output indeholder undefined, NaN eller null", () => {
@@ -140,33 +134,59 @@ test("overskrift: viser kommunekode og region", () => {
   assert.ok(h.includes("787") && h.includes("Nordjylland"));
 });
 
+// --- Fund øverst ---
+
+test("fund: navngiver de nøgletal, der stikker ud", () => {
+  // Det abstrakte "1 markant højere, 1 lavere" er væk. Et fund skal kunne
+  // læses uden at folde noget ud.
+  const h = renderFund(bThisted, concito);
+  assert.ok(h.includes("Parcelhus-andel"), "det største udsving skal navngives");
+  assert.ok(/[+-]\d+,\d\s*%/.test(h), "og bære sit tal");
+});
+
+test("fund: adskiller højere, lavere og uafklaret", () => {
+  const h = renderFund(bThisted, concito);
+  assert.ok(h.includes("Peger mod højere udledning"));
+  assert.ok(h.includes("Peger mod lavere udledning"));
+  assert.ok(h.includes("Kan ikke afgøres"));
+});
+
+test("fund: hvert nøgletal står med sin kategori", () => {
+  const h = renderFund(bThisted, concito);
+  assert.ok(h.includes("Boliger") || h.includes("Transport"),
+    "kategorien skal stå ved nøgletallet");
+});
+
+test("fund: hjælpetal fylder ikke fundene", () => {
+  // Lokal VE-dækning og fritidshuse har de største udsving og ville ellers
+  // fortrænge det, de er sat i verden for at forklare.
+  const h = renderFund(bThisted, concito);
+  assert.ok(!h.includes("Lokal VE-dækning"));
+  assert.ok(!h.includes("Fritidshuse pr. helårsbolig"));
+});
+
+test("fund: fødevarehullet står med sit nationale tal", () => {
+  const h = renderFund(bThisted, concito);
+  assert.ok(h.includes("2,5 ton"));
+  assert.ok(h.includes("blindt"));
+});
+
+test("indikatorer: alle nøgletal står i én tabel uden foldning", () => {
+  const h = renderIndikatorer(bThisted, concito);
+  assert.ok(!h.includes("<details"), "fem klik for at se nitten rækker er ikke et overblik");
+  const raekker = (h.match(/<tr/g) || []).length;
+  const grupper = bThisted.grupper.length;
+  assert.equal(raekker, bThisted.drivere.length + grupper + 1,
+    "én række pr. nøgletal, én overskrift pr. kategori, plus tabelhovedet");
+});
+
+test("indikatorer: hver kategorioverskrift bærer sin nationale vægt", () => {
+  const h = renderIndikatorer(bThisted, concito);
+  assert.ok(h.includes("3,1 ton"), "transportens vægt");
+  assert.ok(h.includes("1,6 ton"), "boligernes vægt");
+});
+
 // --- Signalmærkater ---
-
-test("overblik: tæller nøgletallene, lægger dem ikke sammen til en score", () => {
-  const h = renderOverblik(bThisted, concito);
-  assert.ok(h.includes("talt op"), "det skal fremgå at der tælles");
-  assert.ok(h.includes("vejes ikke mod hinanden"), "det skal siges at der ikke vægtes");
-  // Hvert tal i overblikket skal svare til en optælling af nøgletal - ikke til
-  // et beregnet gennemsnit eller en vægtet score.
-  const gruppe = b_transport();
-  const t = optaelSignaler(gruppe.drivere);
-  const raekke = h.split(">Transport<")[1].split("</li>")[0];
-  const tal = [...raekke.matchAll(/>(\d+)</g)].map((m) => Number(m[1]));
-  const forventede = Object.values(t.pr_signal).filter((n) => n > 0);
-  assert.deepEqual(tal.slice(0, forventede.length).sort(), [...forventede].sort(),
-    "tallene i overblikket skal være optællinger, ikke afledte størrelser");
-});
-
-function b_transport() {
-  return bThisted.grupper.find((g) => g.kategori === "Transport");
-}
-
-test("overblik: Fødevarer står med sin nationale vægt og uden nøgletal", () => {
-  const h = renderOverblik(bThisted, concito);
-  const raekke = h.split("Fødevarer")[1].split("</li>")[0];
-  assert.ok(raekke.includes("2,5 ton"), "den nationale vægt skal stå der");
-  assert.ok(raekke.includes("ingen kommunale nøgletal"));
-});
 
 test("signalmærkat: farven er aldrig eneste bærer af betydning", () => {
   // Cirka 8 % af mænd er farveblinde. Tekst og symbol skal stå ved siden af.
@@ -187,4 +207,11 @@ test("signalmærkat: hvert nøgletal bærer sin begrundelse", () => {
 test("indikatortabel: har en kolonne for hvad nøgletallet peger mod", () => {
   const h = renderIndikatorer(bThisted, concito);
   assert.ok(h.includes("Peger mod"));
+});
+
+test("fund: forklarer at et minustal kan pege mod højere udledning", () => {
+  // Genanvendelsesprocent -22,4 % står under "peger mod højere". Det er
+  // korrekt, men uforklaret ser det ud som en fejl.
+  const h = renderFund(bThisted, concito);
+  assert.ok(h.includes("Et minustal kan godt pege mod"));
 });

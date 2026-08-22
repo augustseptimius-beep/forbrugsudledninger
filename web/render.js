@@ -220,94 +220,70 @@ export function renderNationaltAftryk(c) {
 // Kategoriernes nationale vægt fra CONCITO (2023) s. 16, figur 7. "Kontekst"
 // er ikke en CONCITO-kategori og har derfor ingen vægt.
 function nationalVaegt(c, kategori) {
-  const find = (navn) => c.kategorier.find((k) => k.navn === navn);
   if (kategori === "Øvrigt forbrug") {
-    // De øvrige varegrupper tilsammen. Summeres her frem for at stå som ét
-    // tal i kilden, fordi CONCITO ikke har en kategori med det navn.
     const navngivne = ["Transport", "Fødevarer", "Boliger", "El og varme"];
     const rest = c.kategorier.filter((k) => !navngivne.includes(k.navn));
     return { ton: rest.reduce((s, k) => s + k.ton, 0), pct: rest.reduce((s, k) => s + k.pct, 0) };
   }
-  const k = find(kategori);
+  const k = c.kategorier.find((x) => x.navn === kategori);
   return k ? { ton: k.ton, pct: k.pct } : null;
 }
 
-/** Overblik øverst: hvad kategorien vejer nationalt, og hvor kommunen
- *  afviger mest. Der aggregeres ikke - de nævnte nøgletal er blot dem med
- *  størst afvigelse, sorteret efter størrelse. */
-export function renderOverblik(b, c) {
-  const raekkefoelge = ["Transport", "Fødevarer", "Boliger", "El og varme",
-                        "Øvrigt forbrug", "Kontekst"];
-  const maks = Math.max(...c.kategorier.map((k) => k.ton),
-                        nationalVaegt(c, "Øvrigt forbrug").ton);
+/** De konkrete fund øverst: hvad stikker ud, med navn og tal.
+ *
+ *  Erstatter en tidligere optælling af mærkater pr. kategori. Den var abstrakt
+ *  - "1 markant højere, 1 lavere" fortalte ikke hvilke nøgletal det handlede
+ *  om - og krævede fire liniers brugsanvisning for at kunne læses. */
+export function renderFund(b, c) {
+  const relevante = b.drivere.filter(
+    (d) => d.rolle !== "hjaelper" && d.afvigelse != null);
+  const efterUdsving = (liste) =>
+    [...liste].sort((a, x) => Math.abs(x.afvigelse) - Math.abs(a.afvigelse));
 
-  const raekker = raekkefoelge.map((kategori) => {
-    const gruppe = b.grupper.find((g) => g.kategori === kategori);
-    const vaegt = nationalVaegt(c, kategori);
-    const drivere = gruppe ? gruppe.drivere : [];
-    // Hjælpetal holdes ude: de findes for at kvalificere et andet tal, og de
-    // har ofte de største udsving, så de ville fortrænge det, de forklarer.
-    const medTal = drivere.filter((d) => d.afvigelse != null && d.rolle !== "hjaelper"
-      && d.signal !== "uafklaret");
-    const stoerste = [...medTal].sort((a, x) => Math.abs(x.afvigelse) - Math.abs(a.afvigelse)).slice(0, 3);
+  const hoejere = efterUdsving(relevante.filter((d) => d.signal.includes("højere"))).slice(0, 3);
+  const lavere = efterUdsving(relevante.filter((d) => d.signal.includes("lavere"))).slice(0, 3);
+  const uafklaret = efterUdsving(relevante.filter((d) => d.signal === "uafklaret")).slice(0, 2);
 
-    const soejle = vaegt
-      ? `<span class="block h-2.5 rounded-sm bg-gray-300" style="width:${(vaegt.ton / maks * 100).toFixed(1)}%"></span>`
-      : `<span class="block h-2.5 rounded-sm border border-dashed border-gray-300"></span>`;
-    const vaegtTekst = vaegt
-      ? `${tal(vaegt.ton, 1)} ton`
-      : `<span class="text-gray-400">uden for kategorierne</span>`;
-
-    let hoejre;
-    if (!gruppe) {
-      hoejre = `<span class="text-gray-500 italic">ingen kommunale nøgletal</span>`;
-    } else {
-      const t = optaelSignaler(gruppe.drivere);
-      const orden = ["markant højere", "højere", "på niveau", "lavere", "markant lavere", "uafklaret"];
-      const maerkater = orden
-        .filter((sig) => t.pr_signal[sig] > 0)
-        .map((sig) => `<span class="inline-flex items-center gap-1">
-            <span class="tabular-nums text-sm font-semibold text-gray-900">${t.pr_signal[sig]}</span>
-            ${signalMaerkat(sig)}</span>`)
-        .join(" ");
-      const navngivet = stoerste[0]
-        ? `<span class="block mt-1 text-gray-500">Størst udsving:
-             ${esc(stoerste[0].navn)} <span class="tabular-nums">${driverAfvigelse(stoerste[0])}</span></span>`
-        : "";
-      hoejre = `<span class="flex flex-wrap items-center gap-x-2 gap-y-1">${maerkater}</span>${navngivet}`;
-    }
-
-    const href = gruppe ? `#kat-${encodeURIComponent(kategori)}` : null;
-    const navn = href
-      ? `<a href="${href}" class="font-medium text-gray-900 hover:underline">${esc(kategori)}</a>`
-      : `<span class="font-medium text-gray-900">${esc(kategori)}</span>`;
-
-    return `<li class="grid grid-cols-[9.5rem_1fr] sm:grid-cols-[10rem_7rem_1fr] items-center gap-x-3 gap-y-1 py-2.5">
-      <div class="text-sm">${navn}</div>
-      <div class="hidden sm:block">${soejle}
-        <span class="mt-0.5 block text-xs tabular-nums text-gray-500">${vaegtTekst}</span></div>
-      <div class="text-xs text-gray-600 leading-relaxed">${hoejre}</div>
+  const punkt = (d) => `<li class="flex items-baseline justify-between gap-3 py-1.5">
+      <span class="text-sm text-gray-900">${esc(d.navn)}
+        <span class="text-xs text-gray-500">${esc(d.kategori)}</span></span>
+      <span class="text-sm tabular-nums font-medium whitespace-nowrap
+        ${d.signal.includes("højere") ? "text-red-700"
+          : d.signal.includes("lavere") ? "text-emerald-700" : "text-gray-500"}">
+        ${driverAfvigelse(d)}</span>
     </li>`;
-  }).join("");
 
-  const n = c.nationalt_aftryk;
+  const spalte = (titel, undertitel, liste, farve) => `<div class="flex-1 min-w-[15rem]">
+      <h3 class="text-sm font-semibold ${farve}">${titel}</h3>
+      <p class="text-xs text-gray-500">${undertitel}</p>
+      ${liste.length
+        ? `<ul class="mt-1 divide-y divide-gray-100">${liste.map(punkt).join("")}</ul>`
+        : `<p class="mt-2 text-sm text-gray-400 italic">ingen</p>`}
+    </div>`;
+
+  const mad = c.kategorier.find((k) => k.navn === "Fødevarer");
+
   return `<section class="${KORT} p-5 sm:p-6">
     <div class="flex items-baseline justify-between gap-3 flex-wrap">
-      <h2 class="text-lg font-semibold text-gray-900">Overblik</h2>
-      <span class="text-xs text-gray-500">Danmarks forbrugsudledning
-        ${tal(n.ton, 1)} ton CO2e pr. dansker, ${esc(n.aar)} &middot;
-        ${kildeHenvisning(c, n.side)}</span>
+      <h2 class="text-lg font-semibold text-gray-900">Det stikker ud</h2>
+      <span class="text-xs text-gray-500">sammenlignet med landsgennemsnittet</span>
     </div>
-    <p class="mt-1 text-sm text-gray-600 max-w-3xl">Søjlen viser, hvor tungt kategorien
-      vejer i danskernes samlede forbrugsudledning. Til højre er kommunens nøgletal
-      <em>talt op</em> efter, hvad de peger mod: højere eller lavere udledning end
-      landsgennemsnittet. De vejes ikke mod hinanden - en samlet score ville kræve en
-      vægtning, der ikke findes i nogen kilde. <em>Uafklaret</em> betyder, at retningen
-      ikke kan begrundes fagligt; hold musen over mærkatet i tabellen for at se hvorfor.</p>
-    <ul class="mt-3 divide-y divide-gray-100">${raekker}</ul>
-    <p class="mt-3 text-xs text-gray-500">National fordeling:
-      ${kildeHenvisning(c, 16)}, figur 7.
-      <a href="metode.html" class="underline hover:text-gray-700">Se alle 15 varegrupper</a>.</p>
+
+    <div class="mt-4 flex flex-wrap gap-x-8 gap-y-5">
+      ${spalte("Peger mod højere udledning", "største udsving", hoejere, "text-red-700")}
+      ${spalte("Peger mod lavere udledning", "største udsving", lavere, "text-emerald-700")}
+      ${spalte("Kan ikke afgøres", "retningen har ingen kildebelagt begrundelse", uafklaret, "text-gray-600")}
+    </div>
+
+    <p class="mt-5 border-t border-gray-100 pt-3 text-xs text-gray-500 max-w-3xl">
+      Et minustal kan godt pege mod <em>højere</em> udledning: lavere genanvendelse end
+      landsgennemsnittet betyder mere nyt materiale, og færre elbiler betyder mere
+      benzin og diesel. Retningen afhænger af nøgletallet, ikke af fortegnet.</p>
+    <p class="mt-2 text-xs text-gray-500 max-w-3xl">
+      Fødevarer udgør <strong>${tal(mad.ton, 1)} ton</strong> af danskernes samlede
+      forbrugsudledning på ${tal(c.nationalt_aftryk.ton, 1)} ton
+      (${kildeHenvisning(c, mad.side)}), og der findes ingen offentligt tilgængelig
+      kommunal indikator for dem. Værktøjet er blindt på den kategori.</p>
   </section>`;
 }
 
@@ -377,93 +353,74 @@ function driverAfvigelse(d) {
   return d.type === "difference" ? `${pct(d.afvigelse)}-point` : pct(d.afvigelse);
 }
 
-function indikatorTabel(drivere, kommuneNavn) {
-  const raekker = drivere.map((d) => {
-    const fb = DRIVER_FORBEHOLD[d.navn];
-    const tom = d.kommuneVaerdi == null;
-    return `<tr class="border-t border-gray-100 ${tom ? "text-gray-400" : ""}">
-      <td class="py-2 pr-3 text-sm text-gray-700">
-        <span class="font-medium text-gray-900">${esc(d.navn)}</span>${fb ? forbehold(fb) : ""}
-        <span class="block text-xs text-gray-500">${esc(d.enhed)}</span></td>
-      <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap ${tom ? "" : "font-medium text-gray-900"}">
-        ${driverVaerdi(d, d.kommuneVaerdi)}</td>
-      <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-600">
-        ${driverVaerdi(d, d.landVaerdi)}</td>
-      <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-700">
-        ${driverAfvigelse(d)}</td>
-      <td class="py-2 pl-3 text-right whitespace-nowrap">
-        ${signalMaerkat(d.signal)}${d.begrundelse ? forbehold(d.begrundelse) : ""}</td>
-    </tr>`;
-  }).join("");
-
-  return `<div class="mt-3 overflow-x-auto">
-    <table class="w-full min-w-[34rem]">
-      <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
-        <th class="py-2 pr-3 text-left font-medium">Nøgletal</th>
-        <th class="py-2 px-3 text-right font-medium">${esc(kommuneNavn)}</th>
-        <th class="py-2 px-3 text-right font-medium">Hele landet</th>
-        <th class="py-2 px-3 text-right font-medium">Forskel</th>
-        <th class="py-2 pl-3 text-right font-medium">Peger mod</th>
-      </tr></thead>
-      <tbody>${raekker}</tbody>
-    </table>
-  </div>`;
-}
-
-// Hvad CONCITO opgør nationalt for hver kategori. Afskrift, ikke fortolkning.
-function kategoriKontekst(c, kategori) {
-  const find = (navn) => c.kategorier.find((k) => k.navn === navn);
-  const t = find("Transport");
-  if (kategori === "Transport" && t) {
+function kategoriNote(c, kategori) {
+  if (kategori === "Transport") {
     const bil = c.transport_underkategorier.find((x) => x.navn.startsWith("Kørsel"));
-    return `Heraf udgør kørsel i personlige transportmidler <strong>${tal(bil.ton, 1)} ton</strong>
-      (${bil.pct_af_transport}&nbsp;% af transporten), ${kildeHenvisning(c, bil.side)}.`;
+    return `heraf kørsel i personlige transportmidler ${tal(bil.ton, 1)} ton`;
   }
   if (kategori === "El og varme") {
-    return `Husholdningstallene herunder kommer fra Klimaregnskabet.dk og dækker
-      udledningen fra forbrændingen og elnettet, ikke hele livscyklussen bag brændslet.
-      Niveauet er derfor lavere end CONCITO's tal, og de to må ikke lægges sammen - men
-      sammenligningen mellem kommunen og landet er gyldig, fordi begge sider opgøres ens.`;
+    return "husholdningstallene dækker forbrændingen og elnettet, ikke hele livscyklussen";
   }
-  if (kategori === "Øvrigt forbrug") {
-    return `CONCITO opgør ikke en samlet kategori med dette navn. Nøgletallene herunder
-      vedrører flere af de mindre varegrupper, ${kildeHenvisning(c, 16)}.`;
-  }
-  if (kategori === "Kontekst") {
-    return `Nøgletal, der beskriver kommunen, men ikke peger på én bestemt
-      forbrugskategori.`;
-  }
-  const k = find(kategori);
-  return k ? `${kildeHenvisning(c, k.side)}, figur 7.` : "";
+  if (kategori === "Øvrigt forbrug") return "flere af CONCITO's mindre varegrupper";
+  if (kategori === "Kontekst") return "beskriver kommunen, peger ikke på én kategori";
+  return "";
 }
 
-/** Kommunens nøgletal, foldbare pr. kategori. Lukkede som udgangspunkt, så
- *  overblikket øverst kan læses uden at scrolle - men foldet ud ved print,
- *  så en udskrift indeholder det hele. */
+/** Én samlet tabel med alle nøgletal, grupperet efter kategori.
+ *
+ *  Erstatter fem foldbare kort. Nitten rækker er ikke meget, og at skulle
+ *  klikke fem gange for at se dem gjorde sammenligning på tværs umulig. */
 export function renderIndikatorer(b, c) {
-  return b.grupper.map((g) => {
+  const grupper = b.grupper.map((g) => {
     const vaegt = nationalVaegt(c, g.kategori);
-    const antal = g.drivere.length;
-    return `<section id="kat-${encodeURIComponent(g.kategori)}" class="${KORT} mt-4">
-      <details class="group">
-        <summary class="cursor-pointer list-none p-5 sm:p-6 flex items-baseline justify-between gap-3 flex-wrap">
-          <span class="flex items-baseline gap-2">
-            <svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0 text-gray-400 transition-transform group-open:rotate-90"
-              aria-hidden="true"><path d="M4 2 L9 6 L4 10 Z" fill="currentColor"/></svg>
-            <span class="text-lg font-semibold text-gray-900">${esc(g.kategori)}</span>
-            <span class="text-sm text-gray-500">${antal} nøgletal</span>
-          </span>
-          ${vaegt ? `<span class="text-sm text-gray-600 whitespace-nowrap">Nationalt
-            <strong class="text-gray-900">${tal(vaegt.ton, 1)} ton</strong>
-            <span class="text-gray-500">&middot; ${vaegt.pct}&nbsp;%</span></span>` : ""}
-        </summary>
-        <div class="px-5 pb-5 sm:px-6 sm:pb-6">
-          <p class="text-sm text-gray-600 max-w-3xl">${kategoriKontekst(c, g.kategori)}</p>
-          ${indikatorTabel(g.drivere, b.navn)}
-        </div>
-      </details>
-    </section>`;
+    const note = kategoriNote(c, g.kategori);
+    const overskrift = `<tr class="bg-gray-50">
+      <th colspan="5" class="px-3 py-2 text-left">
+        <span class="text-sm font-semibold text-gray-900">${esc(g.kategori)}</span>
+        ${vaegt ? `<span class="ml-2 text-xs font-normal text-gray-600">nationalt
+          ${tal(vaegt.ton, 1)} ton &middot; ${vaegt.pct}&nbsp;% af aftrykket</span>` : ""}
+        ${note ? `<span class="block text-xs font-normal text-gray-500">${note}</span>` : ""}
+      </th></tr>`;
+
+    const raekker = g.drivere.map((d) => {
+      const fb = DRIVER_FORBEHOLD[d.navn];
+      const tom = d.kommuneVaerdi == null;
+      return `<tr class="border-t border-gray-100 ${tom ? "text-gray-400" : ""}">
+        <td class="py-2 pl-3 pr-3 text-sm">
+          <span class="font-medium text-gray-900">${esc(d.navn)}</span>${fb ? forbehold(fb) : ""}
+          <span class="block text-xs text-gray-500">${esc(d.enhed)}</span></td>
+        <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap ${tom ? "" : "font-medium text-gray-900"}">
+          ${driverVaerdi(d, d.kommuneVaerdi)}</td>
+        <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-600">
+          ${driverVaerdi(d, d.landVaerdi)}</td>
+        <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-700">
+          ${driverAfvigelse(d)}</td>
+        <td class="py-2 pl-3 pr-3 text-right whitespace-nowrap">
+          ${signalMaerkat(d.signal)}${d.begrundelse ? forbehold(d.begrundelse) : ""}</td>
+      </tr>`;
+    }).join("");
+
+    return overskrift + raekker;
   }).join("");
+
+  return `<section class="${KORT} mt-6 p-5 sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Alle nøgletal</h2>
+    <p class="mt-1 text-sm text-gray-600 max-w-3xl">Grupperet efter den forbrugskategori,
+      de vedrører. "Peger mod" er den eneste vurdering i værktøjet - hold musen over
+      ikonet for at se begrundelsen for hvert enkelt nøgletal.</p>
+    <div class="mt-4 -mx-3 overflow-x-auto">
+      <table class="w-full min-w-[36rem]">
+        <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
+          <th class="py-2 pl-3 pr-3 text-left font-medium">Nøgletal</th>
+          <th class="py-2 px-3 text-right font-medium">${esc(b.navn)}</th>
+          <th class="py-2 px-3 text-right font-medium">Hele landet</th>
+          <th class="py-2 px-3 text-right font-medium">Forskel</th>
+          <th class="py-2 pl-3 pr-3 text-right font-medium">Peger mod</th>
+        </tr></thead>
+        <tbody>${grupper}</tbody>
+      </table>
+    </div>
+  </section>`;
 }
 
 // ---------- Hvad værktøjet ikke kan vise ----------
@@ -539,7 +496,7 @@ export function renderKommuneOverskrift(b) {
 export function renderKommune(b, c) {
   return [
     renderKommuneOverskrift(b),
-    renderOverblik(b, c),
+    renderFund(b, c),
     renderIndikatorer(b, c),
     renderHuller(c),
     `<section class="mt-6 text-xs text-gray-500 max-w-3xl">
