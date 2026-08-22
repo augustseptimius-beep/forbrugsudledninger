@@ -87,11 +87,11 @@ const DRIVERE = [
     begrundelse: "CONCITO (2023) s. 6 og s. 30: klimaaftrykket hænger tæt sammen med "
       + "indkomstniveauet, og forbrugsprofilerne stiger fra 8,7 til 25 ton med indkomst." },
   { navn: "Nettoformue (gns.)", enhed: "kr.", val: (m) => m.formue_gns,
-    type: "relativ", kategori: KATEGORI.OEVRIGT, paavirkning: "uafklaret",
+    type: "relativ", kategori: KATEGORI.KONTEKST, paavirkning: "uafklaret",
     begrundelse: "Formue er ikke det samme som forbrug. CONCITO kobler aftrykket til "
       + "indkomst, ikke til formue, så retningen kan ikke afgøres på kildens grundlag." },
   { navn: "Nettoformue (median)", enhed: "kr.", val: (m) => m.formue_median,
-    type: "relativ", kategori: KATEGORI.OEVRIGT, paavirkning: "uafklaret",
+    type: "relativ", kategori: KATEGORI.KONTEKST, paavirkning: "uafklaret",
     begrundelse: "Samme forbehold som gennemsnitsformuen." },
   { navn: "Gini-koefficient", enhed: "indeks", val: (m) => m.gini,
     type: "ingen", kategori: KATEGORI.KONTEKST, paavirkning: "uafklaret",
@@ -194,7 +194,11 @@ export function niveauBaand(afvigelse) {
 /** Hvad afvigelsen peger mod for udledningen - den eneste vurdering i
  *  værktøjet. "uafklaret" når retningen ikke kan begrundes på kildens grundlag,
  *  og "på niveau" når afvigelsen er for lille til at pege nogen vej. */
-export function udledningsSignal(afvigelse, paavirkning) {
+export function udledningsSignal(afvigelse, paavirkning, kategori) {
+  // Kontekst-nøgletal beskriver kommunen uden at pege på en forbrugskategori.
+  // Et "uafklaret"-mærkat på dem er redundant - kategorien siger det allerede,
+  // og fire ekstra mærkater fik værktøjet til at se rådvildt ud.
+  if (kategori === KATEGORI.KONTEKST) return "kontekst";
   if (afvigelse == null || !Number.isFinite(afvigelse)) return "ukendt";
   if (paavirkning == null || paavirkning === "uafklaret") return "uafklaret";
   if (Math.abs(afvigelse) < TAERSKEL_NIVEAU) return "på niveau";
@@ -229,7 +233,7 @@ export function driverTabel(kommune, land) {
       kommuneVaerdi: kv, landVaerdi: lv, afvigelse: afv,
       retning: afv == null ? "kontekst" : afv > 0 ? "over land" : afv < 0 ? "under land" : "på niveau",
       baand: niveauBaand(afv),
-      signal: udledningsSignal(afv, d.paavirkning),
+      signal: udledningsSignal(afv, d.paavirkning, d.kategori),
     };
   });
 }
@@ -243,7 +247,8 @@ export function driverTabel(kommune, land) {
  *  stille overskrive optællingen. */
 export function optaelSignaler(drivere) {
   const pr_signal = { "markant højere": 0, "højere": 0, "på niveau": 0,
-                      "lavere": 0, "markant lavere": 0, uafklaret: 0, ukendt: 0 };
+                      "lavere": 0, "markant lavere": 0, uafklaret: 0,
+                      kontekst: 0, ukendt: 0 };
   for (const d of drivere) {
     if (d.rolle === "hjaelper") continue;
     pr_signal[d.signal] = (pr_signal[d.signal] ?? 0) + 1;

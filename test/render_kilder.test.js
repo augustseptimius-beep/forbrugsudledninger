@@ -28,10 +28,13 @@ test("kilder: hver kilde linker til sit ophav", () => {
   }
 });
 
-test("kilder: forbehold vises som tooltip, ikke som browser-title", () => {
+test("kilder: forbehold vises som egen tooltip, ikke som browser-title", () => {
+  // Teksten ligger i data-tip; selve boksen tegnes af tooltip.js i body, så
+  // den ikke klippes af tabellens overflow.
   const h = renderKilder(sources);
-  assert.ok(h.includes("tip-boks"));
-  assert.ok(!/\stitle="/.test(h));
+  assert.ok(h.includes("data-tip="));
+  assert.ok(h.includes("aria-label="), "teksten skal også nå skærmlæsere");
+  assert.ok(!/\stitle="/.test(h), "browserens title har 0,5-1 sek forsinkelse");
 });
 
 test("referencer: begge rapporter med sidehenvisninger", () => {

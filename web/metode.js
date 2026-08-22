@@ -3,6 +3,7 @@
 // drive fra det, motoren faktisk regner med.
 
 import { renderKilder, renderReferencer, renderNationaltAftryk } from "./render.js";
+import { installerTooltips } from "./tooltip.js";
 
 async function hent(sti) {
   const svar = await fetch(sti);
@@ -13,6 +14,8 @@ async function hent(sti) {
 function fejl(el, besked) {
   if (el) el.innerHTML = `<p class="text-sm text-gray-500">${besked}</p>`;
 }
+
+installerTooltips();
 
 const kilderEl = document.getElementById("kilder");
 const referencerEl = document.getElementById("referencer");

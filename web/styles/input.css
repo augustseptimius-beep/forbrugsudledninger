@@ -24,27 +24,7 @@ body.embed .no-embed { display: none !important; }
 body.embed { background: white; }
 body.embed main { padding-top: 0; }
 
-/* Egen tooltip. Browserens native title har 0,5-1 sekunds forsinkelse og
-   opfører sig forskelligt fra browser til browser - forbeholdene skal vises
-   straks. Vises både ved hover og ved tastaturfokus, så den også virker for
-   tastaturbrugere. */
-.tip { position: relative; }
-.tip > .tip-boks {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 50;
-  width: max-content;
-  max-width: 260px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 100ms ease-out;
-}
-.tip:hover > .tip-boks,
-.tip:focus > .tip-boks,
-.tip:focus-within > .tip-boks { opacity: 1; }
-
 @media print {
-  .tip > .tip-boks { display: none; }
+  /* Tooltip-boksen hører ikke med på papir. */
+  #tip-boks { display: none !important; }
 }

@@ -119,19 +119,18 @@ export function retningsMarkoer(retning) {
 
 // ---------- Forbehold ----------
 
-/** Egen tooltip. Browserens native title har 0,5-1 sekunds forsinkelse og
- *  opfører sig forskelligt fra browser til browser; forbehold skal vises
- *  straks. tabindex gør den tilgængelig for tastaturbrugere. */
+/** Forbeholdsikon med tooltip. Selve boksen tegnes af tooltip.js i
+ *  document.body, fordi en boks inde i elementet bliver klippet væk af
+ *  nøgletalstabellens overflow. Teksten står i data-tip og i aria-label, så
+ *  den også når skærmlæsere. tabindex gør den tilgængelig fra tastaturet. */
 export function forbehold(tekst) {
   return (
-    '<span class="tip inline-flex align-middle ml-1" tabindex="0" ' +
-    `role="note" aria-label="Forbehold: ${esc(tekst)}">` +
+    `<span class="inline-flex align-middle ml-1" tabindex="0" role="note" ` +
+    `data-tip="${esc(tekst)}" aria-label="Forbehold: ${esc(tekst)}">` +
     '<svg viewBox="0 0 16 16" class="h-3.5 w-3.5 text-amber-500" aria-hidden="true">' +
     '<circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
     '<line x1="8" y1="4.5" x2="8" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
-    '<circle cx="8" cy="11.5" r="0.9" fill="currentColor"/></svg>' +
-    '<span class="tip-boks rounded-md bg-gray-900 px-2.5 py-1.5 text-xs font-normal ' +
-    `leading-snug text-white shadow-lg">${esc(tekst)}</span></span>`
+    '<circle cx="8" cy="11.5" r="0.9" fill="currentColor"/></svg></span>'
   );
 }
 
@@ -147,11 +146,15 @@ const SIGNAL = {
   "lavere":         { tekst: "lavere",         klasse: "bg-emerald-50 text-emerald-700 border-emerald-200", tegn: "▼" },
   "markant lavere": { tekst: "markant lavere", klasse: "bg-emerald-100 text-emerald-800 border-emerald-300", tegn: "▼▼" },
   "uafklaret":      { tekst: "uafklaret",      klasse: "bg-gray-50 text-gray-500 border-gray-200", tegn: "?" },
+  "kontekst":       { tekst: "",               klasse: "", tegn: "" },
   "ukendt":         { tekst: "ingen data",     klasse: "bg-gray-50 text-gray-400 border-gray-200", tegn: "–" },
 };
 
 /** Lille mærkat med signalet. Teksten står altid, så farven kun forstærker. */
 function signalMaerkat(signal, ekstraKlasse = "") {
+  // Kontekst-nøgletal får intet mærkat. Kategorioverskriften siger allerede,
+  // at de ikke peger på en forbrugskategori.
+  if (signal === "kontekst") return `<span class="text-xs text-gray-400">&ndash;</span>`;
   const s = SIGNAL[signal] ?? SIGNAL.ukendt;
   return `<span class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5
     text-xs font-medium whitespace-nowrap ${s.klasse} ${ekstraKlasse}">
@@ -244,42 +247,48 @@ export function renderFund(b, c) {
   const lavere = efterUdsving(relevante.filter((d) => d.signal.includes("lavere"))).slice(0, 3);
   const uafklaret = efterUdsving(relevante.filter((d) => d.signal === "uafklaret")).slice(0, 2);
 
-  const punkt = (d) => `<li class="flex items-baseline justify-between gap-3 py-1.5">
-      <span class="text-sm text-gray-900">${esc(d.navn)}
-        <span class="text-xs text-gray-500">${esc(d.kategori)}</span></span>
-      <span class="text-sm tabular-nums font-medium whitespace-nowrap
+  const punkt = (d) => `<li class="flex items-baseline justify-between gap-4 py-2">
+      <span class="min-w-0">
+        <span class="block text-base font-medium text-gray-900 leading-snug">${esc(d.navn)}</span>
+        <span class="block text-xs text-gray-500">${esc(d.kategori)}</span>
+      </span>
+      <span class="text-xl font-bold tabular-nums whitespace-nowrap leading-none
         ${d.signal.includes("højere") ? "text-red-700"
           : d.signal.includes("lavere") ? "text-emerald-700" : "text-gray-500"}">
         ${driverAfvigelse(d)}</span>
     </li>`;
 
-  const spalte = (titel, undertitel, liste, farve) => `<div class="flex-1 min-w-[15rem]">
-      <h3 class="text-sm font-semibold ${farve}">${titel}</h3>
-      <p class="text-xs text-gray-500">${undertitel}</p>
+  const spalte = (titel, liste, farve, prik) => `<div class="flex-1 min-w-[16rem]">
+      <h3 class="flex items-center gap-2 text-base font-semibold ${farve}">
+        <span aria-hidden="true" class="inline-block h-2.5 w-2.5 rounded-full ${prik}"></span>
+        ${titel}</h3>
       ${liste.length
         ? `<ul class="mt-1 divide-y divide-gray-100">${liste.map(punkt).join("")}</ul>`
-        : `<p class="mt-2 text-sm text-gray-400 italic">ingen</p>`}
+        : `<p class="mt-3 text-sm text-gray-400 italic">ingen</p>`}
     </div>`;
 
   const mad = c.kategorier.find((k) => k.navn === "Fødevarer");
 
   return `<section class="${KORT} p-5 sm:p-6">
     <div class="flex items-baseline justify-between gap-3 flex-wrap">
-      <h2 class="text-lg font-semibold text-gray-900">Det stikker ud</h2>
-      <span class="text-xs text-gray-500">sammenlignet med landsgennemsnittet</span>
+      <h2 class="text-xl font-bold text-gray-900">Det stikker ud</h2>
+      <span class="text-sm text-gray-600">de største udsving fra landsgennemsnittet</span>
     </div>
 
-    <div class="mt-4 flex flex-wrap gap-x-8 gap-y-5">
-      ${spalte("Peger mod højere udledning", "største udsving", hoejere, "text-red-700")}
-      ${spalte("Peger mod lavere udledning", "største udsving", lavere, "text-emerald-700")}
-      ${spalte("Kan ikke afgøres", "retningen har ingen kildebelagt begrundelse", uafklaret, "text-gray-600")}
+    <div class="mt-5 flex flex-wrap gap-x-10 gap-y-6">
+      ${spalte("Peger mod højere udledning", hoejere, "text-red-700", "bg-red-500")}
+      ${spalte("Peger mod lavere udledning", lavere, "text-emerald-700", "bg-emerald-500")}
+      ${spalte("Kan ikke afgøres", uafklaret, "text-gray-600", "bg-gray-300")}
     </div>
 
-    <p class="mt-5 border-t border-gray-100 pt-3 text-xs text-gray-500 max-w-3xl">
-      Et minustal kan godt pege mod <em>højere</em> udledning: lavere genanvendelse end
-      landsgennemsnittet betyder mere nyt materiale, og færre elbiler betyder mere
-      benzin og diesel. Retningen afhænger af nøgletallet, ikke af fortegnet.</p>
-    <p class="mt-2 text-xs text-gray-500 max-w-3xl">
+    <details class="mt-5 border-t border-gray-100 pt-3">
+      <summary class="cursor-pointer text-xs text-gray-500 hover:text-gray-700">
+        Sådan skal tallene læses</summary>
+      <p class="mt-2 text-xs text-gray-500 max-w-3xl">
+        Et minustal kan godt pege mod <em>højere</em> udledning: lavere genanvendelse end
+        landsgennemsnittet betyder mere nyt materiale, og færre elbiler betyder mere
+        benzin og diesel. Retningen afhænger af nøgletallet, ikke af fortegnet.</p>
+      <p class="mt-2 text-xs text-gray-500 max-w-3xl">
       Fødevarer udgør <strong>${tal(mad.ton, 1)} ton</strong> af danskernes samlede
       forbrugsudledning på ${tal(c.nationalt_aftryk.ton, 1)} ton
       (${kildeHenvisning(c, mad.side)}), og der findes ingen offentligt tilgængelig

@@ -65,7 +65,23 @@ test("indikatorer: manglende værdi vises som tankestreg", () => {
 test("indikatorer: bruger egen tooltip, ikke browserens title", () => {
   const h = renderIndikatorer(bThisted, concito);
   assert.ok(!/\stitle="/.test(h));
-  assert.ok(h.includes("tip-boks"));
+  assert.ok(h.includes("data-tip="));
+});
+
+test("indikatorer: kontekst-nøgletal får intet peger-mod-mærkat", () => {
+  // Kategorien siger allerede, at de ikke peger på en forbrugskategori.
+  // Fire ekstra "uafklaret"-mærkater fik værktøjet til at se rådvildt ud.
+  const h = renderIndikatorer(bThisted, concito);
+  const antalUafklaret = (h.match(/>uafklaret</g) || []).length;
+  assert.ok(antalUafklaret <= 3,
+    `for mange uafklarede mærkater: ${antalUafklaret}`);
+});
+
+test("fund: kontekst-nøgletal står ikke under 'kan ikke afgøres'", () => {
+  const h = renderFund(bThisted, concito);
+  const spalte = h.split("Kan ikke afgøres")[1].split("</div>")[0];
+  assert.ok(!spalte.includes("Befolkningstæthed"), "kontekst hører ikke til her");
+  assert.ok(!spalte.includes("Nettoformue"));
 });
 
 test("indikatorer: pendlingsafstand vises i km, ikke omregnet", () => {

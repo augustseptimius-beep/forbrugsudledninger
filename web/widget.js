@@ -4,6 +4,7 @@
 
 import { beregnKommune } from "./beregning.js";
 import { renderKommune, renderForside, renderKommuneKort } from "./render.js";
+import { installerTooltips } from "./tooltip.js";
 
 const app = document.getElementById("app");
 
@@ -55,6 +56,7 @@ function visKommune(data, concito, kommune) {
 
 async function start() {
   anvendEmbed();
+  installerTooltips();
   let data, concito;
   try {
     const [d, c] = await Promise.all([fetch("data/data.json"), fetch("data/concito.json")]);
