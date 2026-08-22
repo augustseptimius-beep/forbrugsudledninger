@@ -99,6 +99,30 @@ findes.
 
 Hvis du ændrer i `beregning.js`, så tjek at denne skelnen overlever.
 
+## API-nøgler
+
+Klimaregnskabet.dk kræver en personlig API-nøgle. Den læses fra miljøvariablen
+`KLIMAREGNSKABET_API_KEY` eller fra `pipeline/.env`, som er **gitignoreret og
+må aldrig committes**. Mangler nøglen, springes kilden over, og
+husholdningsfelterne står tomme - resten af datasættet er upåvirket.
+
+Nøgle hentes gratis på https://klimaregnskabet.dk/klimaregnskabet-api mod navn,
+email og formål. Filformat:
+
+```
+KLIMAREGNSKABET_API_KEY=...
+```
+
+Udgivelses-workflowet bruger ikke nøglen: det kører kun tests og CSS, ikke
+`build.py`. Skulle den årlige opdatering en dag automatiseres i CI, hører
+nøglen hjemme som en GitHub Actions-secret, ikke i repoet.
+
+## Cachefiler under udvikling
+
+`pipeline/.el_cache.json` og `pipeline/.kr_cache.json` gemmer de to langsomme
+kilder, så en genkørsel tager sekunder frem for et kvarter. Begge er
+gitignorerede. Omgå dem med `--frisk-el` og `--frisk-kr`.
+
 ## Årlig opdatering
 
 1. `python3 pipeline/build.py` - genhenter alle API-kilder, skriver

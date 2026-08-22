@@ -34,6 +34,19 @@ const fossilOpv = (m) => (m.opv_olie + m.opv_naturgas) / m.opv_boliger_ialt;
 const taethed = (m) => m.folketal / m.areal;
 const bilerPrIndb = (m) => m.biler / m.folketal;
 const vaekst = (m) => m.folketal / m.folketal_forrige - 1;
+const helaarsboliger = (m) => m.boliger_parcel + m.boliger_raekke + m.boliger_etage;
+
+// Husholdningernes energi og udledning fordeles på SAMTLIGE boliger, ikke på
+// indbyggere. Fritidsboliger bruger energi, men deres ejere er registreret i
+// en anden kommune. Målt på tværs af alle 98 kommuner følger tallet pr.
+// indbygger sommerhustætheden næsten lige så tæt som boligstørrelsen; fordelt
+// på alle boliger forsvinder den sammenhæng, og tallet følger i stedet
+// boligstørrelse og andelen af fritliggende huse - altså det, det bør følge.
+// Se pipeline/fetch_klimaregnskabet.py for de målte sammenhænge.
+const alleBoliger = (m) => helaarsboliger(m) + (m.fritidshuse ?? 0);
+const husholdningCo2PrBolig = (m) => m.husholdning_co2_ton / alleBoliger(m);
+const husholdningEnergiPrBolig = (m) => (m.husholdning_energi_tj * 1000) / alleBoliger(m);
+const fritidshusPrBolig = (m) => m.fritidshuse / helaarsboliger(m);
 
 // Kategorierne er CONCITO's egne fra "Danmarks globale forbrugsudledninger"
 // (2023) s. 16, figur 7. "Kontekst" er ikke en CONCITO-kategori, men markerer
@@ -76,8 +89,16 @@ const DRIVERE = [
     type: "relativ", kategori: KATEGORI.TRANSPORT },
   { navn: "Gennemsnitlig pendlingsafstand", enhed: "km", val: (m) => m.pendlingsafstand_km,
     type: "relativ", kategori: KATEGORI.TRANSPORT },
+  { navn: "Husholdningernes CO2 fra energi", enhed: "ton CO2e/bolig",
+    val: husholdningCo2PrBolig, type: "relativ", kategori: KATEGORI.EL_VARME },
+  { navn: "Husholdningernes energiforbrug", enhed: "GJ/bolig",
+    val: husholdningEnergiPrBolig, type: "relativ", kategori: KATEGORI.EL_VARME },
+  { navn: "Fossil andel af husholdningernes energi", enhed: "pct.",
+    val: (m) => m.husholdning_fossil_andel, type: "relativ", kategori: KATEGORI.EL_VARME },
   { navn: "Fossil opvarmning", enhed: "pct.", val: fossilOpv,
     type: "relativ", kategori: KATEGORI.EL_VARME },
+  { navn: "Fritidshuse pr. helårsbolig", enhed: "boliger/bolig",
+    val: fritidshusPrBolig, type: "relativ", kategori: KATEGORI.EL_VARME },
   { navn: "El-CO2 pr. kWh", enhed: "g/kWh", val: (m) => m.elco2_g_kwh,
     type: "relativ", kategori: KATEGORI.EL_VARME },
   { navn: "Lokal VE-dækning af elforbrug", enhed: "pct.", val: (m) => m.ve_daekning_pct,
@@ -130,7 +151,8 @@ const FORVENTEDE_FELTER = [
   "gini", "boliger_parcel", "boliger_raekke", "boliger_etage", "boligareal", "byggeri",
   "biler", "biler_el", "biler_plugin", "biler_diesel", "opv_boliger_ialt", "opv_olie",
   "opv_naturgas", "affald_kg", "genanvendelse_pct", "elco2_g_kwh", "boligpris_m2",
-  "ve_daekning_pct", "pendlingsafstand_km",
+  "ve_daekning_pct", "pendlingsafstand_km", "fritidshuse",
+  "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
 ];
 
 /** Fuld sammenligning for én kommune: indikatortabel, gruppering og manglende felter. */

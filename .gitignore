@@ -15,3 +15,9 @@ node_modules/
 # Bemærk: web/styles/styles.css er bevidst IKKE ignoreret.
 # Den genererede CSS committes, så repoet kan åbnes og bruges uden Node.
 .el_cache.json
+
+# Hemmeligheder - må aldrig i det offentlige repo
+.env
+*.env
+pipeline/.env
+.kr_cache.json

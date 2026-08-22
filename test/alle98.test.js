@@ -64,3 +64,66 @@ test("hver kommunes nøgletal er grupperet under en kategori", () => {
     assert.equal(igrupper, b.drivere.length, `${k.navn}: nøgletal faldt ud af grupperingen`);
   }
 });
+
+// --- Husholdningernes energi og udledning (Klimaregnskabet.dk) ---
+
+test("husholdningstallene findes for alle 98 kommuner", () => {
+  const uden = data.kommuner.filter((k) => k.husholdning_co2_ton == null);
+  assert.deepEqual(uden.map((k) => k.navn), []);
+});
+
+test("fritidshuse er hentet, så husholdningstallene kan fordeles retvisende", () => {
+  const uden = data.kommuner.filter((k) => k.fritidshuse == null);
+  assert.deepEqual(uden.map((k) => k.navn), []);
+});
+
+test("landets husholdningstal er summen af kommunernes", () => {
+  // Ikke et selvstændigt opslag - så tæller og nævner dækker samme område.
+  const sum = data.kommuner.reduce((s, k) => s + k.husholdning_co2_ton, 0);
+  assert.ok(Math.abs(sum - data.land.husholdning_co2_ton) < 1,
+    `${sum} mod ${data.land.husholdning_co2_ton}`);
+});
+
+test("husholdningernes CO2 pr. bolig følger IKKE fritidshustætheden", () => {
+  // Kernen i hvorfor tallet fordeles på boliger og ikke på indbyggere. Gør
+  // det det alligevel, er nævneren forkert igen.
+  const r = data.kommuner.map((k) => {
+    const helaar = k.boliger_parcel + k.boliger_raekke + k.boliger_etage;
+    return {
+      fritidsandel: k.fritidshuse / helaar,
+      prBolig: k.husholdning_co2_ton / (helaar + k.fritidshuse),
+      prIndb: k.husholdning_co2_ton / k.folketal,
+    };
+  });
+  const korr = (xs, ys) => {
+    const n = xs.length, mx = xs.reduce((a, b) => a + b) / n, my = ys.reduce((a, b) => a + b) / n;
+    const t = xs.reduce((s, x, i) => s + (x - mx) * (ys[i] - my), 0);
+    const n1 = Math.sqrt(xs.reduce((s, x) => s + (x - mx) ** 2, 0));
+    const n2 = Math.sqrt(ys.reduce((s, y) => s + (y - my) ** 2, 0));
+    return t / (n1 * n2);
+  };
+  const f = r.map((x) => x.fritidsandel);
+  const prBolig = Math.abs(korr(f, r.map((x) => x.prBolig)));
+  const prIndb = Math.abs(korr(f, r.map((x) => x.prIndb)));
+  assert.ok(prBolig < prIndb,
+    `fordeling på boliger skal svække sommerhus-sammenhængen (${prBolig.toFixed(2)} mod ${prIndb.toFixed(2)})`);
+  assert.ok(prBolig < 0.4, `for stærk sammenhæng tilbage: ${prBolig.toFixed(2)}`);
+});
+
+test("fossil andel af husholdningernes energi ligger mellem 0 og 1", () => {
+  for (const k of data.kommuner) {
+    if (k.husholdning_fossil_andel == null) continue;
+    assert.ok(k.husholdning_fossil_andel >= 0 && k.husholdning_fossil_andel <= 1,
+      `${k.navn}: ${k.husholdning_fossil_andel}`);
+  }
+});
+
+test("landsværdierne er de beregnede, ikke de håndaflæste sikkerhedsnet", () => {
+  // Falder landet tilbage til EL_CO2_MANUAL's 51,8 mens kommunerne bruger de
+  // beregnede tal, regnes hver eneste afvigelse mod et forkert gennemsnit.
+  assert.notEqual(data.land.elco2_g_kwh, 51.8, "landet bruger stadig sikkerhedsnettet");
+  assert.ok(data.land.ve_daekning_pct != null, "landets VE-dækning mangler");
+  const vaerdier = data.kommuner.map((k) => k.elco2_g_kwh).filter((v) => v != null);
+  assert.ok(data.land.elco2_g_kwh > Math.min(...vaerdier));
+  assert.ok(data.land.elco2_g_kwh < Math.max(...vaerdier));
+});

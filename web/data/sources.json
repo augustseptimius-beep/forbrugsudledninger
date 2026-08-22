@@ -1,5 +1,5 @@
 {
-  "genereret": "2026-08-21",
+  "genereret": "2026-08-22",
   "kilder": [
     {
       "id": "FOLK1A",
@@ -155,6 +155,34 @@
       ],
       "forbehold": "Afstanden til arbejde for beskæftigede med bopæl i kommunen. Den siger intet om transportmiddel og dækker kun arbejdsturen, ikke indkøb, fritid og andre ærinder.",
       "periode": "2024"
+    },
+    {
+      "id": "BOL101_FRITID",
+      "navn": "Fritidshuse uden CPR-tilmeldte personer",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/BOL101",
+      "felter": [
+        "fritidshuse"
+      ],
+      "forbehold": "Bruges til at fordele husholdningernes energi og udledning på samtlige boliger. Fritidsboliger bruger energi, men deres ejere er registreret i en anden kommune.",
+      "periode": "2025"
+    },
+    {
+      "id": "KLIMAREGNSKABET_HUSHOLDNINGER",
+      "navn": "Husholdningernes energiforbrug og udledning (Energi- og CO2-regnskabet)",
+      "udbyder": "Klimaregnskabet.dk",
+      "metode": "api",
+      "licens": "Kræver personlig API-nøgle, se klimaregnskabet.dk",
+      "url": "https://klimaregnskabet.dk/klimaregnskabet-api",
+      "felter": [
+        "husholdning_co2_ton",
+        "husholdning_energi_tj",
+        "husholdning_fossil_andel"
+      ],
+      "forbehold": "Kun kategorien Husholdninger - erhverv, fremstilling, offentlig service og transport hører til andre kategorier og er ikke med. Opgørelsen dækker udledningen fra forbrændingen og fra elnettet, ikke hele livscyklussen bag brændslet, og niveauet er derfor lavere end CONCITO's tal for El og varme. Sammenligningen med landsgennemsnittet er gyldig, fordi begge sider opgøres ens. NIRAS (2024) s. 18 peger på Energi- og CO2-Regnskabet som den rigtige kilde til energidelen.",
+      "periode": "2023"
     },
     {
       "id": "BM010",

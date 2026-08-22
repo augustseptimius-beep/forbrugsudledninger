@@ -25,7 +25,11 @@
     "boligpris_m2": 18429,
     "elco2_g_kwh": 43.35114220750178,
     "ve_daekning_pct": 28.321668880158423,
-    "pendlingsafstand_km": 22.6
+    "pendlingsafstand_km": 22.6,
+    "fritidshuse": 224795,
+    "husholdning_co2_ton": 3343924.078589735,
+    "husholdning_energi_tj": 155249.577918768,
+    "husholdning_fossil_andel": 0.0978964430565945
   },
   "kommuner": [
     {
@@ -56,7 +60,11 @@
       "boligpris_m2": 61088,
       "elco2_g_kwh": 41.65573096258222,
       "ve_daekning_pct": 3.1671568688851037,
-      "pendlingsafstand_km": 13.0
+      "pendlingsafstand_km": 13.0,
+      "fritidshuse": 6834,
+      "husholdning_co2_ton": 205716.468447701,
+      "husholdning_energi_tj": 11402.619895413998,
+      "husholdning_fossil_andel": 0.011333715426660538
     },
     {
       "folketal": 106150,
@@ -86,7 +94,11 @@
       "boligpris_m2": 85901,
       "elco2_g_kwh": 42.78922933603361,
       "ve_daekning_pct": 0.28942799555874843,
-      "pendlingsafstand_km": 12.4
+      "pendlingsafstand_km": 12.4,
+      "fritidshuse": 204,
+      "husholdning_co2_ton": 40129.05266842,
+      "husholdning_energi_tj": 2337.697839092,
+      "husholdning_fossil_andel": 0.008798908387146137
     },
     {
       "folketal": 14474,
@@ -116,7 +128,11 @@
       "boligpris_m2": 40630,
       "elco2_g_kwh": 41.192511957146635,
       "ve_daekning_pct": 2.005507226355164,
-      "pendlingsafstand_km": 18.2
+      "pendlingsafstand_km": 18.2,
+      "fritidshuse": 791,
+      "husholdning_co2_ton": 13842.888526044,
+      "husholdning_energi_tj": 389.44628180200004,
+      "husholdning_fossil_andel": 0.5053590105966427
     },
     {
       "folketal": 44214,
@@ -146,7 +162,11 @@
       "boligpris_m2": 39328,
       "elco2_g_kwh": 41.65491445871342,
       "ve_daekning_pct": 1.1954713147246225,
-      "pendlingsafstand_km": 13.8
+      "pendlingsafstand_km": 13.8,
+      "fritidshuse": 1623,
+      "husholdning_co2_ton": 27735.893265174003,
+      "husholdning_energi_tj": 904.292748334,
+      "husholdning_fossil_andel": 0.33572476728727224
     },
     {
       "folketal": 29262,
@@ -176,7 +196,11 @@
       "boligpris_m2": 27817,
       "elco2_g_kwh": 41.99378353311298,
       "ve_daekning_pct": 1.058566818209306,
-      "pendlingsafstand_km": 14.1
+      "pendlingsafstand_km": 14.1,
+      "fritidshuse": 43,
+      "husholdning_co2_ton": 9872.438655270002,
+      "husholdning_energi_tj": 465.309450926,
+      "husholdning_fossil_andel": 0.037357722335978234
     },
     {
       "folketal": 53950,
@@ -206,7 +230,11 @@
       "boligpris_m2": 34846,
       "elco2_g_kwh": 41.72116768121392,
       "ve_daekning_pct": 1.092468569151997,
-      "pendlingsafstand_km": 14.4
+      "pendlingsafstand_km": 14.4,
+      "fritidshuse": 3393,
+      "husholdning_co2_ton": 28110.07951836,
+      "husholdning_energi_tj": 940.8435227169999,
+      "husholdning_fossil_andel": 0.32430418136255595
     },
     {
       "folketal": 40990,
@@ -236,7 +264,11 @@
       "boligpris_m2": 32896,
       "elco2_g_kwh": 41.96774193665898,
       "ve_daekning_pct": 1.3248021870661633,
-      "pendlingsafstand_km": 14.2
+      "pendlingsafstand_km": 14.2,
+      "fritidshuse": 258,
+      "husholdning_co2_ton": 18401.771135042,
+      "husholdning_energi_tj": 819.7685473630002,
+      "husholdning_fossil_andel": 0.09827830642339216
     },
     {
       "folketal": 75106,
@@ -266,7 +298,11 @@
       "boligpris_m2": 68140,
       "elco2_g_kwh": 42.36943076327173,
       "ve_daekning_pct": 0.5687035284294902,
-      "pendlingsafstand_km": 14.8
+      "pendlingsafstand_km": 14.8,
+      "fritidshuse": 285,
+      "husholdning_co2_ton": 59481.66423321,
+      "husholdning_energi_tj": 2147.2819149310008,
+      "husholdning_fossil_andel": 0.23558856348271132
     },
     {
       "folketal": 71185,
@@ -296,7 +332,11 @@
       "boligpris_m2": 48677,
       "elco2_g_kwh": 40.30027985357695,
       "ve_daekning_pct": 0.5906905034607008,
-      "pendlingsafstand_km": 12.8
+      "pendlingsafstand_km": 12.8,
+      "fritidshuse": 261,
+      "husholdning_co2_ton": 47483.226002150004,
+      "husholdning_energi_tj": 1615.005771962,
+      "husholdning_fossil_andel": 0.33162377915612906
     },
     {
       "folketal": 25834,
@@ -326,7 +366,11 @@
       "boligpris_m2": 34377,
       "elco2_g_kwh": 42.162288432540315,
       "ve_daekning_pct": 0.2811681331473473,
-      "pendlingsafstand_km": 14.0
+      "pendlingsafstand_km": 14.0,
+      "fritidshuse": 1471,
+      "husholdning_co2_ton": 13896.752017438,
+      "husholdning_energi_tj": 508.438881774,
+      "husholdning_fossil_andel": 0.2618166612583547
     },
     {
       "folketal": 32030,
@@ -356,7 +400,11 @@
       "boligpris_m2": 36949,
       "elco2_g_kwh": 41.83914611093375,
       "ve_daekning_pct": 1.4856039236337055,
-      "pendlingsafstand_km": 12.5
+      "pendlingsafstand_km": 12.5,
+      "fritidshuse": 222,
+      "husholdning_co2_ton": 16012.367239197,
+      "husholdning_energi_tj": 537.824859678,
+      "husholdning_fossil_andel": 0.31597643301528383
     },
     {
       "folketal": 54228,
@@ -386,7 +434,11 @@
       "boligpris_m2": 41153,
       "elco2_g_kwh": 38.30465068590531,
       "ve_daekning_pct": 12.14334302938207,
-      "pendlingsafstand_km": 13.7
+      "pendlingsafstand_km": 13.7,
+      "fritidshuse": 488,
+      "husholdning_co2_ton": 28866.041185820002,
+      "husholdning_energi_tj": 1167.144210209,
+      "husholdning_fossil_andel": 0.22059736864127114
     },
     {
       "folketal": 60458,
@@ -416,7 +468,11 @@
       "boligpris_m2": 28854,
       "elco2_g_kwh": 41.3607487934747,
       "ve_daekning_pct": 2.3386510359077826,
-      "pendlingsafstand_km": 18.3
+      "pendlingsafstand_km": 18.3,
+      "fritidshuse": 588,
+      "husholdning_co2_ton": 21149.096183536996,
+      "husholdning_energi_tj": 1034.5946261640001,
+      "husholdning_fossil_andel": 0.08587655951145086
     },
     {
       "folketal": 24685,
@@ -446,7 +502,11 @@
       "boligpris_m2": 27655,
       "elco2_g_kwh": 41.4711418798425,
       "ve_daekning_pct": 2.6998443250773634,
-      "pendlingsafstand_km": 16.3
+      "pendlingsafstand_km": 16.3,
+      "fritidshuse": 371,
+      "husholdning_co2_ton": 10347.003473370998,
+      "husholdning_energi_tj": 403.42195207199995,
+      "husholdning_fossil_andel": 0.19691824664717775
     },
     {
       "folketal": 58614,
@@ -476,7 +536,11 @@
       "boligpris_m2": 54252,
       "elco2_g_kwh": 40.92070411527517,
       "ve_daekning_pct": 0.7359164110245833,
-      "pendlingsafstand_km": 15.0
+      "pendlingsafstand_km": 15.0,
+      "fritidshuse": 81,
+      "husholdning_co2_ton": 45768.924936454,
+      "husholdning_energi_tj": 1318.68183717,
+      "husholdning_fossil_andel": 0.4511496528493587
     },
     {
       "folketal": 45138,
@@ -506,7 +570,11 @@
       "boligpris_m2": 41782,
       "elco2_g_kwh": 42.38816177169471,
       "ve_daekning_pct": 1.399339416649001,
-      "pendlingsafstand_km": 12.6
+      "pendlingsafstand_km": 12.6,
+      "fritidshuse": 168,
+      "husholdning_co2_ton": 24179.188289053003,
+      "husholdning_energi_tj": 825.0983644859998,
+      "husholdning_fossil_andel": 0.28265518738276113
     },
     {
       "folketal": 18689,
@@ -536,7 +604,11 @@
       "boligpris_m2": 35003,
       "elco2_g_kwh": 41.65623549419504,
       "ve_daekning_pct": 2.0531106047912324,
-      "pendlingsafstand_km": 15.9
+      "pendlingsafstand_km": 15.9,
+      "fritidshuse": 12,
+      "husholdning_co2_ton": 8916.384496255,
+      "husholdning_energi_tj": 316.643793446,
+      "husholdning_fossil_andel": 0.2598506466637311
     },
     {
       "folketal": 26496,
@@ -566,7 +638,11 @@
       "boligpris_m2": 34608,
       "elco2_g_kwh": 41.342724424316174,
       "ve_daekning_pct": 3.949787637549105,
-      "pendlingsafstand_km": 20.2
+      "pendlingsafstand_km": 20.2,
+      "fritidshuse": 48,
+      "husholdning_co2_ton": 20871.093456822,
+      "husholdning_energi_tj": 656.0767712429998,
+      "husholdning_fossil_andel": 0.4106579191007666
     },
     {
       "folketal": 46240,
@@ -596,7 +672,11 @@
       "boligpris_m2": 29325,
       "elco2_g_kwh": 41.35804656120655,
       "ve_daekning_pct": 2.8208489592455637,
-      "pendlingsafstand_km": 20.5
+      "pendlingsafstand_km": 20.5,
+      "fritidshuse": 365,
+      "husholdning_co2_ton": 29593.539771437998,
+      "husholdning_energi_tj": 1070.9587857469999,
+      "husholdning_fossil_andel": 0.3117705534150014
     },
     {
       "folketal": 42445,
@@ -626,7 +706,11 @@
       "boligpris_m2": 33262,
       "elco2_g_kwh": 41.43900868602486,
       "ve_daekning_pct": 2.4046661205820183,
-      "pendlingsafstand_km": 23.0
+      "pendlingsafstand_km": 23.0,
+      "fritidshuse": 88,
+      "husholdning_co2_ton": 32276.330129803,
+      "husholdning_energi_tj": 1051.7350551349998,
+      "husholdning_fossil_andel": 0.3231828032064315
     },
     {
       "folketal": 47450,
@@ -656,7 +740,11 @@
       "boligpris_m2": 20812,
       "elco2_g_kwh": 39.6154821375385,
       "ve_daekning_pct": 4.454287332216012,
-      "pendlingsafstand_km": 24.6
+      "pendlingsafstand_km": 24.6,
+      "fritidshuse": 4834,
+      "husholdning_co2_ton": 30615.1157054,
+      "husholdning_energi_tj": 1237.2904339880004,
+      "husholdning_fossil_andel": 0.20597460017416705
     },
     {
       "folketal": 42874,
@@ -686,7 +774,11 @@
       "boligpris_m2": 41752,
       "elco2_g_kwh": 41.626299105210535,
       "ve_daekning_pct": 1.9595114236113365,
-      "pendlingsafstand_km": 17.5
+      "pendlingsafstand_km": 17.5,
+      "fritidshuse": 104,
+      "husholdning_co2_ton": 28616.1370733,
+      "husholdning_energi_tj": 951.385923409,
+      "husholdning_fossil_andel": 0.2833808865133873
     },
     {
       "folketal": 41787,
@@ -716,7 +808,11 @@
       "boligpris_m2": 20448,
       "elco2_g_kwh": 40.55292913626031,
       "ve_daekning_pct": 2.922819052513599,
-      "pendlingsafstand_km": 27.9
+      "pendlingsafstand_km": 27.9,
+      "fritidshuse": 12499,
+      "husholdning_co2_ton": 30473.890800109,
+      "husholdning_energi_tj": 1529.68114609,
+      "husholdning_fossil_andel": 0.09658609647092248
     },
     {
       "folketal": 31738,
@@ -746,7 +842,11 @@
       "boligpris_m2": 18310,
       "elco2_g_kwh": 40.60148631962383,
       "ve_daekning_pct": 4.731140513841855,
-      "pendlingsafstand_km": 25.7
+      "pendlingsafstand_km": 25.7,
+      "fritidshuse": 7437,
+      "husholdning_co2_ton": 12886.91831864,
+      "husholdning_energi_tj": 983.4145200230001,
+      "husholdning_fossil_andel": 0.06846541577037656
     },
     {
       "folketal": 64244,
@@ -776,7 +876,11 @@
       "boligpris_m2": 31204,
       "elco2_g_kwh": 36.45478319216654,
       "ve_daekning_pct": 11.128335572649787,
-      "pendlingsafstand_km": 24.0
+      "pendlingsafstand_km": 24.0,
+      "fritidshuse": 2236,
+      "husholdning_co2_ton": 46815.8614795,
+      "husholdning_energi_tj": 1629.1876963089999,
+      "husholdning_fossil_andel": 0.2625548169312166
     },
     {
       "folketal": 55182,
@@ -806,7 +910,11 @@
       "boligpris_m2": 29772,
       "elco2_g_kwh": 39.07995832541246,
       "ve_daekning_pct": 6.345292248915148,
-      "pendlingsafstand_km": 21.3
+      "pendlingsafstand_km": 21.3,
+      "fritidshuse": 174,
+      "husholdning_co2_ton": 28969.513465789998,
+      "husholdning_energi_tj": 1142.4364424589999,
+      "husholdning_fossil_andel": 0.11632004530945199
     },
     {
       "folketal": 25354,
@@ -836,7 +944,11 @@
       "boligpris_m2": 43302,
       "elco2_g_kwh": 42.27277520688069,
       "ve_daekning_pct": 0.41042487592925964,
-      "pendlingsafstand_km": 21.3
+      "pendlingsafstand_km": 21.3,
+      "fritidshuse": 33,
+      "husholdning_co2_ton": 25840.764072119,
+      "husholdning_energi_tj": 795.541682661,
+      "husholdning_fossil_andel": 0.37470678130516705
     },
     {
       "folketal": 57912,
@@ -866,7 +978,11 @@
       "boligpris_m2": 48237,
       "elco2_g_kwh": 41.79367450693623,
       "ve_daekning_pct": 1.319027812068017,
-      "pendlingsafstand_km": 19.3
+      "pendlingsafstand_km": 19.3,
+      "fritidshuse": 445,
+      "husholdning_co2_ton": 56455.171593684005,
+      "husholdning_energi_tj": 1736.644204446,
+      "husholdning_fossil_andel": 0.4006571201992202
     },
     {
       "folketal": 38677,
@@ -896,7 +1012,11 @@
       "boligpris_m2": 10893,
       "elco2_g_kwh": 19.896922459530266,
       "ve_daekning_pct": 61.35988557564137,
-      "pendlingsafstand_km": 25.9
+      "pendlingsafstand_km": 25.9,
+      "fritidshuse": 4433,
+      "husholdning_co2_ton": 15730.740043366999,
+      "husholdning_energi_tj": 1446.1092774480003,
+      "husholdning_fossil_andel": 0.03649489165655237
     },
     {
       "folketal": 54120,
@@ -926,7 +1046,11 @@
       "boligpris_m2": 30347,
       "elco2_g_kwh": 41.098325016345406,
       "ve_daekning_pct": 3.6308578000462823,
-      "pendlingsafstand_km": 20.5
+      "pendlingsafstand_km": 20.5,
+      "fritidshuse": 154,
+      "husholdning_co2_ton": 35734.060545686,
+      "husholdning_energi_tj": 1249.605805824,
+      "husholdning_fossil_andel": 0.32903133939016727
     },
     {
       "folketal": 63962,
@@ -956,7 +1080,11 @@
       "boligpris_m2": 23913,
       "elco2_g_kwh": 39.01488135831822,
       "ve_daekning_pct": 7.871775083737299,
-      "pendlingsafstand_km": 26.6
+      "pendlingsafstand_km": 26.6,
+      "fritidshuse": 202,
+      "husholdning_co2_ton": 38774.073484096996,
+      "husholdning_energi_tj": 1385.5950422800001,
+      "husholdning_fossil_andel": 0.3333101104670907
     },
     {
       "folketal": 29879,
@@ -986,7 +1114,11 @@
       "boligpris_m2": 19724,
       "elco2_g_kwh": 39.30885144594684,
       "ve_daekning_pct": 9.460195437912367,
-      "pendlingsafstand_km": 29.7
+      "pendlingsafstand_km": 29.7,
+      "fritidshuse": 1434,
+      "husholdning_co2_ton": 16014.963983983002,
+      "husholdning_energi_tj": 811.4449008220001,
+      "husholdning_fossil_andel": 0.19137094301990568
     },
     {
       "folketal": 92697,
@@ -1016,7 +1148,11 @@
       "boligpris_m2": 31592,
       "elco2_g_kwh": 41.974886171362705,
       "ve_daekning_pct": 0.5448689083323834,
-      "pendlingsafstand_km": 22.9
+      "pendlingsafstand_km": 22.9,
+      "fritidshuse": 467,
+      "husholdning_co2_ton": 46321.43409109,
+      "husholdning_energi_tj": 2062.070614368,
+      "husholdning_fossil_andel": 0.1601297804218029
     },
     {
       "folketal": 25040,
@@ -1046,7 +1182,11 @@
       "boligpris_m2": 32652,
       "elco2_g_kwh": 37.683972113048675,
       "ve_daekning_pct": 10.911243704903855,
-      "pendlingsafstand_km": 24.6
+      "pendlingsafstand_km": 24.6,
+      "fritidshuse": 38,
+      "husholdning_co2_ton": 5997.080142365,
+      "husholdning_energi_tj": 532.1889343160001,
+      "husholdning_fossil_andel": 0.027199657017680314
     },
     {
       "folketal": 38143,
@@ -1076,7 +1216,11 @@
       "boligpris_m2": 13363,
       "elco2_g_kwh": 20.893954101960976,
       "ve_daekning_pct": 56.17141797485391,
-      "pendlingsafstand_km": 33.2
+      "pendlingsafstand_km": 33.2,
+      "fritidshuse": 622,
+      "husholdning_co2_ton": 13127.915102563002,
+      "husholdning_energi_tj": 1062.302760032,
+      "husholdning_fossil_andel": 0.18820470084533855
     },
     {
       "folketal": 59119,
@@ -1106,7 +1250,11 @@
       "boligpris_m2": 7597,
       "elco2_g_kwh": 20.24846328726501,
       "ve_daekning_pct": 60.861524791007085,
-      "pendlingsafstand_km": 32.2
+      "pendlingsafstand_km": 32.2,
+      "fritidshuse": 7117,
+      "husholdning_co2_ton": 40773.69211793,
+      "husholdning_energi_tj": 1974.0707478790002,
+      "husholdning_fossil_andel": 0.04304855905813203
     },
     {
       "folketal": 75009,
@@ -1136,7 +1284,11 @@
       "boligpris_m2": 15882,
       "elco2_g_kwh": 30.18618403425717,
       "ve_daekning_pct": 37.93984875778309,
-      "pendlingsafstand_km": 29.6
+      "pendlingsafstand_km": 29.6,
+      "fritidshuse": 2275,
+      "husholdning_co2_ton": 50351.09854239,
+      "husholdning_energi_tj": 2029.444169917,
+      "husholdning_fossil_andel": 0.33002596924033256
     },
     {
       "folketal": 47954,
@@ -1166,7 +1318,11 @@
       "boligpris_m2": 10876,
       "elco2_g_kwh": 31.794004042956907,
       "ve_daekning_pct": 27.37924815962836,
-      "pendlingsafstand_km": 27.4
+      "pendlingsafstand_km": 27.4,
+      "fritidshuse": 7006,
+      "husholdning_co2_ton": 13675.855991829001,
+      "husholdning_energi_tj": 2110.333436625,
+      "husholdning_fossil_andel": 0.033017106792580006
     },
     {
       "folketal": 38533,
@@ -1196,7 +1352,11 @@
       "boligpris_m2": 4756,
       "elco2_g_kwh": 7.673468408257751,
       "ve_daekning_pct": 88.5309699772726,
-      "pendlingsafstand_km": 32.3
+      "pendlingsafstand_km": 32.3,
+      "fritidshuse": 3820,
+      "husholdning_co2_ton": 5033.293890174999,
+      "husholdning_energi_tj": 1370.994471995,
+      "husholdning_fossil_andel": 0.04932554518297623
     },
     {
       "folketal": 85163,
@@ -1226,7 +1386,11 @@
       "boligpris_m2": 14746,
       "elco2_g_kwh": 34.87784108415159,
       "ve_daekning_pct": 24.255206018089396,
-      "pendlingsafstand_km": 30.7
+      "pendlingsafstand_km": 30.7,
+      "fritidshuse": 2183,
+      "husholdning_co2_ton": 66167.04807717001,
+      "husholdning_energi_tj": 2174.2953713589995,
+      "husholdning_fossil_andel": 0.18270699327603376
     },
     {
       "folketal": 31988,
@@ -1256,7 +1420,11 @@
       "boligpris_m2": 10163,
       "elco2_g_kwh": 40.325766598055125,
       "ve_daekning_pct": 4.848372074689954,
-      "pendlingsafstand_km": 29.9
+      "pendlingsafstand_km": 29.9,
+      "fritidshuse": 22001,
+      "husholdning_co2_ton": 24492.083135459994,
+      "husholdning_energi_tj": 1502.228841885,
+      "husholdning_fossil_andel": 0.0796959111521073
     },
     {
       "folketal": 36010,
@@ -1286,7 +1454,11 @@
       "boligpris_m2": 16840,
       "elco2_g_kwh": 39.83207669612109,
       "ve_daekning_pct": 7.985762620000527,
-      "pendlingsafstand_km": 31.4
+      "pendlingsafstand_km": 31.4,
+      "fritidshuse": 100,
+      "husholdning_co2_ton": 11309.216414548,
+      "husholdning_energi_tj": 926.8427869530002,
+      "husholdning_fossil_andel": 0.0794299287045465
     },
     {
       "folketal": 80959,
@@ -1316,7 +1488,11 @@
       "boligpris_m2": 12316,
       "elco2_g_kwh": 30.24253936617577,
       "ve_daekning_pct": 35.66610953344667,
-      "pendlingsafstand_km": 30.9
+      "pendlingsafstand_km": 30.9,
+      "fritidshuse": 3888,
+      "husholdning_co2_ton": 40646.52849469,
+      "husholdning_energi_tj": 2105.303873936,
+      "husholdning_fossil_andel": 0.1755784726790642
     },
     {
       "folketal": 30853,
@@ -1346,7 +1522,11 @@
       "boligpris_m2": 12089,
       "elco2_g_kwh": 35.69975379665421,
       "ve_daekning_pct": 17.94223365727569,
-      "pendlingsafstand_km": 33.4
+      "pendlingsafstand_km": 33.4,
+      "fritidshuse": 136,
+      "husholdning_co2_ton": 18607.86274535,
+      "husholdning_energi_tj": 852.4876094829999,
+      "husholdning_fossil_andel": 0.24540642926631526
     },
     {
       "folketal": 23842,
@@ -1376,7 +1556,11 @@
       "boligpris_m2": 14506,
       "elco2_g_kwh": 36.65753038050497,
       "ve_daekning_pct": 17.055037177713228,
-      "pendlingsafstand_km": 31.6
+      "pendlingsafstand_km": 31.6,
+      "fritidshuse": 932,
+      "husholdning_co2_ton": 14616.83227896,
+      "husholdning_energi_tj": 695.5295049980001,
+      "husholdning_fossil_andel": 0.24299493092170973
     },
     {
       "folketal": 44831,
@@ -1406,7 +1590,11 @@
       "boligpris_m2": 9546,
       "elco2_g_kwh": 27.38183074594669,
       "ve_daekning_pct": 37.80310043879915,
-      "pendlingsafstand_km": 36.3
+      "pendlingsafstand_km": 36.3,
+      "fritidshuse": 3954,
+      "husholdning_co2_ton": 8259.210067230999,
+      "husholdning_energi_tj": 1451.686382309,
+      "husholdning_fossil_andel": 0.049671188932907964
     },
     {
       "folketal": 40369,
@@ -1436,7 +1624,11 @@
       "boligpris_m2": 8031,
       "elco2_g_kwh": 47.04931261692119,
       "ve_daekning_pct": 40.22504705483424,
-      "pendlingsafstand_km": 27.9
+      "pendlingsafstand_km": 27.9,
+      "fritidshuse": 754,
+      "husholdning_co2_ton": 15304.868671395,
+      "husholdning_energi_tj": 1253.88508314,
+      "husholdning_fossil_andel": 0.10701224762398603
     },
     {
       "folketal": 52328,
@@ -1466,7 +1658,11 @@
       "boligpris_m2": 8761,
       "elco2_g_kwh": 63.649697245296224,
       "ve_daekning_pct": 10.908661175219935,
-      "pendlingsafstand_km": 27.5
+      "pendlingsafstand_km": 27.5,
+      "fritidshuse": 1325,
+      "husholdning_co2_ton": 14869.126869505999,
+      "husholdning_energi_tj": 1576.498012509,
+      "husholdning_fossil_andel": 0.03802808716554455
     },
     {
       "folketal": 24299,
@@ -1496,7 +1692,11 @@
       "boligpris_m2": 13536,
       "elco2_g_kwh": 54.35493876308154,
       "ve_daekning_pct": 32.92696119172759,
-      "pendlingsafstand_km": 25.7
+      "pendlingsafstand_km": 25.7,
+      "fritidshuse": 1670,
+      "husholdning_co2_ton": 15382.419857121,
+      "husholdning_energi_tj": 674.490578797,
+      "husholdning_fossil_andel": 0.06151457965506655
     },
     {
       "folketal": 11841,
@@ -1526,7 +1726,11 @@
       "boligpris_m2": 6755,
       "elco2_g_kwh": 31.19889145711056,
       "ve_daekning_pct": 68.44423068889324,
-      "pendlingsafstand_km": 29.8
+      "pendlingsafstand_km": 29.8,
+      "fritidshuse": 2196,
+      "husholdning_co2_ton": 2252.4859181660004,
+      "husholdning_energi_tj": 571.944890112,
+      "husholdning_fossil_andel": 0.05139741918708897
     },
     {
       "folketal": 40625,
@@ -1556,7 +1760,11 @@
       "boligpris_m2": 13550,
       "elco2_g_kwh": 59.091702123551826,
       "ve_daekning_pct": 19.193981537087797,
-      "pendlingsafstand_km": 30.0
+      "pendlingsafstand_km": 30.0,
+      "fritidshuse": 1471,
+      "husholdning_co2_ton": 22315.076614708,
+      "husholdning_energi_tj": 1168.5467184070003,
+      "husholdning_fossil_andel": 0.14490123400785174
     },
     {
       "folketal": 29179,
@@ -1586,7 +1794,11 @@
       "boligpris_m2": 8144,
       "elco2_g_kwh": 57.75018310173196,
       "ve_daekning_pct": 23.02484866591629,
-      "pendlingsafstand_km": 27.4
+      "pendlingsafstand_km": 27.4,
+      "fritidshuse": 2968,
+      "husholdning_co2_ton": 14492.150239342001,
+      "husholdning_energi_tj": 889.4166689510001,
+      "husholdning_fossil_andel": 0.03827276477305978
     },
     {
       "folketal": 32401,
@@ -1616,7 +1828,11 @@
       "boligpris_m2": 10186,
       "elco2_g_kwh": 61.69129693754664,
       "ve_daekning_pct": 15.31823550839603,
-      "pendlingsafstand_km": 29.3
+      "pendlingsafstand_km": 29.3,
+      "fritidshuse": 821,
+      "husholdning_co2_ton": 58699.8339013,
+      "husholdning_energi_tj": 916.1900860599999,
+      "husholdning_fossil_andel": 0.09439303636749506
     },
     {
       "folketal": 213168,
@@ -1646,7 +1862,11 @@
       "boligpris_m2": 18918,
       "elco2_g_kwh": 48.406468460344016,
       "ve_daekning_pct": 25.335504313878072,
-      "pendlingsafstand_km": 24.2
+      "pendlingsafstand_km": 24.2,
+      "fritidshuse": 286,
+      "husholdning_co2_ton": 169519.372020378,
+      "husholdning_energi_tj": 5169.116089211,
+      "husholdning_fossil_andel": 0.009390185330391536
     },
     {
       "folketal": 60027,
@@ -1676,7 +1896,11 @@
       "boligpris_m2": 14005,
       "elco2_g_kwh": 51.241405383584315,
       "ve_daekning_pct": 28.924922557425592,
-      "pendlingsafstand_km": 28.5
+      "pendlingsafstand_km": 28.5,
+      "fritidshuse": 778,
+      "husholdning_co2_ton": 39895.20837789,
+      "husholdning_energi_tj": 1777.215477565,
+      "husholdning_fossil_andel": 0.17205406402658144
     },
     {
       "folketal": 5766,
@@ -1706,7 +1930,11 @@
       "boligpris_m2": 7138,
       "elco2_g_kwh": 32.20723150176411,
       "ve_daekning_pct": 69.38493924404628,
-      "pendlingsafstand_km": 23.2
+      "pendlingsafstand_km": 23.2,
+      "fritidshuse": 230,
+      "husholdning_co2_ton": 855.9188548149999,
+      "husholdning_energi_tj": 246.75442687299997,
+      "husholdning_fossil_andel": 0.046172548490341435
     },
     {
       "folketal": 27200,
@@ -1736,7 +1964,11 @@
       "boligpris_m2": 10483,
       "elco2_g_kwh": 39.762548159765416,
       "ve_daekning_pct": 53.66246874281394,
-      "pendlingsafstand_km": 24.3
+      "pendlingsafstand_km": 24.3,
+      "fritidshuse": 942,
+      "husholdning_co2_ton": 6352.2319649,
+      "husholdning_energi_tj": 826.629904647,
+      "husholdning_fossil_andel": 0.03729535987349171
     },
     {
       "folketal": 114947,
@@ -1766,7 +1998,11 @@
       "boligpris_m2": 12921,
       "elco2_g_kwh": 46.73578456442127,
       "ve_daekning_pct": 45.74980485461509,
-      "pendlingsafstand_km": 21.5
+      "pendlingsafstand_km": 21.5,
+      "fritidshuse": 524,
+      "husholdning_co2_ton": 133680.50339633,
+      "husholdning_energi_tj": 3225.0423409719992,
+      "husholdning_fossil_andel": 0.013273415690442766
     },
     {
       "folketal": 3332,
@@ -1796,7 +2032,11 @@
       "boligpris_m2": 10906,
       "elco2_g_kwh": 59.70957720738714,
       "ve_daekning_pct": 21.32401441287385,
-      "pendlingsafstand_km": 26.1
+      "pendlingsafstand_km": 26.1,
+      "fritidshuse": 2750,
+      "husholdning_co2_ton": 5801.30714927,
+      "husholdning_energi_tj": 181.734695188,
+      "husholdning_fossil_andel": 0.018110126575419716
     },
     {
       "folketal": 52939,
@@ -1826,7 +2066,11 @@
       "boligpris_m2": 12660,
       "elco2_g_kwh": 66.04758369384908,
       "ve_daekning_pct": 0.020844268787421412,
-      "pendlingsafstand_km": 24.2
+      "pendlingsafstand_km": 24.2,
+      "fritidshuse": 347,
+      "husholdning_co2_ton": 23636.000502900002,
+      "husholdning_energi_tj": 1439.504469788,
+      "husholdning_fossil_andel": 0.013053361920277546
     },
     {
       "folketal": 55218,
@@ -1856,7 +2100,11 @@
       "boligpris_m2": 9194,
       "elco2_g_kwh": 60.47047538937168,
       "ve_daekning_pct": 15.483102709392698,
-      "pendlingsafstand_km": 27.7
+      "pendlingsafstand_km": 27.7,
+      "fritidshuse": 1814,
+      "husholdning_co2_ton": 10277.972676087,
+      "husholdning_energi_tj": 1618.3638945460002,
+      "husholdning_fossil_andel": 0.024640388473438312
     },
     {
       "folketal": 96214,
@@ -1886,7 +2134,11 @@
       "boligpris_m2": 13827,
       "elco2_g_kwh": 57.84922847417265,
       "ve_daekning_pct": 19.117779834524082,
-      "pendlingsafstand_km": 26.9
+      "pendlingsafstand_km": 26.9,
+      "fritidshuse": 1589,
+      "husholdning_co2_ton": 48708.39046023,
+      "husholdning_energi_tj": 2574.5430169139995,
+      "husholdning_fossil_andel": 0.0667655982287834
     },
     {
       "folketal": 74123,
@@ -1916,7 +2168,11 @@
       "boligpris_m2": 9171,
       "elco2_g_kwh": 55.45438778313891,
       "ve_daekning_pct": 22.294259215164274,
-      "pendlingsafstand_km": 22.3
+      "pendlingsafstand_km": 22.3,
+      "fritidshuse": 2806,
+      "husholdning_co2_ton": 28563.283110214998,
+      "husholdning_energi_tj": 1994.868457857,
+      "husholdning_fossil_andel": 0.024187358770429154
     },
     {
       "folketal": 36174,
@@ -1946,7 +2202,11 @@
       "boligpris_m2": 5692,
       "elco2_g_kwh": 44.072572660079416,
       "ve_daekning_pct": 50.54938889435613,
-      "pendlingsafstand_km": 25.5
+      "pendlingsafstand_km": 25.5,
+      "fritidshuse": 2165,
+      "husholdning_co2_ton": 9570.472669577,
+      "husholdning_energi_tj": 1192.999342138,
+      "husholdning_fossil_andel": 0.06317737249203069
     },
     {
       "folketal": 49468,
@@ -1976,7 +2236,11 @@
       "boligpris_m2": 8543,
       "elco2_g_kwh": 42.10431373643532,
       "ve_daekning_pct": 52.58961306401145,
-      "pendlingsafstand_km": 25.3
+      "pendlingsafstand_km": 25.3,
+      "fritidshuse": 8477,
+      "husholdning_co2_ton": 28511.790836860004,
+      "husholdning_energi_tj": 1730.8613236959995,
+      "husholdning_fossil_andel": 0.026324942541152297
     },
     {
       "folketal": 42641,
@@ -2006,7 +2270,11 @@
       "boligpris_m2": 8077,
       "elco2_g_kwh": 46.684133078866,
       "ve_daekning_pct": 41.39832436582686,
-      "pendlingsafstand_km": 27.8
+      "pendlingsafstand_km": 27.8,
+      "fritidshuse": 154,
+      "husholdning_co2_ton": 8204.364610159002,
+      "husholdning_energi_tj": 1218.6334484499998,
+      "husholdning_fossil_andel": 0.026935053340895364
     },
     {
       "folketal": 123250,
@@ -2036,7 +2304,11 @@
       "boligpris_m2": 14782,
       "elco2_g_kwh": 48.22929177660699,
       "ve_daekning_pct": 35.8750606683396,
-      "pendlingsafstand_km": 27.2
+      "pendlingsafstand_km": 27.2,
+      "fritidshuse": 1378,
+      "husholdning_co2_ton": 54435.027048928,
+      "husholdning_energi_tj": 3443.4347747029997,
+      "husholdning_fossil_andel": 0.08570658487685595
     },
     {
       "folketal": 58405,
@@ -2066,7 +2338,11 @@
       "boligpris_m2": 8499,
       "elco2_g_kwh": 41.949116104996094,
       "ve_daekning_pct": 45.992474322329635,
-      "pendlingsafstand_km": 25.2
+      "pendlingsafstand_km": 25.2,
+      "fritidshuse": 881,
+      "husholdning_co2_ton": 2114.7575691849997,
+      "husholdning_energi_tj": 1667.945612391,
+      "husholdning_fossil_andel": 0.017649021519233588
     },
     {
       "folketal": 49773,
@@ -2096,7 +2372,11 @@
       "boligpris_m2": 15133,
       "elco2_g_kwh": 51.930122002496496,
       "ve_daekning_pct": 33.28746206729992,
-      "pendlingsafstand_km": 26.3
+      "pendlingsafstand_km": 26.3,
+      "fritidshuse": 111,
+      "husholdning_co2_ton": 18168.397339813,
+      "husholdning_energi_tj": 1413.861736692,
+      "husholdning_fossil_andel": 0.022729906665548874
     },
     {
       "folketal": 48578,
@@ -2126,7 +2406,11 @@
       "boligpris_m2": 10191,
       "elco2_g_kwh": 61.85929485746262,
       "ve_daekning_pct": 11.805432232175512,
-      "pendlingsafstand_km": 24.8
+      "pendlingsafstand_km": 24.8,
+      "fritidshuse": 2151,
+      "husholdning_co2_ton": 24883.630623233003,
+      "husholdning_energi_tj": 1401.70746183,
+      "husholdning_fossil_andel": 0.15322669129591074
     },
     {
       "folketal": 98806,
@@ -2156,7 +2440,11 @@
       "boligpris_m2": 14270,
       "elco2_g_kwh": 64.46593384317858,
       "ve_daekning_pct": 5.610489963888938,
-      "pendlingsafstand_km": 23.5
+      "pendlingsafstand_km": 23.5,
+      "fritidshuse": 268,
+      "husholdning_co2_ton": 44469.77928590701,
+      "husholdning_energi_tj": 2100.446689146,
+      "husholdning_fossil_andel": 0.027342571715233844
     },
     {
       "folketal": 36477,
@@ -2186,7 +2474,11 @@
       "boligpris_m2": 6788,
       "elco2_g_kwh": 45.3913237639018,
       "ve_daekning_pct": 45.24052688228158,
-      "pendlingsafstand_km": 26.3
+      "pendlingsafstand_km": 26.3,
+      "fritidshuse": 4936,
+      "husholdning_co2_ton": 7216.399260567,
+      "husholdning_energi_tj": 1255.7181142770003,
+      "husholdning_fossil_andel": 0.03366320323438075
     },
     {
       "folketal": 24310,
@@ -2216,7 +2508,11 @@
       "boligpris_m2": 16560,
       "elco2_g_kwh": 50.391505777018594,
       "ve_daekning_pct": 41.84426146388043,
-      "pendlingsafstand_km": 23.9
+      "pendlingsafstand_km": 23.9,
+      "fritidshuse": 2023,
+      "husholdning_co2_ton": 16312.479160424,
+      "husholdning_energi_tj": 706.3291050610001,
+      "husholdning_fossil_andel": 0.03528673204659676
     },
     {
       "folketal": 100564,
@@ -2246,7 +2542,11 @@
       "boligpris_m2": 10891,
       "elco2_g_kwh": 14.31582178311191,
       "ve_daekning_pct": 87.07381935114412,
-      "pendlingsafstand_km": 26.0
+      "pendlingsafstand_km": 26.0,
+      "fritidshuse": 223,
+      "husholdning_co2_ton": 17996.045500792,
+      "husholdning_energi_tj": 2633.291994437999,
+      "husholdning_fossil_andel": 0.09404618061008232
     },
     {
       "folketal": 3617,
@@ -2276,7 +2576,11 @@
       "boligpris_m2": 13413,
       "elco2_g_kwh": 21.755049445569163,
       "ve_daekning_pct": 80.94569573980958,
-      "pendlingsafstand_km": 20.2
+      "pendlingsafstand_km": 20.2,
+      "fritidshuse": 920,
+      "husholdning_co2_ton": 692.1741528260001,
+      "husholdning_energi_tj": 211.13019706999998,
+      "husholdning_fossil_andel": 0.04371854564669263
     },
     {
       "folketal": 102753,
@@ -2306,7 +2610,11 @@
       "boligpris_m2": 17139,
       "elco2_g_kwh": 57.69556944652018,
       "ve_daekning_pct": 14.73963641430896,
-      "pendlingsafstand_km": 28.3
+      "pendlingsafstand_km": 28.3,
+      "fritidshuse": 1221,
+      "husholdning_co2_ton": 73199.18482512,
+      "husholdning_energi_tj": 2722.0637915279995,
+      "husholdning_fossil_andel": 0.10942507858855083
     },
     {
       "folketal": 66352,
@@ -2336,7 +2644,11 @@
       "boligpris_m2": 21810,
       "elco2_g_kwh": 61.68638195482132,
       "ve_daekning_pct": 10.908229358391939,
-      "pendlingsafstand_km": 26.4
+      "pendlingsafstand_km": 26.4,
+      "fritidshuse": 293,
+      "husholdning_co2_ton": 38857.63132579701,
+      "husholdning_energi_tj": 1706.3452273020002,
+      "husholdning_fossil_andel": 0.06361686111880084
     },
     {
       "folketal": 44394,
@@ -2366,7 +2678,11 @@
       "boligpris_m2": 13607,
       "elco2_g_kwh": 52.83546259570987,
       "ve_daekning_pct": 31.775483130368766,
-      "pendlingsafstand_km": 31.6
+      "pendlingsafstand_km": 31.6,
+      "fritidshuse": 9271,
+      "husholdning_co2_ton": 18570.354136600003,
+      "husholdning_energi_tj": 1595.693032853,
+      "husholdning_fossil_andel": 0.04027573522777957
     },
     {
       "folketal": 378361,
@@ -2396,7 +2712,11 @@
       "boligpris_m2": 29213,
       "elco2_g_kwh": 59.2215710786031,
       "ve_daekning_pct": 9.73680046451125,
-      "pendlingsafstand_km": 22.5
+      "pendlingsafstand_km": 22.5,
+      "fritidshuse": 2787,
+      "husholdning_co2_ton": 267293.90596866,
+      "husholdning_energi_tj": 7164.384413496001,
+      "husholdning_fossil_andel": 0.013796858864775259
     },
     {
       "folketal": 90546,
@@ -2426,7 +2746,11 @@
       "boligpris_m2": 10797,
       "elco2_g_kwh": 18.592114851019353,
       "ve_daekning_pct": 77.03023331121943,
-      "pendlingsafstand_km": 23.4
+      "pendlingsafstand_km": 23.4,
+      "fritidshuse": 424,
+      "husholdning_co2_ton": 25481.585918090004,
+      "husholdning_energi_tj": 2501.0511199300004,
+      "husholdning_fossil_andel": 0.02621589185823403
     },
     {
       "folketal": 59324,
@@ -2456,7 +2780,11 @@
       "boligpris_m2": 11213,
       "elco2_g_kwh": 28.083129665301772,
       "ve_daekning_pct": 74.2194584777595,
-      "pendlingsafstand_km": 24.8
+      "pendlingsafstand_km": 24.8,
+      "fritidshuse": 2678,
+      "husholdning_co2_ton": 31963.901877271997,
+      "husholdning_energi_tj": 1715.4973347750001,
+      "husholdning_fossil_andel": 0.02223476290856658
     },
     {
       "folketal": 43305,
@@ -2486,7 +2814,11 @@
       "boligpris_m2": 9549,
       "elco2_g_kwh": 52.461044418210534,
       "ve_daekning_pct": 32.26562231951607,
-      "pendlingsafstand_km": 25.0
+      "pendlingsafstand_km": 25.0,
+      "fritidshuse": 245,
+      "husholdning_co2_ton": 9233.190135682,
+      "husholdning_energi_tj": 1191.121727498,
+      "husholdning_fossil_andel": 0.02987129588571773
     },
     {
       "folketal": 18596,
@@ -2516,7 +2848,11 @@
       "boligpris_m2": 6186,
       "elco2_g_kwh": 8.183058057056233,
       "ve_daekning_pct": 93.56264106273976,
-      "pendlingsafstand_km": 24.2
+      "pendlingsafstand_km": 24.2,
+      "fritidshuse": 2467,
+      "husholdning_co2_ton": 2728.32814006,
+      "husholdning_energi_tj": 747.74964367,
+      "husholdning_fossil_andel": 0.029925603504366828
     },
     {
       "folketal": 55405,
@@ -2546,7 +2882,11 @@
       "boligpris_m2": 7115,
       "elco2_g_kwh": 19.080332210279963,
       "ve_daekning_pct": 84.15778269588309,
-      "pendlingsafstand_km": 22.7
+      "pendlingsafstand_km": 22.7,
+      "fritidshuse": 10557,
+      "husholdning_co2_ton": 9146.061117047,
+      "husholdning_energi_tj": 1984.3040835649997,
+      "husholdning_fossil_andel": 0.03411864985651142
     },
     {
       "folketal": 44104,
@@ -2576,7 +2916,11 @@
       "boligpris_m2": 7214,
       "elco2_g_kwh": 32.60830232971751,
       "ve_daekning_pct": 65.37107047892479,
-      "pendlingsafstand_km": 22.9
+      "pendlingsafstand_km": 22.9,
+      "fritidshuse": 3353,
+      "husholdning_co2_ton": 4051.7105452039996,
+      "husholdning_energi_tj": 1487.2277291260002,
+      "husholdning_fossil_andel": 0.035746764954579395
     },
     {
       "folketal": 20122,
@@ -2606,7 +2950,11 @@
       "boligpris_m2": 7266,
       "elco2_g_kwh": 35.89716355282785,
       "ve_daekning_pct": 65.58707494435919,
-      "pendlingsafstand_km": 24.8
+      "pendlingsafstand_km": 24.8,
+      "fritidshuse": 1238,
+      "husholdning_co2_ton": 13942.252298329999,
+      "husholdning_energi_tj": 694.602667671,
+      "husholdning_fossil_andel": 0.03126596265577043
     },
     {
       "folketal": 97874,
@@ -2636,7 +2984,11 @@
       "boligpris_m2": 11548,
       "elco2_g_kwh": 50.388759615987546,
       "ve_daekning_pct": 30.86684627415976,
-      "pendlingsafstand_km": 25.7
+      "pendlingsafstand_km": 25.7,
+      "fritidshuse": 723,
+      "husholdning_co2_ton": 58767.714444270016,
+      "husholdning_energi_tj": 2664.733514644,
+      "husholdning_fossil_andel": 0.08732794563852991
     },
     {
       "folketal": 36529,
@@ -2666,7 +3018,11 @@
       "boligpris_m2": 8979,
       "elco2_g_kwh": 31.172799531457457,
       "ve_daekning_pct": 69.29891748831926,
-      "pendlingsafstand_km": 29.8
+      "pendlingsafstand_km": 29.8,
+      "fritidshuse": 297,
+      "husholdning_co2_ton": 7459.285829666,
+      "husholdning_energi_tj": 1109.97691442,
+      "husholdning_fossil_andel": 0.0376670423085753
     },
     {
       "folketal": 57523,
@@ -2696,7 +3052,11 @@
       "boligpris_m2": 8849,
       "elco2_g_kwh": 51.5614348952193,
       "ve_daekning_pct": 31.30243771200792,
-      "pendlingsafstand_km": 28.5
+      "pendlingsafstand_km": 28.5,
+      "fritidshuse": 4917,
+      "husholdning_co2_ton": 48159.8996241,
+      "husholdning_energi_tj": 1959.3320845029998,
+      "husholdning_fossil_andel": 0.07393946113721091
     },
     {
       "folketal": 62979,
@@ -2726,7 +3086,11 @@
       "boligpris_m2": 8352,
       "elco2_g_kwh": 42.32230619744483,
       "ve_daekning_pct": 51.20389153449937,
-      "pendlingsafstand_km": 26.8
+      "pendlingsafstand_km": 26.8,
+      "fritidshuse": 6376,
+      "husholdning_co2_ton": 30115.681420999994,
+      "husholdning_energi_tj": 2263.812324488,
+      "husholdning_fossil_andel": 0.03142213210456311
     },
     {
       "folketal": 37998,
@@ -2756,7 +3120,11 @@
       "boligpris_m2": 8024,
       "elco2_g_kwh": 18.349319947459886,
       "ve_daekning_pct": 83.6852032980086,
-      "pendlingsafstand_km": 29.8
+      "pendlingsafstand_km": 29.8,
+      "fritidshuse": 8627,
+      "husholdning_co2_ton": 12468.725282683,
+      "husholdning_energi_tj": 1462.428651132,
+      "husholdning_fossil_andel": 0.07420889894081023
     },
     {
       "folketal": 1683,
@@ -2786,7 +3154,11 @@
       "boligpris_m2": null,
       "elco2_g_kwh": 49.11837900982469,
       "ve_daekning_pct": 32.304458532136806,
-      "pendlingsafstand_km": 22.5
+      "pendlingsafstand_km": 22.5,
+      "fritidshuse": 975,
+      "husholdning_co2_ton": 1093.364943488,
+      "husholdning_energi_tj": 107.32163618000001,
+      "husholdning_fossil_andel": 0.08750455177788365
     },
     {
       "folketal": 41541,
@@ -2816,7 +3188,11 @@
       "boligpris_m2": 7856,
       "elco2_g_kwh": 43.06733841589326,
       "ve_daekning_pct": 50.152183588606924,
-      "pendlingsafstand_km": 27.6
+      "pendlingsafstand_km": 27.6,
+      "fritidshuse": 3055,
+      "husholdning_co2_ton": 12207.227109794,
+      "husholdning_energi_tj": 1311.7432860860001,
+      "husholdning_fossil_andel": 0.08663246959935238
     },
     {
       "folketal": 19344,
@@ -2846,7 +3222,11 @@
       "boligpris_m2": 4954,
       "elco2_g_kwh": 29.718347335248932,
       "ve_daekning_pct": 72.7941834687303,
-      "pendlingsafstand_km": 20.8
+      "pendlingsafstand_km": 20.8,
+      "fritidshuse": 485,
+      "husholdning_co2_ton": 3239.9026237109997,
+      "husholdning_energi_tj": 649.478065569,
+      "husholdning_fossil_andel": 0.06187368042644193
     },
     {
       "folketal": 31280,
@@ -2876,7 +3256,11 @@
       "boligpris_m2": 12399,
       "elco2_g_kwh": 47.55491238996458,
       "ve_daekning_pct": 45.533995892473115,
-      "pendlingsafstand_km": 30.3
+      "pendlingsafstand_km": 30.3,
+      "fritidshuse": 80,
+      "husholdning_co2_ton": 12444.514830396001,
+      "husholdning_energi_tj": 975.5906892620001,
+      "husholdning_fossil_andel": 0.04306228865999117
     },
     {
       "folketal": 42572,
@@ -2906,7 +3290,11 @@
       "boligpris_m2": 7430,
       "elco2_g_kwh": 23.114001838586113,
       "ve_daekning_pct": 79.65243123026347,
-      "pendlingsafstand_km": 23.6
+      "pendlingsafstand_km": 23.6,
+      "fritidshuse": 3789,
+      "husholdning_co2_ton": 22322.585793274,
+      "husholdning_energi_tj": 1537.2177878330003,
+      "husholdning_fossil_andel": 0.06238913794004247
     },
     {
       "folketal": 35632,
@@ -2936,7 +3324,11 @@
       "boligpris_m2": 7107,
       "elco2_g_kwh": 28.540472850906635,
       "ve_daekning_pct": 74.4967461754242,
-      "pendlingsafstand_km": 26.0
+      "pendlingsafstand_km": 26.0,
+      "fritidshuse": 2562,
+      "husholdning_co2_ton": 12343.544111562001,
+      "husholdning_energi_tj": 1276.0609089769998,
+      "husholdning_fossil_andel": 0.02711337377205371
     },
     {
       "folketal": 226033,
@@ -2966,7 +3358,11 @@
       "boligpris_m2": 16347,
       "elco2_g_kwh": 58.2594181734143,
       "ve_daekning_pct": 17.750499202542454,
-      "pendlingsafstand_km": 26.0
+      "pendlingsafstand_km": 26.0,
+      "fritidshuse": 5299,
+      "husholdning_co2_ton": 356695.49235712003,
+      "husholdning_energi_tj": 5679.734981352,
+      "husholdning_fossil_andel": 0.018881444115808426
     }
   ]
 }

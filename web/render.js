@@ -210,6 +210,26 @@ const DRIVER_FORBEHOLD = {
   "Gennemsnitlig pendlingsafstand":
     "Afstand til arbejde for beskæftigede med bopæl i kommunen. Siger intet om " +
     "transportmiddel og dækker kun arbejdsturen, ikke indkøb, fritid og andre ærinder.",
+  "Husholdningernes CO2 fra energi":
+    "Udledningen fra borgernes eget forbrug af varme, varmt vand og el i boligen, " +
+    "fordelt på samtlige boliger inklusive fritidshuse. Dækker forbrændingen og " +
+    "elnettet, ikke hele livscyklussen bag brændslet - niveauet er derfor lavere end " +
+    "CONCITO's nationale tal for El og varme, men sammenligningen med landet er gyldig, " +
+    "fordi begge sider opgøres ens.",
+  "Husholdningernes energiforbrug":
+    "Al energi brugt i boligerne: fjernvarme, gas, olie, brænde, varmepumper og el til " +
+    "alt andet. Erhverv, fremstilling og transport er ikke med. Fordelt på samtlige " +
+    "boliger inklusive fritidshuse, fordi fritidsboligers energi indgår, mens deres " +
+    "ejere er registreret i en anden kommune.",
+  "Fossil andel af husholdningernes energi":
+    "Naturgas, fyringsolie og LPG som andel af husholdningernes samlede energiforbrug. " +
+    "Modsat 'Fossil opvarmning', der tæller antal boliger, er dette den faktiske " +
+    "energimængde.",
+  "Fritidshuse pr. helårsbolig":
+    "Står her, fordi de to tal ovenfor ikke kan læses uden det. I kommuner med mange " +
+    "fritidsboliger er husholdningstallene usikre i begge retninger: fritidshuse bruger " +
+    "energi, men mindre end en helårsbolig, så de trækker gennemsnittet ned. Ved værdier " +
+    "over cirka 1 skal tallene læses med stor varsomhed.",
   "Genanvendelsesprocent":
     "Opgjort efter kommunens indberetning til Danmarks Statistik. Definitionen af, " +
     "hvad der tæller som genanvendt, har ændret sig over tid.",
@@ -218,6 +238,9 @@ const DRIVER_FORBEHOLD = {
 const ALLEREDE_PROCENT = new Set([
   "Lokal VE-dækning af elforbrug", "Genanvendelsesprocent",
 ]);
+
+// Drivere hvis enhed er "pct." men hvis råværdi er en andel mellem 0 og 1.
+const ANDEL_SOM_PROCENT = new Set(["Fossil andel af husholdningernes energi"]);
 
 function andel(v) {
   if (v == null || !Number.isFinite(v)) return MANGLER;
@@ -289,7 +312,11 @@ function kategoriKontekst(c, kategori) {
   const e = find("El og varme");
   if (kategori === "El og varme" && e) {
     return `CONCITO opgør el og varme til <strong>${tal(e.ton, 1)} ton</strong> pr. dansker
-      (${e.pct}&nbsp;%), ${kildeHenvisning(c, e.side)}.`;
+      (${e.pct}&nbsp;%), ${kildeHenvisning(c, e.side)}. Husholdningstallene herunder
+      kommer fra Klimaregnskabet.dk og dækker udledningen fra forbrændingen og elnettet,
+      ikke hele livscyklussen bag brændslet. Niveauet er derfor lavere end CONCITO's tal,
+      og de to må ikke lægges sammen - men sammenligningen mellem kommunen og landet er
+      gyldig, fordi begge sider opgøres ens.`;
   }
   if (kategori === "Øvrigt forbrug") {
     return `CONCITO opgør ikke en samlet kategori med dette navn. Nøgletallene herunder

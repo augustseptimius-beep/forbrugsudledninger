@@ -91,6 +91,22 @@ def fetch_boliger_type():
     return parcel, raekke, etage
 
 
+def fetch_fritidshuse():
+    """Returnerer {navn: antal ubeboede fritidshuse}.
+
+    Nødvendig for at fordele husholdningernes energi og udledning retvisende.
+    Fritidsboliger bruger energi, men deres ejere er registreret i en anden
+    kommune. Deler man husholdningstallet ud på indbyggere, følger det
+    sommerhustætheden næsten lige så tæt som boligstørrelsen - målt på alle
+    98 kommuner. Se fetch_klimaregnskabet.py for tallene."""
+    rows = dst_client.fetch(BASE, "BOL101", {
+        "OMRÅDE": "*", "BEBO": "5000", "ANVENDELSE": "565",
+        "UDLFORH": "*", "EJER": "*", "OPFØRELSESÅR": "*",
+        "Tid": PERIODER["BOLIGER_AAR"],
+    })
+    return dst_client.sum_by(rows, ["OMRÅDE"])
+
+
 def fetch_boligareal():
     """Returnerer {navn: gennemsnitligt boligareal i m² (float)} via midpoint-metoden.
     IKKE wildcard ANTVÆR/HUSSTØR - de er irrelevante her og blæser cellegrænsen op."""

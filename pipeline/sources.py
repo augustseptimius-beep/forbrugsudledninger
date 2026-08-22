@@ -54,6 +54,30 @@ KILDER = [
          forbehold="Afstanden til arbejde for beskæftigede med bopæl i kommunen. "
                    "Den siger intet om transportmiddel og dækker kun arbejdsturen, "
                    "ikke indkøb, fritid og andre ærinder."),
+    dict(_dst("BOL101_FRITID", "Fritidshuse uden CPR-tilmeldte personer",
+              "BOLIGER_AAR", ["fritidshuse"]),
+         url="https://www.statistikbanken.dk/BOL101",
+         forbehold="Bruges til at fordele husholdningernes energi og udledning på "
+                   "samtlige boliger. Fritidsboliger bruger energi, men deres ejere "
+                   "er registreret i en anden kommune."),
+    {
+        "id": "KLIMAREGNSKABET_HUSHOLDNINGER",
+        "navn": "Husholdningernes energiforbrug og udledning (Energi- og CO2-regnskabet)",
+        "udbyder": "Klimaregnskabet.dk",
+        "metode": "api",
+        "periode_noegle": "KLIMAREGNSKAB_AAR",
+        "licens": "Kræver personlig API-nøgle, se klimaregnskabet.dk",
+        "url": "https://klimaregnskabet.dk/klimaregnskabet-api",
+        "felter": ["husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel"],
+        "forbehold": "Kun kategorien Husholdninger - erhverv, fremstilling, offentlig "
+                     "service og transport hører til andre kategorier og er ikke med. "
+                     "Opgørelsen dækker udledningen fra forbrændingen og fra elnettet, "
+                     "ikke hele livscyklussen bag brændslet, og niveauet er derfor "
+                     "lavere end CONCITO's tal for El og varme. Sammenligningen med "
+                     "landsgennemsnittet er gyldig, fordi begge sider opgøres ens. "
+                     "NIRAS (2024) s. 18 peger på Energi- og CO2-Regnskabet som den "
+                     "rigtige kilde til energidelen.",
+    },
     {
         "id": "BM010",
         "navn": "Boligpriser pr. kvadratmeter, realiserede handler",
