@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { beregnKommune } from "../web/beregning.js";
-import { renderNationaltAftryk, renderIndikatorer, renderHuller,
+import { beregnKommune, optaelSignaler } from "../web/beregning.js";
+import { renderNationaltAftryk, renderIndikatorer, renderHuller, renderOverblik,
          renderKommuneOverskrift, renderKommune } from "../web/render.js";
 import { land, thisted, greve } from "./fixtures.js";
 
@@ -138,4 +138,53 @@ test("kommunevisning: forbeholdet overlever embed-tilstand", () => {
 test("overskrift: viser kommunekode og region", () => {
   const h = renderKommuneOverskrift(bThisted);
   assert.ok(h.includes("787") && h.includes("Nordjylland"));
+});
+
+// --- Signalmærkater ---
+
+test("overblik: tæller nøgletallene, lægger dem ikke sammen til en score", () => {
+  const h = renderOverblik(bThisted, concito);
+  assert.ok(h.includes("talt op"), "det skal fremgå at der tælles");
+  assert.ok(h.includes("vejes ikke mod hinanden"), "det skal siges at der ikke vægtes");
+  // Hvert tal i overblikket skal svare til en optælling af nøgletal - ikke til
+  // et beregnet gennemsnit eller en vægtet score.
+  const gruppe = b_transport();
+  const t = optaelSignaler(gruppe.drivere);
+  const raekke = h.split(">Transport<")[1].split("</li>")[0];
+  const tal = [...raekke.matchAll(/>(\d+)</g)].map((m) => Number(m[1]));
+  const forventede = Object.values(t.pr_signal).filter((n) => n > 0);
+  assert.deepEqual(tal.slice(0, forventede.length).sort(), [...forventede].sort(),
+    "tallene i overblikket skal være optællinger, ikke afledte størrelser");
+});
+
+function b_transport() {
+  return bThisted.grupper.find((g) => g.kategori === "Transport");
+}
+
+test("overblik: Fødevarer står med sin nationale vægt og uden nøgletal", () => {
+  const h = renderOverblik(bThisted, concito);
+  const raekke = h.split("Fødevarer")[1].split("</li>")[0];
+  assert.ok(raekke.includes("2,5 ton"), "den nationale vægt skal stå der");
+  assert.ok(raekke.includes("ingen kommunale nøgletal"));
+});
+
+test("signalmærkat: farven er aldrig eneste bærer af betydning", () => {
+  // Cirka 8 % af mænd er farveblinde. Tekst og symbol skal stå ved siden af.
+  const h = renderIndikatorer(bThisted, concito);
+  for (const tekst of ["højere", "uafklaret"]) {
+    assert.ok(h.includes(`>${tekst}<`) || h.includes(`${tekst}</span>`),
+      `signalet "${tekst}" mangler sin tekst`);
+  }
+});
+
+test("signalmærkat: hvert nøgletal bærer sin begrundelse", () => {
+  const h = renderIndikatorer(bThisted, concito);
+  // Diesel er det vigtigste eksempel på en retning, der ikke må gættes.
+  assert.ok(h.includes("dieselbil udleder typisk"),
+    "diesel-andelens begrundelse skal stå ved mærkatet");
+});
+
+test("indikatortabel: har en kolonne for hvad nøgletallet peger mod", () => {
+  const h = renderIndikatorer(bThisted, concito);
+  assert.ok(h.includes("Peger mod"));
 });

@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { afvigelse, byggeriPr1000, driverTabel, driverePrKategori, beregnKommune, KATEGORI }
+import { afvigelse, byggeriPr1000, driverTabel, driverePrKategori, beregnKommune,
+         niveauBaand, udledningsSignal, optaelSignaler, KATEGORI }
   from "../web/beregning.js";
 import { land, thisted, greve } from "./fixtures.js";
 
@@ -105,4 +106,71 @@ test("beregnKommune: intet felt i modellen hedder aftryk eller estimat", () => {
   const r = beregnKommune(thisted, land);
   assert.ok(!("estimat" in r));
   assert.ok(!("aftryk" in r));
+});
+
+// --- Signal og optælling ---
+
+test("niveauBaand: beskriver størrelse uden at vurdere", () => {
+  assert.equal(niveauBaand(0.05), "på niveau");
+  assert.equal(niveauBaand(-0.05), "på niveau");
+  assert.equal(niveauBaand(0.20), "over");
+  assert.equal(niveauBaand(-0.20), "under");
+  assert.equal(niveauBaand(0.50), "markant over");
+  assert.equal(niveauBaand(-0.50), "markant under");
+  assert.equal(niveauBaand(null), "ukendt");
+});
+
+test("udledningsSignal: retningen afhænger af nøgletallets påvirkning", () => {
+  // Flere biler end landet peger mod højere udledning.
+  assert.equal(udledningsSignal(0.5, "hoejere"), "markant højere");
+  // Færre elbiler end landet peger også mod højere - modsat fortegn, samme svar.
+  assert.equal(udledningsSignal(-0.5, "lavere"), "markant højere");
+  assert.equal(udledningsSignal(0.5, "lavere"), "markant lavere");
+  assert.equal(udledningsSignal(-0.5, "hoejere"), "markant lavere");
+});
+
+test("udledningsSignal: små udsving peger ingen vej", () => {
+  assert.equal(udledningsSignal(0.05, "hoejere"), "på niveau");
+  assert.equal(udledningsSignal(-0.09, "lavere"), "på niveau");
+});
+
+test("udledningsSignal: uafklaret påvirkning gættes aldrig", () => {
+  // Diesel-andel er det vigtigste eksempel: en dieselbil udleder typisk
+  // mindre CO2 pr. km end en benzinbil, men køres længere.
+  assert.equal(udledningsSignal(0.9, "uafklaret"), "uafklaret");
+  assert.equal(udledningsSignal(0.9, undefined), "uafklaret");
+  assert.equal(udledningsSignal(null, "hoejere"), "ukendt");
+});
+
+test("optaelSignaler: summerne kolliderer ikke med optællingen", () => {
+  // Tidligere hed både optællingen af 'lavere' og summen af de to lavere
+  // signaler det samme, så summen overskrev optællingen og kategorien viste
+  // nøgletal, der ikke fandtes.
+  const drivere = [
+    { signal: "markant lavere", rolle: "hoved" },
+    { signal: "markant lavere", rolle: "hoved" },
+    { signal: "højere", rolle: "hoved" },
+  ];
+  const t = optaelSignaler(drivere);
+  assert.equal(t.pr_signal["lavere"], 0, "der er ingen almindeligt 'lavere'");
+  assert.equal(t.pr_signal["markant lavere"], 2);
+  assert.equal(t.sumLavere, 2);
+});
+
+test("optaelSignaler: optællingen summerer til antallet af nøgletal", () => {
+  const b = beregnKommune(thisted, land);
+  for (const g of b.grupper) {
+    const t = optaelSignaler(g.drivere);
+    const uden = g.drivere.filter((d) => d.rolle !== "hjaelper").length;
+    const sum = Object.values(t.pr_signal).reduce((a, x) => a + x, 0);
+    assert.equal(sum, uden, `${g.kategori}: ${sum} talt, ${uden} nøgletal`);
+  }
+});
+
+test("optaelSignaler: hjælpetal tælles ikke med", () => {
+  const t = optaelSignaler([
+    { signal: "højere", rolle: "hoved" },
+    { signal: "markant højere", rolle: "hjaelper" },
+  ]);
+  assert.equal(t.ialt, 1);
 });
