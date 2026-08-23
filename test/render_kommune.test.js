@@ -405,3 +405,26 @@ test("tærskelfordeling: metodetabellen genereres og udelader nøgletal uden afv
   assert.ok(!h.includes("Gini-koefficient"), "nøgletal uden afvigelse hører ikke til");
   assert.ok(!h.includes("undefined") && !h.includes("NaN"));
 });
+
+test("overblik: den nationale vægt må ikke kunne læses som kommunens eget tal", () => {
+  // "Transport 1,84 ton pr. indbygger" på en kommuneside læses ellers som
+  // kommunens eget transportaftryk - et tal, værktøjet slet ikke kan opgøre.
+  // Både tallet og søjlen er nationale og ens på alle 98 sider.
+  const h = renderKategorioverblik(bThisted, ens);
+  const i = h.indexOf("Transport");
+  const raekke = h.slice(i, i + 600);
+  assert.ok(/Nationalt[\s\S]{0,80}ton/.test(raekke),
+    "vægten skal være mærket som national");
+  assert.ok(h.includes("ens på alle 98 kommunesider"),
+    "introen skal sige, at venstre kolonne ikke handler om kommunen");
+  assert.ok(h.includes('aria-label="Transport udgør'),
+    "søjlen skal have et tilgængeligt navn, der siger hvad den måler");
+});
+
+test("overblik: venstre kolonne er byte-identisk for to forskellige kommuner", () => {
+  // Den maskinelle udgave af påstanden ovenfor.
+  const venstre = (b) => (renderKategorioverblik(b, ens)
+    .match(/Nationalt[\s\S]*?af aftrykket/g) || []).map((s) => s.replace(/\s+/g, " "));
+  assert.deepEqual(venstre(bThisted), venstre(bGreve));
+  assert.ok(venstre(bThisted).length === ens.kategorier.length);
+});

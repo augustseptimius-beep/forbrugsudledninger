@@ -344,14 +344,21 @@ export function renderKategorioverblik(b, ens) {
       </div>`;
     }
 
+    // Både tallet og søjlen er NATIONALE og ordret ens på alle 98 kommunesider.
+    // Uden ordet "nationalt" læses "1,84 ton pr. indbygger" på Albertslunds side
+    // som Albertslunds eget transportaftryk - et tal, værktøjet slet ikke kan
+    // opgøre. aria-label gentager det for skærmlæsere, som ikke ser søjlen.
+    const soejleLabel = `${esc(k.navn)} udgør ${tal(k.pct, 1)} procent af det `
+      + "nationale forbrugsaftryk";
     return `<div class="grid grid-cols-1 sm:grid-cols-[13rem_1fr] gap-2 sm:gap-5
       border-t border-gray-100 py-3 first:border-0">
       <div>
         <div class="text-sm font-semibold text-gray-900">${esc(k.navn)}</div>
-        <div class="text-xs text-gray-500 tabular-nums mb-1.5">
+        <div class="text-xs text-gray-500 tabular-nums mb-1.5">Nationalt
           <strong class="font-semibold text-gray-700">${tal(k.ton, 2)} ton</strong>
-          pr. indbygger &middot; ${tal(k.pct, 1)}&nbsp;%</div>
-        <span class="block h-2.5 rounded-sm bg-gray-100">${soejle}</span>
+          pr. indbygger &middot; ${tal(k.pct, 1)}&nbsp;% af aftrykket</div>
+        <span class="block h-2.5 rounded-sm bg-gray-100" role="img"
+          aria-label="${soejleLabel}">${soejle}</span>
       </div>
       ${hoejre}
     </div>`;
@@ -363,9 +370,10 @@ export function renderKategorioverblik(b, ens) {
       <span class="text-sm text-gray-600">Energistyrelsen ${esc(ens.nationalt_aftryk.aar)}
         &middot; ${tal(ens.nationalt_aftryk.ton, 2)} ton pr. indbygger</span>
     </div>
-    <p class="mt-1 text-sm text-gray-600 max-w-3xl">Kategorierne står i den rækkefølge,
-      de fylder nationalt. Værktøjet vælger ikke kategori - det viser, hvad der kan måles
-      om kommunen, og hvad der ikke kan.</p>
+    <p class="mt-1 text-sm text-gray-600 max-w-3xl">Til venstre står kategoriens vægt i
+      det <strong>nationale</strong> aftryk, og søjlen viser den som andel. Begge dele er
+      ens på alle 98 kommunesider - de siger intet om ${esc(b.navn)}. Til højre står det,
+      der faktisk er målt om kommunen. Værktøjet vælger ikke kategori.</p>
 
     <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
       <p class="rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600">
