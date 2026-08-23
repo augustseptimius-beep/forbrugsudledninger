@@ -24,7 +24,7 @@ import fetch_klimaregnskabet
 import sources
 import concito
 import ens
-from constants import PERIODER, EL_CO2_MANUAL
+from constants import PERIODER
 from kommuner import KOMMUNER
 
 DATA_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "data.json")
@@ -56,10 +56,9 @@ def saml_kommune_post(navn, dst_data, boligpriser, kode=None, region=None,
     if region is not None:
         post["region"] = region
     post["boligpris_m2"] = boligpriser.get(navn)
-    # Beregnet værdi vinder over den håndaflæste; EL_CO2_MANUAL er nu kun
-    # et sikkerhedsnet, hvis Energi Data Service ikke svarer.
-    beregnet = (elco2 or {}).get(kode)
-    post["elco2_g_kwh"] = beregnet if beregnet is not None else EL_CO2_MANUAL.get(navn)
+    # Energi Data Service er eneste kilde. Svarer den ikke, står feltet tomt
+    # og vises som streg - aldrig som et tal fra en anden opgørelse.
+    post["elco2_g_kwh"] = (elco2 or {}).get(kode)
     post["ve_daekning_pct"] = (ve_daekning or {}).get(kode)
     # Faktuel pendlingsafstand i km som DST opgør den. Ingen omregning.
     post["pendlingsafstand_km"] = (pendling or {}).get(navn)
@@ -161,8 +160,8 @@ def main():
                   f"Forbrugsvægtet landsgennemsnit: {elco2_land:.1f} g/kWh.")
             _skriv_el_cache(elco2, ve_daekning, elco2_land, ve_land)
         except Exception as fejl:
-            # Falder tilbage til de håndaflæste værdier frem for at fejle helt.
-            # Motoren viser manglende kommuner som streg, ikke som nul.
+            # Feltet står tomt frem for at blive fyldt med tal fra en anden
+            # opgørelse. Motoren viser manglende værdier som streg, ikke som nul.
             print(f"  ADVARSEL: kunne ikke hente el-data ({fejl}). "
                   "Falder tilbage til manuelle værdier.")
             elco2, ve_daekning, elco2_land, ve_land = {}, {}, None, None
@@ -204,10 +203,9 @@ def main():
         vaerdier = [h.get(felt) for h in husholdning.values() if h.get(felt) is not None]
         return sum(vaerdier) if vaerdier else None
 
-    # Beregnet el-CO2 og VE-dækning for landet. Uden disse falder landsværdien
-    # tilbage til EL_CO2_MANUAL's håndaflæste 51,8, mens de 98 kommuner bruger
-    # de beregnede tal - så ville hver eneste afvigelse være regnet mod et
-    # forkert landsgennemsnit.
+    # Beregnet el-CO2 og VE-dækning for landet. Landet og kommunerne skal komme
+    # fra samme kilde og samme metode - ellers er hver eneste afvigelse regnet
+    # mod et forkert landsgennemsnit.
     if elco2_land is not None:
         land_post["elco2_g_kwh"] = elco2_land
     if ve_land is not None:

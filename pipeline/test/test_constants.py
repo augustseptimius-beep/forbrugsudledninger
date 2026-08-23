@@ -32,16 +32,19 @@ class TestIngenKoefficienter(unittest.TestCase):
                              f"{navn} kunne ikke kildebelægges og skal blive ude")
 
     def test_ingen_ukildebelagte_talkonstanter(self):
-        # Alt på modulniveau skal være enten PERIODER eller EL_CO2_MANUAL.
+        # PERIODER er det eneste tilbage på modulniveau. Ethvert nyt tal her
+        # ville være et datapunkt uden kilde.
         offentlige = {n for n in dir(constants) if n.isupper()}
-        self.assertEqual(offentlige, {"PERIODER", "EL_CO2_MANUAL"})
+        self.assertEqual(offentlige, {"PERIODER"})
 
-    def test_el_co2_manual_er_maerket_som_sikkerhedsnet(self):
-        # Uden mærkatet ville næste læser tro, det er en datakilde og bruge
-        # to håndaflæste værdier frem for de 98 beregnede.
+    def test_det_haandaflaeste_el_co2_sikkerhedsnet_er_ikke_kommet_tilbage(self):
+        # EL_CO2_MANUAL dækkede kun landet og én kommune. Et frafald ville sætte
+        # landsgennemsnittet efter én metode og de 98 kommuner efter en anden,
+        # så hver eneste afvigelse blev regnet mod et forkert landstal.
+        # Energi Data Service er nu eneste kilde; svarer den ikke, står feltet tomt.
+        self.assertFalse(hasattr(constants, "EL_CO2_MANUAL"))
         kilde = open(constants.__file__, encoding="utf-8").read()
-        foran = kilde[:kilde.index("EL_CO2_MANUAL = {")]
-        self.assertIn("SIKKERHEDSNET", foran.upper())
+        self.assertNotIn("51.8", kilde, "det håndaflæste landstal må ikke stå som kode")
 
 
 if __name__ == "__main__":

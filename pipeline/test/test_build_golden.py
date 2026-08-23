@@ -36,14 +36,16 @@ class TestBuildGolden(unittest.TestCase):
         self.assertEqual(post["disp_indkomst"], 252934)
         self.assertEqual(post["biler_diesel"], 7114)
         self.assertEqual(post["boligpris_m2"], 7430)
-        self.assertEqual(post["elco2_g_kwh"], 26.7)  # fra EL_CO2_MANUAL
+        # Uden el-data fra Energi Data Service står feltet TOMT - aldrig med
+        # et tal fra en anden opgørelse.
+        self.assertIsNone(post["elco2_g_kwh"])
 
     def test_land_har_ikke_kode_eller_region(self):
         post = build.saml_kommune_post("Hele landet", DST_DATA, BOLIGPRISER)
         self.assertNotIn("kode", post)
         self.assertNotIn("region", post)
         self.assertEqual(post["disp_indkomst"], 287682)
-        self.assertEqual(post["elco2_g_kwh"], 51.8)
+        self.assertIsNone(post["elco2_g_kwh"])
 
     def test_alle_forventede_felter_er_til_stede(self):
         post = build.saml_kommune_post("Thisted", DST_DATA, BOLIGPRISER, kode=787, region="Nordjylland")

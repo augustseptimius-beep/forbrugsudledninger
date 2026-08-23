@@ -3,10 +3,9 @@
 Ved den årlige genkøring:
 1. Opdatér PERIODER til de nyeste tilgængelige perioder for hver kilde
    (kør build.py - valideringsrapporten viser, om en tabel har nyere data).
-2. EL_CO2_MANUAL er et sikkerhedsnet, ikke en datakilde - el-CO2 hentes
-   automatisk i fetch_energi.py. Rør den kun, hvis kilden selv ændrer sig.
-3. Der er ingen beregningskoefficienter i denne fil. De nationale
-   sammenligningstal står afskrevet med sidehenvisning i concito.py."""
+2. Der er ingen beregningskoefficienter og ingen datapunkter i denne fil.
+   El-CO2 hentes udelukkende fra Energi Data Service i fetch_energi.py.
+   De nationale sammenligningstal står afskrevet i ens.py og concito.py."""
 
 # --- Periodekonstanter: ÅRETS ét sted at redigere ved opdatering ---
 PERIODER = {
@@ -53,15 +52,19 @@ PERIODER = {
 # Skal der igen beregnes et kommunalt aftryk, skal datagrundlaget fra NIRAS'
 # anbefaling først skaffes - se NIRAS_ANBEFALINGER i concito.py.
 
-# --- SIKKERHEDSNET: Energinet miljødeklaration (el-CO2 pr. kommune, g/kWh) ---
-# Værdierne herunder er aflæst manuelt fra v5-regnearket. De bruges KUN, hvis
-# Energi Data Service ikke svarer ved den årlige kørsel.
+# --- INTET SIKKERHEDSNET FOR EL-CO2 ---
 #
-# Til daglig beregnes tallet nu for alle 98 kommuner i fetch_energi.py ud fra
-# Energinets rå timedata - præcis den forbrugsvægtede aggregering, denne
-# kommentar tidligere beskrev som ikke-automatiserbar. Metoden følger
-# Energinets lokationsbaserede kommunedeklaration.
-EL_CO2_MANUAL = {
-    "Hele landet": 51.8,
-    "Thisted": 26.7,
-}
+# Her stod tidligere EL_CO2_MANUAL med to håndaflæste værdier fra v5-regnearket
+# (Hele landet 51,8 og Thisted 26,7). De er fjernet.
+#
+# Energi Data Service er eneste kilde til el-CO2. Svarer den ikke, står feltet
+# tomt og vises som streg - præcis som ethvert andet manglende felt. Det er
+# bedre end alternativet: sikkerhedsnettet dækkede kun landet og én kommune, så
+# et frafald ville sætte landsgennemsnittet efter én metode og de 98 kommuner
+# efter en anden. Hver eneste afvigelse ville da være regnet mod et forkert
+# landsgennemsnit - en fejl, der faktisk opstod én gang og blev fanget af testen
+# "landsværdierne er de beregnede, ikke de håndaflæste sikkerhedsnet".
+#
+# De håndaflæste tal stammer desuden fra en anden opgørelse end den, pipelinen
+# beregner, og de to giver ikke samme niveau. Vores tal følger Energinets
+# lokationsbaserede kommunedeklaration og dækker CO2, ikke fuld CO2e.

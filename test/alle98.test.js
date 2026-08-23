@@ -119,10 +119,13 @@ test("fossil andel af husholdningernes energi ligger mellem 0 og 1", () => {
   }
 });
 
-test("landsværdierne er de beregnede, ikke de håndaflæste sikkerhedsnet", () => {
-  // Falder landet tilbage til EL_CO2_MANUAL's 51,8 mens kommunerne bruger de
-  // beregnede tal, regnes hver eneste afvigelse mod et forkert gennemsnit.
-  assert.notEqual(data.land.elco2_g_kwh, 51.8, "landet bruger stadig sikkerhedsnettet");
+test("landsværdierne er de beregnede, ikke et tal fra en anden opgørelse", () => {
+  // Historisk vagt. Sikkerhedsnettet EL_CO2_MANUAL er fjernet, men fejlen det
+  // forårsagede må ikke kunne komme tilbage: faldt landet tilbage til den
+  // håndaflæste 51,8, mens de 98 kommuner brugte de beregnede tal, blev hver
+  // eneste afvigelse regnet mod et forkert landsgennemsnit.
+  assert.notEqual(data.land.elco2_g_kwh, 51.8,
+    "landet bruger et håndaflæst tal fra en anden opgørelse");
   assert.ok(data.land.ve_daekning_pct != null, "landets VE-dækning mangler");
   const vaerdier = data.kommuner.map((k) => k.elco2_g_kwh).filter((v) => v != null);
   assert.ok(data.land.elco2_g_kwh > Math.min(...vaerdier));
