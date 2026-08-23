@@ -2,7 +2,7 @@
 // beregning i beregning.js. Denne fil henter data, læser URL'en og sætter
 // resultatet ind i siden - intet andet.
 
-import { beregnKommune } from "./beregning.js";
+import { beregnKommune, beregnFordeling } from "./beregning.js";
 import { renderKommune, renderForside, renderKommuneKort } from "./render.js";
 import { installerTooltips } from "./tooltip.js";
 
@@ -43,26 +43,34 @@ function visForside(data) {
   input.focus({ preventScroll: true });
 }
 
-function visKommune(data, concito, kommune) {
-  const b = beregnKommune(kommune, data.land);
+function visKommune(data, concito, ens, kommune) {
+  // Fordelingen beregnes i browseren af den data.json, siden allerede har
+  // hentet (ca. 5 ms for 98 kommuner). Den lægges bevidst IKKE ind i data.json
+  // af pipelinen: så ville optællingen her og tabellen på metodesiden kunne
+  // komme ud af trit ved næste datahentning, og datafilen ville få et afledt
+  // tal, der ikke stammer fra et register.
+  const fordeling = beregnFordeling(data.kommuner, data.land);
+  const b = beregnKommune(kommune, data.land, fordeling);
   document.title = `${kommune.navn} - Forbrugsbaserede udledninger`;
   app.innerHTML = `
     <a href="index.html" class="no-embed inline-flex items-center gap-1 text-sm text-gray-500
        hover:text-gray-900 transition-colors mb-4 no-print">
       <span aria-hidden="true">&larr;</span> Alle kommuner
     </a>
-    ${renderKommune(b, concito)}`;
+    ${renderKommune(b, concito, ens)}`;
 }
 
 async function start() {
   anvendEmbed();
   installerTooltips();
-  let data, concito;
+  let data, concito, ens;
   try {
-    const [d, c] = await Promise.all([fetch("data/data.json"), fetch("data/concito.json")]);
+    const [d, c, e] = await Promise.all([
+      fetch("data/data.json"), fetch("data/concito.json"), fetch("data/ens.json")]);
     if (!d.ok) throw new Error(`data.json: HTTP ${d.status}`);
     if (!c.ok) throw new Error(`concito.json: HTTP ${c.status}`);
-    [data, concito] = await Promise.all([d.json(), c.json()]);
+    if (!e.ok) throw new Error(`ens.json: HTTP ${e.status}`);
+    [data, concito, ens] = await Promise.all([d.json(), c.json(), e.json()]);
   } catch (fejl) {
     visFejl(`Kunne ikke hente datagrundlaget (${fejl.message}). Siden skal serveres over
       http, ikke åbnes direkte fra filsystemet.`);
@@ -80,7 +88,7 @@ async function start() {
       <a href="index.html" class="underline">Se listen over alle kommuner</a>.`);
     return;
   }
-  visKommune(data, concito, kommune);
+  visKommune(data, concito, ens, kommune);
 }
 
 start();

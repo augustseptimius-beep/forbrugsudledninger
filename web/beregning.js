@@ -11,8 +11,8 @@
 //
 // Filen sammenligner derfor kommunens faktuelle, offentligt tilgængelige
 // nøgletal med landsgennemsnittet, og kobler hver indikator til den
-// forbrugskategori, CONCITO opgør nationalt. Fortolkningen af, hvad tallene
-// betyder for CO2, ligger hos CONCITO - ikke her.
+// forbrugsgruppe, Energistyrelsen opgør nationalt. Fortolkningen af, hvad
+// tallene betyder for CO2, ligger hos kilderne - ikke her.
 
 /** Relativ afvigelse (kommune − land) / land. Returnerer null hvis input mangler. */
 export function afvigelse(kommuneVal, landVal) {
@@ -48,9 +48,6 @@ const husholdningCo2PrBolig = (m) => m.husholdning_co2_ton / alleBoliger(m);
 const husholdningEnergiPrBolig = (m) => (m.husholdning_energi_tj * 1000) / alleBoliger(m);
 const fritidshusPrBolig = (m) => m.fritidshuse / helaarsboliger(m);
 
-// Kategorierne er CONCITO's egne fra "Danmarks globale forbrugsudledninger"
-// (2023) s. 16, figur 7. "Kontekst" er ikke en CONCITO-kategori, men markerer
-// indikatorer, der beskriver kommunen uden at pege på én forbrugskategori.
 // Hvilken vej et nøgletal peger, hvis værdien er høj.
 //   "hoejere"    en høj værdi peger mod højere udledning end landsgennemsnittet
 //   "lavere"     en høj værdi peger mod lavere udledning
@@ -64,16 +61,25 @@ export const PAAVIRKNING = {
   hoejere: "hoejere", lavere: "lavere", uafklaret: "uafklaret",
 };
 
+// Energistyrelsens forbrugsgrupper (Global Afrapportering 2026, data for 2024).
+// Afløste CONCITO's fem kategorier, fordi ENS' tal er nyere, opdateres årligt
+// og summerer eksakt til hovedtallet. Vægtene står i pipeline/ens.py.
+//
+// TVAERS og KONTEKST er ikke ENS-kategorier. TVAERS rummer nøgletal, der driver
+// forbruget på tværs af alle kategorier; KONTEKST beskriver kommunen uden at
+// pege på en forbrugskategori. Ingen af dem får en national vægt.
 export const KATEGORI = {
   TRANSPORT: "Transport",
-  BOLIGER: "Boliger",
-  EL_VARME: "El og varme",
-  OEVRIGT: "Øvrigt forbrug",
+  FOEDEVARER: "Føde- og drikkevarer",
+  PRODUKTER: "Forbrugsprodukter og services",
+  ENERGI: "Energi og forsyning",
+  BOLIG_BYGGERI: "Bolig og byggeri",
+  TVAERS: "På tværs af kategorier",
   KONTEKST: "Kontekst",
 };
 
 // Hver driver: hvordan værdien beregnes, hvordan afvigelsen dannes, og hvilken
-// af CONCITO's forbrugskategorier den oplyser om.
+// af Energistyrelsens forbrugsgrupper den oplyser om.
 // afvigelsestype: "relativ" = (k−l)/l, "difference" = k−l, "ingen" = kun kontekst.
 //
 // rolle: "hjaelper" markerer nøgletal, der kun findes for at kvalificere et
@@ -83,7 +89,7 @@ export const KATEGORI = {
 // er sat i verden for at forklare.
 const DRIVERE = [
   { navn: "Disponibel indkomst", enhed: "kr.", val: (m) => m.disp_indkomst,
-    type: "relativ", kategori: KATEGORI.OEVRIGT, paavirkning: "hoejere",
+    type: "relativ", kategori: KATEGORI.TVAERS, paavirkning: "hoejere",
     begrundelse: "CONCITO (2023) s. 6 og s. 30: klimaaftrykket hænger tæt sammen med "
       + "indkomstniveauet, og forbrugsprofilerne stiger fra 8,7 til 25 ton med indkomst." },
   { navn: "Nettoformue (gns.)", enhed: "kr.", val: (m) => m.formue_gns,
@@ -105,27 +111,33 @@ const DRIVERE = [
     begrundelse: "Tæthed hænger sammen med både boligtype og transportafstand, som "
       + "begge opgøres hver for sig. Den tælles ikke med igen her." },
   { navn: "Gennemsnitligt boligareal", enhed: "m²/bolig", val: (m) => m.boligareal,
-    type: "relativ", kategori: KATEGORI.BOLIGER, paavirkning: "hoejere",
-    begrundelse: "Større boliger kræver flere byggematerialer og mere energi at "
-      + "opvarme. CONCITO (2023) s. 16 opgør boliger til 1,6 ton pr. dansker." },
+    type: "relativ", kategori: KATEGORI.ENERGI, rolle: "hjaelper", paavirkning: "hoejere",
+    begrundelse: "Større boliger koster mere varme. Står som forklarende tal under "
+      + "energiforbruget, ikke under byggeriet: det er nybyggeriet, der giver "
+      + "byggeriets udledning, ikke størrelsen på de huse, der allerede står." },
   { navn: "Parcelhus-andel", enhed: "pct.", val: parcelAndel,
-    type: "relativ", kategori: KATEGORI.BOLIGER, paavirkning: "hoejere",
-    begrundelse: "Fritliggende huse er større og har mere ydervæg pr. bolig end "
-      + "lejligheder, og bruger derfor mere materiale og energi." },
+    andel: "0-1",
+    type: "relativ", kategori: KATEGORI.ENERGI, rolle: "hjaelper", paavirkning: "hoejere",
+    begrundelse: "Fritliggende huse har mere ydervæg pr. bolig end lejligheder og "
+      + "bruger derfor mere varme. Forklarer energiforbruget; den stående boligmasses "
+      + "sammensætning siger intet om, hvor meget der bygges." },
   { navn: "Byggeaktivitet", enhed: "pr. 1.000 indb.", val: byggeriPr1000,
-    type: "relativ", kategori: KATEGORI.BOLIGER, paavirkning: "hoejere",
-    begrundelse: "Nybyggeri kræver materialer, hvis udledning ligger i boliger-"
-      + "kategorien, CONCITO (2023) s. 16." },
+    type: "relativ", kategori: KATEGORI.BOLIG_BYGGERI, paavirkning: "hoejere",
+    begrundelse: "Nybyggeri kræver materialer. Energistyrelsen opgør investering i "
+      + "boliger til 0,48 ton pr. indbygger (2024). Det er selve byggeriet, der "
+      + "tæller her - boligernes energiforbrug hører til Energi og forsyning." },
   { navn: "Biler pr. indbygger", enhed: "biler/pers.", val: bilerPrIndb,
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "hoejere",
     begrundelse: "Flere biler betyder både mere kørsel og flere producerede "
-      + "køretøjer. CONCITO (2023) s. 17 opgør kørsel i personlige transportmidler "
-      + "til 1,0 ton og køb af køretøjer til 0,4 ton." },
+      + "køretøjer. Energistyrelsen opgør husholdningernes transport plus køb af "
+      + "køretøjer til 1,84 ton pr. indbygger (2024), den største enkeltkategori." },
   { navn: "El- og plugin-hybridandel", enhed: "pct.", val: elPluginAndel,
+    andel: "0-1",
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "lavere",
     begrundelse: "En elbil udleder mindre pr. kørt kilometer end en tilsvarende "
       + "benzin- eller dieselbil på et dansk elnet." },
   { navn: "Diesel-andel", enhed: "pct.", val: dieselAndel,
+    andel: "0-1",
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "uafklaret",
     begrundelse: "En dieselbil udleder typisk MINDRE CO2 pr. kilometer end en "
       + "benzinbil, men køres til gengæld længere. Retningen for CO2 kan ikke "
@@ -135,41 +147,61 @@ const DRIVERE = [
     begrundelse: "Længere afstand til arbejde betyder flere kørte kilometer. Siger "
       + "dog intet om transportmiddel." },
   { navn: "Husholdningernes CO2 fra energi", enhed: "ton CO2e/bolig",
-    val: husholdningCo2PrBolig, type: "relativ", kategori: KATEGORI.EL_VARME,
+    val: husholdningCo2PrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere",
     begrundelse: "Målt udledning fra borgernes eget energiforbrug i boligen." },
   { navn: "Husholdningernes energiforbrug", enhed: "GJ/bolig",
-    val: husholdningEnergiPrBolig, type: "relativ", kategori: KATEGORI.EL_VARME,
+    val: husholdningEnergiPrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere",
     begrundelse: "Mere energi brugt i boligen. Udledningen afhænger dog af, hvilken "
       + "energikilde der bruges - se de to øvrige nøgletal." },
   { navn: "Fossil andel af husholdningernes energi", enhed: "pct.",
-    val: (m) => m.husholdning_fossil_andel, type: "relativ", kategori: KATEGORI.EL_VARME,
+    val: (m) => m.husholdning_fossil_andel, andel: "0-1",
+    type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere",
     begrundelse: "Naturgas, fyringsolie og LPG udleder ved forbrændingen." },
   { navn: "Fossil opvarmning", enhed: "pct.", val: fossilOpv,
-    type: "relativ", kategori: KATEGORI.EL_VARME, paavirkning: "hoejere",
+    andel: "0-1",
+    type: "relativ", kategori: KATEGORI.ENERGI, paavirkning: "hoejere",
     begrundelse: "Olie- og gasfyr udleder ved forbrændingen i boligen." },
   { navn: "Fritidshuse pr. helårsbolig", enhed: "boliger/bolig",
-    val: fritidshusPrBolig, type: "relativ", kategori: KATEGORI.EL_VARME,
+    val: fritidshusPrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
     rolle: "hjaelper", paavirkning: "uafklaret",
     begrundelse: "Findes kun for at kvalificere husholdningstallene." },
   { navn: "El-CO2 pr. kWh", enhed: "g/kWh", val: (m) => m.elco2_g_kwh,
-    type: "relativ", kategori: KATEGORI.EL_VARME, paavirkning: "hoejere",
+    type: "relativ", kategori: KATEGORI.ENERGI, paavirkning: "hoejere",
     begrundelse: "Højere udledning pr. forbrugt kilowatt-time." },
   { navn: "Lokal VE-dækning af elforbrug", enhed: "pct.", val: (m) => m.ve_daekning_pct,
-    type: "relativ", kategori: KATEGORI.EL_VARME, rolle: "hjaelper",
+    andel: "0-100",
+    type: "relativ", kategori: KATEGORI.ENERGI, rolle: "hjaelper",
     paavirkning: "uafklaret",
     begrundelse: "Et produktionsmål. Den grønne strøm indgår allerede i det "
       + "landsdækkende mix, alle forbruger, så den må ikke tælles som en reduktion "
       + "i kommunens eget forbrug." },
+  // De to affaldsnøgletal stod tidligere som "hoejere" og "lavere". De er sat
+  // til uafklaret, fordi DST's kommunefordeling af husholdningsaffald for 2023
+  // er påvist upålidelig: flere kommuner, der deler et fælleskommunalt
+  // affaldsselskab, har fået hinandens affald bogført. Se DRIVER_FORBEHOLD i
+  // render.js for beviset og metodesiden for den fulde redegørelse.
+  //
+  // Retningen er IKKE forkert som fagligt ræsonnement - mere affald peger
+  // fortsat mod større materielt forbrug. Men et mærkat er en påstand om
+  // netop denne kommunes tal, og den påstand kan ikke bæres af data, hvor vi
+  // ikke kan udpege med sikkerhed, hvilke kommuner der er ramt. Sæt dem
+  // tilbage, når kilden er rettet, eller når et senere opgørelsesår er rent.
   { navn: "Husholdningsaffald", enhed: "kg/pers.", val: (m) => m.affald_kg,
-    type: "relativ", kategori: KATEGORI.OEVRIGT, paavirkning: "hoejere",
-    begrundelse: "Mere affald afspejler et større materielt forbrug. Bruges som "
-      + "indikator, fordi kommunalt indkøbsaftryk ikke findes offentligt." },
+    type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "uafklaret",
+    begrundelse: "Mere affald peger i sig selv mod et større materielt forbrug, men "
+      + "kommunefordelingen for det viste år er påvist upålidelig, og det kan ikke "
+      + "afgøres med sikkerhed, hvilke kommuner der er ramt. Retningen gættes derfor "
+      + "ikke. Tallet står som Danmarks Statistik har offentliggjort det." },
   { navn: "Genanvendelsesprocent", enhed: "pct.", val: (m) => m.genanvendelse_pct,
-    type: "relativ", kategori: KATEGORI.OEVRIGT, paavirkning: "lavere",
-    begrundelse: "Genanvendte materialer erstatter produktion af nye." },
+    andel: "0-100",
+    type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "uafklaret",
+    begrundelse: "Genanvendte materialer erstatter produktion af nye, men procenten "
+      + "har samme indberetningsfejl som husholdningsaffaldet: forsvinder restaffaldet "
+      + "fra en kommunes regnskab, stiger de genanvendelige fraktioners andel af sig "
+      + "selv. Retningen gættes derfor ikke." },
   { navn: "Boligpris pr. m²", enhed: "kr./m²", val: (m) => m.boligpris_m2,
     type: "relativ", kategori: KATEGORI.KONTEKST, paavirkning: "uafklaret",
     begrundelse: "Boligpris siger noget om købekraft og boligtype, som begge opgøres "
@@ -179,8 +211,12 @@ const DRIVERE = [
 // Tærskler for, hvornår en afvigelse kaldes markant. De er en PRÆSENTATIONS-
 // beslutning uden kilde - råtallet står altid ved siden af, så læseren kan se
 // gennem båndet. Tærsklerne er skrevet frem på metodesiden.
-const TAERSKEL_NIVEAU = 0.10;
-const TAERSKEL_MARKANT = 0.33;
+//
+// Eksporteret, fordi beregnFordeling(), mærkatet og metodesidens tabel SKAL
+// tælle på de samme tærskler. Lå de tre steder hver for sig, kunne de komme
+// til at sige forskellige ting om det samme tal.
+export const TAERSKEL_NIVEAU = 0.10;
+export const TAERSKEL_MARKANT = 0.33;
 
 /** Beskriver afvigelsens størrelse i ord. Ren beskrivelse, ingen vurdering. */
 export function niveauBaand(afvigelse) {
@@ -215,8 +251,78 @@ function sikker(fn, m) {
   return Number.isFinite(v) ? v : null;
 }
 
-/** Byg indikatortabellen: værdi, landsværdi, afvigelse (efter type) og retning. */
-export function driverTabel(kommune, land) {
+/** Percentil ved lineær interpolation på et sorteret array. */
+function percentil(sorteret, p) {
+  if (sorteret.length === 0) return null;
+  if (sorteret.length === 1) return sorteret[0];
+  const i = (sorteret.length - 1) * p;
+  const lav = Math.floor(i);
+  const hoej = Math.ceil(i);
+  if (lav === hoej) return sorteret[lav];
+  return sorteret[lav] + (sorteret[hoej] - sorteret[lav]) * (i - lav);
+}
+
+/** Hvordan landets kommuner fordeler sig på HVERT nøgletal.
+ *
+ *  HVORFOR DEN FINDES. Tærsklerne er de samme for alle nøgletal, men
+ *  nøgletallene er ikke lige spredte. "Fossil andel af husholdningernes energi"
+ *  ligger mindst 33 % fra landsgennemsnittet i 80 af 98 kommuner; "Gennemsnitligt
+ *  boligareal" gør det i ingen. Ordet "markant" betyder derfor ikke det samme
+ *  fra række til række, og uden denne optælling kan en læser ikke se det.
+ *
+ *  HVAD DEN IKKE ER. Den rangordner ikke kommuner. Alt herunder er en egenskab
+ *  ved NØGLETALLET, ikke ved kommunen: de samme tal gælder ordret på alle 98
+ *  kommunesider. Tre regler holder den grænse, og de må ikke brydes:
+ *    1. Returnér aldrig kommunens egen placering eller percentil.
+ *    2. Vis aldrig mindste- og størsteværdien - de inviterer til spørgsmålet
+ *       "hvem ligger højest?", som værktøjet ikke besvarer.
+ *    3. Navngiv aldrig en anden kommune.
+ *  Det er samme slags operation som optaelSignaler(): den tæller, den vejer
+ *  ikke. Ingen ny koefficient, intet nyt datagrundlag - kun de tærskler, der
+ *  allerede er dokumenteret på metodesiden.
+ *
+ *  Returnerer {[driverNavn]: {n, paaNiveau, mellem, markant, medianAbs, p90Abs,
+ *  spaendLav, spaendHoej}} - eller null for nøgletal uden afvigelse (Gini). */
+export function beregnFordeling(kommuner, land) {
+  const tabeller = kommuner.map((k) => driverTabel(k, land));
+  const fordeling = {};
+
+  DRIVERE.forEach((d, i) => {
+    const raekker = tabeller.map((t) => t[i]);
+    const afvigelser = raekker.map((r) => r.afvigelse).filter((v) => v != null);
+    if (afvigelser.length === 0) {
+      fordeling[d.navn] = null; // fx Gini, der har type "ingen"
+      return;
+    }
+    const abs = afvigelser.map(Math.abs).sort((a, b) => a - b);
+    const raa = raekker.map((r) => r.kommuneVaerdi)
+      .filter((v) => v != null).sort((a, b) => a - b);
+
+    fordeling[d.navn] = {
+      // n er antal kommuner MED en afvigelse - ikke 98. Boligpris pr. m²
+      // mangler for én kommune, og en optælling "af 98" ville påstå en
+      // dækning, værktøjet ikke har.
+      n: afvigelser.length,
+      paaNiveau: abs.filter((a) => a < TAERSKEL_NIVEAU).length,
+      mellem: abs.filter((a) => a >= TAERSKEL_NIVEAU && a < TAERSKEL_MARKANT).length,
+      markant: abs.filter((a) => a >= TAERSKEL_MARKANT).length,
+      medianAbs: percentil(abs, 0.5),
+      p90Abs: percentil(abs, 0.9),
+      // 10- og 90-percentilen af de RÅ værdier, i nøgletallets egen enhed.
+      // Det er den eneste måde at gøre "+283 %" læseligt uden at vise et rangtal.
+      spaendLav: percentil(raa, 0.1),
+      spaendHoej: percentil(raa, 0.9),
+    };
+  });
+  return fordeling;
+}
+
+/** Byg indikatortabellen: værdi, landsværdi, afvigelse (efter type) og retning.
+ *
+ *  `fordeling` er valgfri og har null som standard, så alle eksisterende
+ *  kaldssteder - golden-testene iblandt - kalder uændret og får præcis de
+ *  samme værdier som før. Alt nyt er additivt. */
+export function driverTabel(kommune, land, fordeling = null) {
   return DRIVERE.map((d) => {
     const kv = sikker(d.val, kommune);
     const lv = sikker(d.val, land);
@@ -225,12 +331,27 @@ export function driverTabel(kommune, land) {
       if (d.type === "relativ") afv = afvigelse(kv, lv);
       else if (d.type === "difference") afv = kv - lv;
     }
+    // Procentpoint ved siden af den relative afvigelse for de nøgletal, der er
+    // andele. Med et landsgennemsnit på 9,8 % bliver 37,5 % til "+283 %",
+    // hvilket lyder ekstremt for en forskel på 28 procentpoint.
+    //
+    // VIGTIGT: dette er et RENT VISNINGSFELT. Læg ikke andelene om til
+    // type "difference" for at opnå det samme - niveauBaand() og
+    // udledningsSignal() bruger de samme 0,10/0,33-tærskler på hvad der end
+    // står i afvigelse, så en omlægning ville kollapse alle 0-1-andele til
+    // "på niveau" og gøre næsten alle 0-100-andele "markante".
+    let pp = null;
+    if (d.andel && kv != null && lv != null) {
+      pp = (kv - lv) * (d.andel === "0-1" ? 100 : 1);
+    }
     return {
       navn: d.navn, enhed: d.enhed, type: d.type, kategori: d.kategori,
       rolle: d.rolle ?? "hoved",
       paavirkning: d.paavirkning ?? "uafklaret",
       begrundelse: d.begrundelse ?? null,
       kommuneVaerdi: kv, landVaerdi: lv, afvigelse: afv,
+      procentpoint: pp,
+      fordeling: fordeling?.[d.navn] ?? null,
       retning: afv == null ? "kontekst" : afv > 0 ? "over land" : afv < 0 ? "under land" : "på niveau",
       baand: niveauBaand(afv),
       signal: udledningsSignal(afv, d.paavirkning, d.kategori),
@@ -238,7 +359,7 @@ export function driverTabel(kommune, land) {
   });
 }
 
-/** Indikatorerne grupperet efter CONCITO-kategori, i kategoriernes rækkefølge. */
+/** Indikatorerne grupperet efter Energistyrelsens forbrugsgruppe. */
 /** Tæller nøgletallenes signaler i en kategori. TÆLLER - vejer ikke. En
  *  vægtet score ville kræve et grundlag, der ikke findes i nogen kilde.
  *
@@ -262,8 +383,11 @@ export function optaelSignaler(drivere) {
 }
 
 export function driverePrKategori(drivere) {
-  const raekkefoelge = [KATEGORI.TRANSPORT, KATEGORI.BOLIGER, KATEGORI.EL_VARME,
-                        KATEGORI.OEVRIGT, KATEGORI.KONTEKST];
+  // Rækkefølge efter Energistyrelsens nationale vægt, faldende. Fødevarer og
+  // Offentligt forbrug har ingen kommunale nøgletal og optræder derfor ikke
+  // her, kun i kategorioverblikket.
+  const raekkefoelge = [KATEGORI.TRANSPORT, KATEGORI.PRODUKTER, KATEGORI.ENERGI,
+                        KATEGORI.BOLIG_BYGGERI, KATEGORI.TVAERS, KATEGORI.KONTEKST];
   return raekkefoelge
     .map((kategori) => ({ kategori, drivere: drivere.filter((d) => d.kategori === kategori) }))
     .filter((g) => g.drivere.length > 0);
@@ -279,9 +403,10 @@ const FORVENTEDE_FELTER = [
   "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
 ];
 
-/** Fuld sammenligning for én kommune: indikatortabel, gruppering og manglende felter. */
-export function beregnKommune(kommune, land) {
-  const drivere = driverTabel(kommune, land);
+/** Fuld sammenligning for én kommune: indikatortabel, gruppering og manglende felter.
+ *  `fordeling` er valgfri - se driverTabel. */
+export function beregnKommune(kommune, land, fordeling = null) {
+  const drivere = driverTabel(kommune, land, fordeling);
   return {
     navn: kommune.navn,
     kode: kommune.kode,

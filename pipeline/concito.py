@@ -93,7 +93,7 @@ FOEDEVARE_UNDERKATEGORIER = [
 # NIRAS' anbefalinger til en kommunal model. Gengivet, fordi de forklarer
 # hvorfor dette værktøj ikke selv beregner et kommunalt aftryk.
 NIRAS_ANBEFALINGER = [
-    {"omraade": "Transport", "side": 20, "afsnit": "4.2.6",
+    {"omraade": "Transport", "side": 6, "afsnit": "1.4",
      "anbefaling": "Brug DTU's Transportvaneundersøgelse, som muliggør estimering af "
                    "privat transportarbejde på kommuneniveau fordelt på transportform.",
      "tilgaengelighed": "Kræver aftale om kommercielle vilkår. Ikke offentligt tilgængelig."},

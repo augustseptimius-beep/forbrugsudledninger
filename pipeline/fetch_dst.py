@@ -185,6 +185,58 @@ def fetch_affald():
     return kg, pct
 
 
+# Restaffaldets fraktioner i LABY24. En kommune bogfører sit indsamlede
+# restaffald under den ene eller den anden - Nyborg bruger fx FORBRÆNDINGSEGNET,
+# hvor de fleste bruger DAGRENOVATION - så de skal lægges sammen, før tallene
+# kan sammenlignes på tværs af kommuner.
+RESTAFFALD_FRAKTIONER = ("DAGRENOVATION OG LIGNENDE", "FORBRÆNDINGSEGNET AFFALD")
+
+
+def fetch_affald_validitet(aar, forrige_aar):
+    """Returnerer {navn: forhold} for restaffald i aar delt med forrige_aar.
+
+    DETTE ER ET VALIDITETSTJEK TIL VALIDERINGSRAPPORTEN, IKKE ET DATAFELT.
+    Det ender ikke i data.json og styrer ikke brugerfladen. Det findes, fordi
+    DST's kommunefordeling af husholdningsaffald for 2023 viste sig upålidelig:
+    kommuner, der deler et fælleskommunalt affaldsselskab, havde fået hinandens
+    restaffald bogført. Enkeltvis var tallene absurde - Hørsholm indberettede
+    29 ton dagrenovation for 24.715 indbyggere - men lagt sammen inden for
+    selskabet var niveauet normalt.
+
+    LABY25, tabellen nøgletallet hentes fra, bærer ikke DST's advarsel om
+    kommunefordelingen. Den står på tonnage-tabellen LABY24 og i
+    statistikdokumentationen. Derfor er tjekket nødt til at hente LABY24.
+
+    Et brat fald i en kommunes eget restaffald fra det ene år til det andet er
+    ikke en reel adfærdsændring, men et indberetningsbrud. Hvad der er bratt
+    nok, afgøres bevidst IKKE her: funktionen returnerer det rå forhold og
+    overlader dommen til mennesket, der læser rapporten."""
+    rows = dst_client.fetch(BASE, "LABY24", {
+        "KOMGRP": "*", "BEHANDLING": "TOT", "AFFFRAK": "*",
+        "Tid": f"{forrige_aar},{aar}",
+    })
+    ton = {}
+    for r in rows:
+        if r["AFFFRAK"] not in RESTAFFALD_FRAKTIONER:
+            continue
+        # DST bruger ".." for "ingen data". Her tæller den som nul, fordi en
+        # fraktion, der er forsvundet, er præcis det tjekket leder efter. Den
+        # må aldrig tælle som nul i et datafelt - kun i dette tjek.
+        try:
+            t = float(r["INDHOLD"].strip())
+        except ValueError:
+            t = 0.0
+        noegle = (r["KOMGRP"], r["TID"])
+        ton[noegle] = ton.get(noegle, 0.0) + t
+
+    forhold = {}
+    for navn in {navn for navn, _ in ton}:
+        foer = ton.get((navn, str(forrige_aar)), 0.0)
+        if foer > 0:
+            forhold[navn] = ton.get((navn, str(aar)), 0.0) / foer
+    return forhold
+
+
 def fetch_all_dst():
     """Kører alle 11 DST-hentninger og samler dem i et {navn: {felt: værdi}}-dict,
     med feltnavne der matcher motorens datakontrakt 1:1. Kommuner uden data for et

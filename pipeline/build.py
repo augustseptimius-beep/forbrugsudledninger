@@ -1,6 +1,6 @@
 """Orkestrerer hele datapipelinen. Kør: python3 pipeline/build.py
 
-Skriver web/data/{data.json, sources.json, concito.json} og udskriver en
+Skriver web/data/{data.json, sources.json, concito.json, ens.json} og udskriver en
 valideringsrapport til stdout.
 
 data.json indeholder udelukkende faktuelle, offentligt tilgængelige nøgletal
@@ -23,12 +23,14 @@ import fetch_energi
 import fetch_klimaregnskabet
 import sources
 import concito
+import ens
 from constants import PERIODER, EL_CO2_MANUAL
 from kommuner import KOMMUNER
 
 DATA_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "data.json")
 SOURCES_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "sources.json")
 CONCITO_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "concito.json")
+ENS_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "ens.json")
 EL_CACHE_PATH = os.path.join(os.path.dirname(__file__), ".el_cache.json")
 KR_CACHE_PATH = os.path.join(os.path.dirname(__file__), ".kr_cache.json")
 
@@ -247,6 +249,10 @@ def main():
         json.dump(concito.byg_concito(), f, ensure_ascii=False, indent=2)
     print(f"Skrev {CONCITO_JSON_PATH}")
 
+    with open(ENS_JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(ens.byg_ens(), f, ensure_ascii=False, indent=2)
+    print(f"Skrev {ENS_JSON_PATH}")
+
     # --- Valideringsrapport ---
     print("\n--- Valideringsrapport ---")
     manglende_kerne = 0
@@ -260,6 +266,29 @@ def main():
     print(f"Kommuner med manglende kerne-input (utilstrækkeligt datagrundlag): {manglende_kerne}")
     for felt, antal in sorted(manglende_felter_total.items(), key=lambda x: -x[1]):
         print(f"  {felt}: mangler for {antal} områder")
+
+    # Affaldets kommunefordeling: se fetch_affald_validitet for baggrunden.
+    # Rapporten dømmer ikke - den lægger tallene frem, så et menneske kan afgøre,
+    # om affaldsnøgletallenes retning kan sættes tilbage fra "uafklaret".
+    print("\nAffaldsindberetning - ændring i restaffald siden året før:")
+    try:
+        aar = int(PERIODER["AFFALD_AAR"])
+        forhold = fetch_dst.fetch_affald_validitet(aar, aar - 1)
+        kendte = {p["navn"] for p in kommune_poster}
+        brud = sorted(((v, n) for n, v in forhold.items()
+                       if n in kendte and (v < 0.5 or v > 1.5)))
+        if brud:
+            print(f"  {len(brud)} kommuner ændrede sig mere end 50 % på ét år:")
+            for v, navn in brud:
+                print(f"    {navn:22} {v:6.2f}x")
+            print("  Et brat fald er et indberetningsbrud, ikke en adfærdsændring.")
+            print("  Så længe listen ikke er tom, bør 'Husholdningsaffald' og")
+            print("  'Genanvendelsesprocent' blive stående som uafklarede i beregning.js.")
+        else:
+            print("  Ingen kommuner ændrede sig mere end 50 % på ét år.")
+            print("  Affaldsnøgletallenes retning kan formentlig sættes tilbage i beregning.js.")
+    except Exception as fejl:
+        print(f"  ADVARSEL: kunne ikke hente LABY24 ({fejl}). Tjekket er sprunget over.")
 
     thisted = next(p for p in kommune_poster if p["navn"] == "Thisted")
     print("\nSanity-check Thisted mod v5-regneark (facit i parentes):")

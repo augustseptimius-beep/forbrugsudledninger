@@ -50,7 +50,7 @@ test("driverTabel: Gini er kontekst uden afvigelse", () => {
   assert.equal(d.retning, "kontekst");
 });
 
-test("driverTabel: hver indikator hører til en CONCITO-kategori", () => {
+test("driverTabel: hver indikator hører til en kendt kategori", () => {
   const gyldige = new Set(Object.values(KATEGORI));
   for (const d of driverTabel(thisted, land)) {
     assert.ok(gyldige.has(d.kategori), `${d.navn} har ukendt kategori ${d.kategori}`);

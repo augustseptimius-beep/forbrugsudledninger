@@ -24,7 +24,39 @@ body.embed .no-embed { display: none !important; }
 body.embed { background: white; }
 body.embed main { padding-top: 0; }
 
+/* Modstykket til .no-embed. Sidehovedets forbeholdsbanner bærer .no-embed og
+   forsvinder derfor i en iframe - præcis dér, hvor læseren møder tallene på en
+   fremmed side uden at vide, hvem der står bag. Denne klasse viser en kompakt
+   udgave af samme forbehold, og kun i embed-tilstand, så den ikke står dobbelt
+   på vores egen side. */
+.kun-embed { display: none; }
+body.embed .kun-embed { display: block; }
+
 @media print {
   /* Tooltip-boksen hører ikke med på papir. */
   #tip-boks { display: none !important; }
+}
+
+/* Vandret scroll-markør. Bruges på tabeller, der er bredere end skærmen
+   (nøgletalstabellen, kildetabellen), så det er synligt at der er mere
+   indhold i siderne, ikke kun når man tilfældigt strejfer tabellen. De to
+   hvide dæklag ruller med indholdet (local) og skjuler skyggen ved hver
+   ende, når man er scrollet helt derud; de to skyggelag sidder fast ved
+   containerens kant (scroll) og bliver først synlige, når dæklaget ruller
+   væk fra dem. Forudsætter hvid baggrund i containeren, som alle tre
+   nuværende brugssteder har. */
+.tabel-scroll {
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: left, right, left, right;
+  background-size: 32px 100%, 32px 100%, 12px 100%, 12px 100%;
+  background-image:
+    linear-gradient(to right, white 30%, rgba(255, 255, 255, 0)),
+    linear-gradient(to left, white 30%, rgba(255, 255, 255, 0)),
+    linear-gradient(to right, rgba(20, 30, 26, 0.16), rgba(20, 30, 26, 0)),
+    linear-gradient(to left, rgba(20, 30, 26, 0.16), rgba(20, 30, 26, 0));
+  background-attachment: local, local, scroll, scroll;
+}
+@media print {
+  .tabel-scroll { background: none; }
 }

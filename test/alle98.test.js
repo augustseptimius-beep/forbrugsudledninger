@@ -1,13 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { beregnKommune } from "../web/beregning.js";
-import { renderKommune } from "../web/render.js";
+import { beregnKommune, beregnFordeling, driverTabel } from "../web/beregning.js";
+import { renderKommune, renderIndikatorer } from "../web/render.js";
 
 // Kører mod det ægte datasæt, ikke mod fixtures. Fanger felter, der findes
 // for én kommune, men mangler for en anden.
 const data = JSON.parse(readFileSync(new URL("../web/data/data.json", import.meta.url)));
 const concito = JSON.parse(readFileSync(new URL("../web/data/concito.json", import.meta.url)));
+const ens = JSON.parse(readFileSync(new URL("../web/data/ens.json", import.meta.url)));
 
 test("datasættet indeholder alle 98 kommuner", () => {
   assert.equal(data.kommuner.length, 98);
@@ -20,14 +21,14 @@ test("datasættet indeholder ingen beregningskoefficienter", () => {
 
 test("alle 98 kommuner kan renderes uden at kaste", () => {
   for (const k of data.kommuner) {
-    const html = renderKommune(beregnKommune(k, data.land), concito);
+    const html = renderKommune(beregnKommune(k, data.land), concito, ens);
     assert.ok(html.length > 2000, `${k.navn}: mistænkeligt kort output`);
   }
 });
 
 test("intet kommuneoutput lækker undefined, NaN eller null", () => {
   for (const k of data.kommuner) {
-    const html = renderKommune(beregnKommune(k, data.land), concito);
+    const html = renderKommune(beregnKommune(k, data.land), concito, ens);
     assert.ok(!html.includes("undefined"), `${k.navn}: undefined i output`);
     assert.ok(!html.includes("NaN"), `${k.navn}: NaN i output`);
     assert.ok(!/>\s*null\s*</.test(html), `${k.navn}: null i output`);
@@ -126,4 +127,73 @@ test("landsværdierne er de beregnede, ikke de håndaflæste sikkerhedsnet", () 
   const vaerdier = data.kommuner.map((k) => k.elco2_g_kwh).filter((v) => v != null);
   assert.ok(data.land.elco2_g_kwh > Math.min(...vaerdier));
   assert.ok(data.land.elco2_g_kwh < Math.max(...vaerdier));
+});
+
+// --- Fordelingskonteksten må aldrig blive en rangordning ---
+
+const fordeling = beregnFordeling(data.kommuner, data.land);
+
+test("fordeling: hvert nøgletals optælling er ENS for alle 98 kommuner", () => {
+  // Dette er den maskinelle udgave af påstanden i om.html om, at værktøjet ikke
+  // rangordner kommuner. En rangordning ville variere fra kommune til kommune;
+  // en egenskab ved nøgletallet gør det aldrig. Kører mod ægte data, fordi
+  // fixturen kun har to kommuner og derfor ikke kan afsløre et brud.
+  const perDriver = new Map();
+  for (const k of data.kommuner) {
+    for (const r of driverTabel(k, data.land, fordeling)) {
+      if (!r.fordeling) continue;
+      const s = `markant hos ${r.fordeling.markant} af ${r.fordeling.n}`;
+      if (!perDriver.has(r.navn)) perDriver.set(r.navn, new Set());
+      perDriver.get(r.navn).add(s);
+    }
+  }
+  assert.ok(perDriver.size > 0, "der skal faktisk være optællinger at tjekke");
+  for (const [navn, varianter] of perDriver) {
+    assert.equal(varianter.size, 1,
+      `${navn}: optællingen varierer mellem kommuner og er dermed en rangordning`);
+  }
+});
+
+test("fordeling: nøgletalstabellens optællinger er identiske på tværs af kommuner", () => {
+  const optael = (k) => (renderIndikatorer(beregnKommune(k, data.land, fordeling), concito, ens)
+    .match(/8 ud af 10 kommuner:[^<]*/g) || []).map((s) => s.replace(/\s+/g, " ")).join("|");
+  const facit = optael(data.kommuner[0]);
+  assert.ok(facit.length > 0);
+  for (const k of data.kommuner) {
+    assert.equal(optael(k), facit, `${k.navn}: tabellens optælling afviger`);
+  }
+});
+
+test("fordeling: n afspejler faktisk dækning, ikke et hardkodet 98", () => {
+  // Boligpris pr. m² mangler for Læsø. En optælling "af 98" ville påstå en
+  // dækning, værktøjet ikke har.
+  assert.equal(fordeling["Boligpris pr. m²"].n, 97);
+  assert.equal(fordeling["Parcelhus-andel"].n, 98);
+});
+
+test("fordeling: den skævhed, konteksten findes for, er stadig til stede", () => {
+  // Låser problemet fast: hvis de to nogensinde nærmer sig hinanden, er
+  // tærsklerne blevet ændret, og konteksten skal genovervejes.
+  assert.ok(fordeling["Fossil andel af husholdningernes energi"].markant > 70);
+  assert.equal(fordeling["Gennemsnitligt boligareal"].markant, 0);
+});
+
+test("alle 98 kommuner renderes med fordeling uden undefined, NaN eller null", () => {
+  for (const k of data.kommuner) {
+    const h = renderKommune(beregnKommune(k, data.land, fordeling), concito, ens);
+    assert.ok(!h.includes("undefined"), `${k.navn}: undefined`);
+    assert.ok(!h.includes("NaN"), `${k.navn}: NaN`);
+    assert.ok(!/>\s*null\s*</.test(h), `${k.navn}: null`);
+  }
+});
+
+test("affald: ingen kommune får et retningsmærkat på de to affaldsnøgletal", () => {
+  for (const k of data.kommuner) {
+    for (const r of driverTabel(k, data.land, fordeling)) {
+      if (r.navn === "Husholdningsaffald" || r.navn === "Genanvendelsesprocent") {
+        assert.equal(r.signal, "uafklaret",
+          `${k.navn}/${r.navn}: DST's kommunefordeling bærer ikke et mærkat`);
+      }
+    }
+  }
 });
