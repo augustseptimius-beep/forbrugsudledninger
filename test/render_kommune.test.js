@@ -417,8 +417,6 @@ test("overblik: den nationale vægt må ikke kunne læses som kommunens eget tal
     "vægten skal være mærket som national");
   assert.ok(h.includes("ens på alle 98 kommunesider"),
     "introen skal sige, at venstre kolonne ikke handler om kommunen");
-  assert.ok(h.includes('aria-label="Transport udgør'),
-    "søjlen skal have et tilgængeligt navn, der siger hvad den måler");
 });
 
 test("overblik: venstre kolonne er byte-identisk for to forskellige kommuner", () => {
@@ -427,4 +425,47 @@ test("overblik: venstre kolonne er byte-identisk for to forskellige kommuner", (
     .match(/Nationalt[\s\S]*?af aftrykket/g) || []).map((s) => s.replace(/\s+/g, " "));
   assert.deepEqual(venstre(bThisted), venstre(bGreve));
   assert.ok(venstre(bThisted).length === ens.kategorier.length);
+});
+
+test("overblik: hvert tal bærer sin enhed", () => {
+  // "14,1" uden enhed er ikke et tal, en læser kan bruge. Procenter har
+  // allerede tegnet fra driverVaerdi og skal ikke have "pct." bagefter.
+  const h = renderKategorioverblik(bThisted, ens);
+  assert.ok(/23,6\s*km/.test(h), "pendlingsafstand skal stå med km");
+  assert.ok(/0,56\s*biler\/pers\./.test(h), "biler pr. indbygger skal have sin enhed");
+  assert.ok(!h.includes("% pct."), "procenter må ikke få enheden hæftet på igen");
+});
+
+test("overblik: hvert nøgletal har en over/under-markør, hvor formen bærer signalet", () => {
+  // Cirka 8 % af mænd er farveblinde, så retningen må ikke kun ligge i farven.
+  const h = renderKategorioverblik(bThisted, ens);
+  assert.ok(h.includes("over landsgennemsnittet"), "pil op skal have tilgængeligt navn");
+  assert.ok(h.includes("under landsgennemsnittet"), "pil ned skal have tilgængeligt navn");
+});
+
+test("overblik: hver kategori får en samlet konklusion", () => {
+  const h = renderKategorioverblik(bThisted, ens);
+  assert.ok(/peger mod (højere|lavere) udledning end landsgennemsnittet/.test(h)
+    || h.includes("trækker i hver sin retning"),
+    "der skal stå en konklusion, ikke kun en optælling");
+});
+
+test("overblik: konklusionen påstår aldrig noget om kategorien som helhed", () => {
+  // Værktøjet har intet mål for kategorien og kan ikke veje nøgletal mod
+  // hinanden. Konklusionen må derfor kun sige, hvad NØGLETALLENE peger mod.
+  const h = renderKategorioverblik(bThisted, ens);
+  assert.ok(!/[Kk]ategorien ligger/.test(h));
+  assert.ok(!/Transport ligger (over|under)/.test(h));
+  assert.ok(h.includes("talt, ikke vejet mod hinanden"),
+    "forbeholdet om optælling frem for vægtning skal stå");
+});
+
+test("overblik: ingen rå HTML-entiteter slipper ud i teksten", () => {
+  // esc() ramte engang selve entiteten, fordi den blev sat ind før escaping,
+  // så der stod "&middot;" med bogstaver midt i konklusionen.
+  for (const b of [bThisted, bGreve]) {
+    const h = renderKategorioverblik(b, ens);
+    assert.ok(!h.includes("&amp;middot;"), `${b.navn}: rå &middot;`);
+    assert.ok(!h.includes("&amp;nbsp;"), `${b.navn}: rå &nbsp;`);
+  }
 });
