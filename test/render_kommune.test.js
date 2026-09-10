@@ -221,10 +221,16 @@ test("overblik: mærkatet siger 'peger mod', ikke om værdien er høj", () => {
   assert.equal(d.signal, "højere", "men den peger mod højere udledning");
 });
 
-test("overblik: viser spænd frem for en optælling med skjult tærskel", () => {
+test("overblik: sammenligner kun med landsgennemsnittet, ikke med andre kommuner", () => {
+  // To tidligere forsøg står som skiltet her: "markant hos 62 af 98" krævede at
+  // læseren kendte en skjult tærskel, og spændet ("8 ud af 10 kommuner: X - Y")
+  // lagde en tredje talstørrelse oven i kommunens egen værdi og landets. Begge
+  // er væk. Tilbage står den ene sammenligning, en kommuneside kan bære.
   const h = renderKategorioverblik(bThisted, ens);
-  assert.ok(h.includes("8 ud af 10 kommuner"), "spændet skal stå");
   assert.ok(!h.includes("markant hos"), "den gamle optælling er væk");
+  assert.ok(!/\d+\s*ud af\s*\d+\s*kommuner/i.test(h), "spændet er væk");
+  assert.ok(!/spænd/i.test(h), "ingen omtale af et spænd overhovedet");
+  assert.ok(h.includes("landet"), "landsgennemsnittet står stadig");
 });
 
 test("overblik: hjælpetal fylder ikke overblikket", () => {
@@ -339,40 +345,20 @@ test("fordeling: n tæller kommuner MED en afvigelse, ikke antal kommuner", () =
     "nøgletal med manglende værdier skal have et lavere n");
 });
 
-test("fordeling: to argumenter til beregnKommune giver stadig fordeling null", () => {
-  // Golden-testene kalder med to argumenter og må ikke ændre opførsel.
-  const b = beregnKommune(thisted, land);
-  assert.ok(b.drivere.every((d) => d.fordeling === null));
-  const h = renderKommune(b, concito, ens);
-  // Forklaringsboksen nævner spændet og skal altid stå. Det er DATALINJERNE
-  // med konkrete værdier ("8 ud af 10 kommuner: X - Y"), der skal udeblive.
-  assert.ok(!h.includes("8 ud af 10 kommuner:"),
-    "uden fordeling skrives ingen konkrete spændværdier");
-  assert.ok(!h.includes("undefined") && !h.includes("NaN"));
-});
-
-test("fordeling: spændet er ORDRET ENS for to forskellige kommuner", () => {
-  // Dette er den maskinelle udgave af påstanden om, at værktøjet ikke
-  // rangordner kommuner. En rangordning ville variere fra kommune til kommune;
-  // en egenskab ved nøgletallet gør det aldrig.
-  const hT = renderIndikatorer(beregnKommune(thisted, land, fordeling), concito, ens);
-  const hG = renderIndikatorer(beregnKommune(greve, land, fordeling), concito, ens);
-  const optaellinger = (h) => (h.match(/8 ud af 10 kommuner:[^<]*/g) || [])
-    .map((s) => s.replace(/\s+/g, " "));
-  assert.deepEqual(optaellinger(hT), optaellinger(hG),
-    "optællingen beskriver nøgletallet, ikke kommunen");
-  assert.ok(optaellinger(hT).length > 0, "der skal faktisk stå optællinger");
-});
-
-test("fordeling: hverken placering, percentil eller yderpunkter vises", () => {
-  const h = renderKommune(beregnKommune(thisted, land, fordeling), concito, ens);
+test("fordeling: hverken placering, percentil, yderpunkter eller spænd vises", () => {
+  // Den fulde udgave kører på alle 98 kommuner i alle98.test.js. Denne bliver
+  // stående som den hurtige vagt i selve render-testen, og er udvidet med det
+  // spænd-ordforråd, der netop er fjernet, så det ikke kan snige sig ind igen.
+  const h = renderKommune(beregnKommune(thisted, land), concito, ens);
   assert.ok(!/\bnr\.\s*\d+\s*af\b/.test(h), "ingen placering");
   assert.ok(!/percentil/i.test(h), "ingen percentil i kommunevisningen");
   assert.ok(!/(laveste|højeste|lavest|højest) i landet/i.test(h), "ingen yderpunkter");
+  assert.ok(!/\d+\s*ud af\s*\d+\s*kommuner/i.test(h), "intet spænd");
+  assert.ok(!/spænd/i.test(h), "ingen omtale af et spænd overhovedet");
 });
 
 test("fordeling: tabellen får ikke flere rækker af den nye kontekst", () => {
-  const b = beregnKommune(thisted, land, fordeling);
+  const b = beregnKommune(thisted, land);
   const h = renderIndikatorer(b, concito, ens);
   const raekker = (h.match(/<tr/g) || []).length;
   assert.equal(raekker, b.drivere.length + b.grupper.length + 1,
@@ -380,7 +366,7 @@ test("fordeling: tabellen får ikke flere rækker af den nye kontekst", () => {
 });
 
 test("procentpoint: andele viser både relativ procent og procentpoint", () => {
-  const b = beregnKommune(thisted, land, fordeling);
+  const b = beregnKommune(thisted, land);
   const d = b.drivere.find((x) => x.navn === "Parcelhus-andel");
   assert.ok(d.procentpoint != null, "andele skal bære procentpoint");
   // Den relative afvigelse skal være UÆNDRET - procentpoint er et visningsfelt.
@@ -390,7 +376,7 @@ test("procentpoint: andele viser både relativ procent og procentpoint", () => {
 });
 
 test("procentpoint: nøgletal der ikke er andele får ingen procentpoint", () => {
-  const t = driverTabel(thisted, land, fordeling);
+  const t = driverTabel(thisted, land);
   for (const navn of ["Disponibel indkomst", "Biler pr. indbygger",
                       "Fritidshuse pr. helårsbolig", "Gini-koefficient"]) {
     assert.equal(t.find((x) => x.navn === navn).procentpoint, null,

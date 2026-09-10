@@ -270,6 +270,12 @@ function percentil(sorteret, p) {
  *  boligareal" gør det i ingen. Ordet "markant" betyder derfor ikke det samme
  *  fra række til række, og uden denne optælling kan en læser ikke se det.
  *
+ *  HVOR DEN VISES. Kun på metodesiden, i tærskeltabellen. Den stod tidligere
+ *  også som et spænd ("8 ud af 10 kommuner: X - Y") under hvert nøgletal på
+ *  kommunesiden. Det er fjernet: en læser af én kommunes side sammenligner ikke
+ *  på tværs af kommuner, så spændet var en tredje talstørrelse at holde styr på
+ *  uden et spørgsmål, den besvarede.
+ *
  *  HVAD DEN IKKE ER. Den rangordner ikke kommuner. Alt herunder er en egenskab
  *  ved NØGLETALLET, ikke ved kommunen: de samme tal gælder ordret på alle 98
  *  kommunesider. Tre regler holder den grænse, og de må ikke brydes:
@@ -281,8 +287,8 @@ function percentil(sorteret, p) {
  *  ikke. Ingen ny koefficient, intet nyt datagrundlag - kun de tærskler, der
  *  allerede er dokumenteret på metodesiden.
  *
- *  Returnerer {[driverNavn]: {n, paaNiveau, mellem, markant, medianAbs, p90Abs,
- *  spaendLav, spaendHoej}} - eller null for nøgletal uden afvigelse (Gini). */
+ *  Returnerer {[driverNavn]: {n, paaNiveau, mellem, markant, medianAbs, p90Abs}}
+ *  - eller null for nøgletal uden afvigelse (Gini). */
 export function beregnFordeling(kommuner, land) {
   const tabeller = kommuner.map((k) => driverTabel(k, land));
   const fordeling = {};
@@ -295,8 +301,6 @@ export function beregnFordeling(kommuner, land) {
       return;
     }
     const abs = afvigelser.map(Math.abs).sort((a, b) => a - b);
-    const raa = raekker.map((r) => r.kommuneVaerdi)
-      .filter((v) => v != null).sort((a, b) => a - b);
 
     fordeling[d.navn] = {
       // n er antal kommuner MED en afvigelse - ikke 98. Boligpris pr. m²
@@ -308,21 +312,13 @@ export function beregnFordeling(kommuner, land) {
       markant: abs.filter((a) => a >= TAERSKEL_MARKANT).length,
       medianAbs: percentil(abs, 0.5),
       p90Abs: percentil(abs, 0.9),
-      // 10- og 90-percentilen af de RÅ værdier, i nøgletallets egen enhed.
-      // Det er den eneste måde at gøre "+283 %" læseligt uden at vise et rangtal.
-      spaendLav: percentil(raa, 0.1),
-      spaendHoej: percentil(raa, 0.9),
     };
   });
   return fordeling;
 }
 
-/** Byg indikatortabellen: værdi, landsværdi, afvigelse (efter type) og retning.
- *
- *  `fordeling` er valgfri og har null som standard, så alle eksisterende
- *  kaldssteder - golden-testene iblandt - kalder uændret og får præcis de
- *  samme værdier som før. Alt nyt er additivt. */
-export function driverTabel(kommune, land, fordeling = null) {
+/** Byg indikatortabellen: værdi, landsværdi, afvigelse (efter type) og retning. */
+export function driverTabel(kommune, land) {
   return DRIVERE.map((d) => {
     const kv = sikker(d.val, kommune);
     const lv = sikker(d.val, land);
@@ -351,7 +347,6 @@ export function driverTabel(kommune, land, fordeling = null) {
       begrundelse: d.begrundelse ?? null,
       kommuneVaerdi: kv, landVaerdi: lv, afvigelse: afv,
       procentpoint: pp,
-      fordeling: fordeling?.[d.navn] ?? null,
       retning: afv == null ? "kontekst" : afv > 0 ? "over land" : afv < 0 ? "under land" : "på niveau",
       baand: niveauBaand(afv),
       signal: udledningsSignal(afv, d.paavirkning, d.kategori),
@@ -403,10 +398,9 @@ const FORVENTEDE_FELTER = [
   "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
 ];
 
-/** Fuld sammenligning for én kommune: indikatortabel, gruppering og manglende felter.
- *  `fordeling` er valgfri - se driverTabel. */
-export function beregnKommune(kommune, land, fordeling = null) {
-  const drivere = driverTabel(kommune, land, fordeling);
+/** Fuld sammenligning for én kommune: indikatortabel, gruppering og manglende felter. */
+export function beregnKommune(kommune, land) {
+  const drivere = driverTabel(kommune, land);
   return {
     navn: kommune.navn,
     kode: kommune.kode,

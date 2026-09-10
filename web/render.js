@@ -379,24 +379,19 @@ export function renderKategorioverblik(b, ens) {
       if (niv) dele.push(`${niv} hverken op eller ned`);
       if (ua) dele.push(`${ua} uafklaret`);
 
-      const udenfor = drivere.filter((d) => udenforNote(d) !== "");
       const punkter = drivere
         .filter((d) => d.afvigelse != null)
         .sort((a, x) => Math.abs(x.afvigelse) - Math.abs(a.afvigelse))
         .map((d) => `<li class="py-1.5 border-b border-dotted border-gray-100 last:border-0">
           <span class="flex items-baseline justify-between gap-3">
-            <span class="text-sm text-gray-800">${esc(d.navn)}${udenforNote(d)}</span>
+            <span class="text-sm text-gray-800">${esc(d.navn)}</span>
             <span class="text-sm font-semibold tabular-nums whitespace-nowrap
               inline-flex items-baseline gap-1.5">
               ${d.retning !== "kontekst" ? retningsMarkoer(d.retning) : ""}
               ${driverVaerdi(d, d.kommuneVaerdi)}${enhedSuffiks(d)}</span>
           </span>
           <span class="block text-xs text-gray-500 tabular-nums">landet
-            ${driverVaerdi(d, d.landVaerdi)}${enhedSuffiks(d)} &middot; ${driverAfvigelse(d)}${
-            d.fordeling && d.fordeling.spaendLav != null
-              ? ` &middot; 8 ud af 10 kommuner: ${driverVaerdi(d, d.fordeling.spaendLav)} - ${
-                  driverVaerdi(d, d.fordeling.spaendHoej)}${enhedSuffiks(d)}`
-              : ""}</span>
+            ${driverVaerdi(d, d.landVaerdi)}${enhedSuffiks(d)} &middot; ${driverAfvigelse(d)}</span>
           ${d.signal !== "kontekst"
             ? `<span class="mt-1 block">${signalMaerkat(d.signal, "", true)}</span>` : ""}
         </li>`).join("");
@@ -407,9 +402,7 @@ export function renderKategorioverblik(b, ens) {
         </div>
         <p class="text-xs text-gray-500 mb-1.5"><strong class="font-medium text-gray-700">${
           drivere.length} nøgletal</strong>${
-          dele.length ? ` &middot; ${dele.join(", ")}` : ""}${
-          udenfor.length ? ` &middot; <span class="font-semibold text-amber-800">${
-            udenfor.length} uden for spændet</span>` : ""}</p>
+          dele.length ? ` &middot; ${dele.join(", ")}` : ""}</p>
         <ul class="list-none m-0 p-0">${punkter}</ul>
       </div>`;
     }
@@ -447,8 +440,8 @@ export function renderKategorioverblik(b, ens) {
     <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
       <p class="rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600">
         <strong class="block text-gray-800">Hvad tallet er</strong>
-        Kommunens værdi, landsgennemsnittet, og hvor de midterste 8 ud af 10 kommuner
-        ligger. Ligger kommunen uden for det spænd, er det markeret.</p>
+        Kommunens værdi og landsgennemsnittet, med afvigelsen mellem dem.
+        Værktøjet sammenligner ikke kommuner med hinanden.</p>
       <p class="rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600">
         <strong class="block text-gray-800">Hvad det peger mod</strong>
         Om nøgletallet trækker udledningen op eller ned. Det handler om udledningen,
@@ -460,8 +453,7 @@ export function renderKategorioverblik(b, ens) {
     <p class="mt-4 border-t border-gray-100 pt-3 text-xs text-gray-500 max-w-3xl">
       <strong class="font-semibold text-gray-600">Dette er ikke en prioritering.</strong>
       Rækkefølgen er Energistyrelsens nationale vægte, ikke en vurdering af kommunen.
-      Spændene beskriver nøgletallet og er ens på alle 98 kommunesider. Kommunal
-      indflydelse kan værktøjet ikke opgøre.</p>
+      Kommunal indflydelse kan værktøjet ikke opgøre.</p>
   </section>`;
 }
 
@@ -553,46 +545,6 @@ function procentpointNote(d) {
     ${fortegn}${formatér(Math.abs(d.procentpoint), 1)} procentpoint</span>`;
 }
 
-/** Hvor de midterste 8 ud af 10 kommuner ligger, i nøgletallets egen enhed.
- *
- *  Afløste en optælling ("markant hos 62 af 98"), som krævede at læseren kendte
- *  en tærskel på 33 % for at kunne bruges. Spændet siger det samme i kroner,
- *  procent eller kvadratmeter og kan læses uden forklaring.
- *
- *  Det afslørede samtidig noget, optællingen skjulte: en parcelhus-andel på
- *  70,5 % ser voldsom ud ved +65,5 %, men ligger inden for det spænd, de fleste
- *  kommuner deler. Den relative afvigelse alene overdrev forskellen.
- *
- *  DETTE ER IKKE EN RANGORDNING. Spændet er en egenskab ved NØGLETALLET og står
- *  ordret ens på alle 98 kommunesider. Tre regler holder den grænse:
- *    1. Vis aldrig mindste- og størsteværdien - de inviterer til "hvem ligger højest?".
- *    2. Vis aldrig kommunens egen placering eller percentil.
- *    3. Navngiv aldrig en anden kommune.
- */
-function fordelingsNote(d) {
-  const f = d.fordeling;
-  if (!f || f.spaendLav == null || f.spaendHoej == null) return "";
-  const tip = "De midterste 8 ud af 10 kommuner ligger i dette spænd. Det beskriver, "
-    + "hvor spredt nøgletallet er blandt kommunerne - ikke hvor denne kommune "
-    + "placerer sig. Værktøjet rangordner ikke kommuner.";
-  return `<span class="block text-xs font-normal text-gray-500">8 ud af 10 kommuner:
-    ${driverVaerdi(d, f.spaendLav)} - ${driverVaerdi(d, f.spaendHoej)}${forbehold(tip)}</span>`;
-}
-
-/** Markerer de få nøgletal, hvor kommunen ligger uden for det spænd, de
- *  midterste 8 ud af 10 kommuner deler. Det er den ene oplysning, der reelt
- *  skiller en kommune ud, og den er sjælden nok til at betyde noget. */
-function udenforNote(d) {
-  const f = d.fordeling;
-  if (!f || d.kommuneVaerdi == null || f.spaendLav == null) return "";
-  const over = d.kommuneVaerdi > f.spaendHoej;
-  const under = d.kommuneVaerdi < f.spaendLav;
-  if (!over && !under) return "";
-  return `<span class="ml-1 inline-block rounded border border-amber-200 bg-amber-50
-    px-1 py-0.5 text-[10px] font-semibold text-amber-800 align-middle">${
-    over ? "over spændet" : "under spændet"}</span>`;
-}
-
 function kategoriNote(c, kategori) {
   if (kategori === "Transport") {
     const bil = c.transport_underkategorier.find((x) => x.navn.startsWith("Kørsel"));
@@ -633,14 +585,14 @@ export function renderIndikatorer(b, c, ens) {
       const tom = d.kommuneVaerdi == null;
       return `<tr class="border-t border-gray-100 ${tom ? "text-gray-600" : ""}">
         <td class="py-2 pl-3 pr-3 text-sm">
-          <span class="font-medium text-gray-900">${esc(d.navn)}</span>${udenforNote(d)}${fb ? forbehold(fb) : ""}
+          <span class="font-medium text-gray-900">${esc(d.navn)}</span>${fb ? forbehold(fb) : ""}
           <span class="block text-xs text-gray-500">${esc(d.enhed)}</span></td>
         <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap ${tom ? "" : "font-medium text-gray-900"}">
           ${driverVaerdi(d, d.kommuneVaerdi)}</td>
         <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-600">
           ${driverVaerdi(d, d.landVaerdi)}</td>
         <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-700">
-          ${driverAfvigelse(d)}${procentpointNote(d)}${fordelingsNote(d)}</td>
+          ${driverAfvigelse(d)}${procentpointNote(d)}</td>
         <td class="py-2 pl-3 pr-3 text-right whitespace-nowrap">
           ${signalMaerkat(d.signal)}${d.begrundelse ? forbehold(d.begrundelse) : ""}</td>
       </tr>`;

@@ -2,7 +2,7 @@
 // beregning i beregning.js. Denne fil henter data, læser URL'en og sætter
 // resultatet ind i siden - intet andet.
 
-import { beregnKommune, beregnFordeling } from "./beregning.js";
+import { beregnKommune } from "./beregning.js";
 import { renderKommune, renderForside, renderKommuneKort } from "./render.js";
 import { installerTooltips } from "./tooltip.js";
 
@@ -44,13 +44,7 @@ function visForside(data) {
 }
 
 function visKommune(data, concito, ens, kommune) {
-  // Fordelingen beregnes i browseren af den data.json, siden allerede har
-  // hentet (ca. 5 ms for 98 kommuner). Den lægges bevidst IKKE ind i data.json
-  // af pipelinen: så ville optællingen her og tabellen på metodesiden kunne
-  // komme ud af trit ved næste datahentning, og datafilen ville få et afledt
-  // tal, der ikke stammer fra et register.
-  const fordeling = beregnFordeling(data.kommuner, data.land);
-  const b = beregnKommune(kommune, data.land, fordeling);
+  const b = beregnKommune(kommune, data.land);
   document.title = `${kommune.navn} - Forbrugsbaserede udledninger`;
   app.innerHTML = `
     <a href="index.html" class="no-embed inline-flex items-center gap-1 text-sm text-gray-500

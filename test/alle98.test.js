@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { beregnKommune, beregnFordeling, driverTabel } from "../web/beregning.js";
-import { renderKommune, renderIndikatorer } from "../web/render.js";
+import { renderKommune } from "../web/render.js";
 
 // Kører mod det ægte datasæt, ikke mod fixtures. Fanger felter, der findes
 // for én kommune, men mangler for en anden.
@@ -136,34 +136,49 @@ test("landsværdierne er de beregnede, ikke et tal fra en anden opgørelse", () 
 
 const fordeling = beregnFordeling(data.kommuner, data.land);
 
-test("fordeling: hvert nøgletals optælling er ENS for alle 98 kommuner", () => {
-  // Dette er den maskinelle udgave af påstanden i om.html om, at værktøjet ikke
-  // rangordner kommuner. En rangordning ville variere fra kommune til kommune;
-  // en egenskab ved nøgletallet gør det aldrig. Kører mod ægte data, fordi
-  // fixturen kun har to kommuner og derfor ikke kan afsløre et brud.
-  const perDriver = new Map();
+// Afløste en test, der bevidnede det samme indirekte: den slog fast, at
+// spændet ("8 ud af 10 kommuner: X - Y") stod ordret ens på alle 98 sider og
+// derfor beskrev nøgletallet, ikke kommunen. Spændet er fjernet fra
+// kommunesiden, og med det forsvandt beviset. Denne test er den direkte udgave:
+// den kigger efter selve de udsagn, en rangordning ville kræve - og kører på
+// alle 98 kommuner, ikke kun én.
+const RANGORDNINGS_MØNSTRE = [
+  [/\bnr\.\s*\d+\s*af\b/i, "placering (nr. X af Y)"],
+  [/percentil/i, "percentil"],
+  [/(laveste|højeste|lavest|højest) i landet/i, "yderpunkt"],
+  [/\d+\s*ud af\s*\d+\s*kommuner/i, "spænd-optælling"],
+  // Bredt på stammen "spænd", ikke på en bestemt formulering. En tidligere udgave
+  // ledte kun efter "over/under spændet" og lod derfor sætningen "Spændene beskriver
+  // nøgletallet og er ens på alle 98 kommunesider" blive stående på hver eneste side,
+  // længe efter at spændene var fjernet.
+  [/spænd/i, "omtale af et spænd, der ikke findes på kommunesiden"],
+];
+
+test("ingen kommuneside indeholder et udsagn, der rangordner kommuner", () => {
   for (const k of data.kommuner) {
-    for (const r of driverTabel(k, data.land, fordeling)) {
-      if (!r.fordeling) continue;
-      const s = `markant hos ${r.fordeling.markant} af ${r.fordeling.n}`;
-      if (!perDriver.has(r.navn)) perDriver.set(r.navn, new Set());
-      perDriver.get(r.navn).add(s);
+    const h = renderKommune(beregnKommune(k, data.land), concito, ens);
+    for (const [møn, hvad] of RANGORDNINGS_MØNSTRE) {
+      assert.ok(!møn.test(h), `${k.navn}: ${hvad} er en rangordning`);
     }
-  }
-  assert.ok(perDriver.size > 0, "der skal faktisk være optællinger at tjekke");
-  for (const [navn, varianter] of perDriver) {
-    assert.equal(varianter.size, 1,
-      `${navn}: optællingen varierer mellem kommuner og er dermed en rangordning`);
   }
 });
 
-test("fordeling: nøgletalstabellens optællinger er identiske på tværs af kommuner", () => {
-  const optael = (k) => (renderIndikatorer(beregnKommune(k, data.land, fordeling), concito, ens)
-    .match(/8 ud af 10 kommuner:[^<]*/g) || []).map((s) => s.replace(/\s+/g, " ")).join("|");
-  const facit = optael(data.kommuner[0]);
-  assert.ok(facit.length > 0);
+test("ingen kommuneside navngiver en anden kommune", () => {
+  // Regel 3 i beregnFordeling's kontrakt, som hidtil kun stod som en kommentar.
+  // Uden den kan et nøgletal begynde at sige "højere end i Aarhus", hvilket er
+  // en sammenligning, værktøjet ikke laver. HTML-tags fjernes først, så
+  // kommunenavne i fx et data-attribut ikke tæller som synlig tekst.
+  const navne = data.kommuner.map((k) => k.navn);
   for (const k of data.kommuner) {
-    assert.equal(optael(k), facit, `${k.navn}: tabellens optælling afviger`);
+    const tekst = renderKommune(beregnKommune(k, data.land), concito, ens)
+      .replace(/<[^>]*>/g, " ");
+    for (const andet of navne) {
+      if (andet === k.navn) continue;
+      // Kommunenavne, der indgår i et andet navn (Ærø i Ærøskøbing, Fanø i
+      // Fanøvej), må ikke give falske træf - derfor ordgrænser på begge sider.
+      const møn = new RegExp(`(^|[^\\p{L}])${andet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^\\p{L}]|$)`, "u");
+      assert.ok(!møn.test(tekst), `${k.navn}s side navngiver ${andet}`);
+    }
   }
 });
 
@@ -183,7 +198,7 @@ test("fordeling: den skævhed, konteksten findes for, er stadig til stede", () =
 
 test("alle 98 kommuner renderes med fordeling uden undefined, NaN eller null", () => {
   for (const k of data.kommuner) {
-    const h = renderKommune(beregnKommune(k, data.land, fordeling), concito, ens);
+    const h = renderKommune(beregnKommune(k, data.land), concito, ens);
     assert.ok(!h.includes("undefined"), `${k.navn}: undefined`);
     assert.ok(!h.includes("NaN"), `${k.navn}: NaN`);
     assert.ok(!/>\s*null\s*</.test(h), `${k.navn}: null`);
@@ -192,7 +207,7 @@ test("alle 98 kommuner renderes med fordeling uden undefined, NaN eller null", (
 
 test("affald: ingen kommune får et retningsmærkat på de to affaldsnøgletal", () => {
   for (const k of data.kommuner) {
-    for (const r of driverTabel(k, data.land, fordeling)) {
+    for (const r of driverTabel(k, data.land)) {
       if (r.navn === "Husholdningsaffald" || r.navn === "Genanvendelsesprocent") {
         assert.equal(r.signal, "uafklaret",
           `${k.navn}/${r.navn}: DST's kommunefordeling bærer ikke et mærkat`);
