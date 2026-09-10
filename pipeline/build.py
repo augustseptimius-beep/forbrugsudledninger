@@ -46,7 +46,7 @@ FORVENTEDE_FELTER = [
 
 def saml_kommune_post(navn, dst_data, boligpriser, kode=None, region=None,
                       elco2=None, ve_daekning=None, pendling=None,
-                      fritidshuse=None, husholdning=None):
+                      fritidshuse=None, husholdning=None, affald_indberetning=None):
     """Samler ét kommune- (eller land-) objekt i motorens datakontrakt.
     Ren funktion - ingen I/O - så den kan testes uden netværk (Task 10)."""
     post = dict(dst_data.get(navn, {}))
@@ -70,6 +70,11 @@ def saml_kommune_post(navn, dst_data, boligpriser, kode=None, region=None,
     post["husholdning_co2_ton"] = h.get("co2_ton")
     post["husholdning_energi_tj"] = h.get("energi_tj")
     post["husholdning_fossil_andel"] = h.get("fossil_andel")
+    # Hvor meget affaldstallene kan bære for netop denne kommune. None er den
+    # normale tilstand ("intet at bemærke") og må derfor IKKE med i
+    # FORVENTEDE_FELTER - der ville den blive talt som manglende data for de
+    # 85 kommuner, hvor alt er i orden.
+    post["affald_indberetning"] = (affald_indberetning or {}).get(navn)
     for felt in FORVENTEDE_FELTER:
         post.setdefault(felt, None)
     return post
@@ -195,6 +200,19 @@ def main():
     boligpriser = fetch_boligpriser.fetch_boligpris()
     print(f"  {len(boligpriser)} områder hentet.")
 
+    # Affaldsindberetningens pålidelighed pr. kommune. Fejler hentningen, står
+    # feltet tomt for alle, og motoren viser retningen som før - tjekket må ikke
+    # kunne vælte en hel datahentning.
+    print("Klassificerer affaldsindberetningen pr. kommune...")
+    try:
+        _aar = int(PERIODER["AFFALD_AAR"])
+        affald_indberetning = fetch_dst.klassificer_affald(
+            fetch_dst.fetch_affald_validitet(_aar, _aar - 1))
+        print(f"  {sum(1 for v in affald_indberetning.values() if v)} kommuner med forbehold.")
+    except Exception as fejl:
+        affald_indberetning = {}
+        print(f"  ADVARSEL: kunne ikke hente LABY24 ({fejl}). Alle står uden forbehold.")
+
     land_post = saml_kommune_post("Hele landet", dst_data, boligpriser, pendling=pendling,
                                   fritidshuse=fritidshuse)
     # Landets husholdningstal er summen af kommunernes, ikke et selvstændigt
@@ -227,7 +245,8 @@ def main():
         kommune_poster.append(saml_kommune_post(
             navn, dst_data, boligpriser, kode=kode, region=region,
             elco2=elco2, ve_daekning=ve_daekning, pendling=pendling,
-            fritidshuse=fritidshuse, husholdning=husholdning))
+            fritidshuse=fritidshuse, husholdning=husholdning,
+            affald_indberetning=affald_indberetning))
 
     # Ingen "konstanter" i outputtet: der er ingen beregningskoefficienter
     # tilbage i modellen. De nationale sammenligningstal ligger i concito.json
@@ -268,25 +287,19 @@ def main():
     # Affaldets kommunefordeling: se fetch_affald_validitet for baggrunden.
     # Rapporten dømmer ikke - den lægger tallene frem, så et menneske kan afgøre,
     # om affaldsnøgletallenes retning kan sættes tilbage fra "uafklaret".
-    print("\nAffaldsindberetning - ændring i restaffald siden året før:")
-    try:
-        aar = int(PERIODER["AFFALD_AAR"])
-        forhold = fetch_dst.fetch_affald_validitet(aar, aar - 1)
-        kendte = {p["navn"] for p in kommune_poster}
-        brud = sorted(((v, n) for n, v in forhold.items()
-                       if n in kendte and (v < 0.5 or v > 1.5)))
-        if brud:
-            print(f"  {len(brud)} kommuner ændrede sig mere end 50 % på ét år:")
-            for v, navn in brud:
-                print(f"    {navn:22} {v:6.2f}x")
-            print("  Et brat fald er et indberetningsbrud, ikke en adfærdsændring.")
-            print("  Så længe listen ikke er tom, bør 'Husholdningsaffald' og")
-            print("  'Genanvendelsesprocent' blive stående som uafklarede i beregning.js.")
-        else:
-            print("  Ingen kommuner ændrede sig mere end 50 % på ét år.")
-            print("  Affaldsnøgletallenes retning kan formentlig sættes tilbage i beregning.js.")
-    except Exception as fejl:
-        print(f"  ADVARSEL: kunne ikke hente LABY24 ({fejl}). Tjekket er sprunget over.")
+    print("\nAffaldsindberetning - forbehold pr. kommune:")
+    spaerret = sorted(p["navn"] for p in kommune_poster
+                      if p.get("affald_indberetning") == fetch_dst.AFFALD_BEKRAEFTET_FEJL)
+    usikre = sorted(p["navn"] for p in kommune_poster
+                    if p.get("affald_indberetning") == fetch_dst.AFFALD_USIKKER)
+    print(f"  Deler indberetning, retning holdes tilbage ({len(spaerret)}): "
+          f"{', '.join(spaerret) if spaerret else 'ingen'}")
+    print(f"  Usædvanligt udsving, retning vises med forbehold ({len(usikre)}): "
+          f"{', '.join(usikre) if usikre else 'ingen'}")
+    print(f"  Uden forbehold: {len(kommune_poster) - len(spaerret) - len(usikre)} kommuner.")
+    if spaerret:
+        print("  Listen er navngivet i fetch_dst.DELT_INDBERETNING og bygger på et")
+        print("  eftervist bytte af tonnage. Ryd den, når kilden er rettet.")
 
     thisted = next(p for p in kommune_poster if p["navn"] == "Thisted")
     print("\nSanity-check Thisted mod v5-regneark (facit i parentes):")

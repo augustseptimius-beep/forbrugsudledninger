@@ -29,7 +29,8 @@
     "fritidshuse": 224795,
     "husholdning_co2_ton": 3343924.078589735,
     "husholdning_energi_tj": 155249.577918768,
-    "husholdning_fossil_andel": 0.0978964430565945
+    "husholdning_fossil_andel": 0.0978964430565945,
+    "affald_indberetning": null
   },
   "kommuner": [
     {
@@ -64,7 +65,8 @@
       "fritidshuse": 6834,
       "husholdning_co2_ton": 205716.468447701,
       "husholdning_energi_tj": 11402.619895413998,
-      "husholdning_fossil_andel": 0.011333715426660538
+      "husholdning_fossil_andel": 0.011333715426660538,
+      "affald_indberetning": null
     },
     {
       "folketal": 106150,
@@ -98,7 +100,8 @@
       "fritidshuse": 204,
       "husholdning_co2_ton": 40129.05266842,
       "husholdning_energi_tj": 2337.697839092,
-      "husholdning_fossil_andel": 0.008798908387146137
+      "husholdning_fossil_andel": 0.008798908387146137,
+      "affald_indberetning": null
     },
     {
       "folketal": 14474,
@@ -132,7 +135,8 @@
       "fritidshuse": 791,
       "husholdning_co2_ton": 13842.888526044,
       "husholdning_energi_tj": 389.44628180200004,
-      "husholdning_fossil_andel": 0.5053590105966427
+      "husholdning_fossil_andel": 0.5053590105966427,
+      "affald_indberetning": null
     },
     {
       "folketal": 44214,
@@ -166,7 +170,8 @@
       "fritidshuse": 1623,
       "husholdning_co2_ton": 27735.893265174003,
       "husholdning_energi_tj": 904.292748334,
-      "husholdning_fossil_andel": 0.33572476728727224
+      "husholdning_fossil_andel": 0.33572476728727224,
+      "affald_indberetning": null
     },
     {
       "folketal": 29262,
@@ -200,7 +205,8 @@
       "fritidshuse": 43,
       "husholdning_co2_ton": 9872.438655270002,
       "husholdning_energi_tj": 465.309450926,
-      "husholdning_fossil_andel": 0.037357722335978234
+      "husholdning_fossil_andel": 0.037357722335978234,
+      "affald_indberetning": null
     },
     {
       "folketal": 53950,
@@ -234,7 +240,8 @@
       "fritidshuse": 3393,
       "husholdning_co2_ton": 28110.07951836,
       "husholdning_energi_tj": 940.8435227169999,
-      "husholdning_fossil_andel": 0.32430418136255595
+      "husholdning_fossil_andel": 0.32430418136255595,
+      "affald_indberetning": null
     },
     {
       "folketal": 40990,
@@ -268,7 +275,8 @@
       "fritidshuse": 258,
       "husholdning_co2_ton": 18401.771135042,
       "husholdning_energi_tj": 819.7685473630002,
-      "husholdning_fossil_andel": 0.09827830642339216
+      "husholdning_fossil_andel": 0.09827830642339216,
+      "affald_indberetning": null
     },
     {
       "folketal": 75106,
@@ -302,7 +310,8 @@
       "fritidshuse": 285,
       "husholdning_co2_ton": 59481.66423321,
       "husholdning_energi_tj": 2147.2819149310008,
-      "husholdning_fossil_andel": 0.23558856348271132
+      "husholdning_fossil_andel": 0.23558856348271132,
+      "affald_indberetning": null
     },
     {
       "folketal": 71185,
@@ -336,7 +345,8 @@
       "fritidshuse": 261,
       "husholdning_co2_ton": 47483.226002150004,
       "husholdning_energi_tj": 1615.005771962,
-      "husholdning_fossil_andel": 0.33162377915612906
+      "husholdning_fossil_andel": 0.33162377915612906,
+      "affald_indberetning": null
     },
     {
       "folketal": 25834,
@@ -370,7 +380,8 @@
       "fritidshuse": 1471,
       "husholdning_co2_ton": 13896.752017438,
       "husholdning_energi_tj": 508.438881774,
-      "husholdning_fossil_andel": 0.2618166612583547
+      "husholdning_fossil_andel": 0.2618166612583547,
+      "affald_indberetning": null
     },
     {
       "folketal": 32030,
@@ -404,7 +415,8 @@
       "fritidshuse": 222,
       "husholdning_co2_ton": 16012.367239197,
       "husholdning_energi_tj": 537.824859678,
-      "husholdning_fossil_andel": 0.31597643301528383
+      "husholdning_fossil_andel": 0.31597643301528383,
+      "affald_indberetning": null
     },
     {
       "folketal": 54228,
@@ -438,7 +450,8 @@
       "fritidshuse": 488,
       "husholdning_co2_ton": 28866.041185820002,
       "husholdning_energi_tj": 1167.144210209,
-      "husholdning_fossil_andel": 0.22059736864127114
+      "husholdning_fossil_andel": 0.22059736864127114,
+      "affald_indberetning": null
     },
     {
       "folketal": 60458,
@@ -472,7 +485,8 @@
       "fritidshuse": 588,
       "husholdning_co2_ton": 21149.096183536996,
       "husholdning_energi_tj": 1034.5946261640001,
-      "husholdning_fossil_andel": 0.08587655951145086
+      "husholdning_fossil_andel": 0.08587655951145086,
+      "affald_indberetning": null
     },
     {
       "folketal": 24685,
@@ -506,7 +520,8 @@
       "fritidshuse": 371,
       "husholdning_co2_ton": 10347.003473370998,
       "husholdning_energi_tj": 403.42195207199995,
-      "husholdning_fossil_andel": 0.19691824664717775
+      "husholdning_fossil_andel": 0.19691824664717775,
+      "affald_indberetning": null
     },
     {
       "folketal": 58614,
@@ -540,7 +555,8 @@
       "fritidshuse": 81,
       "husholdning_co2_ton": 45768.924936454,
       "husholdning_energi_tj": 1318.68183717,
-      "husholdning_fossil_andel": 0.4511496528493587
+      "husholdning_fossil_andel": 0.4511496528493587,
+      "affald_indberetning": null
     },
     {
       "folketal": 45138,
@@ -574,7 +590,8 @@
       "fritidshuse": 168,
       "husholdning_co2_ton": 24179.188289053003,
       "husholdning_energi_tj": 825.0983644859998,
-      "husholdning_fossil_andel": 0.28265518738276113
+      "husholdning_fossil_andel": 0.28265518738276113,
+      "affald_indberetning": null
     },
     {
       "folketal": 18689,
@@ -608,7 +625,8 @@
       "fritidshuse": 12,
       "husholdning_co2_ton": 8916.384496255,
       "husholdning_energi_tj": 316.643793446,
-      "husholdning_fossil_andel": 0.2598506466637311
+      "husholdning_fossil_andel": 0.2598506466637311,
+      "affald_indberetning": null
     },
     {
       "folketal": 26496,
@@ -642,7 +660,8 @@
       "fritidshuse": 48,
       "husholdning_co2_ton": 20871.093456822,
       "husholdning_energi_tj": 656.0767712429998,
-      "husholdning_fossil_andel": 0.4106579191007666
+      "husholdning_fossil_andel": 0.4106579191007666,
+      "affald_indberetning": "bekraeftet_fejl"
     },
     {
       "folketal": 46240,
@@ -676,7 +695,8 @@
       "fritidshuse": 365,
       "husholdning_co2_ton": 29593.539771437998,
       "husholdning_energi_tj": 1070.9587857469999,
-      "husholdning_fossil_andel": 0.3117705534150014
+      "husholdning_fossil_andel": 0.3117705534150014,
+      "affald_indberetning": null
     },
     {
       "folketal": 42445,
@@ -710,7 +730,8 @@
       "fritidshuse": 88,
       "husholdning_co2_ton": 32276.330129803,
       "husholdning_energi_tj": 1051.7350551349998,
-      "husholdning_fossil_andel": 0.3231828032064315
+      "husholdning_fossil_andel": 0.3231828032064315,
+      "affald_indberetning": "bekraeftet_fejl"
     },
     {
       "folketal": 47450,
@@ -744,7 +765,8 @@
       "fritidshuse": 4834,
       "husholdning_co2_ton": 30615.1157054,
       "husholdning_energi_tj": 1237.2904339880004,
-      "husholdning_fossil_andel": 0.20597460017416705
+      "husholdning_fossil_andel": 0.20597460017416705,
+      "affald_indberetning": null
     },
     {
       "folketal": 42874,
@@ -778,7 +800,8 @@
       "fritidshuse": 104,
       "husholdning_co2_ton": 28616.1370733,
       "husholdning_energi_tj": 951.385923409,
-      "husholdning_fossil_andel": 0.2833808865133873
+      "husholdning_fossil_andel": 0.2833808865133873,
+      "affald_indberetning": null
     },
     {
       "folketal": 41787,
@@ -812,7 +835,8 @@
       "fritidshuse": 12499,
       "husholdning_co2_ton": 30473.890800109,
       "husholdning_energi_tj": 1529.68114609,
-      "husholdning_fossil_andel": 0.09658609647092248
+      "husholdning_fossil_andel": 0.09658609647092248,
+      "affald_indberetning": null
     },
     {
       "folketal": 31738,
@@ -846,7 +870,8 @@
       "fritidshuse": 7437,
       "husholdning_co2_ton": 12886.91831864,
       "husholdning_energi_tj": 983.4145200230001,
-      "husholdning_fossil_andel": 0.06846541577037656
+      "husholdning_fossil_andel": 0.06846541577037656,
+      "affald_indberetning": null
     },
     {
       "folketal": 64244,
@@ -880,7 +905,8 @@
       "fritidshuse": 2236,
       "husholdning_co2_ton": 46815.8614795,
       "husholdning_energi_tj": 1629.1876963089999,
-      "husholdning_fossil_andel": 0.2625548169312166
+      "husholdning_fossil_andel": 0.2625548169312166,
+      "affald_indberetning": "bekraeftet_fejl"
     },
     {
       "folketal": 55182,
@@ -914,7 +940,8 @@
       "fritidshuse": 174,
       "husholdning_co2_ton": 28969.513465789998,
       "husholdning_energi_tj": 1142.4364424589999,
-      "husholdning_fossil_andel": 0.11632004530945199
+      "husholdning_fossil_andel": 0.11632004530945199,
+      "affald_indberetning": null
     },
     {
       "folketal": 25354,
@@ -948,7 +975,8 @@
       "fritidshuse": 33,
       "husholdning_co2_ton": 25840.764072119,
       "husholdning_energi_tj": 795.541682661,
-      "husholdning_fossil_andel": 0.37470678130516705
+      "husholdning_fossil_andel": 0.37470678130516705,
+      "affald_indberetning": "bekraeftet_fejl"
     },
     {
       "folketal": 57912,
@@ -982,7 +1010,8 @@
       "fritidshuse": 445,
       "husholdning_co2_ton": 56455.171593684005,
       "husholdning_energi_tj": 1736.644204446,
-      "husholdning_fossil_andel": 0.4006571201992202
+      "husholdning_fossil_andel": 0.4006571201992202,
+      "affald_indberetning": "bekraeftet_fejl"
     },
     {
       "folketal": 38677,
@@ -1016,7 +1045,8 @@
       "fritidshuse": 4433,
       "husholdning_co2_ton": 15730.740043366999,
       "husholdning_energi_tj": 1446.1092774480003,
-      "husholdning_fossil_andel": 0.03649489165655237
+      "husholdning_fossil_andel": 0.03649489165655237,
+      "affald_indberetning": null
     },
     {
       "folketal": 54120,
@@ -1050,7 +1080,8 @@
       "fritidshuse": 154,
       "husholdning_co2_ton": 35734.060545686,
       "husholdning_energi_tj": 1249.605805824,
-      "husholdning_fossil_andel": 0.32903133939016727
+      "husholdning_fossil_andel": 0.32903133939016727,
+      "affald_indberetning": null
     },
     {
       "folketal": 63962,
@@ -1084,7 +1115,8 @@
       "fritidshuse": 202,
       "husholdning_co2_ton": 38774.073484096996,
       "husholdning_energi_tj": 1385.5950422800001,
-      "husholdning_fossil_andel": 0.3333101104670907
+      "husholdning_fossil_andel": 0.3333101104670907,
+      "affald_indberetning": null
     },
     {
       "folketal": 29879,
@@ -1118,7 +1150,8 @@
       "fritidshuse": 1434,
       "husholdning_co2_ton": 16014.963983983002,
       "husholdning_energi_tj": 811.4449008220001,
-      "husholdning_fossil_andel": 0.19137094301990568
+      "husholdning_fossil_andel": 0.19137094301990568,
+      "affald_indberetning": null
     },
     {
       "folketal": 92697,
@@ -1152,7 +1185,8 @@
       "fritidshuse": 467,
       "husholdning_co2_ton": 46321.43409109,
       "husholdning_energi_tj": 2062.070614368,
-      "husholdning_fossil_andel": 0.1601297804218029
+      "husholdning_fossil_andel": 0.1601297804218029,
+      "affald_indberetning": null
     },
     {
       "folketal": 25040,
@@ -1186,7 +1220,8 @@
       "fritidshuse": 38,
       "husholdning_co2_ton": 5997.080142365,
       "husholdning_energi_tj": 532.1889343160001,
-      "husholdning_fossil_andel": 0.027199657017680314
+      "husholdning_fossil_andel": 0.027199657017680314,
+      "affald_indberetning": null
     },
     {
       "folketal": 38143,
@@ -1220,7 +1255,8 @@
       "fritidshuse": 622,
       "husholdning_co2_ton": 13127.915102563002,
       "husholdning_energi_tj": 1062.302760032,
-      "husholdning_fossil_andel": 0.18820470084533855
+      "husholdning_fossil_andel": 0.18820470084533855,
+      "affald_indberetning": null
     },
     {
       "folketal": 59119,
@@ -1254,7 +1290,8 @@
       "fritidshuse": 7117,
       "husholdning_co2_ton": 40773.69211793,
       "husholdning_energi_tj": 1974.0707478790002,
-      "husholdning_fossil_andel": 0.04304855905813203
+      "husholdning_fossil_andel": 0.04304855905813203,
+      "affald_indberetning": null
     },
     {
       "folketal": 75009,
@@ -1288,7 +1325,8 @@
       "fritidshuse": 2275,
       "husholdning_co2_ton": 50351.09854239,
       "husholdning_energi_tj": 2029.444169917,
-      "husholdning_fossil_andel": 0.33002596924033256
+      "husholdning_fossil_andel": 0.33002596924033256,
+      "affald_indberetning": null
     },
     {
       "folketal": 47954,
@@ -1322,7 +1360,8 @@
       "fritidshuse": 7006,
       "husholdning_co2_ton": 13675.855991829001,
       "husholdning_energi_tj": 2110.333436625,
-      "husholdning_fossil_andel": 0.033017106792580006
+      "husholdning_fossil_andel": 0.033017106792580006,
+      "affald_indberetning": null
     },
     {
       "folketal": 38533,
@@ -1356,7 +1395,8 @@
       "fritidshuse": 3820,
       "husholdning_co2_ton": 5033.293890174999,
       "husholdning_energi_tj": 1370.994471995,
-      "husholdning_fossil_andel": 0.04932554518297623
+      "husholdning_fossil_andel": 0.04932554518297623,
+      "affald_indberetning": null
     },
     {
       "folketal": 85163,
@@ -1390,7 +1430,8 @@
       "fritidshuse": 2183,
       "husholdning_co2_ton": 66167.04807717001,
       "husholdning_energi_tj": 2174.2953713589995,
-      "husholdning_fossil_andel": 0.18270699327603376
+      "husholdning_fossil_andel": 0.18270699327603376,
+      "affald_indberetning": null
     },
     {
       "folketal": 31988,
@@ -1424,7 +1465,8 @@
       "fritidshuse": 22001,
       "husholdning_co2_ton": 24492.083135459994,
       "husholdning_energi_tj": 1502.228841885,
-      "husholdning_fossil_andel": 0.0796959111521073
+      "husholdning_fossil_andel": 0.0796959111521073,
+      "affald_indberetning": null
     },
     {
       "folketal": 36010,
@@ -1458,7 +1500,8 @@
       "fritidshuse": 100,
       "husholdning_co2_ton": 11309.216414548,
       "husholdning_energi_tj": 926.8427869530002,
-      "husholdning_fossil_andel": 0.0794299287045465
+      "husholdning_fossil_andel": 0.0794299287045465,
+      "affald_indberetning": null
     },
     {
       "folketal": 80959,
@@ -1492,7 +1535,8 @@
       "fritidshuse": 3888,
       "husholdning_co2_ton": 40646.52849469,
       "husholdning_energi_tj": 2105.303873936,
-      "husholdning_fossil_andel": 0.1755784726790642
+      "husholdning_fossil_andel": 0.1755784726790642,
+      "affald_indberetning": null
     },
     {
       "folketal": 30853,
@@ -1526,7 +1570,8 @@
       "fritidshuse": 136,
       "husholdning_co2_ton": 18607.86274535,
       "husholdning_energi_tj": 852.4876094829999,
-      "husholdning_fossil_andel": 0.24540642926631526
+      "husholdning_fossil_andel": 0.24540642926631526,
+      "affald_indberetning": null
     },
     {
       "folketal": 23842,
@@ -1560,7 +1605,8 @@
       "fritidshuse": 932,
       "husholdning_co2_ton": 14616.83227896,
       "husholdning_energi_tj": 695.5295049980001,
-      "husholdning_fossil_andel": 0.24299493092170973
+      "husholdning_fossil_andel": 0.24299493092170973,
+      "affald_indberetning": null
     },
     {
       "folketal": 44831,
@@ -1594,7 +1640,8 @@
       "fritidshuse": 3954,
       "husholdning_co2_ton": 8259.210067230999,
       "husholdning_energi_tj": 1451.686382309,
-      "husholdning_fossil_andel": 0.049671188932907964
+      "husholdning_fossil_andel": 0.049671188932907964,
+      "affald_indberetning": null
     },
     {
       "folketal": 40369,
@@ -1628,7 +1675,8 @@
       "fritidshuse": 754,
       "husholdning_co2_ton": 15304.868671395,
       "husholdning_energi_tj": 1253.88508314,
-      "husholdning_fossil_andel": 0.10701224762398603
+      "husholdning_fossil_andel": 0.10701224762398603,
+      "affald_indberetning": null
     },
     {
       "folketal": 52328,
@@ -1662,7 +1710,8 @@
       "fritidshuse": 1325,
       "husholdning_co2_ton": 14869.126869505999,
       "husholdning_energi_tj": 1576.498012509,
-      "husholdning_fossil_andel": 0.03802808716554455
+      "husholdning_fossil_andel": 0.03802808716554455,
+      "affald_indberetning": null
     },
     {
       "folketal": 24299,
@@ -1696,7 +1745,8 @@
       "fritidshuse": 1670,
       "husholdning_co2_ton": 15382.419857121,
       "husholdning_energi_tj": 674.490578797,
-      "husholdning_fossil_andel": 0.06151457965506655
+      "husholdning_fossil_andel": 0.06151457965506655,
+      "affald_indberetning": null
     },
     {
       "folketal": 11841,
@@ -1730,7 +1780,8 @@
       "fritidshuse": 2196,
       "husholdning_co2_ton": 2252.4859181660004,
       "husholdning_energi_tj": 571.944890112,
-      "husholdning_fossil_andel": 0.05139741918708897
+      "husholdning_fossil_andel": 0.05139741918708897,
+      "affald_indberetning": null
     },
     {
       "folketal": 40625,
@@ -1764,7 +1815,8 @@
       "fritidshuse": 1471,
       "husholdning_co2_ton": 22315.076614708,
       "husholdning_energi_tj": 1168.5467184070003,
-      "husholdning_fossil_andel": 0.14490123400785174
+      "husholdning_fossil_andel": 0.14490123400785174,
+      "affald_indberetning": null
     },
     {
       "folketal": 29179,
@@ -1798,7 +1850,8 @@
       "fritidshuse": 2968,
       "husholdning_co2_ton": 14492.150239342001,
       "husholdning_energi_tj": 889.4166689510001,
-      "husholdning_fossil_andel": 0.03827276477305978
+      "husholdning_fossil_andel": 0.03827276477305978,
+      "affald_indberetning": null
     },
     {
       "folketal": 32401,
@@ -1832,7 +1885,8 @@
       "fritidshuse": 821,
       "husholdning_co2_ton": 58699.8339013,
       "husholdning_energi_tj": 916.1900860599999,
-      "husholdning_fossil_andel": 0.09439303636749506
+      "husholdning_fossil_andel": 0.09439303636749506,
+      "affald_indberetning": null
     },
     {
       "folketal": 213168,
@@ -1866,7 +1920,8 @@
       "fritidshuse": 286,
       "husholdning_co2_ton": 169519.372020378,
       "husholdning_energi_tj": 5169.116089211,
-      "husholdning_fossil_andel": 0.009390185330391536
+      "husholdning_fossil_andel": 0.009390185330391536,
+      "affald_indberetning": null
     },
     {
       "folketal": 60027,
@@ -1900,7 +1955,8 @@
       "fritidshuse": 778,
       "husholdning_co2_ton": 39895.20837789,
       "husholdning_energi_tj": 1777.215477565,
-      "husholdning_fossil_andel": 0.17205406402658144
+      "husholdning_fossil_andel": 0.17205406402658144,
+      "affald_indberetning": null
     },
     {
       "folketal": 5766,
@@ -1934,7 +1990,8 @@
       "fritidshuse": 230,
       "husholdning_co2_ton": 855.9188548149999,
       "husholdning_energi_tj": 246.75442687299997,
-      "husholdning_fossil_andel": 0.046172548490341435
+      "husholdning_fossil_andel": 0.046172548490341435,
+      "affald_indberetning": null
     },
     {
       "folketal": 27200,
@@ -1968,7 +2025,8 @@
       "fritidshuse": 942,
       "husholdning_co2_ton": 6352.2319649,
       "husholdning_energi_tj": 826.629904647,
-      "husholdning_fossil_andel": 0.03729535987349171
+      "husholdning_fossil_andel": 0.03729535987349171,
+      "affald_indberetning": null
     },
     {
       "folketal": 114947,
@@ -2002,7 +2060,8 @@
       "fritidshuse": 524,
       "husholdning_co2_ton": 133680.50339633,
       "husholdning_energi_tj": 3225.0423409719992,
-      "husholdning_fossil_andel": 0.013273415690442766
+      "husholdning_fossil_andel": 0.013273415690442766,
+      "affald_indberetning": null
     },
     {
       "folketal": 3332,
@@ -2036,7 +2095,8 @@
       "fritidshuse": 2750,
       "husholdning_co2_ton": 5801.30714927,
       "husholdning_energi_tj": 181.734695188,
-      "husholdning_fossil_andel": 0.018110126575419716
+      "husholdning_fossil_andel": 0.018110126575419716,
+      "affald_indberetning": null
     },
     {
       "folketal": 52939,
@@ -2070,7 +2130,8 @@
       "fritidshuse": 347,
       "husholdning_co2_ton": 23636.000502900002,
       "husholdning_energi_tj": 1439.504469788,
-      "husholdning_fossil_andel": 0.013053361920277546
+      "husholdning_fossil_andel": 0.013053361920277546,
+      "affald_indberetning": "usikker"
     },
     {
       "folketal": 55218,
@@ -2104,7 +2165,8 @@
       "fritidshuse": 1814,
       "husholdning_co2_ton": 10277.972676087,
       "husholdning_energi_tj": 1618.3638945460002,
-      "husholdning_fossil_andel": 0.024640388473438312
+      "husholdning_fossil_andel": 0.024640388473438312,
+      "affald_indberetning": null
     },
     {
       "folketal": 96214,
@@ -2138,7 +2200,8 @@
       "fritidshuse": 1589,
       "husholdning_co2_ton": 48708.39046023,
       "husholdning_energi_tj": 2574.5430169139995,
-      "husholdning_fossil_andel": 0.0667655982287834
+      "husholdning_fossil_andel": 0.0667655982287834,
+      "affald_indberetning": null
     },
     {
       "folketal": 74123,
@@ -2172,7 +2235,8 @@
       "fritidshuse": 2806,
       "husholdning_co2_ton": 28563.283110214998,
       "husholdning_energi_tj": 1994.868457857,
-      "husholdning_fossil_andel": 0.024187358770429154
+      "husholdning_fossil_andel": 0.024187358770429154,
+      "affald_indberetning": null
     },
     {
       "folketal": 36174,
@@ -2206,7 +2270,8 @@
       "fritidshuse": 2165,
       "husholdning_co2_ton": 9570.472669577,
       "husholdning_energi_tj": 1192.999342138,
-      "husholdning_fossil_andel": 0.06317737249203069
+      "husholdning_fossil_andel": 0.06317737249203069,
+      "affald_indberetning": null
     },
     {
       "folketal": 49468,
@@ -2240,7 +2305,8 @@
       "fritidshuse": 8477,
       "husholdning_co2_ton": 28511.790836860004,
       "husholdning_energi_tj": 1730.8613236959995,
-      "husholdning_fossil_andel": 0.026324942541152297
+      "husholdning_fossil_andel": 0.026324942541152297,
+      "affald_indberetning": null
     },
     {
       "folketal": 42641,
@@ -2274,7 +2340,8 @@
       "fritidshuse": 154,
       "husholdning_co2_ton": 8204.364610159002,
       "husholdning_energi_tj": 1218.6334484499998,
-      "husholdning_fossil_andel": 0.026935053340895364
+      "husholdning_fossil_andel": 0.026935053340895364,
+      "affald_indberetning": null
     },
     {
       "folketal": 123250,
@@ -2308,7 +2375,8 @@
       "fritidshuse": 1378,
       "husholdning_co2_ton": 54435.027048928,
       "husholdning_energi_tj": 3443.4347747029997,
-      "husholdning_fossil_andel": 0.08570658487685595
+      "husholdning_fossil_andel": 0.08570658487685595,
+      "affald_indberetning": null
     },
     {
       "folketal": 58405,
@@ -2342,7 +2410,8 @@
       "fritidshuse": 881,
       "husholdning_co2_ton": 2114.7575691849997,
       "husholdning_energi_tj": 1667.945612391,
-      "husholdning_fossil_andel": 0.017649021519233588
+      "husholdning_fossil_andel": 0.017649021519233588,
+      "affald_indberetning": "usikker"
     },
     {
       "folketal": 49773,
@@ -2376,7 +2445,8 @@
       "fritidshuse": 111,
       "husholdning_co2_ton": 18168.397339813,
       "husholdning_energi_tj": 1413.861736692,
-      "husholdning_fossil_andel": 0.022729906665548874
+      "husholdning_fossil_andel": 0.022729906665548874,
+      "affald_indberetning": "usikker"
     },
     {
       "folketal": 48578,
@@ -2410,7 +2480,8 @@
       "fritidshuse": 2151,
       "husholdning_co2_ton": 24883.630623233003,
       "husholdning_energi_tj": 1401.70746183,
-      "husholdning_fossil_andel": 0.15322669129591074
+      "husholdning_fossil_andel": 0.15322669129591074,
+      "affald_indberetning": null
     },
     {
       "folketal": 98806,
@@ -2444,7 +2515,8 @@
       "fritidshuse": 268,
       "husholdning_co2_ton": 44469.77928590701,
       "husholdning_energi_tj": 2100.446689146,
-      "husholdning_fossil_andel": 0.027342571715233844
+      "husholdning_fossil_andel": 0.027342571715233844,
+      "affald_indberetning": null
     },
     {
       "folketal": 36477,
@@ -2478,7 +2550,8 @@
       "fritidshuse": 4936,
       "husholdning_co2_ton": 7216.399260567,
       "husholdning_energi_tj": 1255.7181142770003,
-      "husholdning_fossil_andel": 0.03366320323438075
+      "husholdning_fossil_andel": 0.03366320323438075,
+      "affald_indberetning": "bekraeftet_fejl"
     },
     {
       "folketal": 24310,
@@ -2512,7 +2585,8 @@
       "fritidshuse": 2023,
       "husholdning_co2_ton": 16312.479160424,
       "husholdning_energi_tj": 706.3291050610001,
-      "husholdning_fossil_andel": 0.03528673204659676
+      "husholdning_fossil_andel": 0.03528673204659676,
+      "affald_indberetning": null
     },
     {
       "folketal": 100564,
@@ -2546,7 +2620,8 @@
       "fritidshuse": 223,
       "husholdning_co2_ton": 17996.045500792,
       "husholdning_energi_tj": 2633.291994437999,
-      "husholdning_fossil_andel": 0.09404618061008232
+      "husholdning_fossil_andel": 0.09404618061008232,
+      "affald_indberetning": null
     },
     {
       "folketal": 3617,
@@ -2580,7 +2655,8 @@
       "fritidshuse": 920,
       "husholdning_co2_ton": 692.1741528260001,
       "husholdning_energi_tj": 211.13019706999998,
-      "husholdning_fossil_andel": 0.04371854564669263
+      "husholdning_fossil_andel": 0.04371854564669263,
+      "affald_indberetning": null
     },
     {
       "folketal": 102753,
@@ -2614,7 +2690,8 @@
       "fritidshuse": 1221,
       "husholdning_co2_ton": 73199.18482512,
       "husholdning_energi_tj": 2722.0637915279995,
-      "husholdning_fossil_andel": 0.10942507858855083
+      "husholdning_fossil_andel": 0.10942507858855083,
+      "affald_indberetning": null
     },
     {
       "folketal": 66352,
@@ -2648,7 +2725,8 @@
       "fritidshuse": 293,
       "husholdning_co2_ton": 38857.63132579701,
       "husholdning_energi_tj": 1706.3452273020002,
-      "husholdning_fossil_andel": 0.06361686111880084
+      "husholdning_fossil_andel": 0.06361686111880084,
+      "affald_indberetning": null
     },
     {
       "folketal": 44394,
@@ -2682,7 +2760,8 @@
       "fritidshuse": 9271,
       "husholdning_co2_ton": 18570.354136600003,
       "husholdning_energi_tj": 1595.693032853,
-      "husholdning_fossil_andel": 0.04027573522777957
+      "husholdning_fossil_andel": 0.04027573522777957,
+      "affald_indberetning": "bekraeftet_fejl"
     },
     {
       "folketal": 378361,
@@ -2716,7 +2795,8 @@
       "fritidshuse": 2787,
       "husholdning_co2_ton": 267293.90596866,
       "husholdning_energi_tj": 7164.384413496001,
-      "husholdning_fossil_andel": 0.013796858864775259
+      "husholdning_fossil_andel": 0.013796858864775259,
+      "affald_indberetning": null
     },
     {
       "folketal": 90546,
@@ -2750,7 +2830,8 @@
       "fritidshuse": 424,
       "husholdning_co2_ton": 25481.585918090004,
       "husholdning_energi_tj": 2501.0511199300004,
-      "husholdning_fossil_andel": 0.02621589185823403
+      "husholdning_fossil_andel": 0.02621589185823403,
+      "affald_indberetning": null
     },
     {
       "folketal": 59324,
@@ -2784,7 +2865,8 @@
       "fritidshuse": 2678,
       "husholdning_co2_ton": 31963.901877271997,
       "husholdning_energi_tj": 1715.4973347750001,
-      "husholdning_fossil_andel": 0.02223476290856658
+      "husholdning_fossil_andel": 0.02223476290856658,
+      "affald_indberetning": "usikker"
     },
     {
       "folketal": 43305,
@@ -2818,7 +2900,8 @@
       "fritidshuse": 245,
       "husholdning_co2_ton": 9233.190135682,
       "husholdning_energi_tj": 1191.121727498,
-      "husholdning_fossil_andel": 0.02987129588571773
+      "husholdning_fossil_andel": 0.02987129588571773,
+      "affald_indberetning": null
     },
     {
       "folketal": 18596,
@@ -2852,7 +2935,8 @@
       "fritidshuse": 2467,
       "husholdning_co2_ton": 2728.32814006,
       "husholdning_energi_tj": 747.74964367,
-      "husholdning_fossil_andel": 0.029925603504366828
+      "husholdning_fossil_andel": 0.029925603504366828,
+      "affald_indberetning": null
     },
     {
       "folketal": 55405,
@@ -2886,7 +2970,8 @@
       "fritidshuse": 10557,
       "husholdning_co2_ton": 9146.061117047,
       "husholdning_energi_tj": 1984.3040835649997,
-      "husholdning_fossil_andel": 0.03411864985651142
+      "husholdning_fossil_andel": 0.03411864985651142,
+      "affald_indberetning": null
     },
     {
       "folketal": 44104,
@@ -2920,7 +3005,8 @@
       "fritidshuse": 3353,
       "husholdning_co2_ton": 4051.7105452039996,
       "husholdning_energi_tj": 1487.2277291260002,
-      "husholdning_fossil_andel": 0.035746764954579395
+      "husholdning_fossil_andel": 0.035746764954579395,
+      "affald_indberetning": null
     },
     {
       "folketal": 20122,
@@ -2954,7 +3040,8 @@
       "fritidshuse": 1238,
       "husholdning_co2_ton": 13942.252298329999,
       "husholdning_energi_tj": 694.602667671,
-      "husholdning_fossil_andel": 0.03126596265577043
+      "husholdning_fossil_andel": 0.03126596265577043,
+      "affald_indberetning": null
     },
     {
       "folketal": 97874,
@@ -2988,7 +3075,8 @@
       "fritidshuse": 723,
       "husholdning_co2_ton": 58767.714444270016,
       "husholdning_energi_tj": 2664.733514644,
-      "husholdning_fossil_andel": 0.08732794563852991
+      "husholdning_fossil_andel": 0.08732794563852991,
+      "affald_indberetning": null
     },
     {
       "folketal": 36529,
@@ -3022,7 +3110,8 @@
       "fritidshuse": 297,
       "husholdning_co2_ton": 7459.285829666,
       "husholdning_energi_tj": 1109.97691442,
-      "husholdning_fossil_andel": 0.0376670423085753
+      "husholdning_fossil_andel": 0.0376670423085753,
+      "affald_indberetning": null
     },
     {
       "folketal": 57523,
@@ -3056,7 +3145,8 @@
       "fritidshuse": 4917,
       "husholdning_co2_ton": 48159.8996241,
       "husholdning_energi_tj": 1959.3320845029998,
-      "husholdning_fossil_andel": 0.07393946113721091
+      "husholdning_fossil_andel": 0.07393946113721091,
+      "affald_indberetning": null
     },
     {
       "folketal": 62979,
@@ -3090,7 +3180,8 @@
       "fritidshuse": 6376,
       "husholdning_co2_ton": 30115.681420999994,
       "husholdning_energi_tj": 2263.812324488,
-      "husholdning_fossil_andel": 0.03142213210456311
+      "husholdning_fossil_andel": 0.03142213210456311,
+      "affald_indberetning": null
     },
     {
       "folketal": 37998,
@@ -3124,7 +3215,8 @@
       "fritidshuse": 8627,
       "husholdning_co2_ton": 12468.725282683,
       "husholdning_energi_tj": 1462.428651132,
-      "husholdning_fossil_andel": 0.07420889894081023
+      "husholdning_fossil_andel": 0.07420889894081023,
+      "affald_indberetning": null
     },
     {
       "folketal": 1683,
@@ -3158,7 +3250,8 @@
       "fritidshuse": 975,
       "husholdning_co2_ton": 1093.364943488,
       "husholdning_energi_tj": 107.32163618000001,
-      "husholdning_fossil_andel": 0.08750455177788365
+      "husholdning_fossil_andel": 0.08750455177788365,
+      "affald_indberetning": null
     },
     {
       "folketal": 41541,
@@ -3192,7 +3285,8 @@
       "fritidshuse": 3055,
       "husholdning_co2_ton": 12207.227109794,
       "husholdning_energi_tj": 1311.7432860860001,
-      "husholdning_fossil_andel": 0.08663246959935238
+      "husholdning_fossil_andel": 0.08663246959935238,
+      "affald_indberetning": null
     },
     {
       "folketal": 19344,
@@ -3226,7 +3320,8 @@
       "fritidshuse": 485,
       "husholdning_co2_ton": 3239.9026237109997,
       "husholdning_energi_tj": 649.478065569,
-      "husholdning_fossil_andel": 0.06187368042644193
+      "husholdning_fossil_andel": 0.06187368042644193,
+      "affald_indberetning": "usikker"
     },
     {
       "folketal": 31280,
@@ -3260,7 +3355,8 @@
       "fritidshuse": 80,
       "husholdning_co2_ton": 12444.514830396001,
       "husholdning_energi_tj": 975.5906892620001,
-      "husholdning_fossil_andel": 0.04306228865999117
+      "husholdning_fossil_andel": 0.04306228865999117,
+      "affald_indberetning": null
     },
     {
       "folketal": 42572,
@@ -3294,7 +3390,8 @@
       "fritidshuse": 3789,
       "husholdning_co2_ton": 22322.585793274,
       "husholdning_energi_tj": 1537.2177878330003,
-      "husholdning_fossil_andel": 0.06238913794004247
+      "husholdning_fossil_andel": 0.06238913794004247,
+      "affald_indberetning": null
     },
     {
       "folketal": 35632,
@@ -3328,7 +3425,8 @@
       "fritidshuse": 2562,
       "husholdning_co2_ton": 12343.544111562001,
       "husholdning_energi_tj": 1276.0609089769998,
-      "husholdning_fossil_andel": 0.02711337377205371
+      "husholdning_fossil_andel": 0.02711337377205371,
+      "affald_indberetning": null
     },
     {
       "folketal": 226033,
@@ -3362,7 +3460,8 @@
       "fritidshuse": 5299,
       "husholdning_co2_ton": 356695.49235712003,
       "husholdning_energi_tj": 5679.734981352,
-      "husholdning_fossil_andel": 0.018881444115808426
+      "husholdning_fossil_andel": 0.018881444115808426,
+      "affald_indberetning": null
     }
   ]
 }

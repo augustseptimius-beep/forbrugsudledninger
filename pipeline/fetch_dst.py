@@ -5,6 +5,7 @@ dækker to felter). DST's tal bruger komma som decimalseparator i nogle CSV-felt
 
 import dst_client
 from constants import PERIODER
+from kommuner import KOMMUNER
 
 BASE = dst_client.DST_BASE_URL
 
@@ -235,6 +236,78 @@ def fetch_affald_validitet(aar, forrige_aar):
         if foer > 0:
             forhold[navn] = ton.get((navn, str(aar)), 0.0) / foer
     return forhold
+
+
+# Kommuner hvis affaldstal ikke kan bæres, fordi indberetningen er delt med andre.
+# Bevist i DST's egne tonnagetal for 2023: tonnage byttet mellem medlemmerne, mens
+# selskabets samlede niveau var normalt (Hørsholm 29 ton dagrenovation for 24.715
+# indbyggere; Fredensborg 8.724 -> 20.307 ton samme år). Hele ejerkredsen mærkes,
+# ikke kun de medlemmer hvis eget tal ser skævt ud det enkelte år - fejlkilden er
+# selskabets indberetning, ikke den enkelte kommunes forbrug.
+# Kilder: norfors.dk/om-os, renodjurs.dk/om-reno-djurs.
+DELT_INDBERETNING = {
+    "Allerød", "Fredensborg", "Helsingør", "Hørsholm", "Rudersdal",  # Norfors
+    "Norddjurs", "Syddjurs",  # Reno Djurs
+}
+
+AFFALD_BEKRAEFTET_FEJL = "bekraeftet_fejl"
+AFFALD_USIKKER = "usikker"
+
+
+def _tukey_hegn(vaerdier):
+    """Standardgrænsen for et boksplot (Tukey, 1977): [Q1-1,5*IQR, Q3+1,5*IQR].
+    En navngiven konvention frem for en tærskel, vi selv finder på. Returnerer
+    None ved for få værdier - et hegn om fire tal beskriver ingenting."""
+    if len(vaerdier) < 8:
+        return None
+    s = sorted(vaerdier)
+    n = len(s)
+
+    def kvartil(p):
+        i = p * (n - 1)
+        lav = int(i)
+        return s[lav] + (s[lav + 1] - s[lav]) * (i - lav) if lav + 1 < n else s[lav]
+
+    q1, q3 = kvartil(0.25), kvartil(0.75)
+    iqr = q3 - q1
+    return q1 - 1.5 * iqr, q3 + 1.5 * iqr
+
+
+def klassificer_affald(forhold):
+    """Afgør pr. kommune, hvor meget affaldstallene kan bære. Tager forholdet fra
+    fetch_affald_validitet og returnerer {navn: AFFALD_BEKRAEFTET_FEJL |
+    AFFALD_USIKKER | None}.
+
+    To niveauer, og forskellen mellem dem er bevisbyrden:
+      - BEKRAEFTET_FEJL: kommunen deler indberetning med en anden kommune, og
+        fejlen er eftervist i tonnagetallene. Her HOLDES retningen tilbage.
+      - USIKKER: årets tal springer uden for Tukeys hegn, men uden en kendt
+        forklaring. Retningen holdes IKKE tilbage - et stort udsving er ikke et
+        bevis for, at tallet er forkert. Små øer springer af naturlige grunde.
+        Udsvinget oplyses i stedet, så læseren selv kan tage højde for det.
+
+    Hegnet beregnes uden de kommuner, der allerede er kendt fejlbehæftede: deres
+    ekstremer ville ellers strække hegnet så bredt, at en reel afviger gik fri.
+
+    LABY24's KOMGRP rummer også kommunegruppe-aggregater ("Hovedstadskommuner",
+    "Landkommuner", "Hele landet"). De frasorteres her frem for hos kalderen:
+    et aggregat er et gennemsnit af mange kommuner og svinger derfor mindre end
+    en enkelt, så de ville trække hegnet for stramt og stemple rolige kommuner
+    som usikre."""
+    kommuner = {navn for _, navn, _ in KOMMUNER}
+    forhold = {navn: v for navn, v in forhold.items() if navn in kommuner}
+    hegn_grundlag = [v for navn, v in forhold.items() if navn not in DELT_INDBERETNING]
+    hegn = _tukey_hegn(hegn_grundlag)
+
+    resultat = {}
+    for navn, v in forhold.items():
+        if navn in DELT_INDBERETNING:
+            resultat[navn] = AFFALD_BEKRAEFTET_FEJL
+        elif hegn is not None and (v < hegn[0] or v > hegn[1]):
+            resultat[navn] = AFFALD_USIKKER
+        else:
+            resultat[navn] = None
+    return resultat
 
 
 def fetch_all_dst():

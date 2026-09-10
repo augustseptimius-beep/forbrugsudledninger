@@ -296,18 +296,57 @@ test("overblik: forklarer at værdi og udledningsretning ikke er det samme", () 
     "det konkrete eksempel skal stå der");
 });
 
+test("affald: kommune uden forbehold får sit retningsmærkat", () => {
+  const k = { ...thisted, affald_indberetning: null };
+  const t = driverTabel(k, land);
+  const affald = t.find((d) => d.navn === "Husholdningsaffald");
+  const genanv = t.find((d) => d.navn === "Genanvendelsesprocent");
+  assert.notEqual(affald.signal, "uafklaret", "mere affald peger mod højere udledning");
+  assert.notEqual(genanv.signal, "uafklaret", "mere genanvendelse peger mod lavere");
+});
+
+test("affald: kommune der deler indberetning får retningen holdt tilbage", () => {
+  const k = { ...thisted, affald_indberetning: "bekraeftet_fejl" };
+  const t = driverTabel(k, land);
+  for (const navn of ["Husholdningsaffald", "Genanvendelsesprocent"]) {
+    assert.equal(t.find((d) => d.navn === navn).signal, "uafklaret",
+      `${navn}: tonnagen er byttet med en anden kommunes, retningen kan ikke bæres`);
+  }
+});
+
+test("affald: usædvanligt udsving holder IKKE retningen tilbage, men oplyses", () => {
+  // Et stort udsving er ikke et bevis for, at tallet er forkert - små øer
+  // springer af naturlige grunde. Retningen vises, forbeholdet står ved siden af.
+  const k = { ...thisted, affald_indberetning: "usikker" };
+  const t = driverTabel(k, land);
+  const affald = t.find((d) => d.navn === "Husholdningsaffald");
+  assert.notEqual(affald.signal, "uafklaret", "retningen vises");
+  assert.match(affald.begrundelse, /udsving/i, "men udsvinget skal nævnes");
+});
+
+test("affald: forbeholdet gælder KUN affaldsnøgletallene", () => {
+  const k = { ...thisted, affald_indberetning: "bekraeftet_fejl" };
+  const t = driverTabel(k, land);
+  // Biler pr. indbygger, ikke Diesel-andel: sidstnævnte er uafklaret by design
+  // (en dieselbil udleder mindre pr. km end en benzinbil) og ville derfor bestå
+  // uanset om forbeholdet smittede eller ej.
+  const biler = t.find((d) => d.navn === "Biler pr. indbygger");
+  assert.notEqual(biler.signal, "uafklaret",
+    "en affaldsindberetningsfejl må ikke smitte af på andre nøgletal");
+});
+
 // --- Affaldstallenes kommunefordeling (DST-indberetningsfejl) ---
 
-test("affald: begge affaldsnøgletal står som uafklarede, ikke med en retning", () => {
-  // DST's kommunefordeling af husholdningsaffald for 2023 er påvist upålidelig:
-  // kommuner, der deler et affaldsselskab, har fået hinandens restaffald bogført.
-  // Hørsholm indberettede 29 ton dagrenovation for 24.715 indbyggere. Retningen
-  // kan ikke bæres, når vi ikke kan udpege de ramte kommuner.
-  const t = driverTabel(thisted, land);
+test("affald: forbeholdet følger kommunen, ikke nøgletallet", () => {
+  // Tidligere stod begge affaldsnøgletal som uafklarede for ALLE 98 kommuner.
+  // Det var for groft: DST's fejl rammer de kommuner, der deler indberetning
+  // med hinanden, ikke de øvrige 85. Samme nøgletal, to kommuner, to udfald.
+  const spaerret = driverTabel({ ...thisted, affald_indberetning: "bekraeftet_fejl" }, land);
+  const ren = driverTabel({ ...thisted, affald_indberetning: null }, land);
+  const find = (t, navn) => t.find((x) => x.navn === navn);
   for (const navn of ["Husholdningsaffald", "Genanvendelsesprocent"]) {
-    const d = t.find((x) => x.navn === navn);
-    assert.equal(d.paavirkning, "uafklaret", `${navn} må ikke påstå en retning`);
-    assert.equal(d.signal, "uafklaret");
+    assert.equal(find(spaerret, navn).signal, "uafklaret", `${navn} spærret`);
+    assert.notEqual(find(ren, navn).signal, "uafklaret", `${navn} fri`);
   }
 });
 

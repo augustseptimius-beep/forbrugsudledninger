@@ -241,12 +241,28 @@
     fraktioner udgør en kunstigt høj andel, når restaffaldet forsvinder fra regnskabet.</p>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Konsekvensen her:</strong>
     tallene står, som Danmarks Statistik har offentliggjort dem - værktøjet retter aldrig
-    et tal fra en kilde. Men begge affaldsnøgletal er sat til <em>uafklaret</em>, så de
-    ikke får et mærkat, der påstår en retning for den enkelte kommune. Det er ikke, fordi
-    retningen er fagligt forkert, men fordi det ikke kan afgøres med sikkerhed, hvilke
-    kommuner der er ramt. Datapipelinen sammenligner hvert år kommunernes indberettede
-    restaffald med året før og skriver afvigelserne i valideringsrapporten, så retningen
-    kan sættes tilbage, når kilden er rettet.</p>
+    et tal fra en kilde. Forbeholdet sættes derimod pr. kommune, efter hvor tungt beviset
+    vejer:</p>
+  <ul class="mt-2 ml-5 list-disc text-sm text-gray-700 max-w-3xl space-y-1">
+    <li><strong>De syv ejerkommuner bag Norfors og Reno Djurs</strong> (Allerød,
+      Fredensborg, Helsingør, Hørsholm, Rudersdal, Norddjurs og Syddjurs) får
+      <em>ingen retning</em> på de to affaldsnøgletal. Her er byttet af tonnage eftervist
+      i Danmarks Statistiks egne mængdetal, og tallet beskriver derfor ikke kommunen alene.
+      Hele ejerkredsen er mærket, ikke kun de medlemmer hvis eget tal ser skævt ud det
+      enkelte år: fejlkilden er selskabets indberetning.</li>
+    <li><strong>Kommuner med et usædvanligt stort spring</strong> fra året før beholder
+      retningen, men får springet oplyst. Et udsving er ikke i sig selv et bevis for en
+      fejl - en lille kommune svinger naturligt - og at holde retningen tilbage ville
+      være en påstand, vi heller ikke kan bære.</li>
+    <li><strong>De øvrige kommuner</strong> får retningen som ethvert andet nøgletal.
+      Der er intet, der peger på, at deres tal er forkerte.</li>
+  </ul>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Inddelingen regnes af datapipelinen ved
+    hver hentning, ud fra kommunernes indberettede restaffald sammenlignet med året før.
+    Listen over kommuner, der deler indberetning, står navngivet i pipelinens kildekode
+    med henvisning til selskaberne og ryddes, når kilden er rettet. Tidligere stod begge
+    nøgletal som <em>uafklarede</em> for alle 98 kommuner; det var for groft, fordi fejlen
+    rammer et mindretal.</p>
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">

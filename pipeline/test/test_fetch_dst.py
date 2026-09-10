@@ -220,5 +220,62 @@ class TestFetchDelD(unittest.TestCase):
             self.assertEqual(result["Thisted"]["disp_indkomst"], 252934)  # øvrige felter upåvirket
 
 
+class TestKlassificerAffald(unittest.TestCase):
+    """Klassificeringen afgør, hvilke kommuner der får retningsmærkat tilbage på de
+    to affaldsnøgletal. Kun kommuner med POSITIVT bevis for en indberetningsfejl
+    holdes tilbage - et usædvanligt udsving er ikke i sig selv et bevis."""
+
+    def test_medlem_af_selskab_med_bekraeftet_fejl_spaerres(self):
+        forhold = {"Hørsholm": 0.01, "Thisted": 1.02}
+        k = fetch_dst.klassificer_affald(forhold)
+        self.assertEqual(k["Hørsholm"], fetch_dst.AFFALD_BEKRAEFTET_FEJL)
+
+    def test_medlem_spaerres_ogsaa_naar_dets_eget_tal_ser_normalt_ud(self):
+        # Helsingør er Norfors-ejerkommune. Selskabets indberetning er fejlkilden,
+        # så medlemmets eget forhold kan tilfældigt se roligt ud og stadig være
+        # sammensat af andres tonnage.
+        forhold = {"Helsingør": 1.02, "Thisted": 1.02}
+        k = fetch_dst.klassificer_affald(forhold)
+        self.assertEqual(k["Helsingør"], fetch_dst.AFFALD_BEKRAEFTET_FEJL)
+
+    def test_rolig_kommune_uden_for_selskaberne_faar_ingen_markering(self):
+        forhold = {"Thisted": 1.02, "Aalborg": 0.98, "Odense": 1.05, "Vejle": 0.97,
+                   "Esbjerg": 1.01, "Kolding": 0.99, "Viborg": 1.03, "Horsens": 0.96}
+        k = fetch_dst.klassificer_affald(forhold)
+        self.assertIsNone(k["Thisted"])
+
+    def test_usaedvanligt_udsving_uden_kendt_aarsag_markeres_men_spaerres_ikke(self):
+        # Samsø-tilfældet: et voldsomt udsving, men ingen delt indberetning at
+        # forklare det med. Retningen holdes IKKE tilbage - vi har intet bevis for
+        # at tallet er forkert - men udsvinget oplyses.
+        forhold = {"Thisted": 1.02, "Aalborg": 0.98, "Odense": 1.05, "Vejle": 0.97,
+                   "Esbjerg": 1.01, "Kolding": 0.99, "Viborg": 1.03, "Horsens": 0.96,
+                   "Samsø": 3.04}
+        k = fetch_dst.klassificer_affald(forhold)
+        self.assertEqual(k["Samsø"], fetch_dst.AFFALD_USIKKER)
+
+    def test_kommunegruppe_aggregater_forurener_ikke_hegnet(self):
+        # LABY24's KOMGRP rummer også "Hovedstadskommuner", "Landkommuner" mv.
+        # De er gennemsnit af mange kommuner og svinger derfor mindre end en
+        # enkelt kommune. Slipper de med i hegn-grundlaget, bliver hegnet for
+        # stramt, og roligt beliggende kommuner stemples som usikre.
+        ægte = {"Thisted": 1.02, "Aalborg": 0.98, "Odense": 1.05, "Vejle": 0.97,
+                "Esbjerg": 1.01, "Kolding": 0.99, "Viborg": 1.03, "Horsens": 0.96,
+                "Randers": 1.20}
+        med_aggregater = dict(ægte, **{
+            "Hele landet": 1.00, "Hovedstadskommuner": 1.00, "Storbykommuner": 1.00,
+            "Provinsbykommuner": 1.00, "Oplandskommuner": 1.00, "Landkommuner": 1.00,
+        })
+        k = fetch_dst.klassificer_affald(med_aggregater)
+        self.assertNotIn("Hovedstadskommuner", k, "aggregater er ikke kommuner")
+        self.assertNotIn("Hele landet", k)
+        self.assertEqual(fetch_dst.klassificer_affald(ægte), k,
+                         "aggregaterne må ikke ændre de ægte kommuners klassifikation")
+
+    def test_kommune_uden_forhold_faar_ingen_markering(self):
+        k = fetch_dst.klassificer_affald({"Thisted": 1.02})
+        self.assertNotIn("Læsø", k)
+
+
 if __name__ == "__main__":
     unittest.main()

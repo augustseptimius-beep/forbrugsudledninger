@@ -205,13 +205,49 @@ test("alle 98 kommuner renderes med fordeling uden undefined, NaN eller null", (
   }
 });
 
-test("affald: ingen kommune får et retningsmærkat på de to affaldsnøgletal", () => {
+const AFFALDSNOEGLETAL = ["Husholdningsaffald", "Genanvendelsesprocent"];
+
+test("affald: retningen holdes tilbage præcis hos dem, der deler indberetning", () => {
+  // Reglen var før global: ingen af de 98 fik et retningsmærkat, fordi nogle af
+  // dem havde fået hinandens tonnage bogført. Den er nu per kommune, så testen
+  // skal binde de to lister sammen - ellers kan en kommune miste sit mærkat,
+  // uden at nogen opdager hvorfor.
   for (const k of data.kommuner) {
+    const spaerret = k.affald_indberetning === "bekraeftet_fejl";
     for (const r of driverTabel(k, data.land)) {
-      if (r.navn === "Husholdningsaffald" || r.navn === "Genanvendelsesprocent") {
+      if (!AFFALDSNOEGLETAL.includes(r.navn)) continue;
+      if (spaerret) {
         assert.equal(r.signal, "uafklaret",
-          `${k.navn}/${r.navn}: DST's kommunefordeling bærer ikke et mærkat`);
+          `${k.navn}/${r.navn}: deler indberetning, retningen kan ikke bæres`);
+      } else {
+        assert.notEqual(r.signal, "uafklaret",
+          `${k.navn}/${r.navn}: intet forbehold, så retningen skal stå`);
       }
     }
+  }
+});
+
+test("affald: forbeholdet rammer et mindretal, ikke alle 98", () => {
+  // Vagt mod at et fremtidigt datasæt stille sætter forbehold på alle igen -
+  // så ville nøgletallene være tilbage ved den blanket-regel, der netop er
+  // afskaffet, uden at nogen test sagde fra.
+  const medForbehold = data.kommuner.filter((k) => k.affald_indberetning).length;
+  assert.ok(medForbehold > 0, "de kendte fejlkommuner skal stadig fanges");
+  assert.ok(medForbehold < data.kommuner.length / 2,
+    `${medForbehold} af ${data.kommuner.length} har forbehold - er blanket-reglen tilbage?`);
+});
+
+test("affald: hver spærret kommune er navngivet i pipelinens kildeliste", () => {
+  // Spærringen bygger på et eftervist bytte af tonnage mellem navngivne
+  // ejerkommuner, ikke på at tallet ser mærkeligt ud. Falder en kommune uden
+  // for listen, er den kommet ind ad en anden vej end beviset.
+  const NORFORS_OG_RENO_DJURS = new Set([
+    "Allerød", "Fredensborg", "Helsingør", "Hørsholm", "Rudersdal",
+    "Norddjurs", "Syddjurs",
+  ]);
+  for (const k of data.kommuner) {
+    if (k.affald_indberetning !== "bekraeftet_fejl") continue;
+    assert.ok(NORFORS_OG_RENO_DJURS.has(k.navn),
+      `${k.navn} er spærret uden at stå i den navngivne kildeliste`);
   }
 });

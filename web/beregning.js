@@ -178,30 +178,20 @@ const DRIVERE = [
     begrundelse: "Et produktionsmål. Den grønne strøm indgår allerede i det "
       + "landsdækkende mix, alle forbruger, så den må ikke tælles som en reduktion "
       + "i kommunens eget forbrug." },
-  // De to affaldsnøgletal stod tidligere som "hoejere" og "lavere". De er sat
-  // til uafklaret, fordi DST's kommunefordeling af husholdningsaffald for 2023
-  // er påvist upålidelig: flere kommuner, der deler et fælleskommunalt
-  // affaldsselskab, har fået hinandens affald bogført. Se DRIVER_FORBEHOLD i
-  // render.js for beviset og metodesiden for den fulde redegørelse.
-  //
-  // Retningen er IKKE forkert som fagligt ræsonnement - mere affald peger
-  // fortsat mod større materielt forbrug. Men et mærkat er en påstand om
-  // netop denne kommunes tal, og den påstand kan ikke bæres af data, hvor vi
-  // ikke kan udpege med sikkerhed, hvilke kommuner der er ramt. Sæt dem
-  // tilbage, når kilden er rettet, eller når et senere opgørelsesår er rent.
+  // De to affaldsnøgletal stod en periode som uafklarede for ALLE 98 kommuner,
+  // fordi DST's kommunefordeling for 2023 er upålidelig for nogle af dem.
+  // Det var for groft: fejlen rammer de kommuner, der deler indberetning med
+  // hinanden, ikke de øvrige 85. Retningen står derfor igen, og forbeholdet
+  // sættes pr. kommune ud fra affald_indberetning - se INDBERETNING_FORBEHOLD.
   { navn: "Husholdningsaffald", enhed: "kg/pers.", val: (m) => m.affald_kg,
-    type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "uafklaret",
-    begrundelse: "Mere affald peger i sig selv mod et større materielt forbrug, men "
-      + "kommunefordelingen for det viste år er påvist upålidelig, og det kan ikke "
-      + "afgøres med sikkerhed, hvilke kommuner der er ramt. Retningen gættes derfor "
-      + "ikke. Tallet står som Danmarks Statistik har offentliggjort det." },
+    type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "hoejere",
+    forbeholdFelt: "affald_indberetning",
+    begrundelse: "Mere affald peger mod et større materielt forbrug." },
   { navn: "Genanvendelsesprocent", enhed: "pct.", val: (m) => m.genanvendelse_pct,
     andel: "0-100",
-    type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "uafklaret",
-    begrundelse: "Genanvendte materialer erstatter produktion af nye, men procenten "
-      + "har samme indberetningsfejl som husholdningsaffaldet: forsvinder restaffaldet "
-      + "fra en kommunes regnskab, stiger de genanvendelige fraktioners andel af sig "
-      + "selv. Retningen gættes derfor ikke." },
+    type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "lavere",
+    forbeholdFelt: "affald_indberetning",
+    begrundelse: "Genanvendte materialer erstatter produktion af nye." },
   { navn: "Boligpris pr. m²", enhed: "kr./m²", val: (m) => m.boligpris_m2,
     type: "relativ", kategori: KATEGORI.KONTEKST, paavirkning: "uafklaret",
     begrundelse: "Boligpris siger noget om købekraft og boligtype, som begge opgøres "
@@ -226,6 +216,31 @@ export function niveauBaand(afvigelse) {
   if (a < TAERSKEL_MARKANT) return afvigelse > 0 ? "over" : "under";
   return afvigelse > 0 ? "markant over" : "markant under";
 }
+
+/** Forbehold, som kildens egen pålidelighed lægger på et nøgletal for NETOP
+ *  denne kommune. Feltet sættes af pipelinen (fetch_dst.klassificer_affald).
+ *
+ *  Forskellen mellem de to niveauer er bevisbyrden. "bekraeftet_fejl" bygger på
+ *  et eftervist bytte af tonnage mellem kommuner, der deler affaldsselskab -
+ *  der VED vi, at tallet ikke beskriver kommunen, og retningen spærres.
+ *  "usikker" er blot et stort spring fra året før. Det er ikke et bevis for en
+ *  fejl: en lille ø kan springe af helt naturlige grunde. Retningen spærres
+ *  derfor ikke - udsvinget oplyses, og læseren tager selv højde for det. */
+const INDBERETNING_FORBEHOLD = {
+  bekraeftet_fejl: {
+    spaerrer: true,
+    note: "Kommunen deler affaldsindberetning med nabokommuner, og tonnagen er "
+      + "påviseligt bogført på hinanden for det viste år. Tallet står som "
+      + "Danmarks Statistik har offentliggjort det, men det beskriver ikke "
+      + "kommunen alene, og retningen gættes derfor ikke.",
+  },
+  usikker: {
+    spaerrer: false,
+    note: "Bemærk: kommunens restaffald viser et usædvanligt stort udsving fra "
+      + "året før. Det behøver ikke være en fejl - små kommuner svinger naturligt "
+      + "- men tallet er mindre stabilt end de øvriges.",
+  },
+};
 
 /** Hvad afvigelsen peger mod for udledningen - den eneste vurdering i
  *  værktøjet. "uafklaret" når retningen ikke kan begrundes på kildens grundlag,
@@ -320,6 +335,16 @@ export function beregnFordeling(kommuner, land) {
 /** Byg indikatortabellen: værdi, landsværdi, afvigelse (efter type) og retning. */
 export function driverTabel(kommune, land) {
   return DRIVERE.map((d) => {
+    // Kildens pålidelighed for netop denne kommune kan spærre retningen og
+    // lægger under alle omstændigheder sin note til begrundelsen.
+    const forbehold = d.forbeholdFelt
+      ? INDBERETNING_FORBEHOLD[kommune[d.forbeholdFelt]] ?? null
+      : null;
+    const paavirkning = forbehold?.spaerrer ? "uafklaret" : (d.paavirkning ?? "uafklaret");
+    const begrundelse = forbehold
+      ? [d.begrundelse, forbehold.note].filter(Boolean).join(" ")
+      : (d.begrundelse ?? null);
+
     const kv = sikker(d.val, kommune);
     const lv = sikker(d.val, land);
     let afv = null;
@@ -343,13 +368,13 @@ export function driverTabel(kommune, land) {
     return {
       navn: d.navn, enhed: d.enhed, type: d.type, kategori: d.kategori,
       rolle: d.rolle ?? "hoved",
-      paavirkning: d.paavirkning ?? "uafklaret",
-      begrundelse: d.begrundelse ?? null,
+      paavirkning,
+      begrundelse,
       kommuneVaerdi: kv, landVaerdi: lv, afvigelse: afv,
       procentpoint: pp,
       retning: afv == null ? "kontekst" : afv > 0 ? "over land" : afv < 0 ? "under land" : "på niveau",
       baand: niveauBaand(afv),
-      signal: udledningsSignal(afv, d.paavirkning, d.kategori),
+      signal: udledningsSignal(afv, paavirkning, d.kategori),
     };
   });
 }
