@@ -162,15 +162,20 @@ def fetch_byggeri():
 
 
 def fetch_biler():
-    """Returnerer (biler_ialt, el, plugin, diesel), hver {navn: antal (int)}."""
+    """Returnerer (biler_ialt, el, plugin, diesel, benzin), hver {navn: antal (int)}.
+
+    Benzin og diesel hentes hver for sig, men vises som ét nøgletal. BIL54's
+    øvrige drivmidler - F-gas, N-gas, petroleum, brint, metanol, ætanol - udgør
+    tilsammen under 0,1 pct. af bilparken i hver kommune og hentes ikke."""
     rows = dst_client.fetch(BASE, "BIL54", {
         "OMRÅDE": "*", "BILTYPE": "4000101002", "BRUG": "1000",
-        "DRIV": "20200,20225,20232,20210", "Tid": PERIODER["BILER_MAANED"],
+        "DRIV": "20200,20225,20232,20210,20205", "Tid": PERIODER["BILER_MAANED"],
     })
     per_type = dst_client.sum_by(rows, ["OMRÅDE", "DRIV"])
     def _uddrag(driv_navn):
         return {navn: v for (navn, driv), v in per_type.items() if driv == driv_navn}
-    return (_uddrag("Drivmidler i alt"), _uddrag("El"), _uddrag("Pluginhybrid"), _uddrag("Diesel"))
+    return (_uddrag("Drivmidler i alt"), _uddrag("El"), _uddrag("Pluginhybrid"),
+            _uddrag("Diesel"), _uddrag("Benzin"))
 
 
 def fetch_affald():
@@ -431,7 +436,7 @@ def fetch_all_dst():
     boligareal = fetch_boligareal()
     opv_ialt, opv_olie, opv_naturgas = fetch_opvarmning()
     byggeri = fetch_byggeri()
-    biler, biler_el, biler_plugin, biler_diesel = fetch_biler()
+    biler, biler_el, biler_plugin, biler_diesel, biler_benzin = fetch_biler()
     affald_kg, genanvendelse_pct = fetch_affald()
 
     # Kommune-universet defineres ud fra tre kernetabeller, IKKE en union af alle 11 -
@@ -450,6 +455,7 @@ def fetch_all_dst():
             "byggeri": byggeri.get(navn),
             "biler": biler.get(navn), "biler_el": biler_el.get(navn),
             "biler_plugin": biler_plugin.get(navn), "biler_diesel": biler_diesel.get(navn),
+            "biler_benzin": biler_benzin.get(navn),
             "opv_boliger_ialt": opv_ialt.get(navn), "opv_olie": opv_olie.get(navn),
             "opv_naturgas": opv_naturgas.get(navn),
             "affald_kg": affald_kg.get(navn), "genanvendelse_pct": genanvendelse_pct.get(navn),

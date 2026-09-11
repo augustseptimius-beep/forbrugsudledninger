@@ -1,5 +1,5 @@
 {
-  "genereret": "2026-08-22",
+  "genereret": "2026-09-11",
   "kilder": [
     {
       "id": "FOLK1A",
@@ -126,7 +126,8 @@
         "biler",
         "biler_el",
         "biler_plugin",
-        "biler_diesel"
+        "biler_diesel",
+        "biler_benzin"
       ],
       "periode": "2026M01"
     },

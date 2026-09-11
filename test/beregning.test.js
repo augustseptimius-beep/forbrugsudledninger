@@ -135,8 +135,8 @@ test("udledningsSignal: små udsving peger ingen vej", () => {
 });
 
 test("udledningsSignal: uafklaret påvirkning gættes aldrig", () => {
-  // Diesel-andel er det vigtigste eksempel: en dieselbil udleder typisk
-  // mindre CO2 pr. km end en benzinbil, men køres længere.
+  // Nettoformue er det vigtigste eksempel: CONCITO kobler aftrykket til
+  // indkomst, ikke til formue, så retningen kan ikke begrundes.
   assert.equal(udledningsSignal(0.9, "uafklaret"), "uafklaret");
   assert.equal(udledningsSignal(0.9, undefined), "uafklaret");
   assert.equal(udledningsSignal(null, "hoejere"), "ukendt");

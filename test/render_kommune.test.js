@@ -277,9 +277,9 @@ test("signalmærkat: farven er aldrig eneste bærer af betydning", () => {
 
 test("signalmærkat: hvert nøgletal bærer sin begrundelse", () => {
   const h = renderIndikatorer(bThisted, concito, ens);
-  // Diesel er det vigtigste eksempel på en retning, der ikke må gættes.
-  assert.ok(h.includes("dieselbil udleder typisk"),
-    "diesel-andelens begrundelse skal stå ved mærkatet");
+  // Formuen er det vigtigste eksempel på en retning, der ikke må gættes.
+  assert.ok(h.includes("Formue er ikke det samme som forbrug"),
+    "nettoformuens begrundelse skal stå ved mærkatet");
 });
 
 test("indikatortabel: har en kolonne for hvad nøgletallet peger mod", () => {
@@ -327,9 +327,8 @@ test("affald: usædvanligt udsving holder IKKE retningen tilbage, men oplyses", 
 test("affald: forbeholdet gælder KUN affaldsnøgletallene", () => {
   const k = { ...thisted, affald_indberetning: "bekraeftet_fejl" };
   const t = driverTabel(k, land);
-  // Biler pr. indbygger, ikke Diesel-andel: sidstnævnte er uafklaret by design
-  // (en dieselbil udleder mindre pr. km end en benzinbil) og ville derfor bestå
-  // uanset om forbeholdet smittede eller ej.
+  // Et nøgletal med en afklaret retning: står det stadig med sin retning, kan
+  // forbeholdet ikke have smittet. Et uafklaret nøgletal ville bestå uanset.
   const biler = t.find((d) => d.navn === "Biler pr. indbygger");
   assert.notEqual(biler.signal, "uafklaret",
     "en affaldsindberetningsfejl må ikke smitte af på andre nøgletal");

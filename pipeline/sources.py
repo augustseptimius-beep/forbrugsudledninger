@@ -46,7 +46,7 @@ KILDER = [
          ["opv_boliger_ialt", "opv_olie", "opv_naturgas"]),
     _dst("BYGV33", "Fuldført byggeri efter område", "BYGGERI_AAR", ["byggeri"]),
     _dst("BIL54", "Personbiler efter drivmiddel", "BILER_MAANED",
-         ["biler", "biler_el", "biler_plugin", "biler_diesel"]),
+         ["biler", "biler_el", "biler_plugin", "biler_diesel", "biler_benzin"]),
     _dst("LABY25", "Husholdningsaffald og genanvendelse", "AFFALD_AAR",
          ["affald_kg", "genanvendelse_pct"]),
     dict(_dst("AFSTB4", "Gennemsnitlig pendlingsafstand efter bopælsområde",

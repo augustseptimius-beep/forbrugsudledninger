@@ -160,6 +160,7 @@ BIL54_CSV = (
     "Thisted;Personbiler i alt;I alt;El;2026M01;3404\n"
     "Thisted;Personbiler i alt;I alt;Pluginhybrid;2026M01;946\n"
     "Thisted;Personbiler i alt;I alt;Diesel;2026M01;7114\n"
+    "Thisted;Personbiler i alt;I alt;Benzin;2026M01;12180\n"
 )
 LABY25_CSV = (
     "﻿KOMGRP;BNØGLE;TID;INDHOLD\n"
@@ -172,11 +173,12 @@ class TestFetchDelD(unittest.TestCase):
     @patch("fetch_dst.dst_client.fetch")
     def test_biler(self, mock_fetch):
         mock_fetch.return_value = fetch_dst.dst_client.parse_csv(BIL54_CSV)
-        biler, el, plugin, diesel = fetch_dst.fetch_biler()
+        biler, el, plugin, diesel, benzin = fetch_dst.fetch_biler()
         self.assertEqual(biler["Thisted"], 23656)
         self.assertEqual(el["Thisted"], 3404)
         self.assertEqual(plugin["Thisted"], 946)
         self.assertEqual(diesel["Thisted"], 7114)
+        self.assertEqual(benzin["Thisted"], 12180)
 
     @patch("fetch_dst.dst_client.fetch")
     def test_affald(self, mock_fetch):
@@ -195,11 +197,12 @@ class TestFetchDelD(unittest.TestCase):
              patch.object(fetch_dst, "fetch_boligareal", return_value={"Thisted": 133.0}), \
              patch.object(fetch_dst, "fetch_opvarmning", return_value=({"Thisted": 20515}, {"Thisted": 1582}, {"Thisted": 958})), \
              patch.object(fetch_dst, "fetch_byggeri", return_value={"Thisted": 103}), \
-             patch.object(fetch_dst, "fetch_biler", return_value=({"Thisted": 23656}, {"Thisted": 3404}, {"Thisted": 946}, {"Thisted": 7114})), \
+             patch.object(fetch_dst, "fetch_biler", return_value=({"Thisted": 23656}, {"Thisted": 3404}, {"Thisted": 946}, {"Thisted": 7114}, {"Thisted": 12180})), \
              patch.object(fetch_dst, "fetch_affald", return_value=({"Thisted": 508}, {"Thisted": 45})):
             result = fetch_dst.fetch_all_dst()
             self.assertEqual(result["Thisted"]["disp_indkomst"], 252934)
             self.assertEqual(result["Thisted"]["biler_diesel"], 7114)
+            self.assertEqual(result["Thisted"]["biler_benzin"], 12180)
             self.assertEqual(result["Thisted"]["opv_olie"], 1582)
             self.assertEqual(result["Thisted"]["genanvendelse_pct"], 45)
 
@@ -213,7 +216,7 @@ class TestFetchDelD(unittest.TestCase):
              patch.object(fetch_dst, "fetch_boligareal", return_value={"Thisted": 133.0}), \
              patch.object(fetch_dst, "fetch_opvarmning", return_value=({"Thisted": 20515}, {"Thisted": 1582}, {"Thisted": 958})), \
              patch.object(fetch_dst, "fetch_byggeri", return_value={"Thisted": 103}), \
-             patch.object(fetch_dst, "fetch_biler", return_value=({"Thisted": 23656}, {"Thisted": 3404}, {"Thisted": 946}, {"Thisted": 7114})), \
+             patch.object(fetch_dst, "fetch_biler", return_value=({"Thisted": 23656}, {"Thisted": 3404}, {"Thisted": 946}, {"Thisted": 7114}, {"Thisted": 12180})), \
              patch.object(fetch_dst, "fetch_affald", return_value=({"Thisted": 508}, {"Thisted": 45})):
             result = fetch_dst.fetch_all_dst()
             self.assertIsNone(result["Thisted"]["gini"])

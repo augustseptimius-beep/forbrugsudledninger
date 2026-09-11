@@ -11,6 +11,7 @@ DST_DATA = {
         "boliger_parcel": 1177875, "boliger_raekke": 440156, "boliger_etage": 1148673,
         "boligareal": 111, "byggeri": 25966,
         "biler": 2918153, "biler_el": 556394, "biler_plugin": 127933, "biler_diesel": 575355,
+        "biler_benzin": 1658341,
         "opv_boliger_ialt": 2872738, "opv_olie": 92448, "opv_naturgas": 334724,
         "affald_kg": 543, "genanvendelse_pct": 58,
     },
@@ -20,6 +21,7 @@ DST_DATA = {
         "boliger_parcel": 14246, "boliger_raekke": 2677, "boliger_etage": 3295,
         "boligareal": 133, "byggeri": 103,
         "biler": 23656, "biler_el": 3404, "biler_plugin": 946, "biler_diesel": 7114,
+        "biler_benzin": 12180,
         "opv_boliger_ialt": 20515, "opv_olie": 1582, "opv_naturgas": 958,
         "affald_kg": 508, "genanvendelse_pct": 45,
     },
@@ -35,6 +37,7 @@ class TestBuildGolden(unittest.TestCase):
         self.assertEqual(post["region"], "Nordjylland")
         self.assertEqual(post["disp_indkomst"], 252934)
         self.assertEqual(post["biler_diesel"], 7114)
+        self.assertEqual(post["biler_benzin"], 12180)
         self.assertEqual(post["boligpris_m2"], 7430)
         # Uden el-data fra Energi Data Service står feltet TOMT - aldrig med
         # et tal fra en anden opgørelse.

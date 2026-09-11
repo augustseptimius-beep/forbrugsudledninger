@@ -28,7 +28,7 @@ export function byggeriPr1000(m) {
 
 const parcelAndel = (m) =>
   m.boliger_parcel / (m.boliger_parcel + m.boliger_raekke + m.boliger_etage);
-const dieselAndel = (m) => m.biler_diesel / m.biler;
+const fossilBilAndel = (m) => (m.biler_benzin + m.biler_diesel) / m.biler;
 const elPluginAndel = (m) => (m.biler_el + m.biler_plugin) / m.biler;
 const fossilOpv = (m) => (m.opv_olie + m.opv_naturgas) / m.opv_boliger_ialt;
 const taethed = (m) => m.folketal / m.areal;
@@ -136,12 +136,21 @@ const DRIVERE = [
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "lavere",
     begrundelse: "En elbil udleder mindre pr. kørt kilometer end en tilsvarende "
       + "benzin- eller dieselbil på et dansk elnet." },
-  { navn: "Diesel-andel", enhed: "pct.", val: dieselAndel,
+  // Afløste Diesel-andel, som stod som uafklaret: en dieselbil udleder mindre
+  // CO2 pr. kilometer end en benzinbil, men køres længere, og fordelingen
+  // mellem de to kunne derfor ikke tolkes. Summen kan.
+  //
+  // Bemærk, at de øvrige drivmidler i BIL54 udgør under 0,1 pct. af bilparken
+  // i hver kommune. Fossil-andelen er derfor tæt på præcis komplementet til
+  // el- og plugin-hybridandelen ovenfor - målt over alle 98 kommuner er
+  // korrelationen -1,00. De står som to nøgletal efter eksplicit valg, ikke
+  // fordi de bærer hver sin oplysning.
+  { navn: "Fossil-andel", enhed: "pct.", val: fossilBilAndel,
     andel: "0-1",
-    type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "uafklaret",
-    begrundelse: "En dieselbil udleder typisk MINDRE CO2 pr. kilometer end en "
-      + "benzinbil, men køres til gengæld længere. Retningen for CO2 kan ikke "
-      + "afgøres på et kildebelagt grundlag, og gættes derfor ikke." },
+    type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "hoejere",
+    begrundelse: "Benzin- og dieselbiler tilsammen. En fossilbil udleder mere "
+      + "CO2 pr. kørt kilometer end en el- eller plugin-hybridbil på et dansk "
+      + "elnet, uanset hvordan de fossile biler fordeler sig på de to brændstoffer." },
   { navn: "Gennemsnitlig pendlingsafstand", enhed: "km", val: (m) => m.pendlingsafstand_km,
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "hoejere",
     begrundelse: "Længere afstand til arbejde betyder flere kørte kilometer. Siger "
@@ -425,7 +434,8 @@ export function driverePrKategori(drivere) {
 const FORVENTEDE_FELTER = [
   "disp_indkomst", "folketal", "folketal_forrige", "areal", "formue_gns", "formue_median",
   "gini", "boliger_parcel", "boliger_raekke", "boliger_etage", "boligareal", "byggeri",
-  "biler", "biler_el", "biler_plugin", "biler_diesel", "opv_boliger_ialt", "opv_olie",
+  "biler", "biler_el", "biler_plugin", "biler_diesel", "biler_benzin",
+  "opv_boliger_ialt", "opv_olie",
   "opv_naturgas", "affald_kg", "genanvendelse_pct", "elco2_g_kwh", "boligpris_m2",
   "ve_daekning_pct", "pendlingsafstand_km", "fritidshuse",
   "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
