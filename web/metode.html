@@ -128,6 +128,85 @@
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 class="text-xl font-semibold text-gray-900">Forbrugsundersøgelsen er undersøgt og fravalgt</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Danmarks Statistiks Forbrugsundersøgelse opgør, hvad husstandene bruger penge
+    på, fordelt på forbrugsgrupper. Den er den ene halvdel af NIRAS' anbefaling
+    ovenfor, og den er offentligt tilgængelig. Vi har undersøgt, om den kan bruges
+    uden den kommercielle segmenteringsmodel, der er den anden halvdel. Det kan den
+    ikke, og grunden er værd at kende, fordi tabellerne umiddelbart ser anvendelige ud.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Regionstallene er reelle, men de er indkomst</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">FU17 opgør forbruget på de fem regioner. Forskellene er ikke stikprøvestøj:
+    måler man over 2015-2024, ligger de samme regioner samme vej år efter år for
+    fødevarer (spænd 13,6 pct.point mellem yderregionerne), restauranter og hoteller
+    (56,8) og bolig, vand og energi (29,5). Men holder man dem op mod regionernes
+    disponible indkomst, følger de den næsten helt: korrelationen er +0,97 for
+    restauranter og hoteller, +0,97 for bolig og energi og +0,84 for fødevarer.
+    Værktøjet viser i forvejen disponibel indkomst for hver af de 98 kommuner, og
+    CONCITO (2023) s. 6 og s. 30 peger på netop indkomsten som bæreren. Et regionstal
+    ville tilføje den samme oplysning i grovere opløsning.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">En region beskriver ikke sine kommuner</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Spændet i disponibel indkomst mellem regionsgennemsnittene er 20,9 pct.point.
+    Spændet <em>inde i</em> regionerne er 46,6 pct.point i gennemsnit og 113,6 i Region
+    Hovedstaden. Regionsgennemsnittet beskriver derfor ikke den enkelte kommune, og for
+    en del af dem vender det forkert: Albertslunds egen disponible indkomst ligger 13,6
+    pct. under landsgennemsnittet, mens regionens ligger 11,8 pct. over. Et regionalt
+    forbrugstal ville fortælle Albertslund, at kommunen forbruger mere end
+    landsgennemsnittet. Det er ikke en unøjagtighed, som et forbehold kan dække -
+    fortegnet er forkert.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Transport er tavs</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Transport er den største forbrugskategori, og det er præcis dér,
+    Forbrugsundersøgelsen intet giver. Alle fem regioner svinger fra år til år med mere,
+    end de afviger fra landsgennemsnittet (udsving på ±12 til ±15 pct.point), og
+    korrelationen med indkomst er +0,02. Hverken tallet selv eller indkomsten som
+    stedfortræder kan bruges.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Forsøget på at gå uden om segmenteringsmodellen</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">FU15 opgør forbruget efter husstandens indkomst i stedet for efter region, og
+    DST's INDKF122 opgør, hvor mange familier hver kommune har i hvert indkomstinterval.
+    Sammen udgør de i princippet en vej til et kommunalt forbrugstal, bygget udelukkende
+    af offentlige registre: kommunens indkomstfordeling ganget med forbruget for hver
+    indkomstgruppe.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Den kæde kan efterprøves. Der findes intet observeret kommunalt forbrug at holde
+    den op mod, men der findes observeret <em>regionalt</em> forbrug i FU17. Rammer
+    forudsigelsen ikke regionerne - hvor gennemsnittet af mange kommuner arbejder for
+    den - kan den ikke bruges på en enkelt kommune. Resultatet for 2022-2024:</p>
+  <div class="mt-3 overflow-x-auto">
+    <table class="w-full text-sm text-gray-700 max-w-3xl">
+      <thead><tr class="border-b border-gray-300 text-left">
+        <th class="py-2 pr-3 font-semibold">Forbrugsgruppe</th>
+        <th class="py-2 px-3 font-semibold text-right">Rangordner rigtigt</th>
+        <th class="py-2 pl-3 font-semibold text-right">Rammer størrelsen</th></tr></thead>
+      <tbody>
+        <tr class="border-b border-gray-100"><td class="py-2 pr-3">Forbrug i alt</td>
+          <td class="py-2 px-3 text-right">+0,99</td><td class="py-2 pl-3 text-right">21 %</td></tr>
+        <tr class="border-b border-gray-100"><td class="py-2 pr-3">Fødevarer</td>
+          <td class="py-2 px-3 text-right">+0,84</td><td class="py-2 pl-3 text-right">27 %</td></tr>
+        <tr class="border-b border-gray-100"><td class="py-2 pr-3">Transport</td>
+          <td class="py-2 px-3 text-right">+0,50</td><td class="py-2 pl-3 text-right">36 %</td></tr>
+        <tr><td class="py-2 pr-3">Restauranter og hoteller</td>
+          <td class="py-2 px-3 text-right">+0,85</td><td class="py-2 pl-3 text-right">12 %</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="mt-3 text-sm text-gray-700 max-w-3xl">Metoden sætter regionerne i næsten rigtig rækkefølge, men den rammer kun 12 til 36
+    pct. af den forskel, der faktisk er målt. Den trykker alle områder ind mod
+    landsgennemsnittet. For at lukke afstanden skulle hver forbrugsgruppe ganges med sin
+    egen faktor - mellem cirka 3 og 8 - og den faktor står ikke i nogen kilde. Det er
+    samme slags opfundne koefficient, som resten af værktøjet er indrettet på at undgå.
+    Rækkefølgen alene kan ikke bruges: værktøjet rangordner ikke kommuner.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Konklusionen er, at den kommercielle segmenteringsmodel i NIRAS' anbefaling er
+    bærende og ikke kan erstattes af offentlige registre. Forbrugsundersøgelsen måler
+    husstande, mens indkomstregistret måler familier - der er cirka 8 pct. flere familier
+    end husstande - og de to inddelinger af indkomsten flugter kun delvist. Men det
+    forklarer ikke sammentrykningen. Den skyldes, at forbrug afhænger af mere end
+    indkomst: byhed, boligform og afstand til indkøb og arbejde trækker hver sin vej, og
+    det er dem, en segmenteringsmodel indeholder.</p>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
   <h2 class="text-xl font-semibold text-gray-900">Danmarks forbrugsudledning</h2>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">De nationale vægte kommer fra
     <strong>Energistyrelsens Globale Afrapportering</strong>. Kategorierne på hver
