@@ -206,11 +206,13 @@ def main():
     print("Klassificerer affaldsindberetningen pr. kommune...")
     try:
         _aar = int(PERIODER["AFFALD_AAR"])
+        _sammensaetning = fetch_dst.fetch_affald_sammensaetning(_aar)
         affald_indberetning = fetch_dst.klassificer_affald(
-            fetch_dst.fetch_affald_validitet(_aar, _aar - 1))
+            fetch_dst.fetch_affald_validitet(_aar, _aar - 1), _sammensaetning)
+        _selskaber = fetch_dst.spaerrede_selskaber(_sammensaetning)
         print(f"  {sum(1 for v in affald_indberetning.values() if v)} kommuner med forbehold.")
     except Exception as fejl:
-        affald_indberetning = {}
+        affald_indberetning, _selskaber = {}, {}
         print(f"  ADVARSEL: kunne ikke hente LABY24 ({fejl}). Alle står uden forbehold.")
 
     land_post = saml_kommune_post("Hele landet", dst_data, boligpriser, pendling=pendling,
@@ -291,15 +293,23 @@ def main():
     spaerret = sorted(p["navn"] for p in kommune_poster
                       if p.get("affald_indberetning") == fetch_dst.AFFALD_BEKRAEFTET_FEJL)
     usikre = sorted(p["navn"] for p in kommune_poster
-                    if p.get("affald_indberetning") == fetch_dst.AFFALD_USIKKER)
+                    if p.get("affald_indberetning") in (fetch_dst.AFFALD_USIKKER_FRAKTION,
+                                                        fetch_dst.AFFALD_USIKKER_SPRING))
     print(f"  Deler indberetning, retning holdes tilbage ({len(spaerret)}): "
           f"{', '.join(spaerret) if spaerret else 'ingen'}")
     print(f"  Usædvanligt udsving, retning vises med forbehold ({len(usikre)}): "
           f"{', '.join(usikre) if usikre else 'ingen'}")
     print(f"  Uden forbehold: {len(kommune_poster) - len(spaerret) - len(usikre)} kommuner.")
-    if spaerret:
-        print("  Listen er navngivet i fetch_dst.DELT_INDBERETNING og bygger på et")
-        print("  eftervist bytte af tonnage. Ryd den, når kilden er rettet.")
+    # Overgangen fra spærret til fri må ikke ske tavst: står et selskab her som
+    # frit, er dets nøgletal netop skiftet fra "ingen retning" til en retning.
+    for selskab, ramte in sorted(_selskaber.items()):
+        if ramte:
+            print(f"  {selskab}: SPÆRRET - fraktionen er kollapset hos {', '.join(ramte)}.")
+        else:
+            print(f"  {selskab}: fri i år - ingen medlemmer har en kollapset fraktion.")
+    if _selskaber:
+        print("  Selskabslisten er strukturel (ejerkredse) og bliver ikke forældet.")
+        print("  Om den spærrer afgøres af indeværende års tal og rydder sig selv.")
 
     thisted = next(p for p in kommune_poster if p["navn"] == "Thisted")
     print("\nSanity-check Thisted mod v5-regneark (facit i parentes):")

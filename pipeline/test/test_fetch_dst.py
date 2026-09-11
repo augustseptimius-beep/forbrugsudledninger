@@ -221,60 +221,93 @@ class TestFetchDelD(unittest.TestCase):
 
 
 class TestKlassificerAffald(unittest.TestCase):
-    """Klassificeringen afgør, hvilke kommuner der får retningsmærkat tilbage på de
-    to affaldsnøgletal. Kun kommuner med POSITIVT bevis for en indberetningsfejl
-    holdes tilbage - et usædvanligt udsving er ikke i sig selv et bevis."""
+    """Klassificeringen afgør, hvilke kommuner der får retningsmærkat på de to
+    affaldsnøgletal. To signaler, og kun det ene kan spærre:
 
-    def test_medlem_af_selskab_med_bekraeftet_fejl_spaerres(self):
-        forhold = {"Hørsholm": 0.01, "Thisted": 1.02}
-        k = fetch_dst.klassificer_affald(forhold)
+      sammensætning - dagrenovationens andel af kommunens samlede affald. Den
+        andel er strukturelt stor overalt (landet 27-32 %), så et kollaps mod nul
+        er et hul i indberetningen. Virker på ÉT år og rydder derfor sig selv, når
+        kilden retter sig.
+      forhold - restaffaldet i år delt med sidste år. Fanger pludselige spring,
+        som en kronisk skæv sammensætning ikke afslører.
+    """
+
+    # 12 kommuner med normale andele. Spredningen spejler de faktiske 98
+    # (Q1 19,7 %, median 23,4 %, Q3 29,0 %) - en fixture med for mange høje
+    # værdier blæser IQR op, så den nedre grænse bliver negativ og intet fanges.
+    NORMALE = {"Thisted": 23.0, "Aalborg": 25.0, "Odense": 20.0, "Vejle": 22.0,
+               "Esbjerg": 28.0, "Kolding": 19.0, "Viborg": 24.0, "Horsens": 26.0,
+               "Randers": 21.0, "Silkeborg": 29.0, "Herning": 30.0, "Skive": 31.0}
+    ROLIGE_FORHOLD = {navn: 1.0 for navn in NORMALE}
+
+    def test_selskab_spaerres_naar_et_medlems_fraktion_kollapser(self):
+        samm = dict(self.NORMALE, Hørsholm=2.1, Helsingør=29.1)
+        forhold = dict(self.ROLIGE_FORHOLD, Hørsholm=1.0, Helsingør=1.0)
+        k = fetch_dst.klassificer_affald(forhold, samm)
         self.assertEqual(k["Hørsholm"], fetch_dst.AFFALD_BEKRAEFTET_FEJL)
 
-    def test_medlem_spaerres_ogsaa_naar_dets_eget_tal_ser_normalt_ud(self):
-        # Helsingør er Norfors-ejerkommune. Selskabets indberetning er fejlkilden,
-        # så medlemmets eget forhold kan tilfældigt se roligt ud og stadig være
-        # sammensat af andres tonnage.
-        forhold = {"Helsingør": 1.02, "Thisted": 1.02}
-        k = fetch_dst.klassificer_affald(forhold)
+    def test_hele_ejerkredsen_spaerres_ogsaa_de_medlemmer_der_ser_normale_ud(self):
+        # Modtageren af den byttede tonnage ser normal ud på sin egen sammensætning
+        # (Fredensborg 35,2 % i 2023). Spærringen skal alligevel gælde den, for det
+        # er selskabets fordeling mellem medlemmerne, der er brudt.
+        samm = dict(self.NORMALE, Hørsholm=2.1, Fredensborg=35.2, Helsingør=29.1)
+        forhold = dict(self.ROLIGE_FORHOLD, Hørsholm=1.0, Fredensborg=1.0, Helsingør=1.0)
+        k = fetch_dst.klassificer_affald(forhold, samm)
+        self.assertEqual(k["Fredensborg"], fetch_dst.AFFALD_BEKRAEFTET_FEJL)
         self.assertEqual(k["Helsingør"], fetch_dst.AFFALD_BEKRAEFTET_FEJL)
 
-    def test_rolig_kommune_uden_for_selskaberne_faar_ingen_markering(self):
-        forhold = {"Thisted": 1.02, "Aalborg": 0.98, "Odense": 1.05, "Vejle": 0.97,
-                   "Esbjerg": 1.01, "Kolding": 0.99, "Viborg": 1.03, "Horsens": 0.96}
-        k = fetch_dst.klassificer_affald(forhold)
-        self.assertIsNone(k["Thisted"])
+    def test_selskabet_spaerres_IKKE_naar_ingen_medlemmer_kollapser(self):
+        # Kernen i at nyeste data styrer: retter Norfors sin indberetning, falder
+        # spærringen bort af sig selv. Ingen skal huske at rydde en liste.
+        samm = dict(self.NORMALE, Hørsholm=31.7, Fredensborg=31.7, Helsingør=31.2,
+                    Rudersdal=27.5, Allerød=29.5)
+        forhold = dict(self.ROLIGE_FORHOLD, Hørsholm=1.0, Fredensborg=1.0,
+                       Helsingør=1.0, Rudersdal=1.0, Allerød=1.0)
+        k = fetch_dst.klassificer_affald(forhold, samm)
+        for navn in ["Hørsholm", "Fredensborg", "Helsingør", "Rudersdal", "Allerød"]:
+            self.assertIsNone(k[navn], f"{navn} skal være fri, når året er rent")
 
-    def test_usaedvanligt_udsving_uden_kendt_aarsag_markeres_men_spaerres_ikke(self):
-        # Samsø-tilfældet: et voldsomt udsving, men ingen delt indberetning at
-        # forklare det med. Retningen holdes IKKE tilbage - vi har intet bevis for
-        # at tallet er forkert - men udsvinget oplyses.
-        forhold = {"Thisted": 1.02, "Aalborg": 0.98, "Odense": 1.05, "Vejle": 0.97,
-                   "Esbjerg": 1.01, "Kolding": 0.99, "Viborg": 1.03, "Horsens": 0.96,
-                   "Samsø": 3.04}
-        k = fetch_dst.klassificer_affald(forhold)
-        self.assertEqual(k["Samsø"], fetch_dst.AFFALD_USIKKER)
+    def test_kollaps_uden_kendt_selskab_markeres_men_spaerres_ikke(self):
+        # Samsø-tilfældet: fraktionen er væk, men der er ingen delt indberetning
+        # at forklare det med. Vi ved ikke hvad der er sket, så vi påstår intet.
+        samm = dict(self.NORMALE, Samsø=0.0)
+        forhold = dict(self.ROLIGE_FORHOLD, Samsø=1.0)
+        k = fetch_dst.klassificer_affald(forhold, samm)
+        self.assertEqual(k["Samsø"], fetch_dst.AFFALD_USIKKER_FRAKTION)
+
+    def test_hoej_andel_er_ikke_en_fejl(self):
+        # København og Frederiksberg ligger over 49 %, fordi de sorterer mindre
+        # fra - tæt by, lidt haveaffald. Hegnet er ENSIDIGT: kun et kollaps mod
+        # nul er et hul, en høj andel er en reel egenskab ved kommunen.
+        samm = dict(self.NORMALE, København=49.6, Frederiksberg=53.1, Ishøj=54.4)
+        forhold = dict(self.ROLIGE_FORHOLD, København=1.0, Frederiksberg=1.0, Ishøj=1.0)
+        k = fetch_dst.klassificer_affald(forhold, samm)
+        for navn in ["København", "Frederiksberg", "Ishøj"]:
+            self.assertIsNone(k[navn], f"{navn} sorterer mindre fra - det er ikke en fejl")
+
+    def test_pludseligt_spring_fanges_selvom_sammensaetningen_er_normal(self):
+        # De to signaler er komplementære: et spring kan ske uden at
+        # sammensætningen skrider, og omvendt.
+        samm = dict(self.NORMALE, Morsø=28.0)
+        forhold = dict(self.ROLIGE_FORHOLD, Morsø=3.2)
+        k = fetch_dst.klassificer_affald(forhold, samm)
+        self.assertEqual(k["Morsø"], fetch_dst.AFFALD_USIKKER_SPRING)
+
+    def test_rolig_kommune_faar_ingen_markering(self):
+        k = fetch_dst.klassificer_affald(self.ROLIGE_FORHOLD, self.NORMALE)
+        self.assertIsNone(k["Thisted"])
 
     def test_kommunegruppe_aggregater_forurener_ikke_hegnet(self):
         # LABY24's KOMGRP rummer også "Hovedstadskommuner", "Landkommuner" mv.
-        # De er gennemsnit af mange kommuner og svinger derfor mindre end en
-        # enkelt kommune. Slipper de med i hegn-grundlaget, bliver hegnet for
-        # stramt, og roligt beliggende kommuner stemples som usikre.
-        ægte = {"Thisted": 1.02, "Aalborg": 0.98, "Odense": 1.05, "Vejle": 0.97,
-                "Esbjerg": 1.01, "Kolding": 0.99, "Viborg": 1.03, "Horsens": 0.96,
-                "Randers": 1.20}
-        med_aggregater = dict(ægte, **{
-            "Hele landet": 1.00, "Hovedstadskommuner": 1.00, "Storbykommuner": 1.00,
-            "Provinsbykommuner": 1.00, "Oplandskommuner": 1.00, "Landkommuner": 1.00,
-        })
-        k = fetch_dst.klassificer_affald(med_aggregater)
-        self.assertNotIn("Hovedstadskommuner", k, "aggregater er ikke kommuner")
-        self.assertNotIn("Hele landet", k)
-        self.assertEqual(fetch_dst.klassificer_affald(ægte), k,
-                         "aggregaterne må ikke ændre de ægte kommuners klassifikation")
-
-    def test_kommune_uden_forhold_faar_ingen_markering(self):
-        k = fetch_dst.klassificer_affald({"Thisted": 1.02})
-        self.assertNotIn("Læsø", k)
+        # De er gennemsnit og svinger derfor mindre end en enkelt kommune.
+        aggregater = {"Hele landet": 27.0, "Hovedstadskommuner": 27.0,
+                      "Storbykommuner": 27.0, "Landkommuner": 27.0}
+        k_ren = fetch_dst.klassificer_affald(self.ROLIGE_FORHOLD, self.NORMALE)
+        k_med = fetch_dst.klassificer_affald(
+            dict(self.ROLIGE_FORHOLD, **{n: 1.0 for n in aggregater}),
+            dict(self.NORMALE, **aggregater))
+        self.assertNotIn("Hovedstadskommuner", k_med)
+        self.assertEqual(k_ren, k_med, "aggregater må ikke ændre de ægte kommuners udfald")
 
 
 if __name__ == "__main__":

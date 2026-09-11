@@ -238,26 +238,80 @@ def fetch_affald_validitet(aar, forrige_aar):
     return forhold
 
 
-# Kommuner hvis affaldstal ikke kan bæres, fordi indberetningen er delt med andre.
-# Bevist i DST's egne tonnagetal for 2023: tonnage byttet mellem medlemmerne, mens
-# selskabets samlede niveau var normalt (Hørsholm 29 ton dagrenovation for 24.715
-# indbyggere; Fredensborg 8.724 -> 20.307 ton samme år). Hele ejerkredsen mærkes,
-# ikke kun de medlemmer hvis eget tal ser skævt ud det enkelte år - fejlkilden er
-# selskabets indberetning, ikke den enkelte kommunes forbrug.
+def fetch_affald_sammensaetning(aar):
+    """Returnerer {navn: dagrenovationens andel af alt husholdningsaffald i pct.}.
+
+    Signalet klassificeringen hviler på. Andelen er strukturelt stor i enhver
+    kommune - landet lå på 27-32 % i 2019-2023 - fordi dagrenovation er det, der
+    bliver tilbage, når alt sorterbart er sorteret fra. En kommune kan sortere
+    meget fra og lande højt eller lavt, men ikke på nul: så mangler fraktionen i
+    regnskabet. Til forskel fra et forholdstal mellem to år kan det aflæses på ét
+    år, og det afslører derfor også de kommuner, hvor fejlen er konstant og
+    dermed usynlig for en år-til-år-sammenligning."""
+    rows = dst_client.fetch(BASE, "LABY24", {
+        "KOMGRP": "*", "BEHANDLING": "TOT",
+        "AFFFRAK": "TOTHHAFFALD,A", "Tid": str(aar),
+    })
+    ton = {}
+    for r in rows:
+        # ".." betyder ingen data. Her tæller det som nul, fordi en fraktion, der
+        # er forsvundet, er præcis det tjekket leder efter. Det må aldrig tælle
+        # som nul i et datafelt - kun i dette tjek.
+        try:
+            t = float(r["INDHOLD"].strip())
+        except (ValueError, AttributeError):
+            t = 0.0
+        ton.setdefault(r["KOMGRP"], {})[r["AFFFRAK"]] = t
+
+    andel = {}
+    for navn, v in ton.items():
+        ialt = v.get("HUSHOLDNINGSAFFALD I ALT", 0.0)
+        if ialt > 0:
+            andel[navn] = v.get("DAGRENOVATION OG LIGNENDE", 0.0) / ialt * 100
+    return andel
+
+
+# Kommuner der deler affaldsindberetning, grupperet efter selskab. Hvem der deler
+# er en STRUKTUREL kendsgerning fra selskabernes ejerkredse - den bliver ikke
+# forældet af et nyt dataår. Om listen så SPÆRRER et nøgletal afgøres derimod af
+# indeværende års tal, se klassificer_affald. Retter selskabet sin indberetning,
+# falder spærringen bort af sig selv.
 # Kilder: norfors.dk/om-os, renodjurs.dk/om-reno-djurs.
-DELT_INDBERETNING = {
-    "Allerød", "Fredensborg", "Helsingør", "Hørsholm", "Rudersdal",  # Norfors
-    "Norddjurs", "Syddjurs",  # Reno Djurs
+DELTE_INDBERETNINGER = {
+    "Norfors": {"Allerød", "Fredensborg", "Helsingør", "Hørsholm", "Rudersdal"},
+    "Reno Djurs": {"Norddjurs", "Syddjurs"},
 }
 
 AFFALD_BEKRAEFTET_FEJL = "bekraeftet_fejl"
-AFFALD_USIKKER = "usikker"
+# To årsager til usikkerhed, fordi de skal forklares forskelligt for læseren.
+# En kommune, hvis fraktion mangler, har ikke "svinget" - den mangler et tal.
+AFFALD_USIKKER_FRAKTION = "usikker_fraktion"
+AFFALD_USIKKER_SPRING = "usikker_spring"
+
+
+def _nedre_tukey_graense(vaerdier):
+    """Q1-1,5*IQR - den nedre halvdel af et boksplots standardgrænse (Tukey, 1977).
+    Bevidst ENSIDIG: en lav dagrenovationsandel er et hul i indberetningen, mens en
+    høj er en reel egenskab ved kommunen. København og Frederiksberg ligger over
+    49 %, fordi de sorterer mindre fra - tæt by, lidt haveaffald - og skal ikke
+    stemples som datafejl. Returnerer None ved for få værdier."""
+    if len(vaerdier) < 8:
+        return None
+    s = sorted(vaerdier)
+    n = len(s)
+
+    def kvartil(p):
+        i = p * (n - 1)
+        lav = int(i)
+        return s[lav] + (s[lav + 1] - s[lav]) * (i - lav) if lav + 1 < n else s[lav]
+
+    q1, q3 = kvartil(0.25), kvartil(0.75)
+    return q1 - 1.5 * (q3 - q1)
 
 
 def _tukey_hegn(vaerdier):
-    """Standardgrænsen for et boksplot (Tukey, 1977): [Q1-1,5*IQR, Q3+1,5*IQR].
-    En navngiven konvention frem for en tærskel, vi selv finder på. Returnerer
-    None ved for få værdier - et hegn om fire tal beskriver ingenting."""
+    """Tosidet udgave til forholdstallet, hvor begge retninger er mistænkelige:
+    et brat fald OG et brat spring er begge brud på en ellers stabil serie."""
     if len(vaerdier) < 8:
         return None
     s = sorted(vaerdier)
@@ -273,41 +327,94 @@ def _tukey_hegn(vaerdier):
     return q1 - 1.5 * iqr, q3 + 1.5 * iqr
 
 
-def klassificer_affald(forhold):
-    """Afgør pr. kommune, hvor meget affaldstallene kan bære. Tager forholdet fra
-    fetch_affald_validitet og returnerer {navn: AFFALD_BEKRAEFTET_FEJL |
-    AFFALD_USIKKER | None}.
+def klassificer_affald(forhold, sammensaetning):
+    """Afgør pr. kommune, hvor meget affaldstallene kan bære. Returnerer
+    {navn: AFFALD_BEKRAEFTET_FEJL | AFFALD_USIKKER_FRAKTION |
+    AFFALD_USIKKER_SPRING | None}.
 
-    To niveauer, og forskellen mellem dem er bevisbyrden:
-      - BEKRAEFTET_FEJL: kommunen deler indberetning med en anden kommune, og
-        fejlen er eftervist i tonnagetallene. Her HOLDES retningen tilbage.
-      - USIKKER: årets tal springer uden for Tukeys hegn, men uden en kendt
-        forklaring. Retningen holdes IKKE tilbage - et stort udsving er ikke et
-        bevis for, at tallet er forkert. Små øer springer af naturlige grunde.
-        Udsvinget oplyses i stedet, så læseren selv kan tage højde for det.
+    To signaler, og kun det ene kan spærre:
 
-    Hegnet beregnes uden de kommuner, der allerede er kendt fejlbehæftede: deres
-    ekstremer ville ellers strække hegnet så bredt, at en reel afviger gik fri.
+      SAMMENSÆTNING (fetch_affald_sammensaetning) - dagrenovationens andel af
+        kommunens samlede affald. Den andel er strukturelt stor overalt (landet
+        27-32 %), så et kollaps mod nul er et hul i indberetningen og ikke
+        adfærd. Signalet virker på ÉT år og er derfor det, der styrer
+        spærringen: det arver ikke sidste års problem, og det rydder sig selv,
+        når kilden retter sig.
 
-    LABY24's KOMGRP rummer også kommunegruppe-aggregater ("Hovedstadskommuner",
-    "Landkommuner", "Hele landet"). De frasorteres her frem for hos kalderen:
-    et aggregat er et gennemsnit af mange kommuner og svinger derfor mindre end
-    en enkelt, så de ville trække hegnet for stramt og stemple rolige kommuner
-    som usikre."""
+      FORHOLD (fetch_affald_validitet) - restaffaldet i år delt med sidste år.
+        Fanger pludselige spring, som en kronisk skæv sammensætning ikke
+        afslører. Kan kun markere, ikke spærre.
+
+    Og to niveauer, hvor forskellen er bevisbyrden:
+
+      BEKRAEFTET_FEJL - mindst ét medlem af et selskab i DELTE_INDBERETNINGER
+        har fået sin fraktion til at kollapse. Så er selskabets fordeling mellem
+        medlemmerne brudt, og HELE ejerkredsen spærres - også de medlemmer der
+        ser normale ud, for modtageren af den byttede tonnage afslører sig ikke
+        selv (Fredensborg lå på pæne 35,2 % i 2023, mens den absorberede de
+        andres affald).
+
+      USIKKER_FRAKTION / USIKKER_SPRING - et af signalerne slår ud uden et kendt
+        selskab at forklare det med. Retningen spærres IKKE: vi ved ikke, hvad der
+        er sket, og et udsving er ikke et bevis for en fejl. Årsagen holdes adskilt,
+        fordi de to skal forklares forskelligt - en kommune, hvis fraktion mangler,
+        har ikke svinget, den mangler et tal.
+
+    Begge hegn beregnes uden de kommuner, der allerede er spærret: deres
+    ekstremer ville ellers strække hegnet, så en reel afviger gik fri. LABY24's
+    KOMGRP rummer også kommunegruppe-aggregater ("Landkommuner", "Hele landet");
+    de frasorteres her frem for hos kalderen, fordi et aggregat er et gennemsnit
+    af mange kommuner og derfor svinger mindre end en enkelt."""
     kommuner = {navn for _, navn, _ in KOMMUNER}
-    forhold = {navn: v for navn, v in forhold.items() if navn in kommuner}
-    hegn_grundlag = [v for navn, v in forhold.items() if navn not in DELT_INDBERETNING]
-    hegn = _tukey_hegn(hegn_grundlag)
+    forhold = {n: v for n, v in forhold.items() if n in kommuner}
+    sammensaetning = {n: v for n, v in sammensaetning.items() if n in kommuner}
+
+    # Hvilke selskaber har et medlem, hvis fraktion er kollapset I ÅR?
+    alle_medlemmer = set().union(*DELTE_INDBERETNINGER.values())
+    graense = _nedre_tukey_graense(
+        [v for n, v in sammensaetning.items() if n not in alle_medlemmer])
+    kollapset = {n for n, v in sammensaetning.items()
+                 if graense is not None and v < graense}
+
+    spaerret = set()
+    for medlemmer in DELTE_INDBERETNINGER.values():
+        if medlemmer & kollapset:
+            spaerret |= medlemmer
+
+    hegn = _tukey_hegn([v for n, v in forhold.items() if n not in spaerret])
 
     resultat = {}
-    for navn, v in forhold.items():
-        if navn in DELT_INDBERETNING:
+    for navn in set(forhold) | set(sammensaetning):
+        if navn in spaerret:
             resultat[navn] = AFFALD_BEKRAEFTET_FEJL
-        elif hegn is not None and (v < hegn[0] or v > hegn[1]):
-            resultat[navn] = AFFALD_USIKKER
+            continue
+        v = forhold.get(navn)
+        springer = hegn is not None and v is not None and (v < hegn[0] or v > hegn[1])
+        # Fraktionen vejer tungest: mangler den, er et forholdstal mellem to år
+        # regnet på et hul og siger mindre end hullet selv.
+        if navn in kollapset:
+            resultat[navn] = AFFALD_USIKKER_FRAKTION
+        elif springer:
+            resultat[navn] = AFFALD_USIKKER_SPRING
         else:
             resultat[navn] = None
     return resultat
+
+
+def spaerrede_selskaber(sammensaetning):
+    """Hvilke selskaber der spærres i år, og hvilke der går fri. Til
+    valideringsrapporten, så overgangen fra spærret til fri ikke sker tavst."""
+    kommuner = {navn for _, navn, _ in KOMMUNER}
+    sammensaetning = {n: v for n, v in sammensaetning.items() if n in kommuner}
+    alle_medlemmer = set().union(*DELTE_INDBERETNINGER.values())
+    graense = _nedre_tukey_graense(
+        [v for n, v in sammensaetning.items() if n not in alle_medlemmer])
+    ud = {}
+    for selskab, medlemmer in DELTE_INDBERETNINGER.items():
+        ramte = sorted(n for n in medlemmer
+                       if graense is not None and sammensaetning.get(n, 100) < graense)
+        ud[selskab] = ramte
+    return ud
 
 
 def fetch_all_dst():

@@ -1886,7 +1886,7 @@
       "husholdning_co2_ton": 58699.8339013,
       "husholdning_energi_tj": 916.1900860599999,
       "husholdning_fossil_andel": 0.09439303636749506,
-      "affald_indberetning": null
+      "affald_indberetning": "usikker_fraktion"
     },
     {
       "folketal": 213168,
@@ -2131,7 +2131,7 @@
       "husholdning_co2_ton": 23636.000502900002,
       "husholdning_energi_tj": 1439.504469788,
       "husholdning_fossil_andel": 0.013053361920277546,
-      "affald_indberetning": "usikker"
+      "affald_indberetning": "usikker_spring"
     },
     {
       "folketal": 55218,
@@ -2411,7 +2411,7 @@
       "husholdning_co2_ton": 2114.7575691849997,
       "husholdning_energi_tj": 1667.945612391,
       "husholdning_fossil_andel": 0.017649021519233588,
-      "affald_indberetning": "usikker"
+      "affald_indberetning": "usikker_spring"
     },
     {
       "folketal": 49773,
@@ -2446,7 +2446,7 @@
       "husholdning_co2_ton": 18168.397339813,
       "husholdning_energi_tj": 1413.861736692,
       "husholdning_fossil_andel": 0.022729906665548874,
-      "affald_indberetning": "usikker"
+      "affald_indberetning": "usikker_spring"
     },
     {
       "folketal": 48578,
@@ -2656,7 +2656,7 @@
       "husholdning_co2_ton": 692.1741528260001,
       "husholdning_energi_tj": 211.13019706999998,
       "husholdning_fossil_andel": 0.04371854564669263,
-      "affald_indberetning": null
+      "affald_indberetning": "usikker_fraktion"
     },
     {
       "folketal": 102753,
@@ -2866,7 +2866,7 @@
       "husholdning_co2_ton": 31963.901877271997,
       "husholdning_energi_tj": 1715.4973347750001,
       "husholdning_fossil_andel": 0.02223476290856658,
-      "affald_indberetning": "usikker"
+      "affald_indberetning": "usikker_spring"
     },
     {
       "folketal": 43305,
@@ -3321,7 +3321,7 @@
       "husholdning_co2_ton": 3239.9026237109997,
       "husholdning_energi_tj": 649.478065569,
       "husholdning_fossil_andel": 0.06187368042644193,
-      "affald_indberetning": "usikker"
+      "affald_indberetning": "usikker_spring"
     },
     {
       "folketal": 31280,

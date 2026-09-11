@@ -317,7 +317,7 @@ test("affald: kommune der deler indberetning får retningen holdt tilbage", () =
 test("affald: usædvanligt udsving holder IKKE retningen tilbage, men oplyses", () => {
   // Et stort udsving er ikke et bevis for, at tallet er forkert - små øer
   // springer af naturlige grunde. Retningen vises, forbeholdet står ved siden af.
-  const k = { ...thisted, affald_indberetning: "usikker" };
+  const k = { ...thisted, affald_indberetning: "usikker_spring" };
   const t = driverTabel(k, land);
   const affald = t.find((d) => d.navn === "Husholdningsaffald");
   assert.notEqual(affald.signal, "uafklaret", "retningen vises");

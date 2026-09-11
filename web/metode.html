@@ -250,17 +250,28 @@
       i Danmarks Statistiks egne mængdetal, og tallet beskriver derfor ikke kommunen alene.
       Hele ejerkredsen er mærket, ikke kun de medlemmer hvis eget tal ser skævt ud det
       enkelte år: fejlkilden er selskabets indberetning.</li>
-    <li><strong>Kommuner med et usædvanligt stort spring</strong> fra året før beholder
-      retningen, men får springet oplyst. Et udsving er ikke i sig selv et bevis for en
-      fejl - en lille kommune svinger naturligt - og at holde retningen tilbage ville
-      være en påstand, vi heller ikke kan bære.</li>
+    <li><strong>Kommuner, hvor tallet skiller sig ud</strong>, beholder retningen, men
+      får årsagen oplyst. Enten springer restaffaldet usædvanligt meget fra året før,
+      eller også er en affaldsfraktion, der fylder meget i alle andre kommuner, næsten
+      fraværende. Ingen af delene er i sig selv et bevis for en fejl - en lille kommune
+      svinger naturligt - og at holde retningen tilbage ville være en påstand, vi heller
+      ikke kan bære.</li>
     <li><strong>De øvrige kommuner</strong> får retningen som ethvert andet nøgletal.
       Der er intet, der peger på, at deres tal er forkerte.</li>
   </ul>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Inddelingen regnes af datapipelinen ved
-    hver hentning, ud fra kommunernes indberettede restaffald sammenlignet med året før.
-    Listen over kommuner, der deler indberetning, står navngivet i pipelinens kildekode
-    med henvisning til selskaberne og ryddes, når kilden er rettet. Tidligere stod begge
+    hver hentning, ud fra to signaler. Det ene sammenligner kommunens restaffald med året
+    før. Det andet ser på, hvor stor en del af kommunens affald der er dagrenovation:
+    den andel er stor i enhver kommune - på landsplan 27-32 % - fordi dagrenovation er
+    det, der bliver tilbage, når alt sorterbart er sorteret fra. Falder den mod nul,
+    mangler fraktionen i regnskabet. Det signal kan aflæses på ét år og fanger derfor
+    også de kommuner, hvor fejlen er konstant og dermed usynlig for en
+    år-til-år-sammenligning.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hvilke kommuner der deler indberetning
+    står navngivet i pipelinens kildekode med henvisning til selskaberne. Den liste er en
+    strukturel oplysning om ejerkredse og bliver ikke forældet af et nyt dataår - men om
+    den <em>spærrer</em> et nøgletal afgøres hvert år på ny af årets egne tal. Retter et
+    selskab sin indberetning, falder forbeholdet bort af sig selv. Tidligere stod begge
     nøgletal som <em>uafklarede</em> for alle 98 kommuner; det var for groft, fordi fejlen
     rammer et mindretal.</p>
 </div>

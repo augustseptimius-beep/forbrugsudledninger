@@ -223,9 +223,11 @@ export function niveauBaand(afvigelse) {
  *  Forskellen mellem de to niveauer er bevisbyrden. "bekraeftet_fejl" bygger på
  *  et eftervist bytte af tonnage mellem kommuner, der deler affaldsselskab -
  *  der VED vi, at tallet ikke beskriver kommunen, og retningen spærres.
- *  "usikker" er blot et stort spring fra året før. Det er ikke et bevis for en
- *  fejl: en lille ø kan springe af helt naturlige grunde. Retningen spærres
- *  derfor ikke - udsvinget oplyses, og læseren tager selv højde for det. */
+ *  De to "usikker"-tilstande er blot et stort spring fra året før eller en
+ *  fraktion, der næsten mangler. Ingen af delene er et bevis for en fejl: en
+ *  lille ø kan springe af naturlige grunde. Retningen spærres derfor ikke -
+ *  årsagen oplyses, og læseren tager selv højde for den. De holdes adskilt,
+ *  fordi en kommune, hvis fraktion mangler, ikke har svinget. */
 const INDBERETNING_FORBEHOLD = {
   bekraeftet_fejl: {
     spaerrer: true,
@@ -234,7 +236,13 @@ const INDBERETNING_FORBEHOLD = {
       + "Danmarks Statistik har offentliggjort det, men det beskriver ikke "
       + "kommunen alene, og retningen gættes derfor ikke.",
   },
-  usikker: {
+  usikker_fraktion: {
+    spaerrer: false,
+    note: "Bemærk: en affaldsfraktion, der fylder meget i alle andre kommuner, er "
+      + "næsten fraværende i kommunens indberetning for det viste år. Det kan være "
+      + "et hul i indberetningen snarere end en forskel i forbruget.",
+  },
+  usikker_spring: {
     spaerrer: false,
     note: "Bemærk: kommunens restaffald viser et usædvanligt stort udsving fra "
       + "året før. Det behøver ikke være en fejl - små kommuner svinger naturligt "
