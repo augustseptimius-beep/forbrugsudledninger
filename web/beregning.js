@@ -84,7 +84,8 @@ export const KATEGORI = {
 //
 // rolle: "hjaelper" markerer nøgletal, der kun findes for at kvalificere et
 // andet tal - lokal VE-dækning forklarer el-CO2, fritidshuse pr. helårsbolig
-// forklarer husholdningstallene. De står i tabellen som alle andre, men holdes
+// forklarer husholdningstallene, befolkningsudviklingen forklarer
+// byggeaktiviteten. De står i tabellen som alle andre, men holdes
 // ude af overblikkets fremhævelser, hvor de ellers ville fortrænge de tal, de
 // er sat i verden for at forklare.
 const DRIVERE = [
@@ -112,9 +113,11 @@ const DRIVERE = [
     type: "ingen", kategori: KATEGORI.KONTEKST, paavirkning: "uafklaret",
     begrundelse: "Ulighed siger noget om fordelingen af forbrug, ikke om niveauet." },
   { navn: "Befolkningsudvikling", enhed: "pct.", val: vaekst,
-    type: "difference", kategori: KATEGORI.KONTEKST, paavirkning: "uafklaret",
-    begrundelse: "Tallene er pr. borger, så befolkningsudvikling påvirker dem ikke "
-      + "direkte." },
+    type: "difference", kategori: KATEGORI.BOLIG_BYGGERI, rolle: "hjaelper",
+    paavirkning: "uafklaret",
+    begrundelse: "Står her for at forklare byggeaktiviteten: en kommune, der vokser, "
+      + "bygger flere boliger. Nøgletallene er opgjort pr. borger, så væksten peger ikke "
+      + "selv mod en højere eller lavere udledning." },
   { navn: "Befolkningstæthed", enhed: "pers./km²", val: taethed,
     type: "relativ", kategori: KATEGORI.KONTEKST, paavirkning: "uafklaret",
     begrundelse: "Tæthed hænger sammen med både boligtype og transportafstand, som "

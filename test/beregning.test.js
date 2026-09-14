@@ -43,6 +43,16 @@ test("driverTabel: befolkningsudvikling bruger DIFFERENCE, ikke relativ", () => 
   naer(d.afvigelse, d.kommuneVaerdi - d.landVaerdi);
 });
 
+test("driverTabel: befolkningsudvikling er hjælpetal under Bolig og byggeri", () => {
+  // Tallene er pr. borger, så væksten peger ikke selv nogen vej. Den står for at
+  // forklare byggeaktiviteten: over alle 98 kommuner følger de to hinanden
+  // (r = +0,60), ligesom fritidshuse forklarer husholdningstallene.
+  const d = find(driverTabel(thisted, land), "Befolkningsudvikling");
+  assert.equal(d.kategori, KATEGORI.BOLIG_BYGGERI);
+  assert.equal(d.rolle, "hjaelper");
+  assert.equal(d.signal, "uafklaret");
+});
+
 test("driverTabel: Gini er kontekst uden afvigelse", () => {
   const d = find(driverTabel(thisted, land), "Gini-koefficient");
   assert.equal(d.type, "ingen");
