@@ -45,8 +45,10 @@ KILDER = [
     _dst("BOL102", "Boliger efter opvarmningsform", "OPVARMNING_AAR",
          ["opv_boliger_ialt", "opv_olie", "opv_naturgas"]),
     _dst("BYGV33", "Fuldført byggeri efter område", "BYGGERI_AAR", ["byggeri"]),
-    _dst("BIL54", "Personbiler efter drivmiddel", "BILER_MAANED",
-         ["biler", "biler_el", "biler_plugin", "biler_diesel", "biler_benzin"]),
+    dict(_dst("BIL54", "Personbiler efter drivmiddel, husholdningernes", "BILER_MAANED",
+              ["biler", "biler_el", "biler_plugin", "biler_diesel", "biler_benzin"]),
+         forbehold="Kun husholdningernes biler. Firma- og leasingbiler er registreret "
+                   "på virksomhedens adresse, ikke der, hvor de bruges, og er udeladt."),
     _dst("LABY25", "Husholdningsaffald og genanvendelse", "AFFALD_AAR",
          ["affald_kg", "genanvendelse_pct"]),
     dict(_dst("AFSTB4", "Gennemsnitlig pendlingsafstand efter bopælsområde",

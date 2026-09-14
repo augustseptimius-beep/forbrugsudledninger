@@ -145,11 +145,16 @@ def fetch_byggeri():
 def fetch_biler():
     """Returnerer (biler_ialt, el, plugin, diesel, benzin), hver {navn: antal (int)}.
 
+    Kun husholdningernes biler (BRUG 1100). Firma- og leasingbiler er registreret
+    på virksomhedens adresse, ikke der, hvor de bruges - i Brøndby og Albertslund
+    var knap hver tredje bil en erhvervsbil - og Energistyrelsens
+    transportkategori er husholdningernes.
+
     Benzin og diesel hentes hver for sig, men vises som ét nøgletal. BIL54's
     øvrige drivmidler - F-gas, N-gas, petroleum, brint, metanol, ætanol - udgør
     tilsammen under 0,1 pct. af bilparken i hver kommune og hentes ikke."""
     rows = dst_client.fetch(BASE, "BIL54", {
-        "OMRÅDE": "*", "BILTYPE": "4000101002", "BRUG": "1000",
+        "OMRÅDE": "*", "BILTYPE": "4000101002", "BRUG": "1100",
         "DRIV": "20200,20225,20232,20210,20205", "Tid": PERIODER["BILER_MAANED"],
     })
     per_type = dst_client.sum_by(rows, ["OMRÅDE", "DRIV"])

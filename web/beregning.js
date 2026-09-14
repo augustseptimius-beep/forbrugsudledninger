@@ -146,7 +146,9 @@ const DRIVERE = [
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "hoejere",
     begrundelse: "Flere biler betyder både mere kørsel og flere producerede "
       + "køretøjer. Energistyrelsen opgør husholdningernes transport plus køb af "
-      + "køretøjer til 1,84 ton pr. indbygger (2024), den største enkeltkategori." },
+      + "køretøjer til 1,84 ton pr. indbygger (2024), den største enkeltkategori. Kun "
+      + "husholdningernes egne biler tælles: firma- og leasingbiler står på "
+      + "virksomhedens adresse, ikke der, hvor de bruges." },
   { navn: "El- og plugin-hybridandel", enhed: "pct.", val: elPluginAndel,
     andel: "0-1",
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "lavere",

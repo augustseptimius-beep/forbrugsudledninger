@@ -158,6 +158,17 @@ class TestFetchDelD(unittest.TestCase):
         self.assertEqual(benzin["Thisted"], 12180)
 
     @patch("fetch_dst.dst_client.fetch")
+    def test_biler_kun_husholdningernes(self, mock_fetch):
+        """Firma- og leasingbiler er registreret på virksomhedens adresse, ikke der,
+        hvor de bruges, og Energistyrelsens transportkategori er husholdningernes.
+        Med "I alt" stod Brøndby med 0,52 biler pr. indbygger, heraf 29 % firmabiler;
+        husholdningernes egne gav 0,37."""
+        mock_fetch.return_value = fetch_dst.dst_client.parse_csv(BIL54_CSV)
+        fetch_dst.fetch_biler()
+        params = mock_fetch.call_args[0][2]
+        self.assertEqual(params["BRUG"], "1100")
+
+    @patch("fetch_dst.dst_client.fetch")
     def test_affald(self, mock_fetch):
         mock_fetch.return_value = fetch_dst.dst_client.parse_csv(LABY25_CSV)
         kg, pct = fetch_dst.fetch_affald()

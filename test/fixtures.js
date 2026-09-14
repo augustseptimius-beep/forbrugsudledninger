@@ -1,5 +1,9 @@
 // Golden rådata fra Beregninger_Forbrugsbaserede_udledninger_Thisted_v5.xlsx, fanen "Rådata".
 // Disse værdier er facit for golden-testene og må kun ændres, hvis regnearket ændres.
+//
+// Bilerne er regnearkets "I alt", altså alle personbiler. Pipelinen henter siden
+// 2026-09-14 kun husholdningernes. Golden-testene holder motorens regnestykke mod
+// regnearket, ikke pipelinens afgrænsning.
 
 export const land = {
   navn: "Hele landet",
