@@ -345,6 +345,43 @@ test("affald: forbeholdet forklarer fejlen og siger at tallet ikke er rettet", (
     "det skal fremgå, at værktøjet ikke retter kildens tal");
 });
 
+// --- Fritidshuse: husholdningstallene er fordelt på samtlige boliger ---
+
+// Thisted har 20.218 helårsboliger i fixturen.
+const medHusholdning = (fritidshuse) => ({
+  ...thisted, fritidshuse, husholdning_co2_ton: 19000, husholdning_energi_tj: 900,
+  husholdning_fossil_andel: 0.05,
+});
+const landHusholdning = {
+  ...land, fritidshuse: 224795, husholdning_co2_ton: 3343924,
+  husholdning_energi_tj: 155250, husholdning_fossil_andel: 0.098,
+};
+
+test("fritidshuse: flere fritidshuse end helårsboliger holder retningen tilbage pr. bolig", () => {
+  // Et fritidshus bruger mindre energi end en helårsbolig, så fordelingen på
+  // samtlige boliger trækker gennemsnittet ned med en størrelse, der ikke kan
+  // opgøres. Et "lavere" ville da være fordelingens, ikke kommunens.
+  const t = driverTabel(medHusholdning(25000), landHusholdning);
+  for (const navn of ["Husholdningernes CO2 fra energi", "Husholdningernes energiforbrug"]) {
+    const d = t.find((x) => x.navn === navn);
+    assert.equal(d.signal, "uafklaret", `${navn}: gennemsnittet er trukket ned`);
+    assert.match(d.begrundelse, /flere fritidshuse end helårsboliger/);
+  }
+});
+
+test("fritidshuse: under grænsen står retningen som normalt", () => {
+  const d = driverTabel(medHusholdning(3000), landHusholdning)
+    .find((x) => x.navn === "Husholdningernes CO2 fra energi");
+  assert.notEqual(d.signal, "uafklaret");
+  assert.doesNotMatch(d.begrundelse, /flere fritidshuse end helårsboliger/);
+});
+
+test("fritidshuse: den fossile andel rammes ikke - den er ikke fordelt på boliger", () => {
+  const d = driverTabel(medHusholdning(25000), landHusholdning)
+    .find((x) => x.navn === "Fossil andel af husholdningernes energi");
+  assert.notEqual(d.signal, "uafklaret");
+});
+
 // --- Fordelingskontekst: gør 'markant' læseligt ---
 
 const alle = [thisted, greve];

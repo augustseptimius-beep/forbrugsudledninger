@@ -45,6 +45,26 @@ const husholdningCo2PrBolig = (m) => m.husholdning_co2_ton / alleBoliger(m);
 const husholdningEnergiPrBolig = (m) => (m.husholdning_energi_tj * 1000) / alleBoliger(m);
 const fritidshusPrBolig = (m) => m.fritidshuse / helaarsboliger(m);
 
+// Forbehold, der gælder for netop én kommune. En driver med et forbehold kalder
+// funktionen med kommunens data; får den {spaerrer, note} tilbage, lægges noten
+// til begrundelsen, og retningen spærres, hvis spaerrer er sand.
+//
+// Fritidshuse: husholdningstallene er fordelt på samtlige boliger, og et
+// fritidshus bruger mindre energi end en helårsbolig. Har kommunen flere
+// fritidshuse end helårsboliger, trækkes gennemsnittet ned med en størrelse, der
+// ikke kan opgøres, og et "lavere" ville være fordelingens, ikke kommunens.
+// Grænsen er metodesidens egen formulering. Den fossile andel rammes ikke - den
+// er ikke fordelt på boliger.
+const FRITIDSHUS_FORBEHOLD = {
+  spaerrer: true,
+  note: "Kommunen har flere fritidshuse end helårsboliger. Tallet er fordelt på "
+    + "samtlige boliger, og da et fritidshus bruger mindre energi end en helårsbolig, "
+    + "trækkes gennemsnittet ned med en størrelse, der ikke kan opgøres. Retningen "
+    + "gættes derfor ikke.",
+};
+const fritidshusForbehold = (m) => (fritidshusPrBolig(m) > 1 ? FRITIDSHUS_FORBEHOLD : null);
+const affaldForbehold = (m) => INDBERETNING_FORBEHOLD[m.affald_indberetning] ?? null;
+
 // Hvilken vej et nøgletal peger, hvis værdien er høj.
 //   "hoejere"    en høj værdi peger mod højere udledning end landsgennemsnittet
 //   "lavere"     en høj værdi peger mod lavere udledning
@@ -153,11 +173,11 @@ const DRIVERE = [
       + "dog intet om transportmiddel." },
   { navn: "Husholdningernes CO2 fra energi", enhed: "ton CO2e/bolig",
     val: husholdningCo2PrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
-    paavirkning: "hoejere",
+    paavirkning: "hoejere", forbehold: fritidshusForbehold,
     begrundelse: "Målt udledning fra borgernes eget energiforbrug i boligen." },
   { navn: "Husholdningernes energiforbrug", enhed: "GJ/bolig",
     val: husholdningEnergiPrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
-    paavirkning: "hoejere",
+    paavirkning: "hoejere", forbehold: fritidshusForbehold,
     begrundelse: "Mere energi brugt i boligen. Udledningen afhænger dog af, hvilken "
       + "energikilde der bruges - se de to øvrige nøgletal." },
   { navn: "Fossil andel af husholdningernes energi", enhed: "pct.",
@@ -190,12 +210,12 @@ const DRIVERE = [
   // sættes pr. kommune ud fra affald_indberetning - se INDBERETNING_FORBEHOLD.
   { navn: "Husholdningsaffald", enhed: "kg/pers.", val: (m) => m.affald_kg,
     type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "hoejere",
-    forbeholdFelt: "affald_indberetning",
+    forbehold: affaldForbehold,
     begrundelse: "Mere affald peger mod et større materielt forbrug." },
   { navn: "Genanvendelsesprocent", enhed: "pct.", val: (m) => m.genanvendelse_pct,
     andel: "0-100",
     type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "lavere",
-    forbeholdFelt: "affald_indberetning",
+    forbehold: affaldForbehold,
     begrundelse: "Genanvendte materialer erstatter produktion af nye." },
 ];
 
@@ -339,11 +359,9 @@ export function beregnFordeling(kommuner, land) {
 /** Byg indikatortabellen: værdi, landsværdi, afvigelse (efter type) og retning. */
 export function driverTabel(kommune, land) {
   return DRIVERE.map((d) => {
-    // Kildens pålidelighed for netop denne kommune kan spærre retningen og
-    // lægger under alle omstændigheder sin note til begrundelsen.
-    const forbehold = d.forbeholdFelt
-      ? INDBERETNING_FORBEHOLD[kommune[d.forbeholdFelt]] ?? null
-      : null;
+    // Et forbehold for netop denne kommune kan spærre retningen og lægger under
+    // alle omstændigheder sin note til begrundelsen.
+    const forbehold = d.forbehold?.(kommune) ?? null;
     const paavirkning = forbehold?.spaerrer ? "uafklaret" : (d.paavirkning ?? "uafklaret");
     const begrundelse = forbehold
       ? [d.begrundelse, forbehold.note].filter(Boolean).join(" ")

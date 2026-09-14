@@ -165,6 +165,23 @@ test("husholdningernes CO2 pr. bolig følger IKKE fritidshustætheden", () => {
   assert.ok(prBolig < 0.4, `for stærk sammenhæng tilbage: ${prBolig.toFixed(2)}`);
 });
 
+test("fritidshuse: retningen holdes tilbage præcis hos kommuner med flere fritidshuse end helårsboliger", () => {
+  // Samme binding som for affaldet: forbeholdet skal følge kommunens egne tal,
+  // ikke en liste. Ellers kan et husholdningstal miste sin retning, uden at
+  // nogen opdager hvorfor - eller beholde en retning, fordelingen har skabt.
+  const PR_BOLIG = ["Husholdningernes CO2 fra energi", "Husholdningernes energiforbrug"];
+  let ramte = 0;
+  for (const k of data.kommuner) {
+    const flere = k.fritidshuse > k.boliger_parcel + k.boliger_raekke + k.boliger_etage;
+    if (flere) ramte++;
+    for (const r of driverTabel(k, data.land)) {
+      if (!PR_BOLIG.includes(r.navn)) continue;
+      assert.equal(r.signal === "uafklaret", flere, `${k.navn}/${r.navn}`);
+    }
+  }
+  assert.ok(ramte > 0 && ramte < 10, `${ramte} kommuner ramt - er grænsen flyttet?`);
+});
+
 test("fossil andel af husholdningernes energi ligger mellem 0 og 1", () => {
   for (const k of data.kommuner) {
     if (k.husholdning_fossil_andel == null) continue;

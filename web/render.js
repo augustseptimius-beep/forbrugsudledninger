@@ -477,10 +477,10 @@ const DRIVER_FORBEHOLD = {
     "Modsat 'Fossil opvarmning', der tæller antal boliger, er dette den faktiske " +
     "energimængde.",
   "Fritidshuse pr. helårsbolig":
-    "Står her, fordi de to husholdningstal ikke kan læses uden det. I kommuner med " +
-    "mange fritidsboliger er de usikre i begge retninger: fritidshuse bruger energi, " +
-    "men mindre end en helårsbolig, så de trækker gennemsnittet ned. Ved værdier over " +
-    "cirka 1 skal tallene læses med stor varsomhed.",
+    "Står her, fordi de to husholdningstal pr. bolig ikke kan læses uden det. " +
+    "Fritidshuse bruger energi, men mindre end en helårsbolig, så de trækker " +
+    "gennemsnittet ned. Over 1 - flere fritidshuse end helårsboliger - holdes " +
+    "retningen på de to tal derfor tilbage.",
   "Gennemsnitlig pendlingsafstand":
     "Afstand til arbejde for beskæftigede med bopæl i kommunen. Siger intet om " +
     "transportmiddel og dækker kun arbejdsturen, ikke indkøb, fritid og andre ærinder.",
