@@ -41,9 +41,27 @@ const helaarsboliger = (m) => m.boliger_parcel + m.boliger_raekke + m.boliger_et
 // boligstørrelse og andelen af fritliggende huse - altså det, det bør følge.
 // Se pipeline/fetch_klimaregnskabet.py for de målte sammenhænge.
 const alleBoliger = (m) => helaarsboliger(m) + (m.fritidshuse ?? 0);
-const husholdningCo2PrBolig = (m) => m.husholdning_co2_ton / alleBoliger(m);
 const husholdningEnergiPrBolig = (m) => (m.husholdning_energi_tj * 1000) / alleBoliger(m);
 const fritidshusPrBolig = (m) => m.fritidshuse / helaarsboliger(m);
+
+// Strøm er fælles, fjernvarme er lokal.
+//
+// Klimaregnskabet giver hver kommune sin egen el-faktor ud fra den el, der
+// produceres i kommunen, så lokal vind og sol tæller som nul hos kommunens egne
+// forbrugere. Strøm deles på det fælles net, og en vindmølle gør ikke kommunens
+// eget forbrug renere - den gør alles. Husholdningernes strøm regnes derfor med
+// landets fælles faktor: landets el-udledning delt med landets elforbrug, fra
+// samme opgørelse og samme år. Summen over landet er uændret.
+//
+// Fjernvarme leveres i rør fra kommunens eget net, og Klimaregnskabet beregner
+// faktoren pr. net efter Energistyrelsens anbefaling. Den bruges, som den er.
+const KWH_PR_TJ = 1e12 / 3.6e6;
+const faellesElFaktor = (land) => land.husholdning_el_co2_ton / land.husholdning_el_tj;
+const husholdningCo2PrBolig = (m, land) =>
+  (m.husholdning_co2_ton - m.husholdning_el_co2_ton
+    + m.husholdning_el_tj * faellesElFaktor(land)) / alleBoliger(m);
+const fjernvarmeCo2PrKwh = (m) =>
+  (m.husholdning_fjernvarme_co2_ton * 1e6) / (m.husholdning_fjernvarme_tj * KWH_PR_TJ);
 
 // Forbehold, der gælder for netop én kommune. En driver med et forbehold kalder
 // funktionen med kommunens data; får den {spaerrer, note} tilbage, lægges noten
@@ -102,9 +120,9 @@ export const KATEGORI = {
 // afvigelsestype: "relativ" = (k−l)/l, "difference" = k−l.
 //
 // rolle: "hjaelper" markerer nøgletal, der kun findes for at kvalificere et
-// andet tal - lokal VE-dækning forklarer el-CO2, fritidshuse pr. helårsbolig
-// forklarer husholdningstallene, befolkningsudviklingen forklarer
-// byggeaktiviteten. De står i tabellen som alle andre, men holdes
+// andet tal - fritidshuse pr. helårsbolig forklarer husholdningstallene,
+// befolkningsudviklingen forklarer byggeaktiviteten. De står i tabellen som
+// alle andre, men holdes
 // ude af overblikkets fremhævelser, hvor de ellers ville fortrænge de tal, de
 // er sat i verden for at forklare.
 const DRIVERE = [
@@ -179,7 +197,9 @@ const DRIVERE = [
   { navn: "Husholdningernes CO2 fra energi", enhed: "ton CO2e/bolig",
     val: husholdningCo2PrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere", forbehold: fritidshusForbehold,
-    begrundelse: "Målt udledning fra borgernes eget energiforbrug i boligen." },
+    begrundelse: "Udledningen fra borgernes eget energiforbrug i boligen. Strømmen er "
+      + "regnet med samme udledning pr. kWh i alle kommuner, fordi den deles på det "
+      + "fælles net; fjernvarmen med sit lokale nets." },
   { navn: "Husholdningernes energiforbrug", enhed: "GJ/bolig",
     val: husholdningEnergiPrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere", forbehold: fritidshusForbehold,
@@ -194,20 +214,16 @@ const DRIVERE = [
     andel: "0-1",
     type: "relativ", kategori: KATEGORI.ENERGI, paavirkning: "hoejere",
     begrundelse: "Olie- og gasfyr udleder ved forbrændingen i boligen." },
+  { navn: "Fjernvarmens CO2 pr. kWh", enhed: "g CO2e/kWh", val: fjernvarmeCo2PrKwh,
+    type: "relativ", kategori: KATEGORI.ENERGI, paavirkning: "hoejere",
+    begrundelse: "Hvor meget CO2 der følger med hver kWh fjernvarme, husholdningerne "
+      + "aftager. Fjernvarme leveres i rør fra kommunens eget net, så tallet er "
+      + "kommunens eget - modsat strøm, der deles på det fælles net. Tallet siger, "
+      + "hvor ren fjernvarmen er, ikke hvor meget den fylder i kommunen." },
   { navn: "Fritidshuse pr. helårsbolig", enhed: "boliger/bolig",
     val: fritidshusPrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
     rolle: "hjaelper", paavirkning: "uafklaret",
     begrundelse: "Findes kun for at kvalificere husholdningstallene." },
-  { navn: "El-CO2 pr. kWh", enhed: "g/kWh", val: (m) => m.elco2_g_kwh,
-    type: "relativ", kategori: KATEGORI.ENERGI, paavirkning: "hoejere",
-    begrundelse: "Højere udledning pr. forbrugt kilowatt-time." },
-  { navn: "Lokal VE-dækning af elforbrug", enhed: "pct.", val: (m) => m.ve_daekning_pct,
-    andel: "0-100",
-    type: "relativ", kategori: KATEGORI.ENERGI, rolle: "hjaelper",
-    paavirkning: "uafklaret",
-    begrundelse: "Et produktionsmål. Den grønne strøm indgår allerede i det "
-      + "landsdækkende mix, alle forbruger, så den må ikke tælles som en reduktion "
-      + "i kommunens eget forbrug." },
   // De to affaldsnøgletal stod en periode som uafklarede for ALLE 98 kommuner,
   // fordi DST's kommunefordeling for 2023 er upålidelig for nogle af dem.
   // Det var for groft: fejlen rammer de kommuner, der deler indberetning med
@@ -289,9 +305,10 @@ export function udledningsSignal(afvigelse, paavirkning) {
 }
 
 /** Sikker beregning: returnerer null hvis resultatet ikke er et endeligt tal
- *  (manglende felt giver NaN/Infinity, som Number.isFinite fanger). */
-function sikker(fn, m) {
-  const v = fn(m);
+ *  (manglende felt giver NaN/Infinity, som Number.isFinite fanger). Landet gives
+ *  med, fordi husholdningernes strøm regnes med landets fælles el-faktor. */
+function sikker(fn, m, land) {
+  const v = fn(m, land);
   return Number.isFinite(v) ? v : null;
 }
 
@@ -371,8 +388,8 @@ export function driverTabel(kommune, land) {
       ? [d.begrundelse, forbehold.note].filter(Boolean).join(" ")
       : (d.begrundelse ?? null);
 
-    const kv = sikker(d.val, kommune);
-    const lv = sikker(d.val, land);
+    const kv = sikker(d.val, kommune, land);
+    const lv = sikker(d.val, land, land);
     let afv = null;
     if (kv != null && lv != null) {
       if (d.type === "relativ") afv = afvigelse(kv, lv);
@@ -448,9 +465,11 @@ const FORVENTEDE_FELTER = [
   "gini", "boliger_parcel", "boliger_raekke", "boliger_etage", "boligareal", "byggeri",
   "biler", "biler_el", "biler_plugin", "biler_diesel", "biler_benzin",
   "opv_boliger_ialt", "opv_olie",
-  "opv_naturgas", "affald_kg", "genanvendelse_pct", "elco2_g_kwh",
-  "ve_daekning_pct", "pendlingsafstand_km", "fritidshuse",
+  "opv_naturgas", "affald_kg", "genanvendelse_pct",
+  "pendlingsafstand_km", "fritidshuse",
   "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
+  "husholdning_el_tj", "husholdning_el_co2_ton",
+  "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton",
 ];
 
 /** Om et nøgletal vises på kommunens side.

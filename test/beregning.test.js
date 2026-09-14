@@ -98,9 +98,70 @@ test("beregnKommune: bærer navn, kode og region videre", () => {
 
 test("beregnKommune: lister manglende felter", () => {
   const r = beregnKommune(greve, land);
-  for (const f of ["affald_kg", "genanvendelse_pct", "elco2_g_kwh", "ve_daekning_pct"]) {
+  for (const f of ["affald_kg", "genanvendelse_pct"]) {
     assert.ok(r.manglende.includes(f), `${f} skulle være markeret som manglende`);
   }
+});
+
+// --- Husholdningernes energi: strøm er fælles, fjernvarme er lokal ---
+
+const medEnergi = (m, felter) => ({
+  ...m, fritidshuse: 0, husholdning_energi_tj: 1000, husholdning_fossil_andel: 0.1, ...felter,
+});
+const landEnergi = medEnergi(land, {
+  husholdning_co2_ton: 3000000, husholdning_el_tj: 30000, husholdning_el_co2_ton: 900000,
+  husholdning_fjernvarme_tj: 70000, husholdning_fjernvarme_co2_ton: 1500000,
+});
+const vaerdi = (k, navn) => {
+  const d = driverTabel(k, landEnergi).find((x) => x.navn === navn);
+  assert.ok(d, `${navn} skal være et nøgletal`);
+  return d;
+};
+
+test("husholdningernes CO2: strømmen regnes med landets fælles faktor, ikke kommunens egen", () => {
+  // Klimaregnskabet giver hver kommune sin egen el-faktor ud fra den el, der
+  // produceres i kommunen. Strøm deles på det fælles net, så en vindmølle gør
+  // ikke kommunens eget forbrug renere. To kommuner med samme elforbrug og samme
+  // øvrige udledning skal derfor stå ens, uanset hvor ren deres lokale el er.
+  const vind = medEnergi(thisted, { husholdning_el_tj: 100, husholdning_co2_ton: 5000,
+    husholdning_el_co2_ton: 0 });
+  const kul = medEnergi(thisted, { husholdning_el_tj: 100, husholdning_co2_ton: 8000,
+    husholdning_el_co2_ton: 3000 });
+  const navn = "Husholdningernes CO2 fra energi";
+  naer(vaerdi(vind, navn).kommuneVaerdi, vaerdi(kul, navn).kommuneVaerdi);
+});
+
+test("husholdningernes CO2: landstallet er det samme med den fælles el-faktor", () => {
+  // Faktoren er landets egen el-udledning delt med landets elforbrug, så den
+  // flytter udledning mellem kommuner uden at ændre summen.
+  const boliger = land.boliger_parcel + land.boliger_raekke + land.boliger_etage;
+  naer(vaerdi(thisted, "Husholdningernes CO2 fra energi").landVaerdi,
+    landEnergi.husholdning_co2_ton / boliger);
+});
+
+test("fjernvarmens CO2 pr. kWh: tons pr. TJ regnes om til gram pr. kWh", () => {
+  // 1 TJ er 277.778 kWh, så 1 ton pr. TJ er 3,6 g pr. kWh.
+  const k = medEnergi(thisted, { husholdning_fjernvarme_tj: 1, husholdning_fjernvarme_co2_ton: 1 });
+  const d = vaerdi(k, "Fjernvarmens CO2 pr. kWh");
+  naer(d.kommuneVaerdi, 3.6);
+  assert.equal(d.kategori, KATEGORI.ENERGI);
+  assert.equal(d.rolle, "hoved");
+  assert.equal(d.paavirkning, "hoejere");
+});
+
+test("fjernvarmens CO2 pr. kWh: uden fjernvarme står der en streg, ikke nul", () => {
+  const k = medEnergi(thisted, { husholdning_fjernvarme_tj: 0, husholdning_fjernvarme_co2_ton: 0 });
+  const d = vaerdi(k, "Fjernvarmens CO2 pr. kWh");
+  assert.equal(d.kommuneVaerdi, null);
+  assert.equal(d.signal, "ukendt");
+});
+
+test("el-CO2 pr. kWh og lokal VE-dækning er ikke nøgletal", () => {
+  // Uden Energinets lokale VE-kredit viste el-CO2 kun prisområdet (DK1 64-69,
+  // DK2 41-43 g/kWh), og VE-dækningen måler produktion, ikke forbrug.
+  const navne = driverTabel(thisted, land).map((d) => d.navn);
+  assert.ok(!navne.includes("El-CO2 pr. kWh"));
+  assert.ok(!navne.includes("Lokal VE-dækning af elforbrug"));
 });
 
 test("beregnKommune: intet felt i modellen hedder aftryk eller estimat", () => {
@@ -141,8 +202,7 @@ test("beregnKommune: hjælpetal bliver stående, selv om de ingen retning har", 
   // De står for at forklare et andet nøgletal og har aldrig en retning. Ramte
   // reglen dem, forsvandt de fra alle 98 kommunesider.
   const r = beregnKommune(thisted, land);
-  for (const navn of ["Befolkningsudvikling", "Fritidshuse pr. helårsbolig",
-                      "Lokal VE-dækning af elforbrug"]) {
+  for (const navn of ["Befolkningsudvikling", "Fritidshuse pr. helårsbolig"]) {
     assert.ok(find(r.drivere, navn), navn);
   }
 });
@@ -182,8 +242,8 @@ test("udledningsSignal: små udsving peger ingen vej", () => {
 });
 
 test("udledningsSignal: uafklaret påvirkning gættes aldrig", () => {
-  // Lokal VE-dækning er eksemplet: et produktionsmål, hvis grønne strøm
-  // allerede indgår i det fælles mix, så retningen kan ikke begrundes.
+  // Befolkningsudviklingen er eksemplet: tallene er pr. borger, så væksten
+  // peger ikke selv nogen vej.
   assert.equal(udledningsSignal(0.9, "uafklaret"), "uafklaret");
   assert.equal(udledningsSignal(0.9, undefined), "uafklaret");
   assert.equal(udledningsSignal(null, "hoejere"), "ukendt");

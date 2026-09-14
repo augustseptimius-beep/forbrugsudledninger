@@ -118,9 +118,9 @@ nøglen hjemme som en GitHub Actions-secret, ikke i repoet.
 
 ## Cachefiler under udvikling
 
-`pipeline/.el_cache.json` og `pipeline/.kr_cache.json` gemmer de to langsomme
-kilder, så en genkørsel tager sekunder frem for et kvarter. Begge er
-gitignorerede. Omgå dem med `--frisk-el` og `--frisk-kr`.
+`pipeline/.kr_cache.json` gemmer Klimaregnskabet.dk, der kræver ét kald pr.
+kommune, så en genkørsel tager sekunder. Den er gitignoreret. Omgå den med
+`--frisk-kr`.
 
 ## Årlig opdatering
 

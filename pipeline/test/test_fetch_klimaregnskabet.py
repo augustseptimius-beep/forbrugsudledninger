@@ -55,6 +55,27 @@ class TestFossilAndel(unittest.TestCase):
         self.assertIsNone(kr.fossil_andel({"Fjernvarme": 0.0}))
 
 
+class TestElOgFjernvarme(unittest.TestCase):
+    """Strøm og fjernvarme læses ud hver for sig. Klimaregnskabets el-faktor er
+    kommunens egen produktion, så motoren regner strømmen om med landets fælles
+    faktor; fjernvarmens faktor er lokal og bliver kommunens eget nøgletal."""
+
+    def test_el_er_de_tre_elposter_lagt_sammen(self):
+        energi = {"El til andet": 10.0, "El til paneler": 2.0, "El til varmepumpe": 3.0,
+                  "Fjernvarme": 50.0, "Naturgas": 7.0}
+        udledning = {"El til andet": 1.0, "El til paneler": 0.5, "El til varmepumpe": 0.5,
+                     "Fjernvarme": 4.0, "Naturgas": 1.4}
+        self.assertEqual(kr.el_og_fjernvarme(energi, udledning), {
+            "el_tj": 15.0, "el_co2_ton": 2.0, "fjernvarme_tj": 50.0, "fjernvarme_co2_ton": 4.0})
+
+    def test_uden_fjernvarme_er_det_et_reelt_nul(self):
+        # Dragør og Stevns har ingen fjernvarme i husholdningerne. Det er ikke
+        # manglende data, og motoren viser en streg, fordi 0/0 ikke er et tal.
+        ud = kr.el_og_fjernvarme({"Naturgas": 7.0}, {"Naturgas": 1.4})
+        self.assertEqual(ud["fjernvarme_tj"], 0.0)
+        self.assertEqual(ud["el_tj"], 0.0)
+
+
 class TestApiNoegle(unittest.TestCase):
     def test_miljoevariabel_vinder(self):
         with patch.dict(os.environ, {"KLIMAREGNSKABET_API_KEY": "fra-miljoe"}):

@@ -291,8 +291,6 @@
     De står for at forklare et andet nøgletal og har derfor aldrig en retning. De vises
     på alle kommunesider, men uden mærkat:</p>
   <ul class="mt-3 space-y-2 text-sm text-gray-700 max-w-3xl list-disc pl-5">
-    <li><strong>Lokal VE-dækning.</strong> Forklarer el-CO2. Et produktionsmål: den
-      grønne strøm indgår allerede i det landsdækkende mix, alle forbruger.</li>
     <li><strong>Befolkningsudvikling og fritidshuse pr. helårsbolig.</strong> Forklarer
       byggeaktiviteten og husholdningstallene og peger ikke selv nogen vej.</li>
   </ul>
@@ -402,16 +400,22 @@
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">To metodenoter, der ikke er vores egne</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>El-CO2 pr. kWh</strong> beregnes af Energinets timedata for
-    prisområdets netmix, vægtet med kommunens eget timeforbrug, og følger Energinets
-    lokationsbaserede kommunedeklaration: lokalt produceret vedvarende energi, der
-    forbruges i kommunen samme time, regnes som nul-emission. Det er Energinets
-    metodevalg. Set fra et rent forbrugsbaseret regnskab er det en dobbeltregning, fordi
-    den grønne strøm også indgår i det landsdækkende mix, alle andre forbruger. Tallet
-    dækker CO2, ikke fuld CO2e: datasættet har også metan og lattergas, men uden
-    dokumenterede enheder, og en gættet omregning ville være værre end et præcist mærket
-    CO2-tal.</p>
+  <h2 class="text-xl font-semibold text-gray-900">Energi: strøm er fælles, fjernvarme er lokal</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Der er ingen el-CO2 pr. kWh for kommunen.</strong>
+    Strøm deles på det fælles net, og en vindmølle i én kommune gør ikke kommunens eget
+    forbrug renere - den gør alles. Værktøjet viste tidligere Energinets
+    lokationsbaserede kommunedeklaration, hvor lokal vedvarende energi, der forbruges i
+    kommunen samme time, regnes som nul-emission. Set fra et forbrugsbaseret regnskab er
+    det en dobbeltregning. Uden den kreditering viste tallet kun prisområdet: i 2025 lå
+    alle kommuner vest for Storebælt på 64-69 g CO2/kWh og alle øst for på 41-43. Den
+    forskel afhænger desuden af metoden - Energistyrelsens fremskrivning for 2025 har de
+    to prisområder på 60,0 og 57,3 g CO2e/kWh. Tallet er derfor taget af siden sammen
+    med den lokale VE-dækning, der skulle forklare det.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Fjernvarmens CO2 pr. kWh er kommunens eget tal.</strong>
+    Fjernvarme leveres i rør fra lokale net. Klimaregnskabet beregner udledningen pr.
+    fjernvarmenet efter Energistyrelsens anbefaling og fordeler den på de kommuner, der
+    aftager varme fra nettet. Tallet siger, hvor ren fjernvarmen er, ikke hvor meget den
+    fylder - det ses i husholdningernes CO2.</p>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Husholdningernes energi og udledning</strong> kommer fra
     Klimaregnskabet.dk, som udstiller Energi- og CO2-regnskabet. NIRAS (2024) s. 18 peger
     på netop den kilde til energidelen af et kommunalt forbrugsregnskab. Vi trækker kun
@@ -419,7 +423,7 @@
     boligen. Erhverv, fremstillingsvirksomhed, offentlig service og transport hører til
     andre kategorier og er ikke med; det er efterprøvet ved, at underkategorierne
     summerer eksakt til kommunens samlede forbrug.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">To ting skal læses med. For det første dækker opgørelsen udledningen fra
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Tre ting skal læses med. For det første dækker opgørelsen udledningen fra
     forbrændingen og fra elnettet, ikke hele livscyklussen bag brændslet. Niveauet er
     derfor lavere end CONCITO's tal for El og varme, og de to må ikke lægges sammen -
     men sammenligningen mellem kommunen og landsgennemsnittet er gyldig, fordi begge
@@ -435,9 +439,15 @@
     Derfor står fritidshuse pr. helårsbolig som selvstændigt nøgletal ved siden af, og i
     de kommuner vises de to husholdningstal pr. bolig ikke, fordi retningen ikke kan
     afgøres.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Lokal VE-dækning</strong> står ved siden af, fordi el-CO2-tallet ellers
-    er uigennemskueligt: uden dækningsgraden kan man ikke se, hvorfor en vindkommune
-    ligger lavt. Den er et produktionsmål, ikke et forbrugsmål, og kan overstige 100 %.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">For det tredje er <strong>strømmen regnet om</strong>.
+    Klimaregnskabet giver hver kommune sin egen el-faktor ud fra den el, der produceres i
+    kommunen, så lokal vind og sol tæller som nul hos kommunens egne forbrugere - i 2023
+    fra 0,04 g CO2e/kWh i Lolland til 174 i Odense. Værktøjet regner i stedet
+    husholdningernes strøm med landets fælles faktor: husholdningernes samlede
+    el-udledning delt med deres samlede elforbrug over alle 98 kommuner, 100 g CO2e/kWh
+    i 2023. Landstallet er uændret, men tallet flytter sig for de kommuner, hvis egen
+    el-faktor ligger langt fra landets. Det er det eneste sted, værktøjet erstatter en del
+    af et kildetal, og derfor står det her, så det kan efterprøves.</p>
 </div>
 
 </div>
@@ -448,7 +458,6 @@
     Data:
     <a href="https://www.dst.dk" target="_blank" rel="noopener" class="underline hover:text-gray-700">Danmarks Statistik</a>
     (CC BY 4.0) &middot;
-    <a href="https://energinet.dk" target="_blank" rel="noopener" class="underline hover:text-gray-700">Energinet</a> &middot;
     <a href="https://www.transportvaner.dk" target="_blank" rel="noopener" class="underline hover:text-gray-700">DTU</a>
     <br class="sm:hidden">
     <span class="hidden sm:inline">&middot;</span>

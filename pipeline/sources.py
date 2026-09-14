@@ -70,7 +70,9 @@ KILDER = [
         "periode_noegle": "KLIMAREGNSKAB_AAR",
         "licens": "Kræver personlig API-nøgle, se klimaregnskabet.dk",
         "url": "https://klimaregnskabet.dk/klimaregnskabet-api",
-        "felter": ["husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel"],
+        "felter": ["husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
+                   "husholdning_el_tj", "husholdning_el_co2_ton",
+                   "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton"],
         "forbehold": "Kun kategorien Husholdninger - erhverv, fremstilling, offentlig "
                      "service og transport hører til andre kategorier og er ikke med. "
                      "Opgørelsen dækker udledningen fra forbrændingen og fra elnettet, "
@@ -78,36 +80,11 @@ KILDER = [
                      "lavere end CONCITO's tal for El og varme. Sammenligningen med "
                      "landsgennemsnittet er gyldig, fordi begge sider opgøres ens. "
                      "NIRAS (2024) s. 18 peger på Energi- og CO2-Regnskabet som den "
-                     "rigtige kilde til energidelen.",
-    },
-    {
-        "id": "ENERGINET_DEKLARATION",
-        "navn": "Miljødeklaration, emission pr. kWh i netmixet (timedata)",
-        "udbyder": "Energinet via Energi Data Service",
-        "metode": "api",
-        "periode_noegle": "ELDEKLARATION_AAR",
-        "licens": "Energinets vilkår",
-        "url": "https://www.energidataservice.dk/tso-electricity/DeclarationGridEmission",
-        "felter": ["elco2_g_kwh"],
-        "forbehold": "Timedata pr. prisområde, aggregeret med kommunens eget "
-                     "timeforbrug. Lokalt produceret vedvarende energi, der "
-                     "forbruges samme time, regnes som nul-emission efter "
-                     "Energinets lokationsbaserede metode. Det krediterer "
-                     "lokal produktion til lokalt forbrug og egner sig derfor "
-                     "ikke til at lægge sammen på tværs af kommuner.",
-    },
-    {
-        "id": "ENERGINET_VE_DAEKNING",
-        "navn": "Lokal VE-dækning og elforbrug pr. kommune (timedata)",
-        "udbyder": "Energinet via Energi Data Service",
-        "metode": "api",
-        "periode_noegle": "ELDEKLARATION_AAR",
-        "licens": "Energinets vilkår",
-        "url": "https://www.energidataservice.dk/tso-electricity/ReCoverageMunicipality",
-        "felter": ["ve_daekning_pct"],
-        "forbehold": "Lokal vedvarende produktion sat i forhold til kommunens "
-                     "eget forbrug. Et produktionsmål, ikke et forbrugsmål - "
-                     "kan overstige 100 % for kommuner, der eksporterer strøm.",
+                     "rigtige kilde til energidelen. Klimaregnskabets el-faktor er "
+                     "kommunens egen produktion; værktøjet regner husholdningernes "
+                     "strøm med landets fælles faktor i stedet, fordi strøm deles på "
+                     "det fælles net. Fjernvarmens faktor er fjernvarmenettets egen og "
+                     "bruges, som den er.",
     },
 ]
 

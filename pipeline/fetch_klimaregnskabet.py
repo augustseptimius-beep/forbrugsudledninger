@@ -13,7 +13,7 @@ fremstillingsvirksomhed, offentlig service og transport hører til andre
 kategorier og trækkes ikke med - verificeret ved at underkategorierne
 summerer eksakt til totalen.
 
-TO FORBEHOLD, DER FØLGER MED.
+TRE FORBEHOLD, DER FØLGER MED.
 
 1. Klimaregnskabet opgør udledningen fra selve forbrændingen og fra elnettet,
    ikke hele livscyklussen bag brændslet. Niveauet er derfor lavere end
@@ -26,6 +26,11 @@ TO FORBEHOLD, DER FØLGER MED.
    så tæt som boligstørrelsen - målt på tværs af alle 98 kommuner. Derfor
    hentes også antal fritidshuse, så tallet kan fordeles på samtlige boliger
    frem for på indbyggere. Se `_maalte_sammenhaenge` nedenfor.
+
+3. Klimaregnskabets el-faktor er kommunens egen: den el, der produceres i
+   kommunen, fordeles på kommunens forbrugere, så lokal vind og sol tæller som
+   nul. Strøm deles på det fælles net, så motoren regner strømmen med landets
+   fælles faktor i stedet. Se EL_KILDER nedenfor.
 
 API-NØGLE. Læses fra miljøvariablen KLIMAREGNSKABET_API_KEY eller fra
 pipeline/.env, som er gitignoreret. Nøglen må aldrig committes. Mangler den,
@@ -58,6 +63,18 @@ _maalte_sammenhaenge = {
 FOSSILE_KILDER = {
     "Naturgas", "Gas-/dieselolie", "LPG", "Benzin og LVN", "Kul", "Fuelolie",
 }
+
+# Husholdningernes el og fjernvarme læses ud hver for sig.
+#
+# Klimaregnskabet beregner el-faktoren pr. kommune ud fra den el, der produceres
+# i kommunen (Energistyrelsens metode til strategisk energiplanlægning), så lokal
+# vind og sol tæller som nul hos kommunens egne forbrugere - i 2023 fra 0,04 g
+# CO2e/kWh i Lolland til 174 i Odense. Strøm deles på det fælles net, så motoren
+# regner strømmen med landets fælles faktor: summen af el-udledningen delt med
+# summen af elforbruget. Fjernvarme leveres i rør fra kommunens eget net, og
+# Klimaregnskabet beregner faktoren pr. net; den er kommunens egen.
+EL_KILDER = ("El til andet", "El til paneler", "El til varmepumpe")
+FJERNVARME = "Fjernvarme"
 
 
 def _api_noegle():
@@ -112,6 +129,19 @@ def fossil_andel(pr_kilde):
     return fossilt / samlet
 
 
+def el_og_fjernvarme(energi, udledning):
+    """{el_tj, el_co2_ton, fjernvarme_tj, fjernvarme_co2_ton} for husholdningerne.
+
+    Et nul er et reelt nul: en kommune uden fjernvarme har 0 TJ, ikke manglende
+    data. Motoren viser en streg, fordi 0/0 ikke er et tal."""
+    return {
+        "el_tj": sum(energi.get(k, 0.0) for k in EL_KILDER),
+        "el_co2_ton": sum(udledning.get(k, 0.0) for k in EL_KILDER),
+        "fjernvarme_tj": energi.get(FJERNVARME, 0.0),
+        "fjernvarme_co2_ton": udledning.get(FJERNVARME, 0.0),
+    }
+
+
 def fetch_husholdninger(kommuneliste, aar, noegle=None, sov=time.sleep):
     """{kommunekode: {co2_ton, energi_tj, fossil_andel, pr_kilde_ton}}.
 
@@ -133,6 +163,7 @@ def fetch_husholdninger(kommuneliste, aar, noegle=None, sov=time.sleep):
             "energi_tj": tj if tj > 0 else None,
             "fossil_andel": fossil_andel(energi),
             "pr_kilde_ton": udledning,
+            **el_og_fjernvarme(energi, udledning),
         }
         sov(PAUSE_SEKUNDER)
     return ud

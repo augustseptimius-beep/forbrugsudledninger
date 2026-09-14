@@ -447,20 +447,21 @@ export function renderKategorioverblik(b, ens) {
 // ---------- Kommunens nøgletal ----------
 
 const DRIVER_FORBEHOLD = {
-  "El-CO2 pr. kWh":
-    "Beregnet af Energinets timedata, vægtet med kommunens eget timeforbrug. Følger " +
-    "Energinets lokationsbaserede metode, hvor lokalt produceret vedvarende energi, " +
-    "der forbruges samme time, regnes som nul-emission. Dækker CO2, ikke fuld CO2e.",
-  "Lokal VE-dækning af elforbrug":
-    "Lokal vedvarende produktion sat i forhold til kommunens eget elforbrug, time for " +
-    "time. Et produktionsmål, ikke et forbrugsmål: strømmen eksporteres til det fælles " +
-    "net. Kan overstige 100 %.",
   "Husholdningernes CO2 fra energi":
     "Udledningen fra borgernes eget forbrug af varme, varmt vand og el i boligen, " +
-    "fordelt på samtlige boliger inklusive fritidshuse. Dækker forbrændingen og " +
-    "elnettet, ikke hele livscyklussen bag brændslet - niveauet er derfor lavere end " +
-    "CONCITO's nationale tal, men sammenligningen med landet er gyldig, fordi begge " +
-    "sider opgøres ens.",
+    "fordelt på samtlige boliger inklusive fritidshuse. Strømmen er regnet med landets " +
+    "fælles udledning pr. kWh: Klimaregnskabets egen el-faktor lader kommunens " +
+    "vindmøller og solceller tælle som nul hos kommunens egne forbrugere, men strøm " +
+    "deles på det fælles net. Fjernvarmen er regnet med sit lokale nets udledning. " +
+    "Dækker forbrændingen og elnettet, ikke hele livscyklussen bag brændslet - " +
+    "niveauet er derfor lavere end CONCITO's nationale tal, men sammenligningen med " +
+    "landet er gyldig, fordi begge sider opgøres ens.",
+  "Fjernvarmens CO2 pr. kWh":
+    "Husholdningernes fjernvarme i kommunen, fra Klimaregnskabet.dk. Udledningen " +
+    "beregnes pr. fjernvarmenet efter Energistyrelsens anbefaling og fordeles på de " +
+    "kommuner, der aftager varme fra nettet. Står der en streg, har kommunens " +
+    "husholdninger ingen fjernvarme. Tallet siger, hvor ren fjernvarmen er - hvor " +
+    "meget den fylder, ses i husholdningernes CO2.",
   "Husholdningernes energiforbrug":
     "Al energi brugt i boligerne: fjernvarme, gas, olie, brænde, varmepumper og el til " +
     "alt andet. Erhverv, fremstilling og transport er ikke med. Fordelt på samtlige " +
@@ -496,7 +497,7 @@ const DRIVER_FORBEHOLD = {
 };
 
 const ALLEREDE_PROCENT = new Set([
-  "Lokal VE-dækning af elforbrug", "Genanvendelsesprocent",
+  "Genanvendelsesprocent",
 ]);
 const ANDEL_SOM_PROCENT = new Set(["Fossil andel af husholdningernes energi"]);
 

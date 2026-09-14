@@ -87,7 +87,7 @@ test("kommunevisning: intet nøgletal på siden står som uafklaret", () => {
 
 test("indikatorer: hjælpetal uden retning står i tabellen med begrundelse, men uden mærkat", () => {
   const h = renderIndikatorer(bThisted, concito, ens);
-  for (const navn of ["Lokal VE-dækning af elforbrug", "Befolkningsudvikling"]) {
+  for (const navn of ["Befolkningsudvikling"]) {
     const i = h.indexOf(`>${navn}<`);
     assert.ok(i > -1, `${navn} skal stå i tabellen`);
     const raekke = h.slice(i, h.indexOf("</tr>", i));
@@ -239,7 +239,7 @@ test("overblik: sammenligner kun med landsgennemsnittet, ikke med andre kommuner
 
 test("overblik: hjælpetal fylder ikke overblikket", () => {
   const h = renderKategorioverblik(bThisted, ens);
-  assert.ok(!h.includes("Lokal VE-dækning"));
+  assert.ok(!h.includes("Befolkningsudvikling"));
   assert.ok(!h.includes("Fritidshuse pr. helårsbolig"));
 });
 
@@ -275,9 +275,9 @@ test("signalmærkat: farven er aldrig eneste bærer af betydning", () => {
 
 test("signalmærkat: hvert nøgletal bærer sin begrundelse", () => {
   const h = renderIndikatorer(bThisted, concito, ens);
-  // VE-dækningen er eksemplet på en retning, der ikke må gættes.
-  assert.ok(h.includes("indgår allerede i det landsdækkende mix"),
-    "VE-dækningens begrundelse skal stå ved mærkatet");
+  // Befolkningsudviklingen er eksemplet på en retning, der ikke må gættes.
+  assert.ok(h.includes("væksten peger ikke selv mod en højere eller lavere udledning"),
+    "befolkningsudviklingens begrundelse skal stå ved ikonet");
 });
 
 test("indikatortabel: har en kolonne for hvad nøgletallet peger mod", () => {
@@ -391,11 +391,12 @@ test("udeladt: overblikket tæller ikke nøgletallet med", () => {
 // Thisted har 20.218 helårsboliger i fixturen.
 const medHusholdning = (fritidshuse) => ({
   ...thisted, fritidshuse, husholdning_co2_ton: 19000, husholdning_energi_tj: 900,
-  husholdning_fossil_andel: 0.05,
+  husholdning_fossil_andel: 0.05, husholdning_el_tj: 100, husholdning_el_co2_ton: 2000,
 });
 const landHusholdning = {
   ...land, fritidshuse: 224795, husholdning_co2_ton: 3343924,
   husholdning_energi_tj: 155250, husholdning_fossil_andel: 0.098,
+  husholdning_el_tj: 30000, husholdning_el_co2_ton: 900000,
 };
 
 test("fritidshuse: flere fritidshuse end helårsboliger holder retningen tilbage pr. bolig", () => {
@@ -414,6 +415,7 @@ test("fritidshuse: under grænsen står retningen som normalt", () => {
   const d = driverTabel(medHusholdning(3000), landHusholdning)
     .find((x) => x.navn === "Husholdningernes CO2 fra energi");
   assert.notEqual(d.signal, "uafklaret");
+  assert.notEqual(d.signal, "ukendt", "testen må ikke bestå, fordi tallet mangler");
   assert.doesNotMatch(d.begrundelse, /flere fritidshuse end helårsboliger/);
 });
 
@@ -437,14 +439,14 @@ test("fordeling: båndene summerer til n for hvert nøgletal", () => {
 });
 
 test("fordeling: nøgletal uden afvigelse giver null, ikke et objekt med nuller", () => {
-  // Greve mangler el-CO2 i fixturen og har alene ingen fordeling at vise.
-  assert.equal(beregnFordeling([greve], land)["El-CO2 pr. kWh"], null);
+  // Greve mangler affaldstallene i fixturen og har alene ingen fordeling at vise.
+  assert.equal(beregnFordeling([greve], land)["Husholdningsaffald"], null);
 });
 
 test("fordeling: n tæller kommuner MED en afvigelse, ikke antal kommuner", () => {
-  // Greve mangler elco2 i fixturen. Et hardkodet "af 98" ville påstå en
-  // dækning, værktøjet ikke har.
-  const f = fordeling["El-CO2 pr. kWh"];
+  // Greve mangler affaldstallene i fixturen. Et hardkodet "af 98" ville påstå
+  // en dækning, værktøjet ikke har.
+  const f = fordeling["Husholdningsaffald"];
   assert.ok(f == null || f.n < alle.length,
     "nøgletal med manglende værdier skal have et lavere n");
 });

@@ -16,7 +16,7 @@ class TestPerioder(unittest.TestCase):
             "FOLK_KVARTAL", "FOLK_KVARTAL_FORRIGE", "INDKOMST_AAR",
             "GINI_AAR", "BOLIGER_AAR", "OPVARMNING_AAR",
             "BYGGERI_AAR", "BILER_MAANED", "AFFALD_AAR",
-            "PENDLING_AAR", "ELDEKLARATION_AAR", "KLIMAREGNSKAB_AAR",
+            "PENDLING_AAR", "KLIMAREGNSKAB_AAR",
         }
         self.assertEqual(set(constants.PERIODER.keys()), forventede)
 
@@ -41,7 +41,7 @@ class TestIngenKoefficienter(unittest.TestCase):
         # EL_CO2_MANUAL dækkede kun landet og én kommune. Et frafald ville sætte
         # landsgennemsnittet efter én metode og de 98 kommuner efter en anden,
         # så hver eneste afvigelse blev regnet mod et forkert landstal.
-        # Energi Data Service er nu eneste kilde; svarer den ikke, står feltet tomt.
+        # El-CO2 pr. kWh er siden taget helt af siden.
         self.assertFalse(hasattr(constants, "EL_CO2_MANUAL"))
         kilde = open(constants.__file__, encoding="utf-8").read()
         self.assertNotIn("51.8", kilde, "det håndaflæste landstal må ikke stå som kode")

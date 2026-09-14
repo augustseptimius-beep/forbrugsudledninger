@@ -4,7 +4,6 @@ Ved den årlige genkøring:
 1. Opdatér PERIODER til de nyeste tilgængelige perioder for hver kilde
    (kør build.py - valideringsrapporten viser, om en tabel har nyere data).
 2. Der er ingen beregningskoefficienter og ingen datapunkter i denne fil.
-   El-CO2 hentes udelukkende fra Energi Data Service i fetch_energi.py.
    De nationale sammenligningstal står afskrevet i ens.py og concito.py."""
 
 # --- Periodekonstanter: ÅRETS ét sted at redigere ved opdatering ---
@@ -19,7 +18,6 @@ PERIODER = {
     "BILER_MAANED": "2026M01",
     "AFFALD_AAR": "2023",
     "PENDLING_AAR": "2024",
-    "ELDEKLARATION_AAR": "2025",
     "KLIMAREGNSKAB_AAR": "2023",
 }
 
@@ -49,19 +47,11 @@ PERIODER = {
 # Skal der igen beregnes et kommunalt aftryk, skal datagrundlaget fra NIRAS'
 # anbefaling først skaffes - se NIRAS_ANBEFALINGER i concito.py.
 
-# --- INTET SIKKERHEDSNET FOR EL-CO2 ---
+# --- EL-CO2 PR. KWH ER FJERNET ---
 #
 # Her stod tidligere EL_CO2_MANUAL med to håndaflæste værdier fra v5-regnearket
-# (Hele landet 51,8 og Thisted 26,7). De er fjernet.
-#
-# Energi Data Service er eneste kilde til el-CO2. Svarer den ikke, står feltet
-# tomt og vises som streg - præcis som ethvert andet manglende felt. Det er
-# bedre end alternativet: sikkerhedsnettet dækkede kun landet og én kommune, så
-# et frafald ville sætte landsgennemsnittet efter én metode og de 98 kommuner
-# efter en anden. Hver eneste afvigelse ville da være regnet mod et forkert
-# landsgennemsnit - en fejl, der faktisk opstod én gang og blev fanget af testen
-# "landsværdierne er de beregnede, ikke de håndaflæste sikkerhedsnet".
-#
-# De håndaflæste tal stammer desuden fra en anden opgørelse end den, pipelinen
-# beregner, og de to giver ikke samme niveau. Vores tal følger Energinets
-# lokationsbaserede kommunedeklaration og dækker CO2, ikke fuld CO2e.
+# (Hele landet 51,8 og Thisted 26,7), og senere blev el-CO2 beregnet af
+# Energinets timedata. Begge dele er væk: strøm deles på det fælles net, så en
+# kommune har ingen egen el-faktor i et forbrugsbaseret regnskab. Uden Energinets
+# lokale VE-kredit viste tallet kun prisområdet. Husholdningernes strøm regnes
+# nu med landets fælles faktor fra Klimaregnskabet - se fetch_klimaregnskabet.py.

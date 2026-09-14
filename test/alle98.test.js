@@ -40,24 +40,6 @@ test("alle kommuner har pendlingsafstand i km", () => {
   assert.deepEqual(uden.map((k) => k.navn), []);
 });
 
-test("el-CO2 og VE-dækning følges ad", () => {
-  for (const k of data.kommuner) {
-    const harEl = k.elco2_g_kwh != null;
-    const harVe = k.ve_daekning_pct != null;
-    assert.equal(harEl, harVe, `${k.navn}: kun det ene felt er udfyldt`);
-  }
-});
-
-test("høj lokal VE-dækning giver lav el-CO2", () => {
-  // Kernemekanismen i Energinets lokationsbaserede metode.
-  const k = data.kommuner.filter((x) => x.elco2_g_kwh != null && x.ve_daekning_pct != null);
-  if (k.length < 10) return;
-  const halv = Math.floor(k.length / 2);
-  const efterVE = [...k].sort((a, b) => b.ve_daekning_pct - a.ve_daekning_pct);
-  const gns = (l) => l.reduce((s, x) => s + x.elco2_g_kwh, 0) / l.length;
-  assert.ok(gns(efterVE.slice(0, halv)) < gns(efterVE.slice(-halv)));
-});
-
 test("hver kommunes nøgletal er grupperet under en kategori", () => {
   for (const k of data.kommuner.slice(0, 5)) {
     const b = beregnKommune(k, data.land);
@@ -190,17 +172,40 @@ test("fossil andel af husholdningernes energi ligger mellem 0 og 1", () => {
   }
 });
 
-test("landsværdierne er de beregnede, ikke et tal fra en anden opgørelse", () => {
-  // Historisk vagt. Sikkerhedsnettet EL_CO2_MANUAL er fjernet, men fejlen det
-  // forårsagede må ikke kunne komme tilbage: faldt landet tilbage til den
-  // håndaflæste 51,8, mens de 98 kommuner brugte de beregnede tal, blev hver
-  // eneste afvigelse regnet mod et forkert landsgennemsnit.
-  assert.notEqual(data.land.elco2_g_kwh, 51.8,
-    "landet bruger et håndaflæst tal fra en anden opgørelse");
-  assert.ok(data.land.ve_daekning_pct != null, "landets VE-dækning mangler");
-  const vaerdier = data.kommuner.map((k) => k.elco2_g_kwh).filter((v) => v != null);
-  assert.ok(data.land.elco2_g_kwh > Math.min(...vaerdier));
-  assert.ok(data.land.elco2_g_kwh < Math.max(...vaerdier));
+test("landets el og fjernvarme er summen af kommunernes", () => {
+  // Den fælles el-faktor og fjernvarmens landstal regnes af landets summer. Er
+  // landet et selvstændigt opslag, dækker tæller og nævner ikke det samme.
+  for (const felt of ["husholdning_el_tj", "husholdning_el_co2_ton",
+                      "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton"]) {
+    const sum = data.kommuner.reduce((s, k) => s + k[felt], 0);
+    assert.ok(Math.abs(sum - data.land[felt]) <= 1e-6 * Math.max(1, sum),
+      `${felt}: ${sum} mod ${data.land[felt]}`);
+  }
+});
+
+test("husholdningernes CO2 følger ikke kommunens egen el-faktor", () => {
+  // Kernen i omregningen: kommunens lokale el-udledning må ikke slå igennem.
+  // Fjernes den helt fra kommunens tal, skal nøgletallet stå præcis som før.
+  const navn = "Husholdningernes CO2 fra energi";
+  let maalt = 0;
+  for (const k of data.kommuner) {
+    if (!k.husholdning_el_tj) continue;
+    const udenLokalEl = { ...k, husholdning_el_co2_ton: 0,
+      husholdning_co2_ton: k.husholdning_co2_ton - k.husholdning_el_co2_ton };
+    const med = driverTabel(k, data.land).find((d) => d.navn === navn).kommuneVaerdi;
+    const uden = driverTabel(udenLokalEl, data.land).find((d) => d.navn === navn).kommuneVaerdi;
+    assert.ok(Math.abs(med - uden) < 1e-9, `${k.navn}: den lokale el-faktor slår igennem`);
+    maalt++;
+  }
+  assert.ok(maalt > 90, `kun ${maalt} kommuner målt`);
+});
+
+test("fjernvarmens CO2 pr. kWh findes præcis for kommuner med fjernvarme", () => {
+  const navn = "Fjernvarmens CO2 pr. kWh";
+  for (const k of data.kommuner) {
+    const v = driverTabel(k, data.land).find((d) => d.navn === navn).kommuneVaerdi;
+    assert.equal(v == null, !(k.husholdning_fjernvarme_tj > 0), k.navn);
+  }
 });
 
 // --- Fordelingskonteksten må aldrig blive en rangordning ---

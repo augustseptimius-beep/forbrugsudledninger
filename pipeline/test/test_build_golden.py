@@ -37,16 +37,25 @@ class TestBuildGolden(unittest.TestCase):
         self.assertEqual(post["disp_indkomst"], 252934)
         self.assertEqual(post["biler_diesel"], 7114)
         self.assertEqual(post["biler_benzin"], 12180)
-        # Uden el-data fra Energi Data Service står feltet TOMT - aldrig med
-        # et tal fra en anden opgørelse.
-        self.assertIsNone(post["elco2_g_kwh"])
 
     def test_land_har_ikke_kode_eller_region(self):
         post = build.saml_kommune_post("Hele landet", DST_DATA)
         self.assertNotIn("kode", post)
         self.assertNotIn("region", post)
         self.assertEqual(post["disp_indkomst"], 287682)
-        self.assertIsNone(post["elco2_g_kwh"])
+
+    def test_el_og_fjernvarme_foeres_igennem_og_el_co2_er_vaek(self):
+        h = {787: {"co2_ton": 22322.6, "energi_tj": 1537.2, "fossil_andel": 0.06,
+                   "el_tj": 302.2, "el_co2_ton": 2601.0,
+                   "fjernvarme_tj": 680.0, "fjernvarme_co2_ton": 13538.7}}
+        post = build.saml_kommune_post("Thisted", DST_DATA, kode=787,
+                                       region="Nordjylland", husholdning=h)
+        self.assertEqual(post["husholdning_el_tj"], 302.2)
+        self.assertEqual(post["husholdning_el_co2_ton"], 2601.0)
+        self.assertEqual(post["husholdning_fjernvarme_tj"], 680.0)
+        self.assertEqual(post["husholdning_fjernvarme_co2_ton"], 13538.7)
+        self.assertNotIn("elco2_g_kwh", post)
+        self.assertNotIn("ve_daekning_pct", post)
 
     def test_alle_forventede_felter_er_til_stede(self):
         post = build.saml_kommune_post("Thisted", DST_DATA, kode=787, region="Nordjylland")

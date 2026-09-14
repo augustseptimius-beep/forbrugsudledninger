@@ -8,9 +8,8 @@ pr. kommune. Der er ingen beregningskoefficienter og intet afledt aftryk i
 ton - se forklaringen i constants.py. De nationale sammenligningstal, som
 kommunetallene holdes op imod, står afskrevet med sidehenvisning i concito.py.
 
-El-data fra Energi Data Service caches på disk, fordi et års timedata for 98
-kommuner er 858.000 rækker og tager cirka et kvarter at hente. Kør med
---frisk-el for at omgå cachen."""
+Klimaregnskabet.dk caches på disk, fordi kilden kræver et kald pr. kommune.
+Kør med --frisk-kr for at omgå cachen."""
 
 import json
 import os
@@ -18,7 +17,6 @@ import sys
 
 import fetch_dst
 import fetch_pendling
-import fetch_energi
 import fetch_klimaregnskabet
 import sources
 import concito
@@ -30,7 +28,6 @@ DATA_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "d
 SOURCES_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "sources.json")
 CONCITO_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "concito.json")
 ENS_JSON_PATH = os.path.join(os.path.dirname(__file__), "..", "web", "data", "ens.json")
-EL_CACHE_PATH = os.path.join(os.path.dirname(__file__), ".el_cache.json")
 KR_CACHE_PATH = os.path.join(os.path.dirname(__file__), ".kr_cache.json")
 
 FORVENTEDE_FELTER = [
@@ -38,14 +35,16 @@ FORVENTEDE_FELTER = [
     "gini", "boliger_parcel", "boliger_raekke", "boliger_etage", "boligareal", "byggeri",
     "biler", "biler_el", "biler_plugin", "biler_diesel", "biler_benzin",
     "opv_boliger_ialt", "opv_olie",
-    "opv_naturgas", "affald_kg", "genanvendelse_pct", "elco2_g_kwh",
-    "ve_daekning_pct", "pendlingsafstand_km", "fritidshuse",
+    "opv_naturgas", "affald_kg", "genanvendelse_pct",
+    "pendlingsafstand_km", "fritidshuse",
     "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
+    "husholdning_el_tj", "husholdning_el_co2_ton",
+    "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton",
 ]
 
 
 def saml_kommune_post(navn, dst_data, kode=None, region=None,
-                      elco2=None, ve_daekning=None, pendling=None,
+                      pendling=None,
                       fritidshuse=None, husholdning=None, affald_indberetning=None):
     """Samler ét kommune- (eller land-) objekt i motorens datakontrakt.
     Ren funktion - ingen I/O - så den kan testes uden netværk (Task 10)."""
@@ -55,10 +54,6 @@ def saml_kommune_post(navn, dst_data, kode=None, region=None,
         post["kode"] = kode
     if region is not None:
         post["region"] = region
-    # Energi Data Service er eneste kilde. Svarer den ikke, står feltet tomt
-    # og vises som streg - aldrig som et tal fra en anden opgørelse.
-    post["elco2_g_kwh"] = (elco2 or {}).get(kode)
-    post["ve_daekning_pct"] = (ve_daekning or {}).get(kode)
     # Faktuel pendlingsafstand i km som DST opgør den. Ingen omregning.
     post["pendlingsafstand_km"] = (pendling or {}).get(navn)
     post["fritidshuse"] = (fritidshuse or {}).get(navn)
@@ -69,6 +64,11 @@ def saml_kommune_post(navn, dst_data, kode=None, region=None,
     post["husholdning_co2_ton"] = h.get("co2_ton")
     post["husholdning_energi_tj"] = h.get("energi_tj")
     post["husholdning_fossil_andel"] = h.get("fossil_andel")
+    # Strøm og fjernvarme hver for sig. Motoren regner strømmen med landets
+    # fælles faktor, fordi Klimaregnskabets el-faktor er kommunens egen
+    # produktion - se fetch_klimaregnskabet.EL_KILDER.
+    for felt in ("el_tj", "el_co2_ton", "fjernvarme_tj", "fjernvarme_co2_ton"):
+        post[f"husholdning_{felt}"] = h.get(felt)
     # Hvor meget affaldstallene kan bære for netop denne kommune. None er den
     # normale tilstand ("intet at bemærke") og må derfor IKKE med i
     # FORVENTEDE_FELTER - der ville den blive talt som manglende data for de
@@ -86,6 +86,10 @@ def _laes_kr_cache():
         d = json.load(f)
     if d.get("aar") != PERIODER["KLIMAREGNSKAB_AAR"]:
         return None
+    # En cache fra før el og fjernvarme blev læst ud hver for sig mangler
+    # felterne og skal hentes forfra.
+    if any("el_tj" not in v for v in d["kommuner"].values()):
+        return None
     return {int(k): v for k, v in d["kommuner"].items()}
 
 
@@ -93,30 +97,6 @@ def _skriv_kr_cache(husholdning):
     with open(KR_CACHE_PATH, "w", encoding="utf-8") as f:
         json.dump({"aar": PERIODER["KLIMAREGNSKAB_AAR"],
                    "kommuner": {str(k): v for k, v in husholdning.items()}}, f)
-
-
-def _laes_el_cache():
-    """(elco2, ve_daekning, elco2_land, ve_land) eller None.
-
-    Cachen omgås med --frisk-el. Den er et udviklingshjælpemiddel: et års
-    timedata for 98 kommuner er 858.000 rækker og tager cirka et kvarter."""
-    if "--frisk-el" in sys.argv or not os.path.exists(EL_CACHE_PATH):
-        return None
-    with open(EL_CACHE_PATH, encoding="utf-8") as f:
-        d = json.load(f)
-    if d.get("aar") != PERIODER["ELDEKLARATION_AAR"]:
-        return None
-    return ({int(k): v for k, v in d["elco2"].items()},
-            {int(k): v for k, v in d["ve_daekning"].items()},
-            d["elco2_land"], d["ve_land"])
-
-
-def _skriv_el_cache(elco2, ve_daekning, elco2_land, ve_land):
-    with open(EL_CACHE_PATH, "w", encoding="utf-8") as f:
-        json.dump({"aar": PERIODER["ELDEKLARATION_AAR"],
-                   "elco2": {str(k): v for k, v in elco2.items()},
-                   "ve_daekning": {str(k): v for k, v in ve_daekning.items()},
-                   "elco2_land": elco2_land, "ve_land": ve_land}, f)
 
 
 def find_manglende(post):
@@ -137,38 +117,6 @@ def main():
         # feltet som None og vises med streg.
         print(f"  ADVARSEL: kunne ikke hente AFSTB4 ({fejl}). Feltet står tomt.")
         pendling = {}
-
-    print("Henter Energi Data Service (el-CO2 pr. kommune, forbrugsvægtet)...")
-    cache = _laes_el_cache()
-    if cache is not None:
-        elco2, ve_daekning, elco2_land, ve_land = cache
-        print(f"  {len(elco2)} kommuner læst fra cache ({EL_CACHE_PATH}). "
-              f"Kør med --frisk-el for at hente forfra.")
-    else:
-        try:
-            dekl = fetch_energi.fetch_deklaration()
-            forbrug, lokal_ve, aars = fetch_energi.fetch_kommuneforbrug()
-            prisomraade = fetch_energi.prisomraader(KOMMUNER)
-            elco2 = fetch_energi.beregn_elco2(forbrug, dekl, prisomraade, lokal_ve)
-            ve_daekning = fetch_energi.beregn_ve_daekning(aars)
-            forbrug_pr_kommune = {k: f for k, (_ve, f) in aars.items()}
-            elco2_land = fetch_energi.landsgennemsnit(elco2, forbrug_pr_kommune)
-            # Landets VE-dækning er den samlede lokale produktion sat i forhold
-            # til det samlede forbrug - ikke gennemsnittet af 98
-            # kommuneprocenter, som ville lade Læsø veje lige så tungt som
-            # København.
-            samlet_ve = sum(ve for ve, _f in aars.values())
-            samlet_forbrug = sum(f for _ve, f in aars.values())
-            ve_land = (samlet_ve / samlet_forbrug * 100) if samlet_forbrug else None
-            print(f"  {len(elco2)} kommuner beregnet ud fra {len(dekl)} deklarationstimer. "
-                  f"Forbrugsvægtet landsgennemsnit: {elco2_land:.1f} g/kWh.")
-            _skriv_el_cache(elco2, ve_daekning, elco2_land, ve_land)
-        except Exception as fejl:
-            # Feltet står tomt frem for at blive fyldt med tal fra en anden
-            # opgørelse. Motoren viser manglende værdier som streg, ikke som nul.
-            print(f"  ADVARSEL: kunne ikke hente el-data ({fejl}). "
-                  "Falder tilbage til manuelle værdier.")
-            elco2, ve_daekning, elco2_land, ve_land = {}, {}, None, None
 
     print("Henter DST BOL101 (fritidshuse)...")
     try:
@@ -218,14 +166,6 @@ def main():
         vaerdier = [h.get(felt) for h in husholdning.values() if h.get(felt) is not None]
         return sum(vaerdier) if vaerdier else None
 
-    # Beregnet el-CO2 og VE-dækning for landet. Landet og kommunerne skal komme
-    # fra samme kilde og samme metode - ellers er hver eneste afvigelse regnet
-    # mod et forkert landsgennemsnit.
-    if elco2_land is not None:
-        land_post["elco2_g_kwh"] = elco2_land
-    if ve_land is not None:
-        land_post["ve_daekning_pct"] = ve_land
-
     land_post["husholdning_co2_ton"] = _sum("co2_ton")
     land_post["husholdning_energi_tj"] = _sum("energi_tj")
     # Landets fossile andel beregnes på de samlede mængder, ikke som
@@ -236,12 +176,16 @@ def main():
         fossilt = sum((h.get("energi_tj") or 0) * (h.get("fossil_andel") or 0)
                       for h in husholdning.values())
         land_post["husholdning_fossil_andel"] = fossilt / samlet_tj
+    # Landets el og fjernvarme er ligeledes summen af kommunernes. Motorens
+    # fælles el-faktor er landets el-udledning delt med landets elforbrug.
+    for felt in ("el_tj", "el_co2_ton", "fjernvarme_tj", "fjernvarme_co2_ton"):
+        land_post[f"husholdning_{felt}"] = _sum(felt)
 
     kommune_poster = []
     for kode, navn, region in KOMMUNER:
         kommune_poster.append(saml_kommune_post(
             navn, dst_data, kode=kode, region=region,
-            elco2=elco2, ve_daekning=ve_daekning, pendling=pendling,
+            pendling=pendling,
             fritidshuse=fritidshuse, husholdning=husholdning,
             affald_indberetning=affald_indberetning))
 
