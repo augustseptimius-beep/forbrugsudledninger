@@ -148,13 +148,20 @@ const KORT = "kort-print rounded-lg border border-gray-200 bg-white";
 // Der er intet mærkat for en retning, der ikke kan afgøres. Et hovednøgletal
 // uden retning tages af kommunens side (se beregnKommune), og et hjælpetal uden
 // retning står uden mærkat.
+//
+// Under 10 % peger nøgletallet "lidt": retningen står, men svagt, og formen er
+// en åben trekant. Kun en afvigelse, der vises som 0,0 %, peger hverken op eller ned.
 const SIGNAL = {
   "markant højere": { tekst: "peger mod meget højere udledning",
     klasse: "bg-red-50 text-red-700 border-red-200", tegn: "▲▲" },
   "højere":         { tekst: "peger mod højere udledning",
     klasse: "bg-amber-50 text-amber-800 border-amber-200", tegn: "▲" },
+  "lidt højere":    { tekst: "peger lidt mod højere udledning",
+    klasse: "bg-gray-50 text-gray-700 border-gray-200", tegn: "△" },
   "på niveau":      { tekst: "peger hverken op eller ned",
     klasse: "bg-gray-50 text-gray-600 border-gray-200", tegn: "–" },
+  "lidt lavere":    { tekst: "peger lidt mod lavere udledning",
+    klasse: "bg-gray-50 text-gray-700 border-gray-200", tegn: "▽" },
   "lavere":         { tekst: "peger mod lavere udledning",
     klasse: "bg-emerald-50 text-emerald-700 border-emerald-200", tegn: "▼" },
   "markant lavere": { tekst: "peger mod meget lavere udledning",
@@ -267,11 +274,17 @@ function enhedSuffiks(d) {
   return `\u00A0${esc(d.enhed)}`;
 }
 
+// Konklusionen og optællingen tæller kun udsving på 10 % eller mere som en
+// retning. De små står for sig: talte et udsving på 6 % med, ville det stå lige
+// med et på 40 %, og konklusionen tæller - den vejer ikke.
+const peger = (vej) => (d) => d.signal === vej || d.signal === `markant ${vej}`;
+const pegerLidt = (d) => d.signal.startsWith("lidt ");
+
 /** Kantfarven på konklusionsboksen følger konklusionens retning. Farven
  *  forstærker kun; teksten bærer altid signalet. */
 function kantFarve(drivere) {
-  const op = drivere.filter((d) => d.signal.includes("højere")).length;
-  const ned = drivere.filter((d) => d.signal.includes("lavere")).length;
+  const op = drivere.filter(peger("højere")).length;
+  const ned = drivere.filter(peger("lavere")).length;
   if (op > 0 && ned === 0) return "border-red-400";
   if (ned > 0 && op === 0) return "border-emerald-400";
   return "border-gray-300";
@@ -289,25 +302,28 @@ function kantFarve(drivere) {
  *  "kategorien ligger ...". */
 function kategoriKonklusion(drivere) {
   const tael = (f) => drivere.filter(f).length;
-  const op = tael((d) => d.signal.includes("højere"));
-  const ned = tael((d) => d.signal.includes("lavere"));
+  const op = tael(peger("højere"));
+  const ned = tael(peger("lavere"));
+  const lidt = tael(pegerLidt);
   const niveau = tael((d) => d.signal === "på niveau");
   const retningsbaerende = op + ned;
 
   let tekst;
   let klasse = "text-gray-700";
   if (retningsbaerende === 0) {
-    tekst = niveau > 0
-      ? "Ingen af nøgletallene skiller sig ud fra landsgennemsnittet."
-      : "Der er ingen data for nøgletallene.";
+    tekst = lidt > 0
+      ? "Nøgletallene peger kun lidt - ingen ligger 10 % eller mere fra landsgennemsnittet."
+      : niveau > 0
+        ? "Nøgletallene ligger på landsgennemsnittet."
+        : "Der er ingen data for nøgletallene.";
     klasse = "text-gray-600";
   } else if (ned === 0 || op === 0) {
     const antal = Math.max(op, ned);
     const vej = op > 0 ? "højere" : "lavere";
     klasse = op > 0 ? "text-red-800" : "text-emerald-800";
-    const indled = antal === 1 ? "Det eneste nøgletal med en retning peger"
-      : antal === 2 ? "Begge nøgletal med en retning peger"
-      : `Alle ${antal} nøgletal med en retning peger`;
+    const indled = antal === 1 ? "Det eneste nøgletal, der afviger 10 % eller mere, peger"
+      : antal === 2 ? "Begge nøgletal, der afviger 10 % eller mere, peger"
+      : `Alle ${antal} nøgletal, der afviger 10 % eller mere, peger`;
     tekst = `${indled} mod ${vej} udledning end landsgennemsnittet.`;
   } else {
     klasse = "text-gray-700";
@@ -360,11 +376,13 @@ export function renderKategorioverblik(b, ens) {
     } else {
       const tael = (f) => drivere.filter(f).length;
       const dele = [];
-      const op = tael((d) => d.signal.includes("højere"));
-      const ned = tael((d) => d.signal.includes("lavere"));
+      const op = tael(peger("højere"));
+      const ned = tael(peger("lavere"));
+      const lidt = tael(pegerLidt);
       const niv = tael((d) => d.signal === "på niveau");
       if (op) dele.push(`${op} peger mod højere udledning`);
       if (ned) dele.push(`${ned} peger mod lavere`);
+      if (lidt) dele.push(`${lidt} peger lidt`);
       if (niv) dele.push(`${niv} hverken op eller ned`);
 
       const punkter = drivere
@@ -801,8 +819,8 @@ export function renderTaerskelfordeling(fordeling) {
     <table class="w-full min-w-[38rem]">
       <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
         <th class="py-2 pr-3 text-left font-medium">Nøgletal</th>
-        <th class="py-2 px-3 text-right font-medium">På niveau</th>
-        <th class="py-2 px-3 text-right font-medium">Over eller under</th>
+        <th class="py-2 px-3 text-right font-medium">Under 10 %</th>
+        <th class="py-2 px-3 text-right font-medium">10-33 %</th>
         <th class="py-2 px-3 text-right font-medium">Markant</th>
         <th class="py-2 px-3 text-right font-medium">Median</th>
         <th class="py-2 pl-3 text-right font-medium">90-percentil</th>

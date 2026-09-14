@@ -236,9 +236,18 @@ test("udledningsSignal: retningen afhænger af nøgletallets påvirkning", () =>
   assert.equal(udledningsSignal(-0.5, "hoejere"), "markant lavere");
 });
 
-test("udledningsSignal: små udsving peger ingen vej", () => {
-  assert.equal(udledningsSignal(0.05, "hoejere"), "på niveau");
-  assert.equal(udledningsSignal(-0.09, "lavere"), "på niveau");
+test("udledningsSignal: små udsving peger lidt - retningen står stadig", () => {
+  // Under 10 % er der stadig en retning, og enhver kan se, om tallet ligger over
+  // eller under landet. Mærkatet siger derfor "lidt" frem for ingenting.
+  assert.equal(udledningsSignal(0.05, "hoejere"), "lidt højere");
+  assert.equal(udledningsSignal(-0.02, "hoejere"), "lidt lavere");
+  assert.equal(udledningsSignal(-0.09, "lavere"), "lidt højere");
+});
+
+test("udledningsSignal: kun en afvigelse, der vises som 0,0 %, peger ingen vej", () => {
+  assert.equal(udledningsSignal(0, "hoejere"), "på niveau");
+  assert.equal(udledningsSignal(0.0004, "hoejere"), "på niveau");
+  assert.equal(udledningsSignal(-0.0006, "hoejere"), "lidt lavere");
 });
 
 test("udledningsSignal: uafklaret påvirkning gættes aldrig", () => {

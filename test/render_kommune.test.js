@@ -522,6 +522,27 @@ test("overblik: disponibel indkomst tæller under Forbrugsprodukter og services"
   assert.ok(h.slice(start, slut).includes("Disponibel indkomst"));
 });
 
+test("overblik: et lille udsving står som 'peger lidt' og tælles for sig", () => {
+  // Tæller, vejer ikke: talte et udsving på 6 % med i konklusionen, ville det stå
+  // lige med et på 40 %. Thisteds husholdningsaffald ligger 6,4 % under landet.
+  const h = renderKategorioverblik(bThisted, ens);
+  const start = h.indexOf("Forbrugsprodukter og services");
+  const afsnit = h.slice(start, h.indexOf("Offentligt forbrug", start));
+  assert.ok(afsnit.includes("peger lidt mod lavere udledning"), "mærkatet skal sige lidt");
+  assert.ok(afsnit.includes("1 nøgletal peger mod højere udledning og 1 mod lavere"),
+    "konklusionen tæller kun udsving på 10 % eller mere");
+  assert.ok(afsnit.includes("1 peger lidt"), "de små udsving står i deres egen optælling");
+});
+
+test("overblik: peger alle nøgletal kun lidt, siger konklusionen det", () => {
+  const b = beregnKommune({ ...thisted, disp_indkomst: 280000, genanvendelse_pct: 56 }, land);
+  const h = renderKategorioverblik(b, ens);
+  const start = h.indexOf("Forbrugsprodukter og services");
+  const afsnit = h.slice(start, h.indexOf("Offentligt forbrug", start));
+  assert.ok(afsnit.includes("Nøgletallene peger kun lidt"), "konklusionen skal sige lidt");
+  assert.ok(!afsnit.includes("skiller sig ud"));
+});
+
 test("overblik: den nationale vægt må ikke kunne læses som kommunens eget tal", () => {
   // "Transport 1,84 ton pr. indbygger" på en kommuneside læses ellers som
   // kommunens eget transportaftryk - et tal, værktøjet slet ikke kan opgøre.

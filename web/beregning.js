@@ -292,16 +292,20 @@ const INDBERETNING_FORBEHOLD = {
 };
 
 /** Hvad afvigelsen peger mod for udledningen - den eneste vurdering i
- *  værktøjet. "uafklaret" når retningen ikke kan begrundes på kildens grundlag,
- *  og "på niveau" når afvigelsen er for lille til at pege nogen vej. */
+ *  værktøjet. "uafklaret" når retningen ikke kan begrundes på kildens grundlag.
+ *
+ *  Under 10 % er der stadig en retning, og enhver kan se, om tallet ligger over
+ *  eller under landet - signalet siger derfor "lidt" frem for ingenting. Kun en
+ *  afvigelse, der vises som 0,0 %, peger ingen vej ("på niveau"). */
+export const TAERSKEL_NUL = 0.0005;
 export function udledningsSignal(afvigelse, paavirkning) {
   if (afvigelse == null || !Number.isFinite(afvigelse)) return "ukendt";
   if (paavirkning == null || paavirkning === "uafklaret") return "uafklaret";
-  if (Math.abs(afvigelse) < TAERSKEL_NIVEAU) return "på niveau";
-  const peger_op = paavirkning === "hoejere" ? afvigelse > 0 : afvigelse < 0;
-  const markant = Math.abs(afvigelse) >= TAERSKEL_MARKANT;
-  if (peger_op) return markant ? "markant højere" : "højere";
-  return markant ? "markant lavere" : "lavere";
+  if (Math.abs(afvigelse) < TAERSKEL_NUL) return "på niveau";
+  const pegerOp = paavirkning === "hoejere" ? afvigelse > 0 : afvigelse < 0;
+  const vej = pegerOp ? "højere" : "lavere";
+  if (Math.abs(afvigelse) < TAERSKEL_NIVEAU) return `lidt ${vej}`;
+  return Math.abs(afvigelse) >= TAERSKEL_MARKANT ? `markant ${vej}` : vej;
 }
 
 /** Sikker beregning: returnerer null hvis resultatet ikke er et endeligt tal
@@ -403,7 +407,7 @@ export function driverTabel(kommune, land) {
     // type "difference" for at opnå det samme - niveauBaand() og
     // udledningsSignal() bruger de samme 0,10/0,33-tærskler på hvad der end
     // står i afvigelse, så en omlægning ville kollapse alle 0-1-andele til
-    // "på niveau" og gøre næsten alle 0-100-andele "markante".
+    // "lidt" og gøre næsten alle 0-100-andele "markante".
     let pp = null;
     if (d.andel && kv != null && lv != null) {
       pp = (kv - lv) * (d.andel === "0-1" ? 100 : 1);
@@ -433,8 +437,8 @@ export function driverTabel(kommune, land) {
  *  Lå de side om side, ville nøglen "lavere" betyde to ting - og summen ville
  *  stille overskrive optællingen. */
 export function optaelSignaler(drivere) {
-  const pr_signal = { "markant højere": 0, "højere": 0, "på niveau": 0,
-                      "lavere": 0, "markant lavere": 0, uafklaret: 0,
+  const pr_signal = { "markant højere": 0, "højere": 0, "lidt højere": 0, "på niveau": 0,
+                      "lidt lavere": 0, "lavere": 0, "markant lavere": 0, uafklaret: 0,
                       ukendt: 0 };
   for (const d of drivere) {
     if (d.rolle === "hjaelper") continue;
@@ -444,6 +448,7 @@ export function optaelSignaler(drivere) {
     pr_signal,
     sumHoejere: pr_signal["markant højere"] + pr_signal["højere"],
     sumLavere: pr_signal["markant lavere"] + pr_signal["lavere"],
+    sumLidt: pr_signal["lidt højere"] + pr_signal["lidt lavere"],
     ialt: Object.values(pr_signal).reduce((a, b) => a + b, 0),
   };
 }
