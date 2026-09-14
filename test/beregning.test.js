@@ -53,13 +53,6 @@ test("driverTabel: befolkningsudvikling er hjælpetal under Bolig og byggeri", (
   assert.equal(d.signal, "uafklaret");
 });
 
-test("driverTabel: Gini er kontekst uden afvigelse", () => {
-  const d = find(driverTabel(thisted, land), "Gini-koefficient");
-  assert.equal(d.type, "ingen");
-  assert.equal(d.afvigelse, null);
-  assert.equal(d.retning, "kontekst");
-});
-
 test("driverTabel: hver indikator hører til en kendt kategori", () => {
   const gyldige = new Set(Object.values(KATEGORI));
   for (const d of driverTabel(thisted, land)) {
@@ -145,8 +138,8 @@ test("udledningsSignal: små udsving peger ingen vej", () => {
 });
 
 test("udledningsSignal: uafklaret påvirkning gættes aldrig", () => {
-  // Nettoformue er det vigtigste eksempel: CONCITO kobler aftrykket til
-  // indkomst, ikke til formue, så retningen kan ikke begrundes.
+  // Lokal VE-dækning er eksemplet: et produktionsmål, hvis grønne strøm
+  // allerede indgår i det fælles mix, så retningen kan ikke begrundes.
   assert.equal(udledningsSignal(0.9, "uafklaret"), "uafklaret");
   assert.equal(udledningsSignal(0.9, undefined), "uafklaret");
   assert.equal(udledningsSignal(null, "hoejere"), "ukendt");

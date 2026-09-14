@@ -72,24 +72,18 @@ test("indikatorer: bruger egen tooltip, ikke browserens title", () => {
   assert.ok(h.includes("data-tip="));
 });
 
-test("indikatorer: kontekst-nøgletal får intet peger-mod-mærkat", () => {
-  // Kategorien siger allerede, at de ikke peger på en forbrugskategori.
-  // Fire ekstra "uafklaret"-mærkater fik værktøjet til at se rådvildt ud.
-  //
-  // Testen tæller MEKANISMEN, ikke et øjebliksbillede: den tidligere udgave
+test("indikatorer: hver uafklaret driver får præcis ét mærkat", () => {
+  // Testen tæller MEKANISMEN, ikke et øjebliksbillede: en tidligere udgave
   // låste antallet til højst 3, og den fejlede, da affaldsnøgletallene
   // retmæssigt blev uafklarede. Antallet af mærkater skal følge antallet af
-  // ikke-kontekst-drivere med uafklaret retning - hverken mere eller mindre.
+  // drivere med uafklaret retning - hverken mere eller mindre.
   const h = renderIndikatorer(bThisted, concito, ens);
-  // Tæl selve MÆRKATET, ikke enhver forekomst af sætningen: Nettoformues
-  // begrundelsestekst indeholder tilfældigvis samme formulering.
+  // Tæl selve MÆRKATET, ikke enhver forekomst af sætningen, som også kan stå
+  // i en begrundelsestekst.
   const vist = (h.match(/>\?<\/span>retningen kan ikke afgøres/g) || []).length;
   const forventet = bThisted.drivere.filter(
     (d) => d.signal === "uafklaret").length;
   assert.equal(vist, forventet, "hver uafklaret driver skal have præcis ét mærkat");
-  assert.ok(bThisted.drivere.filter((d) => d.kategori === "Kontekst")
-    .every((d) => d.signal === "kontekst"),
-    "kontekst-drivere må aldrig få signalet uafklaret");
 });
 
 test("indikatorer: pendlingsafstand vises i km, ikke omregnet", () => {
@@ -239,12 +233,6 @@ test("overblik: hjælpetal fylder ikke overblikket", () => {
   assert.ok(!h.includes("Fritidshuse pr. helårsbolig"));
 });
 
-test("overblik: kontekst-nøgletal hører ikke til i en forbrugskategori", () => {
-  const h = renderKategorioverblik(bThisted, ens);
-  assert.ok(!h.includes("Nettoformue"));
-  assert.ok(!h.includes("Gini-koefficient"));
-});
-
 test("overblik: siger eksplicit at det ikke er en prioritering", () => {
   const h = renderKategorioverblik(bThisted, ens);
   assert.ok(h.includes("ikke en prioritering"));
@@ -277,9 +265,9 @@ test("signalmærkat: farven er aldrig eneste bærer af betydning", () => {
 
 test("signalmærkat: hvert nøgletal bærer sin begrundelse", () => {
   const h = renderIndikatorer(bThisted, concito, ens);
-  // Formuen er det vigtigste eksempel på en retning, der ikke må gættes.
-  assert.ok(h.includes("Formue er ikke det samme som forbrug"),
-    "nettoformuens begrundelse skal stå ved mærkatet");
+  // VE-dækningen er eksemplet på en retning, der ikke må gættes.
+  assert.ok(h.includes("indgår allerede i det landsdækkende mix"),
+    "VE-dækningens begrundelse skal stå ved mærkatet");
 });
 
 test("indikatortabel: har en kolonne for hvad nøgletallet peger mod", () => {
@@ -371,8 +359,8 @@ test("fordeling: båndene summerer til n for hvert nøgletal", () => {
 });
 
 test("fordeling: nøgletal uden afvigelse giver null, ikke et objekt med nuller", () => {
-  // Gini har type "ingen" og har derfor ingen fordeling at vise.
-  assert.equal(fordeling["Gini-koefficient"], null);
+  // Greve mangler el-CO2 i fixturen og har alene ingen fordeling at vise.
+  assert.equal(beregnFordeling([greve], land)["El-CO2 pr. kWh"], null);
 });
 
 test("fordeling: n tæller kommuner MED en afvigelse, ikke antal kommuner", () => {
@@ -405,7 +393,7 @@ test("fordeling: tabellen får ikke flere rækker af den nye kontekst", () => {
 
 test("procentpoint: andele viser både relativ procent og procentpoint", () => {
   const b = beregnKommune(thisted, land);
-  const d = b.drivere.find((x) => x.navn === "Parcelhus-andel");
+  const d = b.drivere.find((x) => x.navn === "Fossil-andel");
   assert.ok(d.procentpoint != null, "andele skal bære procentpoint");
   // Den relative afvigelse skal være UÆNDRET - procentpoint er et visningsfelt.
   assert.ok(Math.abs(d.afvigelse - (d.kommuneVaerdi - d.landVaerdi) / d.landVaerdi) < 1e-9);
@@ -416,7 +404,7 @@ test("procentpoint: andele viser både relativ procent og procentpoint", () => {
 test("procentpoint: nøgletal der ikke er andele får ingen procentpoint", () => {
   const t = driverTabel(thisted, land);
   for (const navn of ["Disponibel indkomst", "Biler pr. indbygger",
-                      "Fritidshuse pr. helårsbolig", "Gini-koefficient"]) {
+                      "Fritidshuse pr. helårsbolig"]) {
     assert.equal(t.find((x) => x.navn === navn).procentpoint, null,
       `${navn} er ikke en andel af en helhed`);
   }
@@ -425,8 +413,9 @@ test("procentpoint: nøgletal der ikke er andele får ingen procentpoint", () =>
 test("tærskelfordeling: metodetabellen genereres og udelader nøgletal uden afvigelse", () => {
   const h = renderTaerskelfordeling(fordeling);
   assert.ok(h.includes("Markant"), "tabellen skal have en markant-kolonne");
-  assert.ok(h.includes("Parcelhus-andel"));
-  assert.ok(!h.includes("Gini-koefficient"), "nøgletal uden afvigelse hører ikke til");
+  assert.ok(h.includes("Fossil-andel"));
+  assert.ok(!h.includes("Husholdningernes CO2 fra energi"),
+    "nøgletal uden afvigelse hører ikke til");
   assert.ok(!h.includes("undefined") && !h.includes("NaN"));
 });
 
@@ -435,10 +424,11 @@ test("overblik: ethvert nøgletal med en retning når overblikket", () => {
   // kategorinavne. Et nøgletal i en kategori, der ikke findes dér, bliver
   // stille væk fra overblikket, mens det står i tabellen. Sådan faldt
   // disponibel indkomst ud i sin egen kategori "På tværs af kategorier".
-  // Kun kontekst- og hjælpetal må stå uden for.
+  // Kun hjælpetal må stå uden for. Kontekst-kategorien er væk: dens nøgletal
+  // gentog andre nøgletal og er taget af siden.
   const navne = new Set(ens.kategorier.map((k) => k.navn));
   const udenfor = bThisted.drivere.filter((d) =>
-    d.kategori !== "Kontekst" && d.rolle !== "hjaelper" && !navne.has(d.kategori));
+    d.rolle !== "hjaelper" && !navne.has(d.kategori));
   assert.deepEqual(udenfor.map((d) => d.navn), []);
 });
 

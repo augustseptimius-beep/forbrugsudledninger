@@ -157,16 +157,12 @@ const SIGNAL = {
     klasse: "bg-emerald-100 text-emerald-800 border-emerald-300", tegn: "▼▼" },
   "uafklaret":      { tekst: "retningen kan ikke afgøres",
     klasse: "bg-gray-50 text-gray-500 border-gray-200", tegn: "?" },
-  "kontekst":       { tekst: "", klasse: "", tegn: "" },
   "ukendt":         { tekst: "ingen data",
     klasse: "bg-gray-50 text-gray-400 border-gray-200", tegn: "–" },
 };
 
 /** Lille mærkat med signalet. Teksten står altid, så farven kun forstærker. */
 function signalMaerkat(signal, ekstraKlasse = "", stor = false) {
-  // Kontekst-nøgletal får intet mærkat. Kategorioverskriften siger allerede,
-  // at de ikke peger på en forbrugskategori.
-  if (signal === "kontekst") return `<span class="text-xs text-gray-600">&ndash;</span>`;
   const s = SIGNAL[signal] ?? SIGNAL.ukendt;
   // Overblikket bruger den store udgave: retningen er hele pointen dér, og i
   // mikroskrift blev den overset. Tabellen beholder den lille, hvor pladsen
@@ -239,8 +235,6 @@ export function renderNationaltAftryk(c) {
   </section>`;
 }
 
-// Kategoriernes nationale vægt fra CONCITO (2023) s. 16, figur 7. "Kontekst"
-// er ikke en CONCITO-kategori og har derfor ingen vægt.
 /** Energistyrelsens nationale vægt for en forbrugsgruppe. */
 function nationalVaegt(ens, kategori) {
   const k = ens.kategorier.find((x) => x.navn === kategori);
@@ -392,8 +386,7 @@ export function renderKategorioverblik(b, ens) {
           </span>
           <span class="block text-xs text-gray-500 tabular-nums">landet
             ${driverVaerdi(d, d.landVaerdi)}${enhedSuffiks(d)} &middot; ${driverAfvigelse(d)}</span>
-          ${d.signal !== "kontekst"
-            ? `<span class="mt-1 block">${signalMaerkat(d.signal, "", true)}</span>` : ""}
+          <span class="mt-1 block">${signalMaerkat(d.signal, "", true)}</span>
         </li>`).join("");
 
       hoejre = `<div>
@@ -488,9 +481,6 @@ const DRIVER_FORBEHOLD = {
     "mange fritidsboliger er de usikre i begge retninger: fritidshuse bruger energi, " +
     "men mindre end en helårsbolig, så de trækker gennemsnittet ned. Ved værdier over " +
     "cirka 1 skal tallene læses med stor varsomhed.",
-  "Boligpris pr. m²":
-    "Kvartalstal fra realiserede handler. I kommuner med få handler svinger tallet " +
-    "meget fra kvartal til kvartal.",
   "Gennemsnitlig pendlingsafstand":
     "Afstand til arbejde for beskæftigede med bopæl i kommunen. Siger intet om " +
     "transportmiddel og dækker kun arbejdsturen, ikke indkøb, fritid og andre ærinder.",
@@ -557,7 +547,6 @@ function kategoriNote(c, kategori) {
   if (kategori === "Bolig og byggeri") {
     return "selve byggeriet - boligernes energiforbrug hører til Energi og forsyning";
   }
-  if (kategori === "Kontekst") return "beskriver kommunen, peger ikke på én kategori";
   return "";
 }
 

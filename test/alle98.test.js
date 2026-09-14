@@ -66,6 +66,43 @@ test("hver kommunes nøgletal er grupperet under en kategori", () => {
   }
 });
 
+test("ingen to nøgletal på siden siger det samme", () => {
+  // Et nøgletal, der følger et andet næsten helt på tværs af de 98 kommuner,
+  // lægger ingen oplysning til - det gentager den, og i overblikket tæller det
+  // med to gange. Nettoformuen fulgte disponibel indkomst (r = +0,95), og
+  // parcelhus-andelen fulgte boligarealet (r = +0,92); begge er taget af siden.
+  // Grænsen 0,9 er en præsentationsbeslutning uden kilde.
+  //
+  // Fossil-andel og el- og plugin-hybridandelen er hinandens komplement
+  // (r = -1,00) og står begge efter eksplicit valg - se beregning.js.
+  const UNDTAGET = new Set(["El- og plugin-hybridandel|Fossil-andel"]);
+  const korrelation = (par) => {
+    const n = par.length;
+    const mx = par.reduce((s, [x]) => s + x, 0) / n;
+    const my = par.reduce((s, [, y]) => s + y, 0) / n;
+    const t = par.reduce((s, [x, y]) => s + (x - mx) * (y - my), 0);
+    const nx = Math.sqrt(par.reduce((s, [x]) => s + (x - mx) ** 2, 0));
+    const ny = Math.sqrt(par.reduce((s, [, y]) => s + (y - my) ** 2, 0));
+    return t / (nx * ny);
+  };
+  const tabeller = data.kommuner.map((k) => driverTabel(k, data.land));
+  const navne = tabeller[0].map((d) => d.navn);
+  const fund = [];
+  for (let i = 0; i < navne.length; i++) {
+    for (let j = i + 1; j < navne.length; j++) {
+      const par = tabeller
+        .map((t) => [t[i].kommuneVaerdi, t[j].kommuneVaerdi])
+        .filter(([x, y]) => x != null && y != null);
+      const r = korrelation(par);
+      const noegle = [navne[i], navne[j]].sort().join("|");
+      if (Math.abs(r) > 0.9 && !UNDTAGET.has(noegle)) {
+        fund.push(`${noegle}: r = ${r.toFixed(2)}`);
+      }
+    }
+  }
+  assert.deepEqual(fund, []);
+});
+
 // --- Husholdningernes energi og udledning (Klimaregnskabet.dk) ---
 
 test("husholdningstallene findes for alle 98 kommuner", () => {
@@ -183,10 +220,11 @@ test("ingen kommuneside navngiver en anden kommune", () => {
 });
 
 test("fordeling: n afspejler faktisk dækning, ikke et hardkodet 98", () => {
-  // Boligpris pr. m² mangler for Læsø. En optælling "af 98" ville påstå en
-  // dækning, værktøjet ikke har.
-  assert.equal(fordeling["Boligpris pr. m²"].n, 97);
-  assert.equal(fordeling["Parcelhus-andel"].n, 98);
+  // Mangler et tal for én kommune, må optællingen ikke påstå "af 98".
+  const medHul = data.kommuner.map((k, i) => (i === 0 ? { ...k, pendlingsafstand_km: null } : k));
+  const f = beregnFordeling(medHul, data.land);
+  assert.equal(f["Gennemsnitlig pendlingsafstand"].n, data.kommuner.length - 1);
+  assert.equal(f["Biler pr. indbygger"].n, data.kommuner.length);
 });
 
 test("fordeling: den skævhed, konteksten findes for, er stadig til stede", () => {

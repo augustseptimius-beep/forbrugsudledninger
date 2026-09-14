@@ -15,7 +15,8 @@ const find = (t, navn) => t.find((d) => d.navn === navn);
 
 test("GOLDEN — Thisteds indikatorer reproducerer regneark v5", () => {
   const t = driverTabel(thisted, land);
-  naer(find(t, "Parcelhus-andel").kommuneVaerdi, 0.7046);
+  // Parcelhus-andelen (regnearkets 0,7046) er taget af siden som dublet af
+  // boligarealet. Boligtallene bag den indgår fortsat i husholdningstallenes nævner.
   // Fossil-andel afløste Diesel-andel. Regnearkets dieseltal (0,3007) er
   // uændret og indgår stadig - det er nu lagt sammen med benzin.
   naer(find(t, "Fossil-andel").kommuneVaerdi, 0.8156);
