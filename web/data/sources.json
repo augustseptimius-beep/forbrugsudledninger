@@ -15,18 +15,6 @@
       "periode": "2026K1"
     },
     {
-      "id": "ARE207",
-      "navn": "Areal efter område",
-      "udbyder": "Danmarks Statistik",
-      "metode": "api",
-      "licens": "CC BY 4.0",
-      "url": "https://www.statistikbanken.dk/ARE207",
-      "felter": [
-        "areal"
-      ],
-      "periode": "2025"
-    },
-    {
       "id": "INDKP101",
       "navn": "Disponibel indkomst efter område",
       "udbyder": "Danmarks Statistik",
@@ -35,19 +23,6 @@
       "url": "https://www.statistikbanken.dk/INDKP101",
       "felter": [
         "disp_indkomst"
-      ],
-      "periode": "2024"
-    },
-    {
-      "id": "FORMUE12",
-      "navn": "Nettoformue efter område",
-      "udbyder": "Danmarks Statistik",
-      "metode": "api",
-      "licens": "CC BY 4.0",
-      "url": "https://www.statistikbanken.dk/FORMUE12",
-      "felter": [
-        "formue_gns",
-        "formue_median"
       ],
       "periode": "2024"
     },
@@ -61,6 +36,7 @@
       "felter": [
         "gini"
       ],
+      "forbehold": "Vises ikke på kommunesiden. Ulighed siger noget om fordelingen af forbruget, ikke om niveauet. Tallet hentes til en vurdering af rimelig og retfærdig omstilling.",
       "periode": "2024"
     },
     {
@@ -184,19 +160,6 @@
       ],
       "forbehold": "Kun kategorien Husholdninger - erhverv, fremstilling, offentlig service og transport hører til andre kategorier og er ikke med. Opgørelsen dækker udledningen fra forbrændingen og fra elnettet, ikke hele livscyklussen bag brændslet, og niveauet er derfor lavere end CONCITO's tal for El og varme. Sammenligningen med landsgennemsnittet er gyldig, fordi begge sider opgøres ens. NIRAS (2024) s. 18 peger på Energi- og CO2-Regnskabet som den rigtige kilde til energidelen.",
       "periode": "2023"
-    },
-    {
-      "id": "BM010",
-      "navn": "Boligpriser pr. kvadratmeter, realiserede handler",
-      "udbyder": "Finans Danmark",
-      "metode": "api",
-      "licens": "Finans Danmarks vilkår",
-      "url": "https://rkr.statistikbank.dk/BM010",
-      "felter": [
-        "boligpris_m2"
-      ],
-      "forbehold": "Kvartalstal baseret på realiserede handler. For små kommuner med få handler er tallet volatilt.",
-      "periode": "2025K4"
     },
     {
       "id": "ENERGINET_DEKLARATION",

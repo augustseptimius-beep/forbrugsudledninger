@@ -103,6 +103,23 @@ test("ingen to nøgletal på siden siger det samme", () => {
   assert.deepEqual(fund, []);
 });
 
+test("datasættet indeholder ingen felter, siden ikke bruger", () => {
+  // Et felt, ingen side læser, er en kilde at vedligeholde og en række i
+  // kildetabellen uden et tal på siden. Tages et nøgletal af siden, skal dets
+  // felter derfor også ud af pipelinen. Hvilke felter der bruges, måles ved at
+  // lade motoren regne på et objekt, der husker hvert felt, den læser.
+  const RESERVERET = {
+    navn: "kommunens navn", kode: "kommunekode", region: "region",
+    gini: "hentes til en vurdering af rimelig og retfærdig omstilling",
+  };
+  const laest = new Set();
+  const spion = (k) => new Proxy(k, { get(t, p) { laest.add(p); return t[p]; } });
+  for (const k of data.kommuner) driverTabel(spion(k), data.land);
+  const ubrugte = Object.keys(data.kommuner[0])
+    .filter((f) => !laest.has(f) && !(f in RESERVERET));
+  assert.deepEqual(ubrugte.sort(), []);
+});
+
 // --- Husholdningernes energi og udledning (Klimaregnskabet.dk) ---
 
 test("husholdningstallene findes for alle 98 kommuner", () => {

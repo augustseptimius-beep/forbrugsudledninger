@@ -419,11 +419,11 @@ export function driverePrKategori(drivere) {
 
 // Felter, der efterspørges; bruges til at rapportere manglende data pr. kommune.
 const FORVENTEDE_FELTER = [
-  "disp_indkomst", "folketal", "folketal_forrige", "areal", "formue_gns", "formue_median",
+  "disp_indkomst", "folketal", "folketal_forrige",
   "gini", "boliger_parcel", "boliger_raekke", "boliger_etage", "boligareal", "byggeri",
   "biler", "biler_el", "biler_plugin", "biler_diesel", "biler_benzin",
   "opv_boliger_ialt", "opv_olie",
-  "opv_naturgas", "affald_kg", "genanvendelse_pct", "elco2_g_kwh", "boligpris_m2",
+  "opv_naturgas", "affald_kg", "genanvendelse_pct", "elco2_g_kwh",
   "ve_daekning_pct", "pendlingsafstand_km", "fritidshuse",
   "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
 ];

@@ -1,6 +1,5 @@
-"""Generisk klient til DST's og Finans Danmarks PX-Web-baserede statbank-API.
-Begge kilder deler samme API-form (api.statbank.dk), blot under forskellige
-base_url-underspor: DST er "/v1", Finans Danmark BM010 er "/v1/s20"."""
+"""Generisk klient til Danmarks Statistiks PX-Web-baserede statbank-API
+(api.statbank.dk)."""
 
 import csv
 import io
@@ -8,7 +7,6 @@ import urllib.parse
 import urllib.request
 
 DST_BASE_URL = "https://api.statbank.dk/v1"
-FINANS_DANMARK_BASE_URL = "https://api.statbank.dk/v1/s20"
 
 TIMEOUT_SEKUNDER = 30
 
@@ -32,8 +30,8 @@ def parse_csv(text):
 # DST's dokumenterede markører for "ingen data" (ikke nul). Kun disse springes over -
 # alt andet uventet (forkert kolonnenavn, ændret talformat) skal fejle højlydt i en
 # ubemandet årlig pipeline, ikke forsvinde stille i en try/except. Offentlig (ikke
-# understreget), fordi fetch_dst.py's enkeltværdi-parsere (areal, gini, formue,
-# boligareal) skal bruge samme markørliste i stedet for hver sin lokale kopi.
+# understreget), fordi fetch_dst.py's enkeltværdi-parsere (gini, boligareal,
+# pendling) skal bruge samme markørliste i stedet for hver sin lokale kopi.
 INGEN_DATA_MARKORER = ("-", "..", "")
 
 

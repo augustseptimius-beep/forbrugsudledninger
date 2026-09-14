@@ -9,20 +9,10 @@ FOLK1A_CSV = (
     "Hele landet;I alt;Alder i alt;I alt;2026K1;6025603\n"
     "Thisted;I alt;Alder i alt;I alt;2026K1;42572\n"
 )
-ARE207_CSV = (
-    "﻿OMRÅDE;TID;INDHOLD\n"
-    "Hele landet;2025;42955,60\n"
-    "Thisted;2025;1072,20\n"
-)
 INDKP101_CSV = (
     "﻿OMRÅDE;ENHED;KOEN;INDKOMSTTYPE;TID;INDHOLD\n"
     "Hele landet;Gennemsnit for alle personer (kr.);Mænd og kvinder i alt;1 Disponibel indkomst (2+30-31-32-35);2024;287682\n"
     "Thisted;Gennemsnit for alle personer (kr.);Mænd og kvinder i alt;1 Disponibel indkomst (2+30-31-32-35);2024;252934\n"
-)
-FORMUE12_CSV = (
-    "﻿FORM1;ENHED;OMRÅDE;ALDER;POPU;TID;INDHOLD\n"
-    "Nettoformue I alt (2020-definition A+B+CX-D-E-F);Gennemsnit, faste priser (seneste dataårs prisniveau);Hele landet;18 år og derover;Alle uanset om de har formuetypen;2024;2177950\n"
-    "Nettoformue I alt (2020-definition A+B+CX-D-E-F);Median, faste priser (seneste dataårs prisniveau);Hele landet;18 år og derover;Alle uanset om de har formuetypen;2024;800815\n"
 )
 IFOR41_CSV = (
     "﻿ULLIG;KOMMUNEDK;TID;INDHOLD\n"
@@ -43,23 +33,10 @@ class TestFetchDelA(unittest.TestCase):
         self.assertEqual(forrige["Hele landet"], 6025603)
 
     @patch("fetch_dst.dst_client.fetch")
-    def test_areal(self, mock_fetch):
-        mock_fetch.return_value = fetch_dst.dst_client.parse_csv(ARE207_CSV)
-        result = fetch_dst.fetch_areal()
-        self.assertAlmostEqual(result["Thisted"], 1072.20)
-
-    @patch("fetch_dst.dst_client.fetch")
     def test_indkomst(self, mock_fetch):
         mock_fetch.return_value = fetch_dst.dst_client.parse_csv(INDKP101_CSV)
         result = fetch_dst.fetch_indkomst()
         self.assertEqual(result["Thisted"], 252934)
-
-    @patch("fetch_dst.dst_client.fetch")
-    def test_formue(self, mock_fetch):
-        mock_fetch.return_value = fetch_dst.dst_client.parse_csv(FORMUE12_CSV)
-        gns, median = fetch_dst.fetch_formue()
-        self.assertEqual(gns["Hele landet"], 2177950)
-        self.assertEqual(median["Hele landet"], 800815)
 
     @patch("fetch_dst.dst_client.fetch")
     def test_gini(self, mock_fetch):
@@ -189,9 +166,7 @@ class TestFetchDelD(unittest.TestCase):
 
     def test_fetch_all_dst_samler_alle_felter(self):
         with patch.object(fetch_dst, "fetch_folketal", return_value=({"Thisted": 42572}, {"Thisted": 42698})), \
-             patch.object(fetch_dst, "fetch_areal", return_value={"Thisted": 1072.2}), \
              patch.object(fetch_dst, "fetch_indkomst", return_value={"Thisted": 252934}), \
-             patch.object(fetch_dst, "fetch_formue", return_value=({"Thisted": 1838139}, {"Thisted": 813928})), \
              patch.object(fetch_dst, "fetch_gini", return_value={"Thisted": 26.42}), \
              patch.object(fetch_dst, "fetch_boliger_type", return_value=({"Thisted": 14246}, {"Thisted": 2677}, {"Thisted": 3295})), \
              patch.object(fetch_dst, "fetch_boligareal", return_value={"Thisted": 133.0}), \
@@ -208,9 +183,7 @@ class TestFetchDelD(unittest.TestCase):
 
     def test_fetch_all_dst_manglende_felt_bliver_none_ikke_krak(self):
         with patch.object(fetch_dst, "fetch_folketal", return_value=({"Thisted": 42572}, {"Thisted": 42698})), \
-             patch.object(fetch_dst, "fetch_areal", return_value={"Thisted": 1072.2}), \
              patch.object(fetch_dst, "fetch_indkomst", return_value={"Thisted": 252934}), \
-             patch.object(fetch_dst, "fetch_formue", return_value=({"Thisted": 1838139}, {"Thisted": 813928})), \
              patch.object(fetch_dst, "fetch_gini", return_value={}), \
              patch.object(fetch_dst, "fetch_boliger_type", return_value=({"Thisted": 14246}, {"Thisted": 2677}, {"Thisted": 3295})), \
              patch.object(fetch_dst, "fetch_boligareal", return_value={"Thisted": 133.0}), \

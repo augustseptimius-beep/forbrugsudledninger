@@ -44,9 +44,9 @@ be computed without inventing coefficients, and this tool does not.
 The method generalises an analysis originally built for Thisted Municipality.
 Full documentation is in `docs/superpowers/specs/`.
 
-Data comes from Statistics Denmark (11 tables), Finans Danmark's BM010 housing
-price index, and two manually maintained sources documented in
-`pipeline/constants.py`.
+Data comes from Statistics Denmark, Energinet via Energi Data Service, and
+Klimaregnskabet.dk. Every source is listed with table id and period on the
+method page.
 
 ## Running it locally
 

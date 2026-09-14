@@ -41,8 +41,7 @@ forbrugsudledninger/
 │   ├── build.py            <- orkestrerer alt, skriver data.json + sources.json
 │   ├── constants.py        <- ★ ANTAGELSER OG PERIODER. Årets ét sted at redigere.
 │   ├── sources.py          <- kildekatalog til metodesiden
-│   ├── fetch_dst.py        <- de 11 DST-tabeller
-│   ├── fetch_boligpriser.py<- Finans Danmark BM010
+│   ├── fetch_dst.py        <- de 9 DST-tabeller
 │   ├── dst_client.py, kommuner.py
 │   └── test/               <- pytest
 ├── web/

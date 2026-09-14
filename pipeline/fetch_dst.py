@@ -1,7 +1,7 @@
-"""Henter de 11 DST-tabeller, motorens datakontrakt kræver. Hver funktion
+"""Henter de 9 DST-tabeller, motorens datakontrakt kræver. Hver funktion
 returnerer et dict {kommunenavn: værdi} (eller et par af dicts, hvis tabellen
 dækker to felter). DST's tal bruger komma som decimalseparator i nogle CSV-felter
-(fx areal), så numeriske felter uden for INDHOLD-kolonnen parses med _to_float()."""
+(fx Gini), så numeriske felter uden for INDHOLD-kolonnen parses med _to_float()."""
 
 import dst_client
 from constants import PERIODER
@@ -27,13 +27,6 @@ def fetch_folketal():
     return dst_client.sum_by(rows_nu, ["OMRÅDE"]), dst_client.sum_by(rows_forrige, ["OMRÅDE"])
 
 
-def fetch_areal():
-    """Returnerer {navn: areal_km2 (float)}."""
-    rows = dst_client.fetch(BASE, "ARE207", {"OMRÅDE": "*", "Tid": PERIODER["AREAL_AAR"]})
-    return {r["OMRÅDE"]: _to_float(r["INDHOLD"]) for r in rows
-            if r["INDHOLD"] not in dst_client.INGEN_DATA_MARKORER}
-
-
 def fetch_indkomst():
     """Returnerer {navn: disponibel_indkomst (int, kr.)}."""
     rows = dst_client.fetch(BASE, "INDKP101", {
@@ -41,18 +34,6 @@ def fetch_indkomst():
         "Tid": PERIODER["INDKOMST_AAR"],
     })
     return dst_client.sum_by(rows, ["OMRÅDE"])
-
-
-def fetch_formue():
-    """Returnerer (gennemsnit, median), begge {navn: kr. (int)}."""
-    rows = dst_client.fetch(BASE, "FORMUE12", {
-        "FORM1": "FGNF2020", "ENHED": "200,215", "OMRÅDE": "*",
-        "ALDER": "1802", "POPU": "5005", "Tid": PERIODER["FORMUE_AAR"],
-    })
-    ok = lambda r: r["INDHOLD"] not in dst_client.INGEN_DATA_MARKORER
-    gns = {r["OMRÅDE"]: int(r["INDHOLD"]) for r in rows if "Gennemsnit" in r["ENHED"] and ok(r)}
-    median = {r["OMRÅDE"]: int(r["INDHOLD"]) for r in rows if "Median" in r["ENHED"] and ok(r)}
-    return gns, median
 
 
 def fetch_gini():
@@ -423,14 +404,12 @@ def spaerrede_selskaber(sammensaetning):
 
 
 def fetch_all_dst():
-    """Kører alle 11 DST-hentninger og samler dem i et {navn: {felt: værdi}}-dict,
+    """Kører alle 9 DST-hentninger og samler dem i et {navn: {felt: værdi}}-dict,
     med feltnavne der matcher motorens datakontrakt 1:1. Kommuner uden data for et
     givent felt får det simpelthen ikke sat her - build.py fylder None ind for
     manglende felter, jf. spec §5.4."""
     folketal, folketal_forrige = fetch_folketal()
-    areal = fetch_areal()
     indkomst = fetch_indkomst()
-    formue_gns, formue_median = fetch_formue()
     gini = fetch_gini()
     parcel, raekke, etage = fetch_boliger_type()
     boligareal = fetch_boligareal()
@@ -439,16 +418,15 @@ def fetch_all_dst():
     biler, biler_el, biler_plugin, biler_diesel, biler_benzin = fetch_biler()
     affald_kg, genanvendelse_pct = fetch_affald()
 
-    # Kommune-universet defineres ud fra tre kernetabeller, IKKE en union af alle 11 -
+    # Kommune-universet defineres ud fra to kernetabeller, IKKE en union af alle 9 -
     # LABY25's KOMGRP indeholder også kommunegruppe-aggregater (fx "Hovedstadskommuner"),
     # som ellers ville lække ind som falske "kommuner" i outputtet.
-    alle_navne = set(folketal) | set(indkomst) | set(areal)
+    alle_navne = set(folketal) | set(indkomst)
     resultat = {}
     for navn in alle_navne:
         resultat[navn] = {
             "folketal": folketal.get(navn), "folketal_forrige": folketal_forrige.get(navn),
-            "areal": areal.get(navn), "disp_indkomst": indkomst.get(navn),
-            "formue_gns": formue_gns.get(navn), "formue_median": formue_median.get(navn),
+            "disp_indkomst": indkomst.get(navn),
             "gini": gini.get(navn),
             "boliger_parcel": parcel.get(navn), "boliger_raekke": raekke.get(navn),
             "boliger_etage": etage.get(navn), "boligareal": boligareal.get(navn),

@@ -17,7 +17,6 @@ import os
 import sys
 
 import fetch_dst
-import fetch_boligpriser
 import fetch_pendling
 import fetch_energi
 import fetch_klimaregnskabet
@@ -35,17 +34,17 @@ EL_CACHE_PATH = os.path.join(os.path.dirname(__file__), ".el_cache.json")
 KR_CACHE_PATH = os.path.join(os.path.dirname(__file__), ".kr_cache.json")
 
 FORVENTEDE_FELTER = [
-    "disp_indkomst", "folketal", "folketal_forrige", "areal", "formue_gns", "formue_median",
+    "disp_indkomst", "folketal", "folketal_forrige",
     "gini", "boliger_parcel", "boliger_raekke", "boliger_etage", "boligareal", "byggeri",
     "biler", "biler_el", "biler_plugin", "biler_diesel", "biler_benzin",
     "opv_boliger_ialt", "opv_olie",
-    "opv_naturgas", "affald_kg", "genanvendelse_pct", "elco2_g_kwh", "boligpris_m2",
+    "opv_naturgas", "affald_kg", "genanvendelse_pct", "elco2_g_kwh",
     "ve_daekning_pct", "pendlingsafstand_km", "fritidshuse",
     "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
 ]
 
 
-def saml_kommune_post(navn, dst_data, boligpriser, kode=None, region=None,
+def saml_kommune_post(navn, dst_data, kode=None, region=None,
                       elco2=None, ve_daekning=None, pendling=None,
                       fritidshuse=None, husholdning=None, affald_indberetning=None):
     """Samler ét kommune- (eller land-) objekt i motorens datakontrakt.
@@ -56,7 +55,6 @@ def saml_kommune_post(navn, dst_data, boligpriser, kode=None, region=None,
         post["kode"] = kode
     if region is not None:
         post["region"] = region
-    post["boligpris_m2"] = boligpriser.get(navn)
     # Energi Data Service er eneste kilde. Svarer den ikke, står feltet tomt
     # og vises som streg - aldrig som et tal fra en anden opgørelse.
     post["elco2_g_kwh"] = (elco2 or {}).get(kode)
@@ -126,7 +124,7 @@ def find_manglende(post):
 
 
 def main():
-    print("Henter DST-tabeller (11 tabeller, alle 98 kommuner + land)...")
+    print("Henter DST-tabeller (9 tabeller, alle 98 kommuner + land)...")
     dst_data = fetch_dst.fetch_all_dst()
     print(f"  {len(dst_data)} områder hentet.")
 
@@ -197,10 +195,6 @@ def main():
             print(f"  ADVARSEL: {fejl}. Husholdningsfelterne står tomme.")
             husholdning = {}
 
-    print("Henter Finans Danmark BM010 (boligpriser)...")
-    boligpriser = fetch_boligpriser.fetch_boligpris()
-    print(f"  {len(boligpriser)} områder hentet.")
-
     # Affaldsindberetningens pålidelighed pr. kommune. Fejler hentningen, står
     # feltet tomt for alle, og motoren viser retningen som før - tjekket må ikke
     # kunne vælte en hel datahentning.
@@ -216,7 +210,7 @@ def main():
         affald_indberetning, _selskaber = {}, {}
         print(f"  ADVARSEL: kunne ikke hente LABY24 ({fejl}). Alle står uden forbehold.")
 
-    land_post = saml_kommune_post("Hele landet", dst_data, boligpriser, pendling=pendling,
+    land_post = saml_kommune_post("Hele landet", dst_data, pendling=pendling,
                                   fritidshuse=fritidshuse)
     # Landets husholdningstal er summen af kommunernes, ikke et selvstændigt
     # opslag - så tæller og nævner dækker præcis det samme område.
@@ -246,7 +240,7 @@ def main():
     kommune_poster = []
     for kode, navn, region in KOMMUNER:
         kommune_poster.append(saml_kommune_post(
-            navn, dst_data, boligpriser, kode=kode, region=region,
+            navn, dst_data, kode=kode, region=region,
             elco2=elco2, ve_daekning=ve_daekning, pendling=pendling,
             fritidshuse=fritidshuse, husholdning=husholdning,
             affald_indberetning=affald_indberetning))
@@ -317,7 +311,6 @@ def main():
     print(f"  disp_indkomst = {thisted['disp_indkomst']} (252934)")
     print(f"  folketal = {thisted['folketal']} (42572)")
     print(f"  biler_diesel = {thisted['biler_diesel']} (7114)")
-    print(f"  boligpris_m2 = {thisted['boligpris_m2']} (7430)")
 
     if manglende_kerne > 0:
         print(f"\nADVARSEL: {manglende_kerne} områder mangler kerne-input og vil vise "

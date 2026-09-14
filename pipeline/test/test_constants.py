@@ -13,9 +13,9 @@ import constants
 class TestPerioder(unittest.TestCase):
     def test_perioder_indeholder_alle_forventede_noegler(self):
         forventede = {
-            "FOLK_KVARTAL", "FOLK_KVARTAL_FORRIGE", "AREAL_AAR", "INDKOMST_AAR",
-            "FORMUE_AAR", "GINI_AAR", "BOLIGER_AAR", "OPVARMNING_AAR",
-            "BYGGERI_AAR", "BILER_MAANED", "AFFALD_AAR", "BOLIGPRIS_KVARTAL",
+            "FOLK_KVARTAL", "FOLK_KVARTAL_FORRIGE", "INDKOMST_AAR",
+            "GINI_AAR", "BOLIGER_AAR", "OPVARMNING_AAR",
+            "BYGGERI_AAR", "BILER_MAANED", "AFFALD_AAR",
             "PENDLING_AAR", "ELDEKLARATION_AAR", "KLIMAREGNSKAB_AAR",
         }
         self.assertEqual(set(constants.PERIODER.keys()), forventede)

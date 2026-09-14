@@ -33,12 +33,12 @@ def _dst(id_, navn, periode_noegle, felter):
 KILDER = [
     _dst("FOLK1A", "Folketal efter område", "FOLK_KVARTAL",
          ["folketal", "folketal_forrige"]),
-    _dst("ARE207", "Areal efter område", "AREAL_AAR", ["areal"]),
     _dst("INDKP101", "Disponibel indkomst efter område", "INDKOMST_AAR",
          ["disp_indkomst"]),
-    _dst("FORMUE12", "Nettoformue efter område", "FORMUE_AAR",
-         ["formue_gns", "formue_median"]),
-    _dst("IFOR41", "Gini-koefficient efter område", "GINI_AAR", ["gini"]),
+    dict(_dst("IFOR41", "Gini-koefficient efter område", "GINI_AAR", ["gini"]),
+         forbehold="Vises ikke på kommunesiden. Ulighed siger noget om fordelingen af "
+                   "forbruget, ikke om niveauet. Tallet hentes til en vurdering af "
+                   "rimelig og retfærdig omstilling."),
     _dst("BOL101", "Boliger efter anvendelse", "BOLIGER_AAR",
          ["boliger_parcel", "boliger_raekke", "boliger_etage"]),
     _dst("BOL103", "Boliger efter størrelse", "BOLIGER_AAR", ["boligareal"]),
@@ -77,18 +77,6 @@ KILDER = [
                      "landsgennemsnittet er gyldig, fordi begge sider opgøres ens. "
                      "NIRAS (2024) s. 18 peger på Energi- og CO2-Regnskabet som den "
                      "rigtige kilde til energidelen.",
-    },
-    {
-        "id": "BM010",
-        "navn": "Boligpriser pr. kvadratmeter, realiserede handler",
-        "udbyder": "Finans Danmark",
-        "metode": "api",
-        "periode_noegle": "BOLIGPRIS_KVARTAL",
-        "licens": "Finans Danmarks vilkår",
-        "url": "https://rkr.statistikbank.dk/BM010",
-        "felter": ["boligpris_m2"],
-        "forbehold": "Kvartalstal baseret på realiserede handler. For små "
-                     "kommuner med få handler er tallet volatilt.",
     },
     {
         "id": "ENERGINET_DEKLARATION",
