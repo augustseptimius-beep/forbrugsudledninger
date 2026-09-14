@@ -557,9 +557,6 @@ function kategoriNote(c, kategori) {
   if (kategori === "Bolig og byggeri") {
     return "selve byggeriet - boligernes energiforbrug hører til Energi og forsyning";
   }
-  if (kategori === "På tværs af kategorier") {
-    return "driver forbruget i alle kategorier, ikke i én";
-  }
   if (kategori === "Kontekst") return "beskriver kommunen, peger ikke på én kategori";
   return "";
 }

@@ -430,6 +430,28 @@ test("tærskelfordeling: metodetabellen genereres og udelader nøgletal uden afv
   assert.ok(!h.includes("undefined") && !h.includes("NaN"));
 });
 
+test("overblik: ethvert nøgletal med en retning når overblikket", () => {
+  // Overblikket finder nøgletallene ved at matche på Energistyrelsens
+  // kategorinavne. Et nøgletal i en kategori, der ikke findes dér, bliver
+  // stille væk fra overblikket, mens det står i tabellen. Sådan faldt
+  // disponibel indkomst ud i sin egen kategori "På tværs af kategorier".
+  // Kun kontekst- og hjælpetal må stå uden for.
+  const navne = new Set(ens.kategorier.map((k) => k.navn));
+  const udenfor = bThisted.drivere.filter((d) =>
+    d.kategori !== "Kontekst" && d.rolle !== "hjaelper" && !navne.has(d.kategori));
+  assert.deepEqual(udenfor.map((d) => d.navn), []);
+});
+
+test("overblik: disponibel indkomst tæller under Forbrugsprodukter og services", () => {
+  // CONCITO (2023) s. 27 og NIRAS (2024) s. 27 kobler indkomsten til mængden
+  // af varer og tjenesteydelser. Se begrundelsen i beregning.js.
+  const h = renderKategorioverblik(bThisted, ens);
+  const start = h.indexOf("Forbrugsprodukter og services");
+  const slut = h.indexOf("Offentligt forbrug", start);
+  assert.ok(start > -1 && slut > start);
+  assert.ok(h.slice(start, slut).includes("Disponibel indkomst"));
+});
+
 test("overblik: den nationale vægt må ikke kunne læses som kommunens eget tal", () => {
   // "Transport 1,84 ton pr. indbygger" på en kommuneside læses ellers som
   // kommunens eget transportaftryk - et tal, værktøjet slet ikke kan opgøre.

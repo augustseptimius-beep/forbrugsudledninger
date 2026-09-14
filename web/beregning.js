@@ -65,16 +65,16 @@ export const PAAVIRKNING = {
 // Afløste CONCITO's fem kategorier, fordi ENS' tal er nyere, opdateres årligt
 // og summerer eksakt til hovedtallet. Vægtene står i pipeline/ens.py.
 //
-// TVAERS og KONTEKST er ikke ENS-kategorier. TVAERS rummer nøgletal, der driver
-// forbruget på tværs af alle kategorier; KONTEKST beskriver kommunen uden at
-// pege på en forbrugskategori. Ingen af dem får en national vægt.
+// KONTEKST er ikke en ENS-kategori. Den beskriver kommunen uden at pege på en
+// forbrugskategori og får ingen national vægt. Ethvert andet nøgletal skal
+// stå i en af Energistyrelsens kategorier, ellers når det ikke overblikket -
+// det holdes af testen "ethvert nøgletal med en retning når overblikket".
 export const KATEGORI = {
   TRANSPORT: "Transport",
   FOEDEVARER: "Føde- og drikkevarer",
   PRODUKTER: "Forbrugsprodukter og services",
   ENERGI: "Energi og forsyning",
   BOLIG_BYGGERI: "Bolig og byggeri",
-  TVAERS: "På tværs af kategorier",
   KONTEKST: "Kontekst",
 };
 
@@ -88,10 +88,19 @@ export const KATEGORI = {
 // ude af overblikkets fremhævelser, hvor de ellers ville fortrænge de tal, de
 // er sat i verden for at forklare.
 const DRIVERE = [
+  // Står under Forbrugsprodukter og services. Kilderne kobler også indkomsten til
+  // flyrejser (NIRAS s. 20) og regner fødevarer med til "øvrigt forbrug" (NIRAS
+  // s. 22), men nøgletallet står kun ét sted, så det ikke tæller dobbelt i
+  // overblikket. Det lå tidligere i en egen kategori, "På tværs af kategorier",
+  // som ikke findes blandt Energistyrelsens - og nåede derfor aldrig overblikket.
   { navn: "Disponibel indkomst", enhed: "kr.", val: (m) => m.disp_indkomst,
-    type: "relativ", kategori: KATEGORI.TVAERS, paavirkning: "hoejere",
-    begrundelse: "CONCITO (2023) s. 6 og s. 30: klimaaftrykket hænger tæt sammen med "
-      + "indkomstniveauet, og forbrugsprofilerne stiger fra 8,7 til 25 ton med indkomst." },
+    type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "hoejere",
+    begrundelse: "CONCITO (2023) s. 27: mennesker med lav indkomst forbruger ofte færre "
+      + "ting og sager og rejser mindre. NIRAS (2024) s. 27 anbefaler at undersøge, om "
+      + "borgernes øvrige forbrug kan skaleres efter indkomsten. Sammenhængen er ikke "
+      + "mekanisk: CONCITO's forbrugsprofiler går fra 8,7 til 15 ton i den laveste "
+      + "indkomstgruppe og fra 12 til 25 ton i den højeste (s. 28-29), fordi pengene kan "
+      + "bruges mere eller mindre klimavenligt (s. 6)." },
   { navn: "Nettoformue (gns.)", enhed: "kr.", val: (m) => m.formue_gns,
     type: "relativ", kategori: KATEGORI.KONTEKST, paavirkning: "uafklaret",
     begrundelse: "Formue er ikke det samme som forbrug. CONCITO kobler aftrykket til "
@@ -424,7 +433,7 @@ export function driverePrKategori(drivere) {
   // Offentligt forbrug har ingen kommunale nøgletal og optræder derfor ikke
   // her, kun i kategorioverblikket.
   const raekkefoelge = [KATEGORI.TRANSPORT, KATEGORI.PRODUKTER, KATEGORI.ENERGI,
-                        KATEGORI.BOLIG_BYGGERI, KATEGORI.TVAERS, KATEGORI.KONTEKST];
+                        KATEGORI.BOLIG_BYGGERI, KATEGORI.KONTEKST];
   return raekkefoelge
     .map((kategori) => ({ kategori, drivere: drivere.filter((d) => d.kategori === kategori) }))
     .filter((g) => g.drivere.length > 0);
