@@ -47,7 +47,8 @@ const fritidshusPrBolig = (m) => m.fritidshuse / helaarsboliger(m);
 
 // Forbehold, der gælder for netop én kommune. En driver med et forbehold kalder
 // funktionen med kommunens data; får den {spaerrer, note} tilbage, lægges noten
-// til begrundelsen, og retningen spærres, hvis spaerrer er sand.
+// til begrundelsen. Er spaerrer sand, spærres retningen, og nøgletallet vises
+// ikke på kommunens side - noten står i stedet under tabellen.
 //
 // Fritidshuse: husholdningstallene er fordelt på samtlige boliger, og et
 // fritidshus bruger mindre energi end en helårsbolig. Har kommunen flere
@@ -57,10 +58,10 @@ const fritidshusPrBolig = (m) => m.fritidshuse / helaarsboliger(m);
 // er ikke fordelt på boliger.
 const FRITIDSHUS_FORBEHOLD = {
   spaerrer: true,
-  note: "Kommunen har flere fritidshuse end helårsboliger. Tallet er fordelt på "
-    + "samtlige boliger, og da et fritidshus bruger mindre energi end en helårsbolig, "
-    + "trækkes gennemsnittet ned med en størrelse, der ikke kan opgøres. Retningen "
-    + "gættes derfor ikke.",
+  note: "Kommunen har flere fritidshuse end helårsboliger. Husholdningstallene er "
+    + "fordelt på samtlige boliger, og da et fritidshus bruger mindre energi end en "
+    + "helårsbolig, trækkes gennemsnittet ned med en størrelse, der ikke kan opgøres. "
+    + "Et lavere tal ville derfor være fordelingens, ikke kommunens.",
 };
 const fritidshusForbehold = (m) => (fritidshusPrBolig(m) > 1 ? FRITIDSHUS_FORBEHOLD : null);
 const affaldForbehold = (m) => INDBERETNING_FORBEHOLD[m.affald_indberetning] ?? null;
@@ -73,7 +74,9 @@ const affaldForbehold = (m) => INDBERETNING_FORBEHOLD[m.affald_indberetning] ?? 
 // Dette er den ENESTE vurdering i hele værktøjet, og den er tilføjet efter
 // eksplicit ønske, fordi en mur af procenttal ikke er et overblik. Hvert
 // nøgletal bærer sin begrundelse i PAAVIRKNING nedenfor. Kan retningen ikke
-// begrundes, står den som uafklaret frem for at blive gættet.
+// begrundes, står den som uafklaret frem for at blive gættet. Et hovednøgletal,
+// der står som uafklaret for en kommune, vises ikke på kommunens side - se
+// beregnKommune.
 export const PAAVIRKNING = {
   hoejere: "hoejere", lavere: "lavere", uafklaret: "uafklaret",
 };
@@ -255,9 +258,8 @@ const INDBERETNING_FORBEHOLD = {
   bekraeftet_fejl: {
     spaerrer: true,
     note: "Kommunen deler affaldsindberetning med nabokommuner, og tonnagen er "
-      + "påviseligt bogført på hinanden for det viste år. Tallet står som "
-      + "Danmarks Statistik har offentliggjort det, men det beskriver ikke "
-      + "kommunen alene, og retningen gættes derfor ikke.",
+      + "påviseligt bogført på hinanden for det seneste opgjorte år. Danmarks "
+      + "Statistiks tal beskriver derfor ikke kommunen alene.",
   },
   usikker_fraktion: {
     spaerrer: false,
@@ -399,6 +401,9 @@ export function driverTabel(kommune, land) {
       retning: afv == null ? "kontekst" : afv > 0 ? "over land" : afv < 0 ? "under land" : "på niveau",
       baand: niveauBaand(afv),
       signal: udledningsSignal(afv, paavirkning),
+      // Forbeholdets note for sig. Spærrer forbeholdet retningen, vises
+      // nøgletallet ikke, og noten er den begrundelse, siden giver i stedet.
+      forbeholdNote: forbehold?.note ?? null,
     };
   });
 }
@@ -448,15 +453,34 @@ const FORVENTEDE_FELTER = [
   "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
 ];
 
-/** Fuld sammenligning for én kommune: indikatortabel, gruppering og manglende felter. */
+/** Om et nøgletal vises på kommunens side.
+ *
+ *  Et nøgletal, hvis retning ikke kan afgøres for netop denne kommune, vises
+ *  ikke. Det sker, når et forbehold spærrer retningen: affaldstallene hos
+ *  kommuner, der deler indberetning, og husholdningstallene pr. bolig, hvor der
+ *  er flere fritidshuse end helårsboliger.
+ *
+ *  Hjælpetal er undtaget. De har aldrig en retning, fordi de står for at
+ *  forklare et andet nøgletal, og ville ellers forsvinde fra alle 98 sider.
+ *  Manglende data ("ukendt") rammes heller ikke - dér står en tankestreg. */
+const vises = (d) => d.rolle === "hjaelper" || d.signal !== "uafklaret";
+
+/** Fuld sammenligning for én kommune: indikatortabel, gruppering, udeladte
+ *  nøgletal og manglende felter. */
 export function beregnKommune(kommune, land) {
-  const drivere = driverTabel(kommune, land);
+  const alle = driverTabel(kommune, land);
+  const drivere = alle.filter(vises);
   return {
     navn: kommune.navn,
     kode: kommune.kode,
     region: kommune.region,
     drivere,
     grupper: driverePrKategori(drivere),
+    // Det, der er taget af siden, med begrundelsen. Siden nævner det under
+    // tabellen, så et nøgletal aldrig forsvinder uden forklaring.
+    udeladt: alle.filter((d) => !vises(d)).map((d) => ({
+      navn: d.navn, kategori: d.kategori, note: d.forbeholdNote ?? d.begrundelse,
+    })),
     manglende: FORVENTEDE_FELTER.filter((f) => kommune[f] == null),
   };
 }

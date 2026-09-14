@@ -72,18 +72,28 @@ test("indikatorer: bruger egen tooltip, ikke browserens title", () => {
   assert.ok(h.includes("data-tip="));
 });
 
-test("indikatorer: hver uafklaret driver får præcis ét mærkat", () => {
-  // Testen tæller MEKANISMEN, ikke et øjebliksbillede: en tidligere udgave
-  // låste antallet til højst 3, og den fejlede, da affaldsnøgletallene
-  // retmæssigt blev uafklarede. Antallet af mærkater skal følge antallet af
-  // drivere med uafklaret retning - hverken mere eller mindre.
+test("kommunevisning: intet nøgletal på siden står som uafklaret", () => {
+  // Et hovednøgletal, hvis retning ikke kan afgøres for kommunen, tages af siden
+  // (se beregnKommune). Et hjælpetal har aldrig haft en retning at give - det
+  // står for at forklare et andet tal - og får derfor intet mærkat. Testen
+  // kører både på en kommune uden og en med et spærrende forbehold.
+  const spaerret = beregnKommune({ ...thisted, affald_indberetning: "bekraeftet_fejl" }, land);
+  for (const b of [bThisted, spaerret]) {
+    const h = renderKommune(b, concito, ens);
+    assert.ok(!h.includes("retningen kan ikke afgøres"), `${b.navn}: mærkatet står der stadig`);
+    assert.ok(!/uafklaret/i.test(h), `${b.navn}: "uafklaret" står der stadig`);
+  }
+});
+
+test("indikatorer: hjælpetal uden retning står i tabellen med begrundelse, men uden mærkat", () => {
   const h = renderIndikatorer(bThisted, concito, ens);
-  // Tæl selve MÆRKATET, ikke enhver forekomst af sætningen, som også kan stå
-  // i en begrundelsestekst.
-  const vist = (h.match(/>\?<\/span>retningen kan ikke afgøres/g) || []).length;
-  const forventet = bThisted.drivere.filter(
-    (d) => d.signal === "uafklaret").length;
-  assert.equal(vist, forventet, "hver uafklaret driver skal have præcis ét mærkat");
+  for (const navn of ["Lokal VE-dækning af elforbrug", "Befolkningsudvikling"]) {
+    const i = h.indexOf(`>${navn}<`);
+    assert.ok(i > -1, `${navn} skal stå i tabellen`);
+    const raekke = h.slice(i, h.indexOf("</tr>", i));
+    assert.ok(raekke.includes("data-tip="), `${navn}: begrundelsen skal stå ved ikonet`);
+    assert.ok(!raekke.includes("rounded-full"), `${navn}: intet mærkat`);
+  }
 });
 
 test("indikatorer: pendlingsafstand vises i km, ikke omregnet", () => {
@@ -258,7 +268,7 @@ test("indikatorer: hver kategorioverskrift bærer sin nationale vægt", () => {
 test("signalmærkat: farven er aldrig eneste bærer af betydning", () => {
   // Cirka 8 % af mænd er farveblinde. Tekst og symbol skal stå ved siden af.
   const h = renderIndikatorer(bThisted, concito, ens);
-  for (const tekst of ["peger mod højere udledning", "retningen kan ikke afgøres"]) {
+  for (const tekst of ["peger mod højere udledning"]) {
     assert.ok(h.includes(tekst), `signalet "${tekst}" mangler sin tekst`);
   }
 });
@@ -343,6 +353,37 @@ test("affald: forbeholdet forklarer fejlen og siger at tallet ikke er rettet", (
     "DST's eget forbehold skal citeres");
   assert.ok(h.includes("ikke rettet her"),
     "det skal fremgå, at værktøjet ikke retter kildens tal");
+});
+
+// --- Nøgletal, hvis retning ikke kan afgøres for kommunen, vises ikke ---
+
+const bSpaerret = beregnKommune({ ...thisted, affald_indberetning: "bekraeftet_fejl" }, land);
+
+test("udeladt: nøgletallet har ingen række, men nævnes under tabellen med begrundelsen", () => {
+  // Et hul skal forklares, ikke gemmes. Uden noten ville en koordinator lede
+  // efter affaldstallene uden at kunne se, om de mangler eller er glemt.
+  const h = renderIndikatorer(bSpaerret, concito, ens);
+  const slut = h.indexOf("</table>");
+  const tabel = h.slice(0, slut);
+  const under = h.slice(slut);
+  for (const navn of ["Husholdningsaffald", "Genanvendelsesprocent"]) {
+    assert.ok(!tabel.includes(`>${navn}<`), `${navn} må ikke have en række`);
+    assert.ok(under.includes(navn), `${navn} skal nævnes under tabellen`);
+  }
+  assert.ok(under.includes("deler affaldsindberetning"), "begrundelsen skal stå");
+  assert.equal((under.match(/deler affaldsindberetning/g) || []).length, 1,
+    "to nøgletal med samme begrundelse deler én note");
+});
+
+test("udeladt: ingen note, når intet er taget af siden", () => {
+  const h = renderIndikatorer(bThisted, concito, ens);
+  assert.ok(!h.includes("Vises ikke for"));
+});
+
+test("udeladt: overblikket tæller ikke nøgletallet med", () => {
+  const h = renderKategorioverblik(bSpaerret, ens);
+  assert.ok(!h.includes("Husholdningsaffald"));
+  assert.ok(!h.includes("Genanvendelsesprocent"));
 });
 
 // --- Fritidshuse: husholdningstallene er fordelt på samtlige boliger ---

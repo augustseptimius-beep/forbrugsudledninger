@@ -144,6 +144,10 @@ const KORT = "kort-print rounded-lg border border-gray-200 bg-white";
 //
 // Formen bærer signalet lige så meget som farven, og teksten står altid ved
 // siden af - farve må aldrig være eneste bærer af betydning.
+//
+// Der er intet mærkat for en retning, der ikke kan afgøres. Et hovednøgletal
+// uden retning tages af kommunens side (se beregnKommune), og et hjælpetal uden
+// retning står uden mærkat.
 const SIGNAL = {
   "markant højere": { tekst: "peger mod meget højere udledning",
     klasse: "bg-red-50 text-red-700 border-red-200", tegn: "▲▲" },
@@ -155,8 +159,6 @@ const SIGNAL = {
     klasse: "bg-emerald-50 text-emerald-700 border-emerald-200", tegn: "▼" },
   "markant lavere": { tekst: "peger mod meget lavere udledning",
     klasse: "bg-emerald-100 text-emerald-800 border-emerald-300", tegn: "▼▼" },
-  "uafklaret":      { tekst: "retningen kan ikke afgøres",
-    klasse: "bg-gray-50 text-gray-500 border-gray-200", tegn: "?" },
   "ukendt":         { tekst: "ingen data",
     klasse: "bg-gray-50 text-gray-400 border-gray-200", tegn: "–" },
 };
@@ -290,7 +292,6 @@ function kategoriKonklusion(drivere) {
   const op = tael((d) => d.signal.includes("højere"));
   const ned = tael((d) => d.signal.includes("lavere"));
   const niveau = tael((d) => d.signal === "på niveau");
-  const uafklaret = tael((d) => d.signal === "uafklaret");
   const retningsbaerende = op + ned;
 
   let tekst;
@@ -298,7 +299,7 @@ function kategoriKonklusion(drivere) {
   if (retningsbaerende === 0) {
     tekst = niveau > 0
       ? "Ingen af nøgletallene skiller sig ud fra landsgennemsnittet."
-      : "Ingen af nøgletallene har en retning, der kan afgøres.";
+      : "Der er ingen data for nøgletallene.";
     klasse = "text-gray-600";
   } else if (ned === 0 || op === 0) {
     const antal = Math.max(op, ned);
@@ -315,11 +316,6 @@ function kategoriKonklusion(drivere) {
   }
 
   const forbehold = [];
-  if (uafklaret > 0) {
-    forbehold.push(uafklaret === 1
-      ? "1 nøgletal har ingen retning, der kan afgøres"
-      : `${uafklaret} nøgletal har ingen retning, der kan afgøres`);
-  }
   if (retningsbaerende > 1) forbehold.push("nøgletallene er talt, ikke vejet mod hinanden");
 
   return `<p class="text-base font-semibold leading-snug ${klasse}">${esc(tekst)}</p>${
@@ -367,11 +363,9 @@ export function renderKategorioverblik(b, ens) {
       const op = tael((d) => d.signal.includes("højere"));
       const ned = tael((d) => d.signal.includes("lavere"));
       const niv = tael((d) => d.signal === "på niveau");
-      const ua = tael((d) => d.signal === "uafklaret");
       if (op) dele.push(`${op} peger mod højere udledning`);
       if (ned) dele.push(`${ned} peger mod lavere`);
       if (niv) dele.push(`${niv} hverken op eller ned`);
-      if (ua) dele.push(`${ua} uafklaret`);
 
       const punkter = drivere
         .filter((d) => d.afvigelse != null)
@@ -479,8 +473,8 @@ const DRIVER_FORBEHOLD = {
   "Fritidshuse pr. helårsbolig":
     "Står her, fordi de to husholdningstal pr. bolig ikke kan læses uden det. " +
     "Fritidshuse bruger energi, men mindre end en helårsbolig, så de trækker " +
-    "gennemsnittet ned. Over 1 - flere fritidshuse end helårsboliger - holdes " +
-    "retningen på de to tal derfor tilbage.",
+    "gennemsnittet ned. Over 1 - flere fritidshuse end helårsboliger - vises de to " +
+    "tal derfor ikke.",
   "Gennemsnitlig pendlingsafstand":
     "Afstand til arbejde for beskæftigede med bopæl i kommunen. Siger intet om " +
     "transportmiddel og dækker kun arbejdsturen, ikke indkøb, fritid og andre ærinder.",
@@ -550,6 +544,26 @@ function kategoriNote(c, kategori) {
   return "";
 }
 
+/** De nøgletal, der er taget af kommunens side, fordi deres retning ikke kan
+ *  afgøres her. Et hul skal forklares, ikke gemmes. Nøgletal med samme
+ *  begrundelse samles, så forbeholdet står én gang. */
+function udeladtNote(b) {
+  if (b.udeladt.length === 0) return "";
+  const prNote = new Map();
+  for (const u of b.udeladt) prNote.set(u.note, [...(prNote.get(u.note) ?? []), u.navn]);
+  const punkter = [...prNote].map(([note, navne]) => {
+    const opremset = navne.length > 1
+      ? `${navne.slice(0, -1).join(", ")} og ${navne.at(-1)}` : navne[0];
+    return `<li class="mt-1"><strong class="font-medium text-gray-700">${esc(opremset)}.</strong>
+      ${esc(note)}</li>`;
+  }).join("");
+  return `<div class="mt-4 border-t border-gray-100 pt-3 text-xs text-gray-500 max-w-3xl">
+      <p><strong class="font-semibold text-gray-600">Vises ikke for ${esc(b.navn)}.</strong>
+        Et nøgletal, hvis retning ikke kan afgøres for kommunen, er taget af siden.</p>
+      <ul class="mt-1 list-none m-0 p-0">${punkter}</ul>
+    </div>`;
+}
+
 /** Én samlet tabel med alle nøgletal, grupperet efter kategori.
  *
  *  Erstatter fem foldbare kort. Nitten rækker er ikke meget, og at skulle
@@ -569,6 +583,10 @@ export function renderIndikatorer(b, c, ens) {
     const raekker = g.drivere.map((d) => {
       const fb = DRIVER_FORBEHOLD[d.navn];
       const tom = d.kommuneVaerdi == null;
+      // Et hjælpetal uden retning får intet mærkat; begrundelsen ved ikonet siger,
+      // hvad det forklarer. Et hovednøgletal uden retning når aldrig hertil -
+      // beregnKommune tager det af kommunens side.
+      const maerkat = d.signal === "uafklaret" ? "" : signalMaerkat(d.signal);
       return `<tr class="border-t border-gray-100 ${tom ? "text-gray-600" : ""}">
         <td class="py-2 pl-3 pr-3 text-sm">
           <span class="font-medium text-gray-900">${esc(d.navn)}</span>${fb ? forbehold(fb) : ""}
@@ -580,7 +598,7 @@ export function renderIndikatorer(b, c, ens) {
         <td class="py-2 px-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-700">
           ${driverAfvigelse(d)}${procentpointNote(d)}</td>
         <td class="py-2 pl-3 pr-3 text-right whitespace-nowrap">
-          ${signalMaerkat(d.signal)}${d.begrundelse ? forbehold(d.begrundelse) : ""}</td>
+          ${maerkat}${d.begrundelse ? forbehold(d.begrundelse) : ""}</td>
       </tr>`;
     }).join("");
 
@@ -604,6 +622,7 @@ export function renderIndikatorer(b, c, ens) {
         <tbody>${grupper}</tbody>
       </table>
     </div>
+    ${udeladtNote(b)}
   </section>`;
 }
 

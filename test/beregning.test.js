@@ -111,6 +111,50 @@ test("beregnKommune: intet felt i modellen hedder aftryk eller estimat", () => {
   assert.ok(!("aftryk" in r));
 });
 
+// --- Nøgletal, hvis retning ikke kan afgøres for kommunen ---
+
+const AFFALD = ["Husholdningsaffald", "Genanvendelsesprocent"];
+
+test("beregnKommune: et nøgletal, hvis retning ikke kan afgøres for kommunen, vises ikke", () => {
+  const r = beregnKommune({ ...thisted, affald_indberetning: "bekraeftet_fejl" }, land);
+  const igrupper = r.grupper.flatMap((g) => g.drivere).map((d) => d.navn);
+  for (const navn of AFFALD) {
+    assert.ok(!find(r.drivere, navn), `${navn} står stadig blandt nøgletallene`);
+    assert.ok(!igrupper.includes(navn), `${navn} står stadig i en kategori`);
+    assert.ok(r.udeladt.some((u) => u.navn === navn), `${navn} skal stå som udeladt`);
+  }
+});
+
+test("beregnKommune: et udeladt nøgletal bærer forbeholdets begrundelse", () => {
+  const r = beregnKommune({ ...thisted, affald_indberetning: "bekraeftet_fejl" }, land);
+  const u = r.udeladt.find((x) => x.navn === "Husholdningsaffald");
+  assert.match(u.note, /deler affaldsindberetning/);
+});
+
+test("beregnKommune: reglen følger kommunen - uden forbehold står nøgletallet", () => {
+  const r = beregnKommune({ ...thisted, affald_indberetning: null }, land);
+  for (const navn of AFFALD) assert.ok(find(r.drivere, navn), navn);
+  assert.deepEqual(r.udeladt, []);
+});
+
+test("beregnKommune: hjælpetal bliver stående, selv om de ingen retning har", () => {
+  // De står for at forklare et andet nøgletal og har aldrig en retning. Ramte
+  // reglen dem, forsvandt de fra alle 98 kommunesider.
+  const r = beregnKommune(thisted, land);
+  for (const navn of ["Befolkningsudvikling", "Fritidshuse pr. helårsbolig",
+                      "Lokal VE-dækning af elforbrug"]) {
+    assert.ok(find(r.drivere, navn), navn);
+  }
+});
+
+test("beregnKommune: manglende data er ikke det samme som en retning, der ikke kan afgøres", () => {
+  // Greve mangler affaldstallene i fixturen. De skal stå med tankestreg, ikke
+  // forsvinde.
+  const r = beregnKommune(greve, land);
+  assert.equal(find(r.drivere, "Husholdningsaffald").signal, "ukendt");
+  assert.ok(!r.udeladt.some((u) => u.navn === "Husholdningsaffald"));
+});
+
 // --- Signal og optælling ---
 
 test("niveauBaand: beskriver størrelse uden at vurdere", () => {

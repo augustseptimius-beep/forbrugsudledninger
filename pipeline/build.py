@@ -290,13 +290,13 @@ def main():
     usikre = sorted(p["navn"] for p in kommune_poster
                     if p.get("affald_indberetning") in (fetch_dst.AFFALD_USIKKER_FRAKTION,
                                                         fetch_dst.AFFALD_USIKKER_SPRING))
-    print(f"  Deler indberetning, retning holdes tilbage ({len(spaerret)}): "
+    print(f"  Deler indberetning, nøgletallene vises ikke ({len(spaerret)}): "
           f"{', '.join(spaerret) if spaerret else 'ingen'}")
     print(f"  Usædvanligt udsving, retning vises med forbehold ({len(usikre)}): "
           f"{', '.join(usikre) if usikre else 'ingen'}")
     print(f"  Uden forbehold: {len(kommune_poster) - len(spaerret) - len(usikre)} kommuner.")
     # Overgangen fra spærret til fri må ikke ske tavst: står et selskab her som
-    # frit, er dets nøgletal netop skiftet fra "ingen retning" til en retning.
+    # frit, vender dets nøgletal netop tilbage på medlemmernes kommunesider.
     for selskab, ramte in sorted(_selskaber.items()):
         if ramte:
             print(f"  {selskab}: SPÆRRET - fraktionen er kollapset hos {', '.join(ramte)}.")

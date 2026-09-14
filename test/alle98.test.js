@@ -165,18 +165,18 @@ test("husholdningernes CO2 pr. bolig følger IKKE fritidshustætheden", () => {
   assert.ok(prBolig < 0.4, `for stærk sammenhæng tilbage: ${prBolig.toFixed(2)}`);
 });
 
-test("fritidshuse: retningen holdes tilbage præcis hos kommuner med flere fritidshuse end helårsboliger", () => {
+test("fritidshuse: husholdningstallene pr. bolig vises ikke præcis hos kommuner med flere fritidshuse end helårsboliger", () => {
   // Samme binding som for affaldet: forbeholdet skal følge kommunens egne tal,
-  // ikke en liste. Ellers kan et husholdningstal miste sin retning, uden at
-  // nogen opdager hvorfor - eller beholde en retning, fordelingen har skabt.
+  // ikke en liste. Ellers kan et husholdningstal forsvinde fra siden, uden at
+  // nogen opdager hvorfor - eller stå med en retning, fordelingen har skabt.
   const PR_BOLIG = ["Husholdningernes CO2 fra energi", "Husholdningernes energiforbrug"];
   let ramte = 0;
   for (const k of data.kommuner) {
     const flere = k.fritidshuse > k.boliger_parcel + k.boliger_raekke + k.boliger_etage;
     if (flere) ramte++;
-    for (const r of driverTabel(k, data.land)) {
-      if (!PR_BOLIG.includes(r.navn)) continue;
-      assert.equal(r.signal === "uafklaret", flere, `${k.navn}/${r.navn}`);
+    const udeladt = beregnKommune(k, data.land).udeladt.map((u) => u.navn);
+    for (const navn of PR_BOLIG) {
+      assert.equal(udeladt.includes(navn), flere, `${k.navn}/${navn}`);
     }
   }
   assert.ok(ramte > 0 && ramte < 10, `${ramte} kommuner ramt - er grænsen flyttet?`);
@@ -279,22 +279,43 @@ test("alle 98 kommuner renderes med fordeling uden undefined, NaN eller null", (
 
 const AFFALDSNOEGLETAL = ["Husholdningsaffald", "Genanvendelsesprocent"];
 
-test("affald: retningen holdes tilbage præcis hos dem, der deler indberetning", () => {
+test("affald: nøgletallene vises ikke præcis hos dem, der deler indberetning", () => {
   // Reglen var før global: ingen af de 98 fik et retningsmærkat, fordi nogle af
   // dem havde fået hinandens tonnage bogført. Den er nu per kommune, så testen
-  // skal binde de to lister sammen - ellers kan en kommune miste sit mærkat,
-  // uden at nogen opdager hvorfor.
+  // skal binde de to lister sammen - ellers kan en kommune miste sine
+  // affaldstal, uden at nogen opdager hvorfor.
   for (const k of data.kommuner) {
     const spaerret = k.affald_indberetning === "bekraeftet_fejl";
-    for (const r of driverTabel(k, data.land)) {
-      if (!AFFALDSNOEGLETAL.includes(r.navn)) continue;
-      if (spaerret) {
-        assert.equal(r.signal, "uafklaret",
-          `${k.navn}/${r.navn}: deler indberetning, retningen kan ikke bæres`);
-      } else {
-        assert.notEqual(r.signal, "uafklaret",
-          `${k.navn}/${r.navn}: intet forbehold, så retningen skal stå`);
-      }
+    const b = beregnKommune(k, data.land);
+    for (const navn of AFFALDSNOEGLETAL) {
+      assert.equal(b.udeladt.some((u) => u.navn === navn), spaerret,
+        `${k.navn}/${navn}: ${spaerret ? "deler indberetning og skal tages af siden"
+          : "intet forbehold, så nøgletallet skal stå"}`);
+    }
+  }
+});
+
+test("ingen kommuneside viser et nøgletal, hvis retning ikke kan afgøres - hjælpetal undtaget", () => {
+  // Reglen testes på mekanismen, ikke på en liste over ramte kommuner: hvilke
+  // nøgletal der spærres, afgøres af årets tal.
+  for (const k of data.kommuner) {
+    const b = beregnKommune(k, data.land);
+    const vist = b.drivere.filter((d) => d.signal === "uafklaret" && d.rolle !== "hjaelper");
+    assert.deepEqual(vist.map((d) => d.navn), [], `${k.navn}: står uden retning`);
+    // Intet må forsvinde tavst: hvert nøgletal står enten på siden eller som udeladt.
+    assert.equal(b.drivere.length + b.udeladt.length, driverTabel(k, data.land).length,
+      `${k.navn}: et nøgletal er hverken vist eller udeladt`);
+  }
+});
+
+test("et udeladt nøgletal nævnes på kommunesiden sammen med begrundelsen", () => {
+  for (const k of data.kommuner) {
+    const b = beregnKommune(k, data.land);
+    if (b.udeladt.length === 0) continue;
+    const h = renderKommune(b, concito, ens);
+    for (const u of b.udeladt) {
+      assert.ok(h.includes(u.navn), `${k.navn}: ${u.navn} er ikke nævnt`);
+      assert.ok(h.includes(u.note), `${k.navn}: begrundelsen for ${u.navn} står ikke`);
     }
   }
 });
