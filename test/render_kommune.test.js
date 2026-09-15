@@ -393,6 +393,26 @@ test("affald: forbeholdet forklarer fejlen og siger at tallet ikke er rettet", (
     "det skal fremgå, at værktøjet ikke retter kildens tal");
 });
 
+test("affald: begge affaldstal står i tabellen som kontekst, men tæller ikke i overblikket", () => {
+  // Husholdningsaffald og genanvendelsesprocent er kontekst, ikke mål for forbruget.
+  // Målt 2026-09-15 over de 91 kommuner, hvor affaldet vises, fulgte affaldet ikke
+  // indkomsten (r = -0,25) og pegede oftere den modsatte vej. I Forbrugsprodukter og
+  // services er det derfor kun disponibel indkomst, der afgør retningen.
+  const overblik = renderKategorioverblik(bThisted, ens);
+  const tabel = renderIndikatorer(bThisted, concito);
+  for (const navn of ["Husholdningsaffald", "Genanvendelsesprocent"]) {
+    const d = bThisted.drivere.find((x) => x.navn === navn);
+    assert.equal(d.rolle, "hjaelper", navn);
+    assert.notEqual(d.signal, "uafklaret", `${navn}: retningen står stadig i tabellen`);
+    assert.ok(tabel.includes(`>${navn}<`), `${navn} skal stå i tabellen`);
+    assert.ok(!overblik.includes(navn), `${navn} må ikke stå i overblikket`);
+  }
+  // Meget affald (+29 %) flytter ikke mærkatet: indkomsten peger mod lavere.
+  const meget = renderKategorioverblik(beregnKommune({ ...thisted, affald_kg: 700 }, land), ens);
+  assert.ok(kategoriAfsnit(meget, "Forbrugsprodukter og services")
+    .includes(">peger mod lavere udledning<"));
+});
+
 // --- Nøgletal, hvis retning ikke kan afgøres for kommunen, vises ikke ---
 
 const bSpaerret = beregnKommune({ ...thisted, affald_indberetning: "bekraeftet_fejl" }, land);
@@ -648,13 +668,17 @@ test("overblik: konklusionen er et kort mærkat, ikke en sætning", () => {
   const h = renderKategorioverblik(bThisted, ens);
   const forventet = {
     "Transport": "peger mod højere udledning",
-    "Forbrugsprodukter og services": "trækker i hver sin retning",
+    "Forbrugsprodukter og services": "peger mod lavere udledning",
     "Energi og forsyning": "peger mod lavere udledning",
     "Bolig og byggeri": "peger mod lavere udledning",
   };
   for (const [kategori, maerkat] of Object.entries(forventet)) {
     assert.ok(kategoriAfsnit(h, kategori).includes(`>${maerkat}<`), `${kategori}: ${maerkat}`);
   }
+  // Med kort pendling (-34 %) trækker transportens nøgletal hver sin vej.
+  const modsat = renderKategorioverblik(
+    beregnKommune({ ...thisted, pendlingsafstand_km: 15 }, land), ens);
+  assert.ok(kategoriAfsnit(modsat, "Transport").includes(">trækker i hver sin retning<"));
   assert.ok(!/afviger 10 % eller mere, peger/.test(h), "den gamle sætning er væk");
   assert.ok(!/nøgletal peger mod højere udledning og/.test(h));
 });

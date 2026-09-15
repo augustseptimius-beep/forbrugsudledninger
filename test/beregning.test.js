@@ -207,6 +207,18 @@ test("beregnKommune: hjælpetal bliver stående, selv om de ingen retning har", 
   }
 });
 
+test("beregnKommune: et spærrende forbehold tager også et hjælpetal af siden", () => {
+  // Affaldstallene er hjælpetal, men hos kommuner, der deler affaldsindberetning,
+  // er tallene selv forkerte. Hjælpetal er undtaget, fordi de af natur ingen
+  // retning har - ikke når et forbehold har spærret den.
+  const r = beregnKommune({ ...thisted, affald_indberetning: "bekraeftet_fejl" }, land);
+  for (const navn of AFFALD) {
+    assert.equal(find(beregnKommune(thisted, land).drivere, navn).rolle, "hjaelper", navn);
+    assert.ok(!find(r.drivere, navn), `${navn} står stadig på siden`);
+    assert.ok(r.udeladt.some((u) => u.navn === navn), navn);
+  }
+});
+
 test("beregnKommune: manglende data er ikke det samme som en retning, der ikke kan afgøres", () => {
   // Greve mangler affaldstallene i fixturen. De skal stå med tankestreg, ikke
   // forsvinde.

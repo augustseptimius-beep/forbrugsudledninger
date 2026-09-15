@@ -121,10 +121,10 @@ export const KATEGORI = {
 //
 // rolle: "hjaelper" markerer nøgletal, der kun findes for at kvalificere et
 // andet tal - fritidshuse pr. helårsbolig forklarer husholdningstallene,
-// befolkningsudviklingen forklarer byggeaktiviteten. De står i tabellen som
-// alle andre, men holdes
-// ude af overblikkets fremhævelser, hvor de ellers ville fortrænge de tal, de
-// er sat i verden for at forklare.
+// befolkningsudviklingen forklarer byggeaktiviteten, affaldstallene er kontekst
+// til det forbrug, disponibel indkomst beskriver. De står i tabellen som alle andre,
+// men holdes ude af overblikket, hvor de ellers ville fortrænge de tal, de er
+// sat i verden for at forklare.
 const DRIVERE = [
   // Står under Forbrugsprodukter og services. Kilderne kobler også indkomsten til
   // flyrejser (NIRAS s. 20) og regner fødevarer med til "øvrigt forbrug" (NIRAS
@@ -229,13 +229,20 @@ const DRIVERE = [
   // Det var for groft: fejlen rammer de kommuner, der deler indberetning med
   // hinanden, ikke de øvrige 85. Retningen står derfor igen, og forbeholdet
   // sættes pr. kommune ud fra affald_indberetning - se INDBERETNING_FORBEHOLD.
+//
+// Begge er hjælpetal efter eksplicit valg: de er kontekst, ikke mål for
+// forbruget, og står med mærkat i tabellen uden at tælle i overblikket. Dér
+// afgør disponibel indkomst alene, hvilken vej Forbrugsprodukter og services
+// peger. Målt over de 91 kommuner, hvor affaldet vises, fulgte det ikke
+// indkomsten (r = -0,25), og husholdningsaffaldet rummer haveaffald, hvis andel
+// svinger fra under 1 til knap 50 % mellem kommunerne.
   { navn: "Husholdningsaffald", enhed: "kg/pers.", val: (m) => m.affald_kg,
-    type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "hoejere",
+    type: "relativ", kategori: KATEGORI.PRODUKTER, rolle: "hjaelper", paavirkning: "hoejere",
     forbehold: affaldForbehold,
     begrundelse: "Mere affald peger mod et større materielt forbrug." },
   { navn: "Genanvendelsesprocent", enhed: "pct.", val: (m) => m.genanvendelse_pct,
     andel: "0-100",
-    type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "lavere",
+    type: "relativ", kategori: KATEGORI.PRODUKTER, rolle: "hjaelper", paavirkning: "lavere",
     forbehold: affaldForbehold,
     begrundelse: "Genanvendte materialer erstatter produktion af nye." },
 ];
@@ -425,6 +432,7 @@ export function driverTabel(kommune, land) {
       // Forbeholdets note for sig. Spærrer forbeholdet retningen, vises
       // nøgletallet ikke, og noten er den begrundelse, siden giver i stedet.
       forbeholdNote: forbehold?.note ?? null,
+      spaerret: forbehold?.spaerrer === true,
     };
   });
 }
@@ -484,10 +492,13 @@ const FORVENTEDE_FELTER = [
  *  kommuner, der deler indberetning, og husholdningstallene pr. bolig, hvor der
  *  er flere fritidshuse end helårsboliger.
  *
- *  Hjælpetal er undtaget. De har aldrig en retning, fordi de står for at
- *  forklare et andet nøgletal, og ville ellers forsvinde fra alle 98 sider.
+ *  Hjælpetal uden retning er undtaget. De fleste har aldrig en retning, fordi de
+ *  står for at forklare et andet nøgletal, og ville ellers forsvinde fra alle 98
+ *  sider. Har et forbehold derimod spærret retningen, er tallet selv ramt - som
+ *  genanvendelsesprocenten hos kommuner, der deler affaldsindberetning - og så
+ *  tages også et hjælpetal af siden.
  *  Manglende data ("ukendt") rammes heller ikke - dér står en tankestreg. */
-const vises = (d) => d.rolle === "hjaelper" || d.signal !== "uafklaret";
+const vises = (d) => !d.spaerret && (d.rolle === "hjaelper" || d.signal !== "uafklaret");
 
 /** Fuld sammenligning for én kommune: indikatortabel, gruppering, udeladte
  *  nøgletal og manglende felter. */
