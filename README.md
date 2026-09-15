@@ -41,11 +41,9 @@ be computed without inventing coefficients, and this tool does not.
 
 ## Method
 
-The method generalises an analysis originally built for Thisted Municipality.
-Full documentation is in `docs/superpowers/specs/`.
-
 Data comes from Statistics Denmark and Klimaregnskabet.dk. Every source is
-listed with table id and period on the method page.
+listed with table id and period on the method page, which also documents the
+methodological choices.
 
 ## Running it locally
 

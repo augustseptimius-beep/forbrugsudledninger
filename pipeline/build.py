@@ -251,7 +251,7 @@ def main():
         print("  Om den spærrer afgøres af indeværende års tal og rydder sig selv.")
 
     thisted = next(p for p in kommune_poster if p["navn"] == "Thisted")
-    print("\nSanity-check Thisted mod v5-regneark (facit i parentes):")
+    print("\nSanity-check Thisted mod golden-fixturen (facit i parentes):")
     print(f"  disp_indkomst = {thisted['disp_indkomst']} (252934)")
     print(f"  folketal = {thisted['folketal']} (42572)")
     print(f"  biler_diesel = {thisted['biler_diesel']} (7114)")

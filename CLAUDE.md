@@ -4,8 +4,8 @@
 > starten af en ny arbejdssession, af mennesker og af AI-assistenter.
 >
 > **Se også:** `README.md` for formål og opsætning (engelsk), og
-> `docs/superpowers/specs/` for de normative beregningsregler og designvalg.
-> Denne fil er den praktiske driftsvejledning; specen er den faglige kontrakt.
+> `web/metode.html` for metode, kilder og designvalg. Denne fil er den
+> praktiske driftsvejledning; metodesiden er den faglige kontrakt.
 
 ## TL;DR (30 sekunder)
 
@@ -45,7 +45,7 @@ forbrugsudledninger/
 │   ├── dst_client.py, kommuner.py
 │   └── test/               <- pytest
 ├── web/
-│   ├── index.html          <- forside + kommunevisning (?kommune=787)
+│   ├── index.html          <- forside + kommunevisning (?kommune=101)
 │   ├── metode.html, om.html
 │   ├── beregning.js        <- ★ REN BEREGNINGSMOTOR. Ingen I/O, ingen DOM.
 │   ├── render.js           <- ★ RENE RENDER-FUNKTIONER. Data ind, HTML-streng ud.
@@ -141,9 +141,9 @@ npm test                              # 30+ JS-tests: motor og rendering
 cd pipeline && python3 -m pytest -q   # 44 Python-tests: pipeline
 ```
 
-Golden-testene i `test/golden.test.js` er facit mod det oprindelige regneark
-for Thisted (fidelitet) og Greve (fortegn). De må ikke ændres uden at
-regnearket ændres.
+Golden-testene i `test/golden.test.js` holder motoren fast på fastfrosne
+rådata for Thisted (fidelitet) og Greve (fortegn) i `test/fixtures.js`. De må
+kun ændres bevidst.
 
 ## Lokal preview
 

@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import unittest
 import build
 
-# Samme rå værdier som Plan 1's test/fixtures.js (land + Thisted).
+# Samme rå værdier som test/fixtures.js (land + Thisted).
 DST_DATA = {
     "Hele landet": {
         "disp_indkomst": 287682, "folketal": 6025603, "folketal_forrige": 5992734,
@@ -29,7 +29,7 @@ DST_DATA = {
 
 
 class TestBuildGolden(unittest.TestCase):
-    def test_thisted_matcher_plan1_fixture_eksakt(self):
+    def test_thisted_matcher_fixture_eksakt(self):
         post = build.saml_kommune_post("Thisted", DST_DATA, kode=787, region="Nordjylland")
         self.assertEqual(post["navn"], "Thisted")
         self.assertEqual(post["kode"], 787)

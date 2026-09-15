@@ -1,4 +1,4 @@
-"""Periodekonstanter og antagelser. ÅRLIG OPDATERING: se spec §5.5.
+"""Periodekonstanter og antagelser. ÅRLIG OPDATERING: se nedenfor og CLAUDE.md.
 
 Ved den årlige genkøring:
 1. Opdatér PERIODER til de nyeste tilgængelige perioder for hver kilde
@@ -49,8 +49,8 @@ PERIODER = {
 
 # --- EL-CO2 PR. KWH ER FJERNET ---
 #
-# Her stod tidligere EL_CO2_MANUAL med to håndaflæste værdier fra v5-regnearket
-# (Hele landet 51,8 og Thisted 26,7), og senere blev el-CO2 beregnet af
+# Her stod tidligere EL_CO2_MANUAL med to håndaflæste værdier (landet og én
+# kommune), og senere blev el-CO2 beregnet af
 # Energinets timedata. Begge dele er væk: strøm deles på det fælles net, så en
 # kommune har ingen egen el-faktor i et forbrugsbaseret regnskab. Uden Energinets
 # lokale VE-kredit viste tallet kun prisområdet. Husholdningernes strøm regnes

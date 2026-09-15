@@ -3,14 +3,14 @@ import assert from "node:assert/strict";
 import * as fixtures from "./fixtures.js";
 import { land, thisted, greve } from "./fixtures.js";
 
-test("fixture: kendte rå værdier fra regneark v5", () => {
+test("fixture: kendte rå værdier", () => {
   assert.equal(land.folketal, 6025603);
   assert.equal(land.disp_indkomst, 287682);
   assert.equal(thisted.folketal, 42572);
   assert.equal(thisted.disp_indkomst, 252934);
   assert.equal(greve.folketal, 54120);
   assert.equal(greve.disp_indkomst, 306548);
-  assert.equal(greve.affald_kg, null, "Greve mangler affald i regnearket");
+  assert.equal(greve.affald_kg, null, "Greve mangler affald i fixturen");
   assert.equal(thisted.region, "Nordjylland");
 });
 

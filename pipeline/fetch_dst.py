@@ -46,9 +46,9 @@ def fetch_gini():
             if r["INDHOLD"] not in dst_client.INGEN_DATA_MARKORER}
 
 
-# Midpoint-antagelse for BOL103's størrelsesintervaller. Egen beregning (som i v5-
-# regnearket), dokumenteret som antagelse. Giver ca. 1-2 m² afvigelse fra v5's manuelle
-# tal for de yderste, åbne intervaller ("- 50 kvm", "175 kvm og derover") - forventet.
+# Midpoint-antagelse for BOL103's størrelsesintervaller. Egen beregning, dokumenteret
+# som antagelse. Giver ca. 1-2 m² afvigelse fra manuelt opgjorte tal for de yderste,
+# åbne intervaller ("- 50 kvm", "175 kvm og derover") - forventet.
 _BOLIGSTOR_MIDPUNKT = {
     "- 50 kvm": 40, "50-74 kvm": 62, "75-99 kvm": 87, "100-124 kvm": 112,
     "125-149 kvm": 137, "150-174 kvm": 162, "175 kvm og derover": 195,
@@ -110,8 +110,8 @@ def fetch_boligareal():
     return {navn: sum_areal[navn] / sum_antal[navn] for navn in sum_antal if sum_antal[navn] > 0}
 
 
-# ANVEND-koder der IKKE er almindelige boliger - udelades fra byggeaktivitet, jf. v5's
-# facit-tal (verificeret: inkl. Kollegier gav 153 for Thisted 2024 i stedet for korrekt 103).
+# ANVEND-koder der IKKE er almindelige boliger - udelades fra byggeaktivitet
+# (verificeret: inkl. Kollegier gav 153 for Thisted 2024 i stedet for korrekt 103).
 _BYGGERI_IKKE_BOLIG = {"Kollegier", "Døgninstitutioner", "IKKE-FORDELT, UOPLYST"}
 
 
@@ -412,7 +412,7 @@ def fetch_all_dst():
     """Kører alle 9 DST-hentninger og samler dem i et {navn: {felt: værdi}}-dict,
     med feltnavne der matcher motorens datakontrakt 1:1. Kommuner uden data for et
     givent felt får det simpelthen ikke sat her - build.py fylder None ind for
-    manglende felter, jf. spec §5.4."""
+    manglende felter."""
     folketal, folketal_forrige = fetch_folketal()
     indkomst = fetch_indkomst()
     gini = fetch_gini()

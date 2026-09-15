@@ -6,18 +6,18 @@ import { land, thisted, greve } from "./fixtures.js";
 const naer = (a, b, tol = 1e-3) => assert.ok(Math.abs(a - b) < tol, `${a} ≈ ${b}`);
 const find = (t, navn) => t.find((d) => d.navn === navn);
 
-// GOLDEN: indikatortabellen mod regneark v5, fanen "Drivere".
+// GOLDEN: indikatortabellen mod fastfrosne referenceværdier.
 //
 // Testene mod det samlede aftryk i ton er væk, fordi estimatet er væk. Det
 // hvilede på fem koefficienter, som ingen af dem kunne kildebelægges - se
 // pipeline/constants.py. Indikatorernes værdier er derimod uændrede
-// faktuelle tal, og de skal fortsat reproducere regnearket eksakt.
+// faktuelle tal, og de skal fortsat reproducere referenceværdierne eksakt.
 
-test("GOLDEN — Thisteds indikatorer reproducerer regneark v5", () => {
+test("GOLDEN — Thisteds indikatorer reproducerer referenceværdierne", () => {
   const t = driverTabel(thisted, land);
-  // Parcelhus-andelen (regnearkets 0,7046) er taget af siden som dublet af
+  // Parcelhus-andelen (referenceværdi 0,7046) er taget af siden som dublet af
   // boligarealet. Boligtallene bag den indgår fortsat i husholdningstallenes nævner.
-  // Fossil-andel afløste Diesel-andel. Regnearkets dieseltal (0,3007) er
+  // Fossil-andel afløste Diesel-andel. Dieselandelen (0,3007) er
   // uændret og indgår stadig - det er nu lagt sammen med benzin.
   naer(find(t, "Fossil-andel").kommuneVaerdi, 0.8156);
   naer(find(t, "Biler pr. indbygger").kommuneVaerdi, 0.5557);

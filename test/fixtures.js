@@ -1,9 +1,9 @@
-// Golden rådata fra Beregninger_Forbrugsbaserede_udledninger_Thisted_v5.xlsx, fanen "Rådata".
-// Disse værdier er facit for golden-testene og må kun ændres, hvis regnearket ændres.
+// Golden rådata: fastfrosne tal fra offentlige registre for land, Thisted og Greve.
+// Disse værdier er facit for golden-testene og må kun ændres bevidst.
 //
-// Bilerne er regnearkets "I alt", altså alle personbiler. Pipelinen henter siden
+// Bilerne er "I alt", altså alle personbiler. Pipelinen henter siden
 // 2026-09-14 kun husholdningernes. Golden-testene holder motorens regnestykke mod
-// regnearket, ikke pipelinens afgrænsning.
+// de fastfrosne tal, ikke pipelinens afgrænsning.
 
 export const land = {
   navn: "Hele landet",
@@ -42,7 +42,7 @@ export const greve = {
   biler: 27441, biler_el: 6557, biler_plugin: 1654, biler_diesel: 3705,
   biler_benzin: 15520,
   opv_boliger_ialt: 22856, opv_olie: 319, opv_naturgas: 9040,
-  affald_kg: null, genanvendelse_pct: null, // "-" i regnearket
+  affald_kg: null, genanvendelse_pct: null, // ingen data
   elco2_g_kwh: null, boligpris_m2: 30347,
   ve_daekning_pct: null, pendlingsafstand_km: 20.7,
 };
