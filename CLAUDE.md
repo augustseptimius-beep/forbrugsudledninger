@@ -68,9 +68,10 @@ React-komponent, hvis platformen senere flettes ind i doughnut-projektet.
 
 ## To UI-mønstre der er arvet af faglige grunde
 
-1. **Retning bæres af formen, ikke kun farven.** Driver-tabellens retningsmarkør
-   bruger pil op, pil ned og vandret streg, fordi cirka 8 % af mænd er
-   farveblinde. Farven forstærker, den bærer ikke.
+1. **Retning bæres af formen, ikke kun farven.** Signalerne bruger fyldte og
+   åbne trekanter op og ned og en vandret streg, og teksten står altid ved
+   siden af, fordi cirka 8 % af mænd er farveblinde. Farven forstærker, den
+   bærer ikke.
 2. **Egen tooltip frem for `title`.** Browserens native tooltip har 0,5-1
    sekunds forsinkelse og opfører sig forskelligt fra browser til browser.
    Forbeholdene skal vises straks, både ved hover og ved tastaturfokus.

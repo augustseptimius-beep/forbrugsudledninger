@@ -4,7 +4,7 @@
 // platformen senere flettes ind i doughnut-projektet.
 
 // Optællingen bor i motoren, hvor den er testet - ikke her.
-import { optaelSignaler } from "./beregning.js";
+import { optaelSignaler, TAERSKEL_NIVEAU, TAERSKEL_MARKANT } from "./beregning.js";
 
 // ---------- Formatering ----------
 
@@ -69,52 +69,6 @@ export function interval(a, b, adskiller = " - ") {
  *  stregen, fordi den ser bedre ud i stor visning. */
 export function intervalTil(a, b) {
   return interval(a, b, " til ");
-}
-
-// ---------- Retningsmarkør ----------
-
-// Formen bærer retningen, ikke farven: cirka 8 % af mænd er farveblinde.
-// Overtaget fra doughnut-projektets TrendMarker.
-//
-// Markøren er bevidst NEUTRAL grå og vurderer ikke godt eller dårligt.
-// Motoren udleder kun retning af afvigelsens fortegn, og specen forbyder
-// auto-prioritering. En grøn/rød skala ville påtvinge en normativ dom, som
-// metoden ikke har truffet - og den ville være direkte forkert for drivere
-// som el-bil-andel, hvor "over land" er en fordel.
-const MARKOERER = {
-  "over land": {
-    form: '<path d="M6 1.5 L10.5 9 L1.5 9 Z" fill="currentColor"/>',
-    farve: "text-gray-500",
-    label: "over landsgennemsnittet",
-  },
-  "under land": {
-    form: '<path d="M6 10.5 L1.5 3 L10.5 3 Z" fill="currentColor"/>',
-    farve: "text-gray-500",
-    label: "under landsgennemsnittet",
-  },
-  "på niveau": {
-    form: '<line x1="1.5" y1="6" x2="10.5" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
-    farve: "text-gray-400",
-    label: "på niveau med landsgennemsnittet",
-  },
-  kontekst: {
-    form:
-      '<rect x="1" y="1" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1"/>' +
-      '<line x1="1" y1="11" x2="11" y2="1" stroke="currentColor" stroke-width="1"/>' +
-      '<line x1="1" y1="6" x2="6" y2="1" stroke="currentColor" stroke-width="1"/>' +
-      '<line x1="6" y1="11" x2="11" y2="6" stroke="currentColor" stroke-width="1"/>',
-    farve: "text-gray-300",
-    label: "ingen retning opgjort",
-  },
-};
-
-/** SVG-markør for en drivers retning. Formen skelner, farven gør ikke. */
-export function retningsMarkoer(retning) {
-  const m = MARKOERER[retning] ?? MARKOERER.kontekst;
-  return (
-    `<svg viewBox="0 0 12 12" class="inline-block h-3 w-3 shrink-0 ${m.farve}" ` +
-    `role="img" aria-label="${esc(m.label)}">${m.form}</svg>`
-  );
 }
 
 // ---------- Forbehold ----------
@@ -244,12 +198,6 @@ export function renderNationaltAftryk(c) {
   </section>`;
 }
 
-/** Energistyrelsens nationale vægt for en forbrugsgruppe. */
-function nationalVaegt(ens, kategori) {
-  const k = ens.kategorier.find((x) => x.navn === kategori);
-  return k ? { ton: k.ton, pct: k.pct } : null;
-}
-
 // ---------- Kategorioverblik ----------
 
 // Kategorier uden kommunale nøgletal. De står med i overblikket - de udgør
@@ -267,78 +215,64 @@ const UDEN_INDIKATOR = {
     + "erhvervsbyggeri. Tæller med i aftrykket, men er ikke borgernes eget forbrug.",
 };
 
-/** Enheden efter værdien. Springes over for procenter, hvor driverVaerdi
- *  allerede har sat tegnet - "16,2 % pct." ville være volapyk. */
-function enhedSuffiks(d) {
-  if (!d.enhed || d.enhed === "pct.") return "";
-  return `\u00A0${esc(d.enhed)}`;
-}
-
-// Konklusionen og optællingen tæller kun udsving på 10 % eller mere som en
-// retning. De små står for sig: talte et udsving på 6 % med, ville det stå lige
-// med et på 40 %, og konklusionen tæller - den vejer ikke.
+// Konklusionen tæller kun udsving på 10 % eller mere som en retning. De små står
+// for sig: talte et udsving på 6 % med, ville det stå lige med et på 40 %, og
+// konklusionen tæller - den vejer ikke.
 const peger = (vej) => (d) => d.signal === vej || d.signal === `markant ${vej}`;
 const pegerLidt = (d) => d.signal.startsWith("lidt ");
+const taeller = (d) => peger("højere")(d) || peger("lavere")(d);
 
-/** Kantfarven på konklusionsboksen følger konklusionens retning. Farven
- *  forstærker kun; teksten bærer altid signalet. */
-function kantFarve(drivere) {
-  const op = drivere.filter(peger("højere")).length;
-  const ned = drivere.filter(peger("lavere")).length;
-  if (op > 0 && ned === 0) return "border-red-400";
-  if (ned > 0 && op === 0) return "border-emerald-400";
-  return "border-gray-300";
+/** Konklusionen for en kategori, som et kort mærkat.
+ *
+ *  TÆLLER, VEJER IKKE. Mærkatet siger, hvilken vej de nøgletal, der afviger
+ *  10 % eller mere, peger. Det siger IKKE, at kategorien som helhed ligger over
+ *  eller under landsgennemsnittet - det ville kræve en vægtning af nøgletal mod
+ *  hinanden, som ikke findes i nogen kilde, og værktøjet har intet mål for
+ *  kategorien som helhed.
+ *
+ *  Det var før en hel sætning ("Begge nøgletal, der afviger 10 % eller mere,
+ *  peger ..."), fulgt af en optælling, der sagde det samme en gang til.
+ *  Nøgletallene står nu ved navn lige under, så mærkatet gentager ikke antallet. */
+function kategoriKonklusion(drivere) {
+  const op = drivere.some(peger("højere"));
+  const ned = drivere.some(peger("lavere"));
+  const neutral = "bg-gray-50 text-gray-700 border-gray-300";
+  const [tekst, klasse, tegn] =
+    op && ned ? ["trækker i hver sin retning", neutral, ""]
+    : op ? ["peger mod højere udledning", SIGNAL["højere"].klasse, "▲"]
+    : ned ? ["peger mod lavere udledning", SIGNAL["lavere"].klasse, "▼"]
+    : drivere.some(pegerLidt) ? ["peger kun lidt", neutral, ""]
+    : drivere.some((d) => d.signal === "på niveau") ? ["på landsgennemsnittet", neutral, ""]
+    : ["ingen data", SIGNAL.ukendt.klasse, ""];
+  return `<span class="inline-flex items-center gap-1 rounded-full border whitespace-nowrap
+    text-sm px-2.5 py-0.5 font-semibold ${klasse}">${
+    tegn ? `<span aria-hidden="true" class="text-[11px] leading-none">${tegn}</span>` : ""
+  }${esc(tekst)}</span>`;
 }
 
-/** Samlet konklusion for en kategori.
- *
- *  TÆLLER, VEJER IKKE. Konklusionen siger, hvilken vej nøgletallene peger, og
- *  hvor mange der peger hver vej. Den siger IKKE, at kategorien som helhed
- *  ligger over eller under landsgennemsnittet - det ville kræve en vægtning af
- *  nøgletal mod hinanden, som ikke findes i nogen kilde, og værktøjet har
- *  intet mål for kategorien som helhed.
- *
- *  Formuleringen holder den grænse: "nøgletallene peger mod ...", aldrig
- *  "kategorien ligger ...". */
-function kategoriKonklusion(drivere) {
-  const tael = (f) => drivere.filter(f).length;
-  const op = tael(peger("højere"));
-  const ned = tael(peger("lavere"));
-  const lidt = tael(pegerLidt);
-  const niveau = tael((d) => d.signal === "på niveau");
-  const retningsbaerende = op + ned;
+// Nøgletallene nævnes i signalets rækkefølge, så det, der peger op, står samlet
+// før det, der peger ned. Inden for samme signal står det største udsving først.
+const SIGNAL_ORDEN = Object.keys(SIGNAL);
+const efterSignal = (a, x) =>
+  SIGNAL_ORDEN.indexOf(a.signal) - SIGNAL_ORDEN.indexOf(x.signal)
+  || Math.abs(x.afvigelse ?? 0) - Math.abs(a.afvigelse ?? 0);
 
-  let tekst;
-  let klasse = "text-gray-700";
-  if (retningsbaerende === 0) {
-    tekst = lidt > 0
-      ? "Nøgletallene peger kun lidt - ingen ligger 10 % eller mere fra landsgennemsnittet."
-      : niveau > 0
-        ? "Nøgletallene ligger på landsgennemsnittet."
-        : "Der er ingen data for nøgletallene.";
-    klasse = "text-gray-600";
-  } else if (ned === 0 || op === 0) {
-    const antal = Math.max(op, ned);
-    const vej = op > 0 ? "højere" : "lavere";
-    klasse = op > 0 ? "text-red-800" : "text-emerald-800";
-    const indled = antal === 1 ? "Det eneste nøgletal, der afviger 10 % eller mere, peger"
-      : antal === 2 ? "Begge nøgletal, der afviger 10 % eller mere, peger"
-      : `Alle ${antal} nøgletal, der afviger 10 % eller mere, peger`;
-    tekst = `${indled} mod ${vej} udledning end landsgennemsnittet.`;
-  } else {
-    klasse = "text-gray-700";
-    tekst = `${op} nøgletal peger mod højere udledning og ${ned} mod lavere - `
-      + "de trækker i hver sin retning.";
-  }
+/** Et nøgletal ved navn med sit retningstegn - ingen værdi, den står i tabellen.
+ *  Tegnet er skjult for skærmlæsere, som i stedet får signalets tekst. Et
+ *  nøgletal uden data siger det med ord, så det ikke forsvinder tavst. */
+function noegletalNavn(d) {
+  const s = SIGNAL[d.signal] ?? SIGNAL.ukendt;
+  const efter = d.signal === "ukendt"
+    ? " (ingen data)"
+    : `<span class="sr-only">: ${esc(s.tekst)}</span>`;
+  return `<li><span aria-hidden="true" class="mr-1 text-[10px]">${s.tegn}</span>${
+    esc(d.navn)}${efter}</li>`;
+}
 
-  const forbehold = [];
-  if (retningsbaerende > 1) forbehold.push("nøgletallene er talt, ikke vejet mod hinanden");
-
-  return `<p class="text-base font-semibold leading-snug ${klasse}">${esc(tekst)}</p>${
-    forbehold.length
-      ? `<p class="text-xs text-gray-500 mt-0.5">${
-          forbehold.map(esc).join(" &middot; ")}</p>`
-      : ""}`;
+function navneliste(drivere, klasse) {
+  if (drivere.length === 0) return "";
+  return `<ul class="mt-1.5 flex flex-wrap gap-x-4 gap-y-0.5 text-sm ${klasse}">${
+    [...drivere].sort(efterSignal).map(noegletalNavn).join("")}</ul>`;
 }
 
 /** Kategorioverblikket øverst på kommunesiden.
@@ -352,6 +286,12 @@ function kategoriKonklusion(drivere) {
  *
  *  Rækkefølgen er Energistyrelsens nationale vægt, faldende. Det er kildens
  *  egen ordning, ikke vores, og den modvirker skævheden.
+ *
+ *  INGEN TAL. Overblikket viste før kommunens værdi, landets og forskellen for
+ *  hvert nøgletal - tabellen en gang til, sat op som kort og næsten dobbelt så
+ *  lang som tabellen selv. Nu siger det kun, hvilken vej hvert nøgletal peger,
+ *  så de syv kategorier kan ses og sammenlignes på én skærm. Tallene står én
+ *  gang, i tabellen nedenfor.
  *
  *  Værktøjet vælger IKKE kategori. Det viser vægten, hvad der kan måles, og
  *  hvad der ikke kan. */
@@ -367,59 +307,18 @@ export function renderKategorioverblik(b, ens) {
       (d) => d.kategori === k.navn && d.rolle !== "hjaelper");
     const blind = UDEN_INDIKATOR[k.navn];
 
-    let hoejre;
-    if (blind) {
-      hoejre = `<div class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2
-        text-xs text-amber-900"><strong class="font-semibold">${
-        k.navn === "Føde- og drikkevarer" ? "Ingen kommunal indikator."
-          : "Ingen kommunal variation."}</strong> ${esc(blind)}</div>`;
-    } else {
-      const tael = (f) => drivere.filter(f).length;
-      const dele = [];
-      const op = tael(peger("højere"));
-      const ned = tael(peger("lavere"));
-      const lidt = tael(pegerLidt);
-      const niv = tael((d) => d.signal === "på niveau");
-      if (op) dele.push(`${op} peger mod højere udledning`);
-      if (ned) dele.push(`${ned} peger mod lavere`);
-      if (lidt) dele.push(`${lidt} peger lidt`);
-      if (niv) dele.push(`${niv} hverken op eller ned`);
+    const hoejre = blind
+      ? `<p class="text-sm text-gray-600"><strong class="font-semibold text-gray-800">${
+          k.navn === "Føde- og drikkevarer" ? "Ingen kommunal indikator."
+            : "Ingen kommunal variation."}</strong> ${esc(blind)}</p>`
+      : `<div>${kategoriKonklusion(drivere)}${
+          navneliste(drivere.filter(taeller), "text-gray-900")}${
+          navneliste(drivere.filter((d) => !taeller(d)), "text-gray-500")}</div>`;
 
-      const punkter = drivere
-        .filter((d) => d.afvigelse != null)
-        .sort((a, x) => Math.abs(x.afvigelse) - Math.abs(a.afvigelse))
-        .map((d) => `<li class="py-1.5 border-b border-dotted border-gray-100 last:border-0">
-          <span class="flex items-baseline justify-between gap-3">
-            <span class="text-sm text-gray-800">${esc(d.navn)}</span>
-            <span class="text-sm font-semibold tabular-nums whitespace-nowrap
-              inline-flex items-baseline gap-1.5">
-              ${d.retning !== "kontekst" ? retningsMarkoer(d.retning) : ""}
-              ${driverVaerdi(d, d.kommuneVaerdi)}${enhedSuffiks(d)}</span>
-          </span>
-          <span class="block text-xs text-gray-500 tabular-nums">landet
-            ${driverVaerdi(d, d.landVaerdi)}${enhedSuffiks(d)} &middot; ${driverAfvigelse(d)}</span>
-          <span class="mt-1 block">${signalMaerkat(d.signal, "", true)}</span>
-        </li>`).join("");
-
-      hoejre = `<div>
-        <div class="mb-2 rounded-md border-l-4 ${kantFarve(drivere)} bg-gray-50 px-3 py-2.5">
-          ${kategoriKonklusion(drivere)}
-        </div>
-        <p class="text-xs text-gray-500 mb-1.5"><strong class="font-medium text-gray-700">${
-          drivere.length} nøgletal</strong>${
-          dele.length ? ` &middot; ${dele.join(", ")}` : ""}</p>
-        <ul class="list-none m-0 p-0">${punkter}</ul>
-      </div>`;
-    }
-
-    // Både tallet og søjlen er NATIONALE og ordret ens på alle 98 kommunesider.
-    // Uden ordet "nationalt" læses "1,84 ton pr. indbygger" på Albertslunds side
-    // som Albertslunds eget transportaftryk - et tal, værktøjet slet ikke kan
-    // opgøre. aria-label gentager det for skærmlæsere, som ikke ser søjlen.
-    // Ingen søjle. Den viste kategoriens andel af det NATIONALE aftryk og var
-    // derfor ordret ens på alle 98 kommunesider - den bar ingen oplysning om
-    // kommunen, mens alt andet på siden gør. Tallet står i teksten lige over.
-    return `<div class="grid grid-cols-1 sm:grid-cols-[13rem_1fr] gap-2 sm:gap-5
+    // Vægten er NATIONAL og ordret ens på alle 98 kommunesider. Uden ordet
+    // "nationalt" læses "1,84 ton pr. indbygger" på Albertslunds side som
+    // Albertslunds eget transportaftryk - et tal, værktøjet slet ikke kan opgøre.
+    return `<div class="grid grid-cols-1 sm:grid-cols-[13rem_1fr] gap-1.5 sm:gap-5
       border-t border-gray-100 py-3 first:border-0">
       <div>
         <div class="text-sm font-semibold text-gray-900">${esc(k.navn)}</div>
@@ -431,34 +330,30 @@ export function renderKategorioverblik(b, ens) {
     </div>`;
   }).join("");
 
+  const niveau = tal(TAERSKEL_NIVEAU * 100);
+  const markant = tal(TAERSKEL_MARKANT * 100);
   return `<section class="${KORT} p-5 sm:p-6">
     <div class="flex items-baseline justify-between gap-3 flex-wrap">
       <h2 class="text-xl font-bold text-gray-900">Forbrugskategorier i ${esc(b.navn)}</h2>
       <span class="text-sm text-gray-600">Energistyrelsen ${esc(ens.nationalt_aftryk.aar)}
         &middot; ${tal(ens.nationalt_aftryk.ton, 2)} ton pr. indbygger</span>
     </div>
-    <p class="mt-1 text-sm text-gray-600 max-w-3xl">Til venstre står kategoriens vægt i
-      det <strong>nationale</strong> aftryk. Den er ens på alle 98 kommunesider og siger
-      intet om ${esc(b.navn)}. Til højre står det, der faktisk er målt om kommunen.
-      Værktøjet vælger ikke kategori.</p>
+    <p class="mt-1 text-sm text-gray-600 max-w-3xl">Vægten til venstre er national og
+      ens på alle 98 kommunesider. Til højre står, hvilken vej nøgletallene for
+      ${esc(b.navn)} peger. Tallene står i
+      <a href="#noegletal" class="underline hover:text-gray-900">tabellen nedenfor</a>.</p>
 
-    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-      <p class="rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600">
-        <strong class="block text-gray-800">Hvad tallet er</strong>
-        Kommunens værdi og landsgennemsnittet, med afvigelsen mellem dem.
-        Værktøjet sammenligner ikke kommuner med hinanden.</p>
-      <p class="rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-600">
-        <strong class="block text-gray-800">Hvad det peger mod</strong>
-        Om nøgletallet trækker udledningen op eller ned. Det handler om udledningen,
-        ikke om værdien: færre elbiler er en lavere andel, men peger mod højere udledning.</p>
-    </div>
+    <div class="mt-3">${raekker}</div>
 
-    <div class="mt-4">${raekker}</div>
-
-    <p class="mt-4 border-t border-gray-100 pt-3 text-xs text-gray-500 max-w-3xl">
+    <p class="mt-3 border-t border-gray-100 pt-3 text-xs text-gray-500 max-w-3xl">
+      ▲ og ▼ peger mod højere og lavere udledning og afviger ${niveau}&nbsp;% eller mere
+      fra landsgennemsnittet, ▲▲ og ▼▼ ${markant}&nbsp;% eller mere. △ og ▽ peger kun lidt
+      og tæller ikke med i mærkatet. Retningen handler om udledningen, ikke om værdien:
+      færre elbiler er en lavere andel, men peger mod højere udledning.</p>
+    <p class="mt-2 text-xs text-gray-500 max-w-3xl">
       <strong class="font-semibold text-gray-600">Dette er ikke en prioritering.</strong>
-      Rækkefølgen er Energistyrelsens nationale vægte, ikke en vurdering af kommunen.
-      Kommunal indflydelse kan værktøjet ikke opgøre.</p>
+      Nøgletallene er talt, ikke vejet mod hinanden, og rækkefølgen er Energistyrelsens
+      nationale vægt. Kommunal indflydelse kan værktøjet ikke opgøre.</p>
   </section>`;
 }
 
@@ -586,16 +481,16 @@ function udeladtNote(b) {
 /** Én samlet tabel med alle nøgletal, grupperet efter kategori.
  *
  *  Erstatter fem foldbare kort. Nitten rækker er ikke meget, og at skulle
- *  klikke fem gange for at se dem gjorde sammenligning på tværs umulig. */
-export function renderIndikatorer(b, c, ens) {
+ *  klikke fem gange for at se dem gjorde sammenligning på tværs umulig.
+ *
+ *  Det eneste sted på siden, hvor tallene står. Den nationale vægt står i
+ *  overblikket og gentages ikke i gruppeoverskrifterne. */
+export function renderIndikatorer(b, c) {
   const grupper = b.grupper.map((g) => {
-    const vaegt = ens ? nationalVaegt(ens, g.kategori) : null;
     const note = kategoriNote(c, g.kategori);
     const overskrift = `<tr class="bg-gray-50">
       <th colspan="5" class="px-3 py-2 text-left">
         <span class="text-sm font-semibold text-gray-900">${esc(g.kategori)}</span>
-        ${vaegt ? `<span class="ml-2 text-xs font-normal text-gray-600">nationalt
-          ${tal(vaegt.ton, 1)} ton &middot; ${vaegt.pct}&nbsp;% af aftrykket</span>` : ""}
         ${note ? `<span class="block text-xs font-normal text-gray-500">${note}</span>` : ""}
       </th></tr>`;
 
@@ -624,7 +519,7 @@ export function renderIndikatorer(b, c, ens) {
     return overskrift + raekker;
   }).join("");
 
-  return `<section class="${KORT} mt-6 p-5 sm:p-6">
+  return `<section id="noegletal" class="${KORT} mt-6 p-5 sm:p-6">
     <h2 class="text-lg font-semibold text-gray-900">Alle nøgletal</h2>
     <p class="mt-1 text-sm text-gray-600 max-w-3xl">Grupperet efter den forbrugskategori,
       de vedrører. "Peger mod" er den eneste vurdering i værktøjet - hold musen over
@@ -647,11 +542,20 @@ export function renderIndikatorer(b, c, ens) {
 
 // ---------- Hvad værktøjet ikke kan vise ----------
 
-/** De huller, der er kendte og bevidste. Skal stå i outputtet, ikke gemmes. */
+// Offentligt forbrug står i NIRAS' liste, men kræver ingen data: det fordeles
+// ligeligt og varierer ikke mellem kommuner. Det siger overblikkets række
+// allerede, med samme kilde.
+const I_OVERBLIKKET = new Set(["Offentligt forbrug og investeringer"]);
+
+/** De huller, der er kendte og bevidste. Skal stå i outputtet, ikke gemmes.
+ *
+ *  Fødevarehullet står i overblikket og gentages ikke her. Afsnittet brugte
+ *  CONCITO's 2,5 ton, mens overblikket bruger Energistyrelsens 1,65 ton - to
+ *  nationale tal for samme kategori på samme side. */
 export function renderHuller(c) {
-  const mad = c.kategorier.find((k) => k.navn === "Fødevarer");
-  const okse = c.foedevare_underkategorier.find((x) => x.navn === "Oksekød");
-  const anbefalinger = c.niras_anbefalinger.map((a) => `<li class="mt-2">
+  const anbefalinger = c.niras_anbefalinger
+    .filter((a) => !I_OVERBLIKKET.has(a.omraade))
+    .map((a) => `<li class="mt-2">
       <strong class="font-medium text-gray-700">${esc(a.omraade)}.</strong>
       ${esc(a.anbefaling)}
       <span class="block text-gray-500">${esc(a.tilgaengelighed)}
@@ -662,15 +566,7 @@ export function renderHuller(c) {
   return `<section class="${KORT} p-5 sm:p-6 mt-6">
     <h3 class="text-lg font-semibold text-gray-900">Hvad værktøjet ikke kan vise</h3>
 
-    <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Fødevarer.</strong>
-      CONCITO opgør fødevarer til <strong>${tal(mad.ton, 1)} ton</strong> pr. dansker
-      (${mad.pct}&nbsp;%), heraf oksekød alene <strong>${tal(okse.ton, 1)} ton</strong>
-      (${okse.pct_af_foedevarer}&nbsp;% af fødevarerne), ${kildeHenvisning(c, okse.side)}.
-      Det er den næststørste kategori i det nationale aftryk, og der findes ingen
-      offentligt tilgængelig kommunal indikator for den. Værktøjet er derfor blindt
-      på en femtedel af aftrykket.</p>
-
-    <p class="mt-3 text-sm text-gray-700 max-w-3xl"><strong>Et samlet kommunalt tal.</strong>
+    <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Et samlet kommunalt tal.</strong>
       Værktøjet beregner ikke, hvor mange ton CO2e en kommunes borgere udleder. Et
       sådant tal ville kræve koefficienter, der ikke findes i nogen af kilderne.
       <a href="${esc(niras.url)}" target="_blank" rel="noopener"
@@ -690,26 +586,26 @@ export function renderKommuneOverskrift(b) {
   ].filter(Boolean).join(" &middot; ");
 
   const printknap = `<button type="button" onclick="window.print()"
-      class="no-print no-embed mt-4 inline-flex items-center gap-1.5 rounded-md border
-             border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700
+      class="no-print no-embed inline-flex items-center gap-1.5 rounded-md border
+             border-gray-300 bg-white px-2.5 py-1 text-xs text-gray-700
              hover:bg-gray-50 hover:border-gray-400 transition-colors">
-      <svg viewBox="0 0 16 16" class="h-4 w-4" aria-hidden="true" fill="none"
+      <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" aria-hidden="true" fill="none"
         stroke="currentColor" stroke-width="1.5">
         <path d="M4 6V2h8v4M4 12H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1"/>
         <rect x="4" y="10" width="8" height="4"/></svg>
       Print eller gem som PDF</button>`;
 
-  return `<section class="mb-6">
-    <div class="flex items-baseline justify-between gap-3 flex-wrap">
+  return `<section class="mb-5">
+    <div class="flex items-center justify-between gap-x-4 gap-y-2 flex-wrap">
       <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">${esc(b.navn)}</h2>
-      <span class="text-xs text-gray-500">${meta}</span>
+      <div class="flex items-center gap-3 flex-wrap">
+        <span class="text-xs text-gray-500">${meta}</span>${printknap}
+      </div>
     </div>
-    <p class="mt-2 text-sm text-gray-600 max-w-3xl">Kommunens offentligt tilgængelige
-      nøgletal sammenlignet med landsgennemsnittet, grupperet efter den forbrugskategori
-      de vedrører. Alle tal er hentet direkte fra de kilder, der står på
-      <a href="metode.html" class="underline hover:text-gray-900">metodesiden</a>.
-      Værktøjet lægger dem ikke sammen til et samlet klimaaftryk - se hvorfor nederst.</p>
-    ${printknap}
+    <p class="mt-2 text-sm text-gray-600 max-w-3xl">Offentligt tilgængelige nøgletal for
+      kommunen, stillet op mod landsgennemsnittet. Værktøjet lægger dem ikke sammen til et
+      samlet klimaaftryk - se hvorfor nederst. Kilderne står på
+      <a href="metode.html" class="underline hover:text-gray-900">metodesiden</a>.</p>
   </section>`;
 }
 
@@ -742,7 +638,7 @@ export function renderKommune(b, c, ens) {
     embedForbehold(),
     renderKommuneOverskrift(b),
     ens ? renderKategorioverblik(b, ens) : "",
-    renderIndikatorer(b, c, ens),
+    renderIndikatorer(b, c),
     renderHuller(c),
     `<section class="mt-6 text-xs text-gray-500 max-w-3xl">
       <p><strong class="font-semibold text-gray-600">Uofficielt værktøj.</strong>
