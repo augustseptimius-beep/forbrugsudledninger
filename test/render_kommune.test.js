@@ -725,3 +725,19 @@ test("overblik: ingen rå HTML-entiteter slipper ud i teksten", () => {
     assert.ok(!h.includes("&amp;nbsp;"), `${b.navn}: rå &nbsp;`);
   }
 });
+
+test("enheder: beløb pr. år siger det, så tallet ikke læses som månedligt", () => {
+  // 19.738 kr. er ikke åbenlyst forkert som månedstal, bare urealistisk, og så
+  // tvivler læseren på tallet i stedet for på enheden. Beløb, der er årlige,
+  // skal sige det.
+  const h = renderKommune(bThisted, concito, ens);
+  for (const enhed of ["kr./år", "kr./indb./år"]) {
+    assert.ok(h.includes(enhed), `enheden ${enhed} mangler i tabellen`);
+  }
+  const beloeb = bThisted.drivere.filter((d) => d.enhed.startsWith("kr"));
+  assert.ok(beloeb.length >= 2, "der skal være mindst to beløbsnøgletal");
+  for (const d of beloeb) {
+    assert.ok(d.enhed.endsWith("/år"),
+      `${d.navn} har enheden "${d.enhed}" uden tidsangivelse`);
+  }
+});

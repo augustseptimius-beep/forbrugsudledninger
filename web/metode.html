@@ -128,12 +128,23 @@
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Forbrugsundersøgelsen er undersøgt og fravalgt</h2>
+  <h2 class="text-xl font-semibold text-gray-900">Forbrugsundersøgelsen: hvad der er fravalgt, og hvad der bruges</h2>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Danmarks Statistiks Forbrugsundersøgelse opgør, hvad husstandene bruger penge
     på, fordelt på forbrugsgrupper. Den er den ene halvdel af NIRAS' anbefaling
     ovenfor, og den er offentligt tilgængelig. Vi har undersøgt, om den kan bruges
-    uden den kommercielle segmenteringsmodel, der er den anden halvdel. Det kan den
-    ikke, og grunden er værd at kende, fordi tabellerne umiddelbart ser anvendelige ud.</p>
+    uden den kommercielle segmenteringsmodel, der er den anden halvdel. Som en generel
+    erstatning kan den ikke, og grunden er værd at kende, fordi tabellerne umiddelbart
+    ser anvendelige ud.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Én anvendelse er der alligevel.</strong>
+    Nøgletallet <em>Fødevareforbrug pr. indbygger</em> bygger på FU17, men ikke som et
+    regionstal. Det følger fordelingsnøglen fra
+    <a href="https://doi.org/10.1016/j.ecolecon.2020.106778" target="_blank" rel="noopener"
+      class="underline decoration-dotted hover:text-gray-900">Osei-Owusu m.fl. (2020)</a>,
+    hvor regionens forbrugskvotient ganges med <em>kommunens egen</em> disponible
+    indkomst. De to indvendinger nedenfor rammer derfor forskelligt: den om fortegnet
+    gælder ikke, fordi kommunens eget tal bærer variationen, mens den om at tallet er
+    indkomst gælder fuldt ud. Den står skrevet ind i nøgletallets egen begrundelse på
+    kommunesiderne, så læseren ser den dér og ikke kun her.</p>
 
   <h3 class="mt-4 font-semibold text-gray-900 text-sm">Regionstallene er reelle, men de er indkomst</h3>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">FU17 opgør forbruget på de fem regioner. Forskellene er ikke stikprøvestøj:
@@ -145,6 +156,11 @@
     Værktøjet viser i forvejen disponibel indkomst for hver af de 98 kommuner, og
     CONCITO (2023) s. 6 og s. 30 peger på netop indkomsten som bæreren. Et regionstal
     ville tilføje den samme oplysning i grovere opløsning.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det gælder også fødevarenøgletallet, som er
+    beholdt alligevel: målt over de 98 kommuner følger det disponibel indkomst med
+    r = +0,94. Det står med, fordi fødevarerne vejer 17 % af det nationale aftryk, og en
+    kategori uden retning læses som en kategori uden problem. Det er et valg om
+    formidling, ikke et tal med ny oplysning i.</p>
 
   <h3 class="mt-4 font-semibold text-gray-900 text-sm">En region beskriver ikke sine kommuner</h3>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Spændet i disponibel indkomst mellem regionsgennemsnittene er 20,9 pct.point.
@@ -155,6 +171,10 @@
     forbrugstal ville fortælle Albertslund, at kommunen forbruger mere end
     landsgennemsnittet. Det er ikke en unøjagtighed, som et forbehold kan dække -
     fortegnet er forkert.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det er grunden til, at fødevarenøgletallet
+    ikke bruger regionens forbrug, men regionens forbrugskvotient ganget med kommunens
+    egen indkomst. Albertslund lander derfor 17 pct. under landsgennemsnittet, i takt med
+    kommunens egen indkomst, og ikke over det.</p>
 
   <h3 class="mt-4 font-semibold text-gray-900 text-sm">Transport er tavs</h3>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Transport er den største forbrugskategori, og det er præcis dér,

@@ -153,7 +153,7 @@ const DRIVERE = [
   // s. 22), men nøgletallet står kun ét sted, så det ikke tæller dobbelt i
   // overblikket. Det lå tidligere i en egen kategori, "På tværs af kategorier",
   // som ikke findes blandt Energistyrelsens - og nåede derfor aldrig overblikket.
-  { navn: "Disponibel indkomst", enhed: "kr.", val: (m) => m.disp_indkomst,
+  { navn: "Disponibel indkomst", enhed: "kr./år", val: (m) => m.disp_indkomst,
     type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "hoejere",
     forbehold: indkomstForbehold,
     begrundelse: "CONCITO (2023) s. 27: mennesker med lav indkomst forbruger ofte færre "
@@ -173,7 +173,7 @@ const DRIVERE = [
   // fylder 17 % af det nationale aftryk. En kategori uden retning læses som en
   // kategori uden problem. Dubletten er skrevet ind i begrundelsen, så læseren
   // ser den frem for at opdage den.
-  { navn: "Fødevareforbrug pr. indbygger", enhed: "kr./indb.",
+  { navn: "Fødevareforbrug pr. indbygger", enhed: "kr./indb./år",
     val: (m) => m.foedevare_forbrug_pr_indb,
     type: "relativ", kategori: KATEGORI.FOEDEVARER, paavirkning: "hoejere",
     // Tallet ER kommunens disponible indkomst ganget med en regionskvotient, så
