@@ -16,11 +16,13 @@ import os
 import sys
 
 import fetch_dst
+import fetch_forbrug
 import fetch_pendling
 import fetch_klimaregnskabet
 import sources
 import concito
 import ens
+import osei_owusu
 from constants import PERIODER
 from kommuner import KOMMUNER
 
@@ -40,12 +42,14 @@ FORVENTEDE_FELTER = [
     "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
     "husholdning_el_tj", "husholdning_el_co2_ton",
     "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton",
+    "foedevare_forbrug_pr_indb",
 ]
 
 
 def saml_kommune_post(navn, dst_data, kode=None, region=None,
                       pendling=None,
-                      fritidshuse=None, husholdning=None, affald_indberetning=None):
+                      fritidshuse=None, husholdning=None, affald_indberetning=None,
+                      foedevareforbrug=None):
     """Samler ét kommune- (eller land-) objekt i motorens datakontrakt.
     Ren funktion - ingen I/O - så den kan testes uden netværk (Task 10)."""
     post = dict(dst_data.get(navn, {}))
@@ -74,6 +78,9 @@ def saml_kommune_post(navn, dst_data, kode=None, region=None,
     # FORVENTEDE_FELTER - der ville den blive talt som manglende data for de
     # 85 kommuner, hvor alt er i orden.
     post["affald_indberetning"] = (affald_indberetning or {}).get(navn)
+    # Fødevareforbrug pr. indbygger i kroner, beregnet efter Osei-Owusu et al.
+    # (2020), ligning S9-S11. Ikke et udledningstal - se osei_owusu.py.
+    post["foedevare_forbrug_pr_indb"] = (foedevareforbrug or {}).get(navn)
     for felt in FORVENTEDE_FELTER:
         post.setdefault(felt, None)
     return post
@@ -97,6 +104,48 @@ def _skriv_kr_cache(husholdning):
     with open(KR_CACHE_PATH, "w", encoding="utf-8") as f:
         json.dump({"aar": PERIODER["KLIMAREGNSKAB_AAR"],
                    "kommuner": {str(k): v for k, v in husholdning.items()}}, f)
+
+
+def _beregn_foedevareforbrug(dst_data):
+    """Fødevareforbrug pr. indbygger for alle 98 kommuner og for landet.
+
+    Fejler en af de to tabeller, står nøgletallet tomt for alle, og resten af
+    datasættet er upåvirket - samme regel som for de øvrige valgfrie kilder."""
+    vindue = osei_owusu.kvotient_vindue(PERIODER["FORBRUG_AAR"])
+    print(f"Henter DST FU17 og INDKF111 (fødevareforbrug, {vindue[0]}-{vindue[-1]})...")
+    try:
+        raa = fetch_forbrug.fetch_kvotient_vindue(vindue)
+        if not raa:
+            raise RuntimeError("ingen årgange hentet")
+        kvotient_pr_aar = {
+            aar: osei_owusu.relativ_kvotient(forbrug, indkomst, aar)
+            for aar, (forbrug, indkomst) in raa.items()
+        }
+        # Niveauet fra det nyeste år, den indbyrdes placering udjævnet over
+        # vinduet. Så er den viste værdi kroner brugt på mad i dag, mens
+        # forskellen mellem regionerne ikke hænger på én stikprøve.
+        seneste = max(raa)
+        kvotient_dst = osei_owusu.skaler_kvotient(
+            osei_owusu.udjaevn_kvotient(kvotient_pr_aar),
+            osei_owusu.landets_kvotient(*raa[seneste]))
+        # Tilbage til KOMMUNER's korte regionsnavne.
+        kvotient = {kort: kvotient_dst[langt]
+                    for kort, langt in fetch_forbrug.REGION_DST.items()
+                    if langt in kvotient_dst}
+        indkomst_i_alt = fetch_forbrug.fetch_indkomst_i_alt(PERIODER["INDKOMST_AAR"])
+    except Exception as fejl:
+        print(f"  ADVARSEL: {fejl}. Fødevarenøgletallet står tomt.")
+        return {}
+
+    folketal = {navn: v.get("folketal") for navn, v in dst_data.items()}
+    region_pr_kommune = {navn: region for _, navn, region in KOMMUNER}
+    pr_kommune = osei_owusu.forbrug_pr_indbygger(
+        kvotient, indkomst_i_alt, folketal, region_pr_kommune)
+    pr_kommune["Hele landet"] = osei_owusu.landets_forbrug_pr_indbygger(
+        pr_kommune, folketal)
+    print(f"  {len(kvotient_pr_aar)} årgange udjævnet, "
+          f"{sum(1 for v in pr_kommune.values() if v is not None)} områder beregnet.")
+    return pr_kommune
 
 
 def find_manglende(post):
@@ -158,8 +207,11 @@ def main():
         affald_indberetning, _selskaber = {}, {}
         print(f"  ADVARSEL: kunne ikke hente LABY24 ({fejl}). Alle står uden forbehold.")
 
+    foedevareforbrug = _beregn_foedevareforbrug(dst_data)
+
     land_post = saml_kommune_post("Hele landet", dst_data, pendling=pendling,
-                                  fritidshuse=fritidshuse)
+                                  fritidshuse=fritidshuse,
+                                  foedevareforbrug=foedevareforbrug)
     # Landets husholdningstal er summen af kommunernes, ikke et selvstændigt
     # opslag - så tæller og nævner dækker præcis det samme område.
     def _sum(felt):
@@ -187,7 +239,8 @@ def main():
             navn, dst_data, kode=kode, region=region,
             pendling=pendling,
             fritidshuse=fritidshuse, husholdning=husholdning,
-            affald_indberetning=affald_indberetning))
+            affald_indberetning=affald_indberetning,
+            foedevareforbrug=foedevareforbrug))
 
     # Ingen "konstanter" i outputtet: der er ingen beregningskoefficienter
     # tilbage i modellen. De nationale sammenligningstal ligger i concito.json

@@ -86,6 +86,37 @@ KILDER = [
                      "det fælles net. Fjernvarmens faktor er fjernvarmenettets egen og "
                      "bruges, som den er.",
     },
+    {
+        "id": "FU17",
+        "navn": "Forbrug efter forbrugsgruppe, region, prisenhed og tid",
+        "udbyder": DST,
+        "metode": "api",
+        "periode_noegle": "FORBRUG_AAR",
+        "licens": DST_LICENS,
+        "url": "https://www.statistikbanken.dk/FU17",
+        "felter": ["foedevare_forbrug_pr_indb"],
+        "forbehold": "Forbrugsundersøgelsen er en stikprøve, og et enkelt års "
+                     "regionskvotient er ustabil. Kvotienten udjævnes derfor over "
+                     "de ti seneste år. Målt over 2015-2024 adskiller kun Sjælland "
+                     "(6,9 % over landet) og Midtjylland (4,9 % under) sig påviseligt; "
+                     "Hovedstaden, Syddanmark og Nordjylland kan ikke skelnes fra "
+                     "landsgennemsnittet og heller ikke indbyrdes. Perioden er den "
+                     "nyeste årgang; de ni foregående hentes med.",
+    },
+    {
+        "id": "INDKF111",
+        "navn": "Familiernes indkomster efter område",
+        "udbyder": DST,
+        "metode": "api",
+        "periode_noegle": "INDKOMST_AAR",
+        "licens": DST_LICENS,
+        "url": "https://www.statistikbanken.dk/INDKF111",
+        "felter": [],
+        "forbehold": "Leverer både nævneren i regionens forbrugskvotient og "
+                     "kommunens samlede disponible indkomst, som fødevareforbruget "
+                     "skaleres med. Gennemsnittet kan trækkes skævt af få personer "
+                     "med meget stor kapitalindkomst i en lille kommune.",
+    },
 ]
 
 # Faglige referencer. Værktøjet indeholder ingen antagelser eller
@@ -116,6 +147,20 @@ REFERENCER = [
         "sider": "s. 18 afsnit 4.2.3 (energi), s. 20 afsnit 4.2.6 (transport), "
                  "s. 26 afsnit 4.2.10 (øvrigt forbrug), s. 29 afsnit 4.3.1 "
                  "(offentligt forbrug)",
+    },
+    {
+        "id": "OSEI_OWUSU_2020",
+        "navn": "Tracking the carbon emissions of Denmark's five regions from a "
+                "producer and consumer perspective",
+        "udgiver": "Ecological Economics 177, 106778",
+        "aar": 2020,
+        "url": "https://doi.org/10.1016/j.ecolecon.2020.106778",
+        "anvendes_til": "Fordelingsnøglen bag kommunernes fødevareforbrug. Værktøjet "
+                        "anvender artiklens metode på aktuelle registerdata og bruger "
+                        "ikke dens udledningstal",
+        "sider": "s. 4 (landsgennemsnitlig udledningsintensitet i alle kommuner), "
+                 "s. 8 (samme produktsammensætning i alle regioner), supplerende "
+                 "information ligning S9-S11 (fordelingsnøglen)",
     },
 ]
 

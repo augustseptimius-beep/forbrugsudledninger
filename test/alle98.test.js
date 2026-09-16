@@ -57,7 +57,15 @@ test("ingen to nøgletal på siden siger det samme", () => {
   //
   // Fossil-andel og el- og plugin-hybridandelen er hinandens komplement
   // (r = -1,00) og står begge efter eksplicit valg - se beregning.js.
-  const UNDTAGET = new Set(["El- og plugin-hybridandel|Fossil-andel"]);
+  //
+  // Fødevareforbruget følger disponibel indkomst (r = +0,94), fordi kilden
+  // netop fordeler forbruget efter indkomsten. Det er en ægte dublet, og den
+  // står her som undtagelse frem for som en løsnet grænse: fødevarerne fylder
+  // 1,65 ton af det nationale aftryk, og en kategori uden retning læses som en
+  // kategori uden problem. Dubletten er skrevet ind i nøgletallets begrundelse,
+  // så læseren ser den. Grænsen på 0,9 gælder uændret for alle andre par.
+  const UNDTAGET = new Set(["El- og plugin-hybridandel|Fossil-andel",
+                            "Disponibel indkomst|Fødevareforbrug pr. indbygger"]);
   const korrelation = (par) => {
     const n = par.length;
     const mx = par.reduce((s, [x]) => s + x, 0) / n;

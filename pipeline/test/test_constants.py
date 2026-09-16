@@ -16,7 +16,7 @@ class TestPerioder(unittest.TestCase):
             "FOLK_KVARTAL", "FOLK_KVARTAL_FORRIGE", "INDKOMST_AAR",
             "GINI_AAR", "BOLIGER_AAR", "OPVARMNING_AAR",
             "BYGGERI_AAR", "BILER_MAANED", "AFFALD_AAR",
-            "PENDLING_AAR", "KLIMAREGNSKAB_AAR",
+            "PENDLING_AAR", "KLIMAREGNSKAB_AAR", "FORBRUG_AAR",
         }
         self.assertEqual(set(constants.PERIODER.keys()), forventede)
 

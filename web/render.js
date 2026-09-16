@@ -203,10 +203,13 @@ export function renderNationaltAftryk(c) {
 // Kategorier uden kommunale nøgletal. De står med i overblikket - de udgør
 // tilsammen halvdelen af aftrykket, og et overblik, der kun viser det, vi kan
 // måle, ville pege klimakoordinatoren mod de forkerte kategorier.
+//
+// Føde- og drikkevarer stod her, med teksten "Der findes ingen offentligt
+// tilgængelig kommunal indikator for fødevareforbrug". Det passede ikke:
+// Osei-Owusu et al. (2020) fordeler fødevareforbruget på alle 98 kommuner, og
+// kategorien har nu et nøgletal. Det gentager ganske vist indkomsten - se
+// begrundelsen i beregning.js.
 const UDEN_INDIKATOR = {
-  "Føde- og drikkevarer":
-    "Der findes ingen offentligt tilgængelig kommunal indikator for fødevareforbrug. "
-    + "Behovet må antages at ligge på nationalt niveau.",
   "Offentligt forbrug":
     "Fordeles ligeligt på alle borgere og varierer derfor ikke mellem kommuner "
     + "(NIRAS 2024, afsnit 4.3.1, s. 29).",
@@ -308,9 +311,8 @@ export function renderKategorioverblik(b, ens) {
     const blind = UDEN_INDIKATOR[k.navn];
 
     const hoejre = blind
-      ? `<p class="text-sm text-gray-600"><strong class="font-semibold text-gray-800">${
-          k.navn === "Føde- og drikkevarer" ? "Ingen kommunal indikator."
-            : "Ingen kommunal variation."}</strong> ${esc(blind)}</p>`
+      ? `<p class="text-sm text-gray-600"><strong class="font-semibold
+          text-gray-800">Ingen kommunal variation.</strong> ${esc(blind)}</p>`
       : `<div>${kategoriKonklusion(drivere)}${
           navneliste(drivere.filter(taeller), "text-gray-900")}${
           navneliste(drivere.filter((d) => !taeller(d)), "text-gray-500")}</div>`;

@@ -19,6 +19,9 @@ PERIODER = {
     "AFFALD_AAR": "2023",
     "PENDLING_AAR": "2024",
     "KLIMAREGNSKAB_AAR": "2023",
+    # Forbrugsundersøgelsens nyeste år. Regionskvotienten udjævnes over de ti
+    # år, der slutter her - se osei_owusu.py.
+    "FORBRUG_AAR": "2024",
 }
 
 # --- INGEN BEREGNINGSKOEFFICIENTER HER ---
