@@ -302,3 +302,37 @@ test("optaelSignaler: hjælpetal tælles ikke med", () => {
   ]);
   assert.equal(t.ialt, 1);
 });
+
+// --- Indkomst trukket af få personer ---
+
+test("indkomstforbehold: markerer uden at spærre retningen", () => {
+  // Tallet er rigtigt - pengene er der, og de er borgernes. Men de er så skævt
+  // fordelt, at gennemsnittet siger noget andet end det, læseren tror.
+  // Retningen skal derfor blive stående, og noten skal med.
+  const skaev = { ...thisted, indkomst_robusthed: "trukket_af_faa" };
+  const d = find(driverTabel(skaev, land), "Disponibel indkomst");
+  const ren = find(driverTabel(thisted, land), "Disponibel indkomst");
+  assert.equal(d.signal, ren.signal, "retningen må ikke spærres");
+  assert.match(d.begrundelse, /kapitalindkomst hos få personer/);
+  assert.ok(!ren.begrundelse.includes("kapitalindkomst hos få personer"),
+    "en almindelig kommune må ikke få noten");
+});
+
+test("indkomstforbehold: rammer også fødevaretallet", () => {
+  // Fødevareforbruget ER den disponible indkomst ganget med en regionskvotient.
+  // Slår et skævt gennemsnit igennem på indkomsten, slår det lige så hårdt
+  // igennem her, og så skal forbeholdet stå begge steder.
+  const skaev = { ...thisted, indkomst_robusthed: "trukket_af_faa" };
+  const d = find(driverTabel(skaev, land), "Fødevareforbrug pr. indbygger");
+  assert.match(d.begrundelse, /kapitalindkomst hos få personer/);
+  assert.equal(d.signal,
+    find(driverTabel(thisted, land), "Fødevareforbrug pr. indbygger").signal);
+});
+
+test("indkomstforbehold: ukendt markering giver ingen note", () => {
+  // Et felt, pipelinen en dag fylder med noget andet, må ikke ende som en tom
+  // eller forkert note - det skal bare ikke udløse noget.
+  const d = find(driverTabel({ ...thisted, indkomst_robusthed: "noget_nyt" }, land),
+    "Disponibel indkomst");
+  assert.equal(d.begrundelse, find(driverTabel(thisted, land), "Disponibel indkomst").begrundelse);
+});

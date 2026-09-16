@@ -49,7 +49,7 @@ FORVENTEDE_FELTER = [
 def saml_kommune_post(navn, dst_data, kode=None, region=None,
                       pendling=None,
                       fritidshuse=None, husholdning=None, affald_indberetning=None,
-                      foedevareforbrug=None):
+                      foedevareforbrug=None, indkomst_robusthed=None):
     """Samler ét kommune- (eller land-) objekt i motorens datakontrakt.
     Ren funktion - ingen I/O - så den kan testes uden netværk (Task 10)."""
     post = dict(dst_data.get(navn, {}))
@@ -78,6 +78,10 @@ def saml_kommune_post(navn, dst_data, kode=None, region=None,
     # FORVENTEDE_FELTER - der ville den blive talt som manglende data for de
     # 85 kommuner, hvor alt er i orden.
     post["affald_indberetning"] = (affald_indberetning or {}).get(navn)
+    # Om kommunens gennemsnitsindkomst er trukket af få personer. None er den
+    # normale tilstand og må derfor IKKE med i FORVENTEDE_FELTER - se
+    # affald_indberetning ovenfor, samme begrundelse.
+    post["indkomst_robusthed"] = (indkomst_robusthed or {}).get(navn)
     # Fødevareforbrug pr. indbygger i kroner, beregnet efter Osei-Owusu et al.
     # (2020), ligning S9-S11. Ikke et udledningstal - se osei_owusu.py.
     post["foedevare_forbrug_pr_indb"] = (foedevareforbrug or {}).get(navn)
@@ -148,6 +152,28 @@ def _beregn_foedevareforbrug(dst_data):
     return pr_kommune
 
 
+def _klassificer_indkomst():
+    """Kommuner, hvis gennemsnitsindkomst er trukket af få personer.
+
+    Fejler hentningen, står alle uden forbehold og nøgletallet vises som før -
+    et forbehold, der ikke kan hentes, må ikke vælte en datakørsel."""
+    nu = PERIODER["INDKOMST_AAR"]
+    foer = str(int(nu) - fetch_dst.INDKOMST_VINDUE_AAR)
+    print(f"Vurderer indkomstens robusthed ({foer}-{nu}, INDKP101 disponibel mod løn)...")
+    try:
+        disp_nu, loen_nu = fetch_dst.fetch_indkomst_og_loen(nu)
+        disp_foer, loen_foer = fetch_dst.fetch_indkomst_og_loen(foer)
+        ud = fetch_dst.klassificer_indkomst(disp_nu, disp_foer, loen_nu, loen_foer)
+        markeret = sorted(n for n, v in ud.items() if v)
+        print(f"  {len(markeret)} kommuner markeret: "
+              f"{', '.join(markeret) if markeret else 'ingen'}")
+        return ud
+    except Exception as fejl:
+        print(f"  ADVARSEL: kunne ikke vurdere indkomstens robusthed ({fejl}). "
+              "Alle står uden forbehold.")
+        return {}
+
+
 def find_manglende(post):
     return [felt for felt in FORVENTEDE_FELTER if post.get(felt) is None]
 
@@ -208,10 +234,12 @@ def main():
         print(f"  ADVARSEL: kunne ikke hente LABY24 ({fejl}). Alle står uden forbehold.")
 
     foedevareforbrug = _beregn_foedevareforbrug(dst_data)
+    indkomst_robusthed = _klassificer_indkomst()
 
     land_post = saml_kommune_post("Hele landet", dst_data, pendling=pendling,
                                   fritidshuse=fritidshuse,
-                                  foedevareforbrug=foedevareforbrug)
+                                  foedevareforbrug=foedevareforbrug,
+                                  indkomst_robusthed=indkomst_robusthed)
     # Landets husholdningstal er summen af kommunernes, ikke et selvstændigt
     # opslag - så tæller og nævner dækker præcis det samme område.
     def _sum(felt):
@@ -240,7 +268,8 @@ def main():
             pendling=pendling,
             fritidshuse=fritidshuse, husholdning=husholdning,
             affald_indberetning=affald_indberetning,
-            foedevareforbrug=foedevareforbrug))
+            foedevareforbrug=foedevareforbrug,
+            indkomst_robusthed=indkomst_robusthed))
 
     # Ingen "konstanter" i outputtet: der er ingen beregningskoefficienter
     # tilbage i modellen. De nationale sammenligningstal ligger i concito.json
