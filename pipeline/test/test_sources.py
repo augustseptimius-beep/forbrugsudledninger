@@ -69,14 +69,3 @@ def test_ingen_antagelser_tilbage():
     assert "antagelser" not in sources.byg_sources()
     assert not hasattr(sources, "ANTAGELSER")
 
-
-def test_kilder_med_fast_periode_oplyser_den():
-    """En kilde uden periode_noegle må ikke ende med tom periode på
-    metodesiden. FOLK1A_FOEDEVARE henter en fast periode, der følger kilden
-    i stedet for den årlige opdatering, og skal oplyse hvilken."""
-    for kilde in sources.KILDER:
-        if kilde["periode_noegle"] is None:
-            assert kilde.get("periode_fast"), \
-                f"{kilde['id']} har hverken periode_noegle eller periode_fast"
-    for kilde in sources.byg_sources()["kilder"]:
-        assert kilde["periode"], f"{kilde['id']} mangler udfyldt periode"

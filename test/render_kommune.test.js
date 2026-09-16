@@ -106,14 +106,20 @@ test("indikatorer: pendlingsafstand vises i km, ikke omregnet", () => {
 
 // --- Hullerne ---
 
-test("fødevarer: hullet står én gang, i overblikket, med Energistyrelsens tal", () => {
+test("fødevarer: står med ét nationalt tal og har nu et kommunalt nøgletal", () => {
   // Afsnittet om hullerne gentog fødevarerne med CONCITO's 2,5 ton (20 %), mens
   // overblikket stod med Energistyrelsens 1,65 ton (17,0 %): to nationale tal for
   // samme kategori på samme side. Energistyrelsens er de nyeste og summerer til
   // hovedtallet, så de står alene.
+  //
+  // Kategorien stod også som blind med "Ingen kommunal indikator". Det passer
+  // ikke længere: Osei-Owusu et al. (2020) fordeler fødevareforbruget på alle 98
+  // kommuner. Sætningen må ikke blive stående nogen steder på siden.
   const h = renderKommune(bThisted, concito, ens);
   const foede = ens.kategorier.find((k) => k.navn === "Føde- og drikkevarer");
-  assert.equal((h.match(/Ingen kommunal indikator/g) || []).length, 1);
+  assert.ok(!h.includes("Ingen kommunal indikator"),
+    "fødevarerne har et nøgletal og er ikke længere en blind kategori");
+  assert.ok(h.includes("Fødevareforbrug pr. indbygger"), "nøgletallet skal stå");
   assert.ok(h.includes(`${tal(foede.ton, 2)} ton`), "Energistyrelsens tal skal stå");
   assert.ok(!h.includes("2,5 ton"), "CONCITO's fødevaretal må ikke stå ved siden af");
   assert.ok(!/femtedel/.test(h));
@@ -215,11 +221,28 @@ test("overblik: alle Energistyrelsens kategorier står med, også dem uden nøgl
 });
 
 test("overblik: kategorier uden nøgletal siger det tydeligt", () => {
+  // Eksemplet var fødevarerne, indtil de fik et nøgletal. Offentligt forbrug er
+  // blind af en anden grund: det fordeles ligeligt og varierer ikke mellem
+  // kommuner. Begge slags skal stå med ord, ikke bare mangle et tal.
+  const h = renderKategorioverblik(bThisted, ens);
+  const i = h.indexOf("Offentligt forbrug");
+  const afsnit = h.slice(i, i + 900);
+  assert.ok(afsnit.includes("Ingen kommunal variation"),
+    "blindheden skal stå med ord, ikke kun mangle et tal");
+});
+
+test("overblik: fødevarerne viser en retning, og dubletten står i begrundelsen", () => {
+  // Nøgletallet gentager disponibel indkomst (r = +0,94). Det er accepteret,
+  // men det skal stå, hvor læseren ser det, ikke kun i kildekoden.
   const h = renderKategorioverblik(bThisted, ens);
   const i = h.indexOf("Føde- og drikkevarer");
-  const afsnit = h.slice(i, i + 900);
-  assert.ok(afsnit.includes("Ingen kommunal indikator"),
-    "blindheden skal stå med ord, ikke kun mangle et tal");
+  assert.ok(!h.slice(i, i + 900).includes("Ingen kommunal"),
+    "kategorien har et nøgletal");
+  const d = bThisted.drivere.find((x) => x.navn === "Fødevareforbrug pr. indbygger");
+  assert.equal(d.kategori, "Føde- og drikkevarer");
+  assert.equal(d.signal, "lavere", "Thisted ligger 11,2 % under landet");
+  assert.match(d.begrundelse, /gentager/,
+    "dubletten mod indkomsten skal stå i begrundelsen");
 });
 
 test("overblik: rækkefølgen følger Energistyrelsens vægt, med restposter sidst", () => {

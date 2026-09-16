@@ -1,4 +1,4 @@
-"""Kommunernes andel af Danmarks fødevareforbrug. Ren afskrift med sidehenvisning.
+"""Fødevareforbrug pr. indbygger, beregnet efter Osei-Owusu et al. (2020).
 
 Kilde:
   Osei-Owusu, K.A., Thomsen, M., Lindahl, J., Javakhishvili Larsen, N. og
@@ -6,59 +6,68 @@ Kilde:
   from a producer and consumer perspective", Ecological Economics 177, 106778.
   https://doi.org/10.1016/j.ecolecon.2020.106778
 
-Tallene nedenfor er afskrevet fra artiklens supplerende regneark, arket
-"CESM" ("Share of consumption groups"), rækken "01.1 Food". Hver værdi er
-kommunens andel af Danmarks samlede forbrugsudgift til fødevarer i 2011.
-De 98 andele summerer til 1.
+METODEN, IKKE TALLENE
+
+Artiklen opgør 2011. Dette modul afskriver dens fordelingsnøgle og anvender
+den på aktuelle registerdata, så nøgletallet følger samme opdateringsrytme
+som resten af værktøjet. Nøglen står i artiklens supplerende information som
+ligning S9-S11:
+
+  S9   CES(i,r) = CE(i,r) / HHINC(r)
+       regionens forbrugskvotient: hvor stor en del af den disponible indkomst
+       en husstand i regionen bruger på forbrugsgruppe i.
+  S10  CE(i,m) = CES(i,r) * HHINC(m)
+       kommunens forbrug: regionens kvotient gange kommunens samlede
+       disponible indkomst. Artiklen antager samme kvotient for alle kommuner
+       i en region.
+  S11  CES(i,m) = CE(i,m) / sum over alle 98 kommuner
+
+Formlen er verificeret mod artiklens eget regneark (arket CESM, rækken
+"01.1 Food"): den reproducerer alle 98 offentliggjorte andele med samme
+skalafaktor på 0,669 % for hver kommune. Da værktøjet kun bruger afvigelsen
+fra landsgennemsnittet, forsvinder skalafaktoren.
 
 HVAD TALLET ER, OG HVAD DET IKKE ER
 
-Artiklen opgør kommunens fødevareudledning som kommunens andel af Danmarks
-samlede fødevareaftryk. Andelen nedenfor er dermed selve fordelingsnøglen bag
-det offentliggjorte resultat, ikke en proxy, vi har fundet på.
+Det er forbrugsudgiften til fødevarer pr. indbygger, i kroner. Det er IKKE
+et udledningstal. Artiklen omregner udgiften til ton CO2e, men den omregning
+bruges ikke: værktøjet beregner intet kommunalt klimaaftryk, se constants.py.
 
-Men den måler forbrugets STØRRELSE, ikke dets SAMMENSÆTNING. Artiklen antager
+Det måler forbrugets STØRRELSE, ikke kostens SAMMENSÆTNING. Artiklen antager
 landsgennemsnitlig kost overalt. Side 4: "we assume that Denmark's national
 carbon intensities for all products in EXIOBASE is the same for each Danish
 municipality." Side 8: "The share of CF for specific products in total CF of
-food is the same across regions because we assumed the same production
-technologies for all Danish regions. However, the absolute CF values vary
-between regions." Tallet kan altså ikke se, at én kommune spiser mere oksekød
-end en anden. Det ser kun, at den bruger flere penge på mad.
+food is the same across regions." Tallet kan altså ikke se, at én kommune
+spiser mere oksekød end en anden.
 
-VÆRKTØJET VISER KUN AFVIGELSEN, IKKE TONNAGEN
+DET GENTAGER INDKOMSTEN, OG DET SKAL STÅ
 
-Artiklen offentliggør også et absolut tal i ton CO2e pr. indbygger for 20
-kommuner (top-10 og bund-10). Det tal bruges bevidst ikke. Værktøjet beregner
-intet kommunalt klimaaftryk - se constants.py - og et enkelt ton-tal fra 2011
-ville læses som en måling af kommunens fødevareudledning i dag. Motoren
-regner kommunens andel om til forbrug pr. indbygger og viser udelukkende,
-hvordan den ligger i forhold til landsgennemsnittet.
+Af formlen følger, at den kommunale variation kommer fra den disponible
+indkomst alene; regionskvotienten modulerer med 2 til 8 %. Over de 98
+kommuner er korrelationen med disponibel indkomst r = +0,94. Nøgletallet
+siger derfor i praksis det samme som indkomsten, blot i fødevarernes
+kategori. Det står med som eneste kommunale nøgletal for en kategori, der
+ellers er tom, ikke fordi det bærer ny information.
 
-REGIONSFAKTOREN ER UDELADT
+REGIONSKVOTIENTEN UDJÆVNES OVER TI ÅR
 
-De offentliggjorte kommunetal rummer en regionsspecifik korrektion på
-0,997-1,004, fordi udledningsintensiteten varierer en smule mellem de fem
-regioner. Den er ikke offentliggjort som tal og skulle regnes baglæns ud af
-top- og bundlisterne. Den er udeladt: den er vores egen udledte koefficient,
-og den flytter ingen kommunes afvigelse mere end 0,7 procentpoint og ændrer
-ingen kommunes signal.
+Forbrugsundersøgelsen (FU17) er en stikprøve, og et enkelt års kvotient er
+ustabil: skiftes kun kvotientåret ud, skifter 14-16 af 98 kommuner signal.
+Med et ti-års gennemsnit falder det til højst 5, når et vilkårligt år
+udelades. Kvotienten regnes som regionens andel af landets samme år, så den
+fælles faldende trend ikke indgår - kun den indbyrdes placering.
 
-FORBEHOLD, DER SKAL STÅ PÅ METODESIDEN
-
-Opgørelsesåret er 2011. Alle øvrige nøgletal i værktøjet er aktuelle
-registerdata. Og fordelingen følger forbrugsudgiften tæt: over de 98 kommuner
-korrelerer den med disponibel indkomst på r = +0,93, så nøgletallet siger i
-praksis det samme som indkomsten, blot i fødevarernes kategori.
+Målt over 2015-2024 adskiller kun to regioner sig påviseligt fra landet:
+Sjælland ligger 6,9 % over og Midtjylland 4,9 % under, begge med en
+standardfejl omkring 0,5 procentpoint og stabile mellem periodens to
+halvdele. Hovedstaden, Syddanmark og Nordjylland kan ikke skelnes fra
+landsgennemsnittet og heller ikke indbyrdes. Det skal stå på metodesiden.
 """
 
-# Året artiklen opgør. Må ikke flyttes til PERIODER i constants.py: det er
-# ikke en periode, der opdateres årligt, men kildens eget opgørelsesår.
-OPGOERELSESAAR = 2011
-
-# Folketallet skal hentes for samme år som forbrugsandelene, ellers
-# sammenlignes 2011-forbrug med nutidens indbyggertal.
-FOLK_KVARTAL = "2011K1"
+# Antal år i vinduet bag regionskvotienten. Ti år er valgt, fordi det er det
+# korteste vindue, hvor udeladelsen af et enkelt år ikke flytter mere end en
+# håndfuld kommuners signal. Det er en præsentationsbeslutning, ikke en kilde.
+KVOTIENT_VINDUE_AAR = 10
 
 KILDE = {
     "id": "OSEI_OWUSU_2020",
@@ -69,114 +78,103 @@ KILDE = {
     "url": "https://doi.org/10.1016/j.ecolecon.2020.106778",
 }
 
-# Kommunens andel af Danmarks samlede forbrugsudgift til fødevarer, 2011.
-# Supplerende regneark, arket "CESM", rækken "01.1 Food".
-FOEDEVARE_FORBRUGSANDEL = {
-    "Aabenraa": 0.009814758791072561,
-    "Aalborg": 0.03378389632438219,
-    "Aarhus": 0.057560917342488936,
-    "Albertslund": 0.004384337788504561,
-    "Allerød": 0.005312070846686775,
-    "Assens": 0.006832130734153929,
-    "Ballerup": 0.00851882098420647,
-    "Billund": 0.004526643913767806,
-    "Bornholm": 0.006646770662091428,
-    "Brøndby": 0.005617592273205164,
-    "Brønderslev": 0.005645989550563252,
-    "Dragør": 0.003117054426709135,
-    "Egedal": 0.008189328519325937,
-    "Esbjerg": 0.01999373125655386,
-    "Faaborg-Midtfyn": 0.008550474394577253,
-    "Fanø": 0.0006472965587846483,
-    "Favrskov": 0.008495541116993077,
-    "Faxe": 0.006295304719675055,
-    "Fredensborg": 0.008070224750417535,
-    "Fredericia": 0.008619047492046956,
-    "Frederiksberg": 0.02012703086082356,
-    "Frederikshavn": 0.010302257388808222,
-    "Frederikssund": 0.008034127301080137,
-    "Furesø": 0.008317809959684756,
-    "Gentofte": 0.020927559681654766,
-    "Gladsaxe": 0.012061910603914837,
-    "Glostrup": 0.003916206718516708,
-    "Greve": 0.00986043519887963,
-    "Gribskov": 0.007591366470720803,
-    "Guldborgsund": 0.01044182063239341,
-    "Haderslev": 0.00921786413908621,
-    "Halsnæs": 0.005276446275555143,
-    "Hedensted": 0.008036625390096022,
-    "Helsingør": 0.011546464722585232,
-    "Herlev": 0.004758431953012029,
-    "Herning": 0.015598373130516785,
-    "Hillerød": 0.009217461825784848,
-    "Hjørring": 0.010821288019923332,
-    "Holbæk": 0.01264706085250286,
-    "Holstebro": 0.01017612840504497,
-    "Horsens": 0.014606076421325,
-    "Hvidovre": 0.008730279594109908,
-    "Høje-Taastrup": 0.008253066671457894,
-    "Hørsholm": 0.0066889766614019385,
-    "Ikast-Brande": 0.006974593386066607,
-    "Ishøj": 0.003308220299727701,
-    "Jammerbugt": 0.006298260743604914,
-    "Kalundborg": 0.008720940947293027,
-    "Kerteminde": 0.004074884022916779,
-    "Kolding": 0.015704557949587968,
-    "København": 0.09232047095467026,
-    "Køge": 0.010699546173525767,
-    "Langeland": 0.0020750854693609836,
-    "Lejre": 0.005345986564607818,
-    "Lemvig": 0.003762621508077886,
-    "Lolland": 0.0074758209662054475,
-    "Lyngby-Taarbæk": 0.012174418909446474,
-    "Læsø": 0.0003201651347779259,
-    "Mariagerfjord": 0.006935516546181803,
-    "Middelfart": 0.0065978086009831965,
-    "Morsø": 0.003348409427622781,
-    "Norddjurs": 0.006457370843536101,
-    "Nordfyns": 0.004833829625373941,
-    "Nyborg": 0.005299759841623576,
-    "Næstved": 0.014711606710780329,
-    "Odder": 0.004051097149474227,
-    "Odense": 0.03239220868953232,
-    "Odsherred": 0.005740348086661945,
-    "Randers": 0.016454532132939875,
-    "Rebild": 0.004909253011820378,
-    "Ringkøbing-Skjern": 0.010058374071732785,
-    "Ringsted": 0.006050065180862566,
-    "Roskilde": 0.016935707275413738,
-    "Rudersdal": 0.014811969437356028,
-    "Rødovre": 0.006418810977994097,
-    "Samsø": 0.0006656707961245343,
-    "Silkeborg": 0.015871143224743117,
-    "Skanderborg": 0.01112612878592403,
-    "Skive": 0.008105476358496566,
-    "Slagelse": 0.013724931492088734,
-    "Solrød": 0.004527742183273646,
-    "Sorø": 0.005345870709188957,
-    "Stevns": 0.004096491607604025,
-    "Struer": 0.0038262873645082372,
-    "Svendborg": 0.009917005197987975,
-    "Syddjurs": 0.007532141440009821,
-    "Sønderborg": 0.012590074669271116,
-    "Thisted": 0.007204639705846359,
-    "Tårnby": 0.007571791688189433,
-    "Tønder": 0.006166174806730671,
-    "Vallensbæk": 0.002796336119769834,
-    "Varde": 0.008372344288004607,
-    "Vejen": 0.00681883144989231,
-    "Vejle": 0.019176156028750006,
-    "Vesthimmerlands": 0.0058844974462738545,
-    "Viborg": 0.01654576570840321,
-    "Vordingborg": 0.007984397577923267,
-    "Ærø": 0.0011108593861506265,}
+
+def kvotient_vindue(seneste_aar, antal=KVOTIENT_VINDUE_AAR):
+    """De år, regionskvotienten udjævnes over. Nyeste år sidst."""
+    seneste = int(seneste_aar)
+    return [str(a) for a in range(seneste - antal + 1, seneste + 1)]
 
 
-def byg_osei_owusu():
+def landets_kvotient(forbrug, indkomst, landsnavn="Hele landet",
+                     gennemsnitsnavn="Gennemsnitshusstand"):
+    """Landets forbrugskvotient for ét år: den andel af den disponible indkomst
+    en gennemsnitshusstand bruger på fødevarer.
+
+    Den sætter NIVEAUET for nøgletallet, så den viste værdi er kroner brugt på
+    mad og ikke bare indkomst. Den tages fra det nyeste år alene, ikke fra
+    vinduet: niveauet skal være nutidens. Kun den indbyrdes placering mellem
+    regionerne udjævnes - se udjaevn_kvotient()."""
+    return forbrug[gennemsnitsnavn] / indkomst[landsnavn]
+
+
+def skaler_kvotient(relativ, landets):
+    """Regionens udjævnede placering ganget op med landets kvotient.
+
+    Skalafaktoren er fælles for alle kommuner og ændrer derfor ingen afvigelse
+    fra landsgennemsnittet. Den er der udelukkende for at den viste værdi kan
+    læses som kroner brugt på fødevarer."""
+    return {navn: landets * v for navn, v in relativ.items()}
+
+
+def relativ_kvotient(forbrug, indkomst, aar, landsnavn="Hele landet",
+                     gennemsnitsnavn="Gennemsnitshusstand"):
+    """Regionens forbrugskvotient som andel af landets, for ét år (ligning S9).
+
+    forbrug:  {områdenavn: kr. pr. husstand} fra FU17
+    indkomst: {områdenavn: kr. pr. familie} fra INDKF111
+
+    Regnes relativt til landet, fordi kvotienten falder for alle regioner over
+    tid. Kun den indbyrdes placering går ind i nøgletallet, og den skal ikke
+    forurenes af en fælles trend. Returnerer {regionsnavn: andel}, hvor 1,0
+    betyder "som landet"."""
+    land = landets_kvotient(forbrug, indkomst, landsnavn, gennemsnitsnavn)
+    if not land:
+        raise ValueError(f"landets forbrugskvotient er nul for {aar}")
+    return {navn: (forbrug[navn] / indkomst[navn]) / land
+            for navn in forbrug
+            if navn != gennemsnitsnavn and navn in indkomst}
+
+
+def udjaevn_kvotient(pr_aar):
+    """Gennemsnittet af de relative kvotienter over vinduet.
+
+    pr_aar: {år: {regionsnavn: andel}}. Regioner, der mangler i et enkelt år,
+    får gennemsnittet af de år, de faktisk optræder i - et hul må ikke tælle
+    som nul."""
+    samlet = {}
+    for kvotienter in pr_aar.values():
+        for navn, v in kvotienter.items():
+            samlet.setdefault(navn, []).append(v)
+    return {navn: sum(v) / len(v) for navn, v in samlet.items() if v}
+
+
+def forbrug_pr_indbygger(kvotient, indkomst_i_alt, folketal, region_pr_kommune):
+    """Fødevareforbrug pr. indbygger i kroner, pr. kommune (ligning S10).
+
+    kvotient:          {regionsnavn: forbrugskvotient, jf. skaler_kvotient()}
+    indkomst_i_alt:    {kommunenavn: samlet disponibel indkomst, 1.000 kr.}
+    folketal:          {kommunenavn: indbyggere}
+    region_pr_kommune: {kommunenavn: regionsnavn}
+
+    S11's normering er udeladt: den er en fælles skalafaktor, og værktøjet
+    bruger kun afvigelsen fra landet, hvor den går ud. En kommune uden et af
+    inputtene får None og vises med streg - aldrig nul, som ville læses som
+    "intet fødevareforbrug"."""
+    ud = {}
+    for navn, region in region_pr_kommune.items():
+        k = kvotient.get(region)
+        i = indkomst_i_alt.get(navn)
+        f = folketal.get(navn)
+        ud[navn] = (k * i * 1000) / f if k and i and f else None
+    return ud
+
+
+def landets_forbrug_pr_indbygger(pr_kommune, folketal):
+    """Landets tal er summen af kommunernes forbrug delt med summen af deres
+    indbyggere, ikke et selvstændigt opslag. Så dækker tæller og nævner
+    præcis samme område, og kommuner uden tal trækker ikke nævneren skæv."""
+    navne = [n for n, v in pr_kommune.items() if v is not None and folketal.get(n)]
+    if not navne:
+        return None
+    indbyggere = sum(folketal[n] for n in navne)
+    return sum(pr_kommune[n] * folketal[n] for n in navne) / indbyggere
+
+
+def byg_osei_owusu(seneste_aar):
     """Kildeposten til metodesiden. Ingen tal - de står i data.json."""
+    vindue = kvotient_vindue(seneste_aar)
     return {
         "kilde": KILDE,
-        "opgoerelsesaar": OPGOERELSESAAR,
-        "folk_kvartal": FOLK_KVARTAL,
-        "antal_kommuner": len(FOEDEVARE_FORBRUGSANDEL),
+        "kvotient_vindue": [vindue[0], vindue[-1]],
+        "kvotient_vindue_aar": KVOTIENT_VINDUE_AAR,
     }

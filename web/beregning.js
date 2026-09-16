@@ -139,6 +139,30 @@ const DRIVERE = [
       + "mekanisk: CONCITO's forbrugsprofiler går fra 8,7 til 15 ton i den laveste "
       + "indkomstgruppe og fra 12 til 25 ton i den højeste (s. 28-29), fordi pengene kan "
       + "bruges mere eller mindre klimavenligt (s. 6)." },
+  // Fødevarekategoriens eneste kommunale nøgletal. Det GENTAGER indkomsten og
+  // står med efter eksplicit valg: Osei-Owusu et al. (2020) fordeler
+  // fødevareforbruget som regionens forbrugskvotient gange kommunens samlede
+  // disponible indkomst (SI, ligning S9-S11), så hele den kommunale variation
+  // kommer derfra. Målt over de 98 kommuner er r = +0,94 mod disponibel
+  // indkomst, altså samme leje som de nøgletal, der er taget af siden nedenfor.
+  //
+  // Det bliver alligevel stående, fordi alternativet er en tom kategori, der
+  // fylder 17 % af det nationale aftryk. En kategori uden retning læses som en
+  // kategori uden problem. Dubletten er skrevet ind i begrundelsen, så læseren
+  // ser den frem for at opdage den.
+  { navn: "Fødevareforbrug pr. indbygger", enhed: "kr./indb.",
+    val: (m) => m.foedevare_forbrug_pr_indb,
+    type: "relativ", kategori: KATEGORI.FOEDEVARER, paavirkning: "hoejere",
+    begrundelse: "Forbrugsudgiften til fødevarer, ikke en udledning: værktøjet "
+      + "beregner intet kommunalt aftryk. Mere forbrug betyder flere producerede "
+      + "fødevarer, og Osei-Owusu et al. (2020) opgør netop fødevareforbruget til "
+      + "kommunens del af det nationale aftryk. Tallet er beregnet, ikke målt - "
+      + "det er regionens forbrugskvotient ganget med kommunens disponible "
+      + "indkomst, og det gentager derfor indkomsten (r = +0,94 over de 98 "
+      + "kommuner). Det siger noget om, hvor meget der bruges på mad, ikke om "
+      + "hvad der spises: kilden regner med landsgennemsnitlig kost i alle "
+      + "kommuner (s. 4 og s. 8), så den kan ikke se forskel på oksekød og "
+      + "bønner." },
   // Taget af siden, fordi de gentog tal, der allerede står der - målt over alle
   // 98 kommuner: nettoformue (gns. og median) fulgte disponibel indkomst
   // (r = +0,95 og +0,84), befolkningstætheden fulgte biler pr. indbygger
@@ -462,11 +486,12 @@ export function optaelSignaler(drivere) {
 }
 
 export function driverePrKategori(drivere) {
-  // Rækkefølge efter Energistyrelsens nationale vægt, faldende. Fødevarer og
-  // Offentligt forbrug har ingen kommunale nøgletal og optræder derfor ikke
-  // her, kun i kategorioverblikket.
-  const raekkefoelge = [KATEGORI.TRANSPORT, KATEGORI.PRODUKTER, KATEGORI.ENERGI,
-                        KATEGORI.BOLIG_BYGGERI];
+  // Rækkefølge efter Energistyrelsens nationale vægt, faldende. Offentligt
+  // forbrug har intet kommunalt nøgletal og optræder kun i kategorioverblikket.
+  // Fødevarer stod tidligere i samme kategori og er kommet til - se
+  // fødevarenøgletallet i DRIVERE.
+  const raekkefoelge = [KATEGORI.TRANSPORT, KATEGORI.FOEDEVARER, KATEGORI.PRODUKTER,
+                        KATEGORI.ENERGI, KATEGORI.BOLIG_BYGGERI];
   return raekkefoelge
     .map((kategori) => ({ kategori, drivere: drivere.filter((d) => d.kategori === kategori) }))
     .filter((g) => g.drivere.length > 0);
@@ -479,7 +504,7 @@ const FORVENTEDE_FELTER = [
   "biler", "biler_el", "biler_plugin", "biler_diesel", "biler_benzin",
   "opv_boliger_ialt", "opv_olie",
   "opv_naturgas", "affald_kg", "genanvendelse_pct",
-  "pendlingsafstand_km", "fritidshuse",
+  "pendlingsafstand_km", "fritidshuse", "foedevare_forbrug_pr_indb",
   "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
   "husholdning_el_tj", "husholdning_el_co2_ton",
   "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton",

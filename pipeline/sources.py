@@ -11,7 +11,6 @@ i stedet for at drive fra virkeligheden efter et par årlige opdateringer."""
 
 from datetime import date
 
-import osei_owusu
 from constants import PERIODER
 
 DST = "Danmarks Statistik"
@@ -88,40 +87,35 @@ KILDER = [
                      "bruges, som den er.",
     },
     {
-        "id": "OSEI_OWUSU_2020",
-        "navn": "Kommunernes andel af Danmarks fødevareforbrug "
-                "(Osei-Owusu et al. 2020, supplerende regneark, arket CESM)",
-        "udbyder": "Ecological Economics",
-        "metode": "manuel",
-        "periode_noegle": None,
-        "periode_fast": str(osei_owusu.OPGOERELSESAAR),
-        "licens": "Artiklens supplerende materiale",
-        "url": "https://doi.org/10.1016/j.ecolecon.2020.106778",
-        "felter": ["foedevare_forbrugsandel"],
-        "forbehold": "Opgørelsesåret er 2011, hvor værktøjets øvrige nøgletal er "
-                     "aktuelle registerdata. Tallet måler forbrugets størrelse, ikke "
-                     "kostens sammensætning: artiklen antager landsgennemsnitlig kost "
-                     "i alle kommuner (s. 4 og s. 8), så det kan ikke se, om én "
-                     "kommune spiser mere oksekød end en anden. Over de 98 kommuner "
-                     "følger det disponibel indkomst tæt (r = +0,93) og siger derfor "
-                     "i praksis det samme som indkomsten, blot i fødevarernes "
-                     "kategori. Artiklens absolutte ton-tal bruges ikke - værktøjet "
-                     "viser kun afvigelsen fra landsgennemsnittet.",
+        "id": "FU17",
+        "navn": "Forbrug efter forbrugsgruppe, region, prisenhed og tid",
+        "udbyder": DST,
+        "metode": "api",
+        "periode_noegle": "FORBRUG_AAR",
+        "licens": DST_LICENS,
+        "url": "https://www.statistikbanken.dk/FU17",
+        "felter": ["foedevare_forbrug_pr_indb"],
+        "forbehold": "Forbrugsundersøgelsen er en stikprøve, og et enkelt års "
+                     "regionskvotient er ustabil. Kvotienten udjævnes derfor over "
+                     "de ti seneste år. Målt over 2015-2024 adskiller kun Sjælland "
+                     "(6,9 % over landet) og Midtjylland (4,9 % under) sig påviseligt; "
+                     "Hovedstaden, Syddanmark og Nordjylland kan ikke skelnes fra "
+                     "landsgennemsnittet og heller ikke indbyrdes. Perioden er den "
+                     "nyeste årgang; de ni foregående hentes med.",
     },
     {
-        "id": "FOLK1A_FOEDEVARE",
-        "navn": "Folketal efter område (opgørelsesåret for fødevareforbruget)",
+        "id": "INDKF111",
+        "navn": "Familiernes indkomster efter område",
         "udbyder": DST,
-        "metode": "api_fast",
-        "periode_noegle": None,
-        "periode_fast": osei_owusu.FOLK_KVARTAL,
+        "metode": "api",
+        "periode_noegle": "INDKOMST_AAR",
         "licens": DST_LICENS,
-        "url": "https://www.statistikbanken.dk/FOLK1A",
-        "felter": ["foedevare_folketal"],
-        "forbehold": "Hentes for samme kvartal som fødevareforbruget er opgjort i, "
-                     "ikke for indeværende år. Ellers ville 2011-forbrug blive delt "
-                     "med nutidens indbyggertal. Perioden følger derfor kilden og "
-                     "opdateres ikke ved den årlige genkøring.",
+        "url": "https://www.statistikbanken.dk/INDKF111",
+        "felter": [],
+        "forbehold": "Leverer både nævneren i regionens forbrugskvotient og "
+                     "kommunens samlede disponible indkomst, som fødevareforbruget "
+                     "skaleres med. Gennemsnittet kan trækkes skævt af få personer "
+                     "med meget stor kapitalindkomst i en lille kommune.",
     },
 ]
 
@@ -161,12 +155,12 @@ REFERENCER = [
         "udgiver": "Ecological Economics 177, 106778",
         "aar": 2020,
         "url": "https://doi.org/10.1016/j.ecolecon.2020.106778",
-        "anvendes_til": "Kommunernes indbyrdes fordeling af fødevareforbruget - den "
-                        "eneste offentliggjorte kommuneopdelte opgørelse af "
-                        "forbrugsbaserede fødevareudledninger",
+        "anvendes_til": "Fordelingsnøglen bag kommunernes fødevareforbrug. Værktøjet "
+                        "anvender artiklens metode på aktuelle registerdata og bruger "
+                        "ikke dens udledningstal",
         "sider": "s. 4 (landsgennemsnitlig udledningsintensitet i alle kommuner), "
                  "s. 8 (samme produktsammensætning i alle regioner), supplerende "
-                 "regneark arket CESM (kommunernes forbrugsandele)",
+                 "information ligning S9-S11 (fordelingsnøglen)",
     },
 ]
 
@@ -176,12 +170,9 @@ def byg_sources():
     den faktiske periode, så json-filen er selvforklarende for widgeten."""
     kilder = []
     for kilde in KILDER:
-        ud = {k: v for k, v in kilde.items()
-              if k not in ("periode_noegle", "periode_fast")}
+        ud = {k: v for k, v in kilde.items() if k != "periode_noegle"}
         noegle = kilde["periode_noegle"]
-        # En kilde uden periode_noegle kan have en fast periode, der følger
-        # kilden selv i stedet for den årlige opdatering - se FOLK1A_FOEDEVARE.
-        ud["periode"] = PERIODER[noegle] if noegle else kilde.get("periode_fast")
+        ud["periode"] = PERIODER[noegle] if noegle else None
         kilder.append(ud)
     return {
         "genereret": date.today().isoformat(),

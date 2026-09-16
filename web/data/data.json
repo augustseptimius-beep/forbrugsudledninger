@@ -29,7 +29,8 @@
     "husholdning_el_co2_ton": 854004.826410706,
     "husholdning_fjernvarme_tj": 72957.26838295501,
     "husholdning_fjernvarme_co2_ton": 1563185.539821364,
-    "affald_indberetning": null
+    "affald_indberetning": null,
+    "foedevare_forbrug_pr_indb": 19738.311930066353
   },
   "kommuner": [
     {
@@ -64,7 +65,8 @@
       "husholdning_el_co2_ton": 44258.93988780001,
       "husholdning_fjernvarme_tj": 9546.044668859999,
       "husholdning_fjernvarme_co2_ton": 152823.8635547,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 20512.179316276233
     },
     {
       "folketal": 106150,
@@ -98,7 +100,8 @@
       "husholdning_el_co2_ton": 8110.42797111,
       "husholdning_fjernvarme_tj": 2024.068876883,
       "husholdning_fjernvarme_co2_ton": 30644.76355486,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 24196.517429221974
     },
     {
       "folketal": 14474,
@@ -132,7 +135,8 @@
       "husholdning_el_co2_ton": 2464.5225237950003,
       "husholdning_fjernvarme_tj": 0.0,
       "husholdning_fjernvarme_co2_ton": 0.0,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 25534.17728284884
     },
     {
       "folketal": 44214,
@@ -166,7 +170,8 @@
       "husholdning_el_co2_ton": 5422.8346722940005,
       "husholdning_fjernvarme_tj": 249.567683905,
       "husholdning_fjernvarme_co2_ton": 4580.8021072,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 20331.21243727362
     },
     {
       "folketal": 29262,
@@ -200,7 +205,8 @@
       "husholdning_el_co2_ton": 2315.86692393,
       "husholdning_fjernvarme_tj": 354.21762233,
       "husholdning_fjernvarme_co2_ton": 6504.27230257,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 16311.389957942249
     },
     {
       "folketal": 53950,
@@ -234,7 +240,8 @@
       "husholdning_el_co2_ton": 5919.99042753,
       "husholdning_fjernvarme_tj": 247.70202601,
       "husholdning_fjernvarme_co2_ton": 4444.99744692,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19087.6503501559
     },
     {
       "folketal": 40990,
@@ -268,7 +275,8 @@
       "husholdning_el_co2_ton": 3404.4676483,
       "husholdning_fjernvarme_tj": 572.6978990470001,
       "husholdning_fjernvarme_co2_ton": 10242.804226549999,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 16723.18257159156
     },
     {
       "folketal": 75106,
@@ -302,7 +310,8 @@
       "husholdning_el_co2_ton": 9807.775411249999,
       "husholdning_fjernvarme_tj": 1123.190029193,
       "husholdning_fjernvarme_co2_ton": 20089.41614389,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 39146.30859921906
     },
     {
       "folketal": 71185,
@@ -336,7 +345,8 @@
       "husholdning_el_co2_ton": 7254.33161248,
       "husholdning_fjernvarme_tj": 610.268051099,
       "husholdning_fjernvarme_co2_ton": 9132.348937929999,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 20876.195960204757
     },
     {
       "folketal": 25834,
@@ -370,7 +380,8 @@
       "husholdning_el_co2_ton": 2718.1518199780003,
       "husholdning_fjernvarme_tj": 219.49226996,
       "husholdning_fjernvarme_co2_ton": 3402.8394519000003,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18368.21719692054
     },
     {
       "folketal": 32030,
@@ -404,7 +415,8 @@
       "husholdning_el_co2_ton": 3305.1530111700004,
       "husholdning_fjernvarme_tj": 151.58640434,
       "husholdning_fjernvarme_co2_ton": 2782.0849352,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19025.963836303436
     },
     {
       "folketal": 54228,
@@ -438,7 +450,8 @@
       "husholdning_el_co2_ton": 5532.99792333,
       "husholdning_fjernvarme_tj": 541.958740692,
       "husholdning_fjernvarme_co2_ton": 8280.6416723,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19081.353563460612
     },
     {
       "folketal": 60458,
@@ -472,7 +485,8 @@
       "husholdning_el_co2_ton": 5474.107858179999,
       "husholdning_fjernvarme_tj": 612.6319094080001,
       "husholdning_fjernvarme_co2_ton": 10284.27805026,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17695.118321416914
     },
     {
       "folketal": 24685,
@@ -506,7 +520,8 @@
       "husholdning_el_co2_ton": 2456.5775229,
       "husholdning_fjernvarme_tj": 177.3738185,
       "husholdning_fjernvarme_co2_ton": 3255.410214,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 16411.527831785144
     },
     {
       "folketal": 58614,
@@ -540,7 +555,8 @@
       "husholdning_el_co2_ton": 6394.92433726,
       "husholdning_fjernvarme_tj": 259.406397604,
       "husholdning_fjernvarme_co2_ton": 4681.390784274,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 27335.48157853151
     },
     {
       "folketal": 45138,
@@ -574,7 +590,8 @@
       "husholdning_el_co2_ton": 4542.56396074,
       "husholdning_fjernvarme_tj": 328.97828853699997,
       "husholdning_fjernvarme_co2_ton": 6038.9202932200005,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18937.91234363504
     },
     {
       "folketal": 18689,
@@ -608,7 +625,8 @@
       "husholdning_el_co2_ton": 1900.2402168999997,
       "husholdning_fjernvarme_tj": 123.09614378,
       "husholdning_fjernvarme_co2_ton": 2200.8366346000003,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19021.528634266942
     },
     {
       "folketal": 26496,
@@ -642,7 +660,8 @@
       "husholdning_el_co2_ton": 4200.094842898,
       "husholdning_fjernvarme_tj": 47.62020126,
       "husholdning_fjernvarme_co2_ton": 1000.2804102,
-      "affald_indberetning": "bekraeftet_fejl"
+      "affald_indberetning": "bekraeftet_fejl",
+      "foedevare_forbrug_pr_indb": 24230.669348997097
     },
     {
       "folketal": 46240,
@@ -676,7 +695,8 @@
       "husholdning_el_co2_ton": 7266.577739811,
       "husholdning_fjernvarme_tj": 176.361852779,
       "husholdning_fjernvarme_co2_ton": 2793.746852727,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 21333.716772965625
     },
     {
       "folketal": 42445,
@@ -710,7 +730,8 @@
       "husholdning_el_co2_ton": 7379.912456483,
       "husholdning_fjernvarme_tj": 243.17904029,
       "husholdning_fjernvarme_co2_ton": 4956.3048085,
-      "affald_indberetning": "bekraeftet_fejl"
+      "affald_indberetning": "bekraeftet_fejl",
+      "foedevare_forbrug_pr_indb": 23516.56603603854
     },
     {
       "folketal": 47450,
@@ -744,7 +765,8 @@
       "husholdning_el_co2_ton": 9091.911449399999,
       "husholdning_fjernvarme_tj": 226.86487197600002,
       "husholdning_fjernvarme_co2_ton": 6346.88267767,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 20110.71510120282
     },
     {
       "folketal": 42874,
@@ -778,7 +800,8 @@
       "husholdning_el_co2_ton": 6281.88137705,
       "husholdning_fjernvarme_tj": 265.630545074,
       "husholdning_fjernvarme_co2_ton": 6592.24485098,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 24711.536308174607
     },
     {
       "folketal": 41787,
@@ -812,7 +835,8 @@
       "husholdning_el_co2_ton": 13992.971404709999,
       "husholdning_fjernvarme_tj": 261.183232568,
       "husholdning_fjernvarme_co2_ton": 6413.035442200001,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 21087.903321171227
     },
     {
       "folketal": 31738,
@@ -846,7 +870,8 @@
       "husholdning_el_co2_ton": 7525.504267179999,
       "husholdning_fjernvarme_tj": 298.13346080800005,
       "husholdning_fjernvarme_co2_ton": 948.98769311,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19258.753307862233
     },
     {
       "folketal": 64244,
@@ -880,7 +905,8 @@
       "husholdning_el_co2_ton": 12770.26537626,
       "husholdning_fjernvarme_tj": 463.97346615000004,
       "husholdning_fjernvarme_co2_ton": 8998.505845700001,
-      "affald_indberetning": "bekraeftet_fejl"
+      "affald_indberetning": "bekraeftet_fejl",
+      "foedevare_forbrug_pr_indb": 21902.64074145017
     },
     {
       "folketal": 55182,
@@ -914,7 +940,8 @@
       "husholdning_el_co2_ton": 8129.24936892,
       "husholdning_fjernvarme_tj": 507.37139098899996,
       "husholdning_fjernvarme_co2_ton": 12554.32170705,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 21974.74219075006
     },
     {
       "folketal": 25354,
@@ -948,7 +975,8 @@
       "husholdning_el_co2_ton": 5046.0493872,
       "husholdning_fjernvarme_tj": 171.02886130099998,
       "husholdning_fjernvarme_co2_ton": 3467.229109384,
-      "affald_indberetning": "bekraeftet_fejl"
+      "affald_indberetning": "bekraeftet_fejl",
+      "foedevare_forbrug_pr_indb": 31468.542990612877
     },
     {
       "folketal": 57912,
@@ -982,7 +1010,8 @@
       "husholdning_el_co2_ton": 10044.14031014,
       "husholdning_fjernvarme_tj": 297.73571338200003,
       "husholdning_fjernvarme_co2_ton": 5761.8864503,
-      "affald_indberetning": "bekraeftet_fejl"
+      "affald_indberetning": "bekraeftet_fejl",
+      "foedevare_forbrug_pr_indb": 36185.53448830426
     },
     {
       "folketal": 38677,
@@ -1016,7 +1045,8 @@
       "husholdning_el_co2_ton": 2619.778348717,
       "husholdning_fjernvarme_tj": 601.5035210509999,
       "husholdning_fjernvarme_co2_ton": 9257.16501533,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17750.499768837824
     },
     {
       "folketal": 54120,
@@ -1050,7 +1080,8 @@
       "husholdning_el_co2_ton": 7352.706557101999,
       "husholdning_fjernvarme_tj": 289.830096517,
       "husholdning_fjernvarme_co2_ton": 4545.489027954,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 21861.287823320486
     },
     {
       "folketal": 63962,
@@ -1084,7 +1115,8 @@
       "husholdning_el_co2_ton": 8348.18237759,
       "husholdning_fjernvarme_tj": 203.761793118,
       "husholdning_fjernvarme_co2_ton": 3090.516964651,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 21215.04978082537
     },
     {
       "folketal": 29879,
@@ -1118,7 +1150,8 @@
       "husholdning_el_co2_ton": 5693.3365545490005,
       "husholdning_fjernvarme_tj": 68.055817354,
       "husholdning_fjernvarme_co2_ton": 663.620520324,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 21881.271440835575
     },
     {
       "folketal": 92697,
@@ -1152,7 +1185,8 @@
       "husholdning_el_co2_ton": 12032.160485749999,
       "husholdning_fjernvarme_tj": 844.15664195,
       "husholdning_fjernvarme_co2_ton": 14701.4033237,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 23539.385287973386
     },
     {
       "folketal": 25040,
@@ -1186,7 +1220,8 @@
       "husholdning_el_co2_ton": 3121.0857626200004,
       "husholdning_fjernvarme_tj": 141.85952379699998,
       "husholdning_fjernvarme_co2_ton": 1838.1488672849998,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 23695.767595002922
     },
     {
       "folketal": 38143,
@@ -1220,7 +1255,8 @@
       "husholdning_el_co2_ton": 52.96541084500001,
       "husholdning_fjernvarme_tj": 205.27032505100001,
       "husholdning_fjernvarme_co2_ton": 960.8658554369999,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19564.722330130076
     },
     {
       "folketal": 59119,
@@ -1254,7 +1290,8 @@
       "husholdning_el_co2_ton": 15741.982888940001,
       "husholdning_fjernvarme_tj": 886.9174863310001,
       "husholdning_fjernvarme_co2_ton": 18821.12668041,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18853.559830062757
     },
     {
       "folketal": 75009,
@@ -1288,7 +1325,8 @@
       "husholdning_el_co2_ton": 7007.72502417,
       "husholdning_fjernvarme_tj": 102.043726789,
       "husholdning_fjernvarme_co2_ton": 3935.23690374,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 20500.515045797463
     },
     {
       "folketal": 47954,
@@ -1322,7 +1360,8 @@
       "husholdning_el_co2_ton": 6568.80503981,
       "husholdning_fjernvarme_tj": 1004.349148936,
       "husholdning_fjernvarme_co2_ton": 2149.96805123,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 20612.603365843333
     },
     {
       "folketal": 38533,
@@ -1356,7 +1395,8 @@
       "husholdning_el_co2_ton": 3.179141629,
       "husholdning_fjernvarme_tj": 638.608936966,
       "husholdning_fjernvarme_co2_ton": 76.432084706,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18419.118829360294
     },
     {
       "folketal": 85163,
@@ -1390,7 +1430,8 @@
       "husholdning_el_co2_ton": 17675.794632719997,
       "husholdning_fjernvarme_tj": 629.663892079,
       "husholdning_fjernvarme_co2_ton": 24882.85866115,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19787.545543646214
     },
     {
       "folketal": 31988,
@@ -1424,7 +1465,8 @@
       "husholdning_el_co2_ton": 11294.42081581,
       "husholdning_fjernvarme_tj": 206.073721798,
       "husholdning_fjernvarme_co2_ton": 5562.74597456,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19636.26055750099
     },
     {
       "folketal": 36010,
@@ -1458,7 +1500,8 @@
       "husholdning_el_co2_ton": 4760.88954009,
       "husholdning_fjernvarme_tj": 365.15367953000003,
       "husholdning_fjernvarme_co2_ton": 1773.7478866,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 20408.940176785058
     },
     {
       "folketal": 80959,
@@ -1492,7 +1535,8 @@
       "husholdning_el_co2_ton": 10237.49667198,
       "husholdning_fjernvarme_tj": 634.530113472,
       "husholdning_fjernvarme_co2_ton": 8252.92497441,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19230.113914472568
     },
     {
       "folketal": 30853,
@@ -1526,7 +1570,8 @@
       "husholdning_el_co2_ton": 4777.160350300001,
       "husholdning_fjernvarme_tj": 113.532313866,
       "husholdning_fjernvarme_co2_ton": 1325.5004440139999,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 20333.037498096695
     },
     {
       "folketal": 23842,
@@ -1560,7 +1605,8 @@
       "husholdning_el_co2_ton": 4323.8752741200005,
       "husholdning_fjernvarme_tj": 0.0,
       "husholdning_fjernvarme_co2_ton": 0.0,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 20553.038174463876
     },
     {
       "folketal": 44831,
@@ -1594,7 +1640,8 @@
       "husholdning_el_co2_ton": 2836.20159442,
       "husholdning_fjernvarme_tj": 387.464838202,
       "husholdning_fjernvarme_co2_ton": 145.141828021,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19567.03792753824
     },
     {
       "folketal": 40369,
@@ -1628,7 +1675,8 @@
       "husholdning_el_co2_ton": 3829.373640105,
       "husholdning_fjernvarme_tj": 420.867368657,
       "husholdning_fjernvarme_co2_ton": 2971.00331165,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17503.351678983294
     },
     {
       "folketal": 52328,
@@ -1662,7 +1710,8 @@
       "husholdning_el_co2_ton": 8426.4939154,
       "husholdning_fjernvarme_tj": 265.64303684500004,
       "husholdning_fjernvarme_co2_ton": 2075.293177796,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17468.490942305212
     },
     {
       "folketal": 24299,
@@ -1696,7 +1745,8 @@
       "husholdning_el_co2_ton": 4930.815288422,
       "husholdning_fjernvarme_tj": 250.328358617,
       "husholdning_fjernvarme_co2_ton": 7847.1134539899995,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18274.439514833408
     },
     {
       "folketal": 11841,
@@ -1730,7 +1780,8 @@
       "husholdning_el_co2_ton": 0.0,
       "husholdning_fjernvarme_tj": 228.358964636,
       "husholdning_fjernvarme_co2_ton": 91.991501026,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 16917.218463775716
     },
     {
       "folketal": 40625,
@@ -1764,7 +1815,8 @@
       "husholdning_el_co2_ton": 7144.066297949,
       "husholdning_fjernvarme_tj": 418.4577818,
       "husholdning_fjernvarme_co2_ton": 4993.64717447,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19588.04798113713
     },
     {
       "folketal": 29179,
@@ -1798,7 +1850,8 @@
       "husholdning_el_co2_ton": 6086.279891352001,
       "husholdning_fjernvarme_tj": 264.787997068,
       "husholdning_fjernvarme_co2_ton": 5926.16584208,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17562.31474196897
     },
     {
       "folketal": 32401,
@@ -1832,7 +1885,8 @@
       "husholdning_el_co2_ton": 16599.40799654,
       "husholdning_fjernvarme_tj": 431.797145989,
       "husholdning_fjernvarme_co2_ton": 36803.602694600006,
-      "affald_indberetning": "usikker_fraktion"
+      "affald_indberetning": "usikker_fraktion",
+      "foedevare_forbrug_pr_indb": 17837.610667478253
     },
     {
       "folketal": 213168,
@@ -1866,7 +1920,8 @@
       "husholdning_el_co2_ton": 35727.86655367,
       "husholdning_fjernvarme_tj": 4122.704720168,
       "husholdning_fjernvarme_co2_ton": 130560.6018649,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17534.24283099171
     },
     {
       "folketal": 60027,
@@ -1900,7 +1955,8 @@
       "husholdning_el_co2_ton": 9594.89388034,
       "husholdning_fjernvarme_tj": 382.188710366,
       "husholdning_fjernvarme_co2_ton": 11889.50146518,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18130.72200772993
     },
     {
       "folketal": 5766,
@@ -1934,7 +1990,8 @@
       "husholdning_el_co2_ton": 0.0,
       "husholdning_fjernvarme_tj": 114.06261580500001,
       "husholdning_fjernvarme_co2_ton": 20.305288932,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17263.64774892911
     },
     {
       "folketal": 27200,
@@ -1968,7 +2025,8 @@
       "husholdning_el_co2_ton": 1677.78147898,
       "husholdning_fjernvarme_tj": 464.22753379999995,
       "husholdning_fjernvarme_co2_ton": 2707.5707906999996,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19301.06981431253
     },
     {
       "folketal": 114947,
@@ -2002,7 +2060,8 @@
       "husholdning_el_co2_ton": 32958.0243218,
       "husholdning_fjernvarme_tj": 2153.5531680579998,
       "husholdning_fjernvarme_co2_ton": 97716.7047906,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18831.85673692288
     },
     {
       "folketal": 3332,
@@ -2036,7 +2095,8 @@
       "husholdning_el_co2_ton": 3189.433937376,
       "husholdning_fjernvarme_tj": 46.148470917000004,
       "husholdning_fjernvarme_co2_ton": 2372.91278544,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19526.700810853916
     },
     {
       "folketal": 52939,
@@ -2070,7 +2130,8 @@
       "husholdning_el_co2_ton": 8256.80871663,
       "husholdning_fjernvarme_tj": 1068.147581769,
       "husholdning_fjernvarme_co2_ton": 14065.873185639999,
-      "affald_indberetning": "usikker_spring"
+      "affald_indberetning": "usikker_spring",
+      "foedevare_forbrug_pr_indb": 18408.015767835284
     },
     {
       "folketal": 55218,
@@ -2104,7 +2165,8 @@
       "husholdning_el_co2_ton": 6515.75355188,
       "husholdning_fjernvarme_tj": 538.376309148,
       "husholdning_fjernvarme_co2_ton": 886.821467977,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17419.140047302157
     },
     {
       "folketal": 96214,
@@ -2138,7 +2200,8 @@
       "husholdning_el_co2_ton": 16589.9644075,
       "husholdning_fjernvarme_tj": 1467.6006064029998,
       "husholdning_fjernvarme_co2_ton": 21606.74691284,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18490.40217479047
     },
     {
       "folketal": 74123,
@@ -2172,7 +2235,8 @@
       "husholdning_el_co2_ton": 10339.88144532,
       "husholdning_fjernvarme_tj": 989.094220368,
       "husholdning_fjernvarme_co2_ton": 14784.40404777,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17592.82039846838
     },
     {
       "folketal": 36174,
@@ -2206,7 +2270,8 @@
       "husholdning_el_co2_ton": 1800.33592782,
       "husholdning_fjernvarme_tj": 390.530433695,
       "husholdning_fjernvarme_co2_ton": 3024.1681034699996,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17183.51288121048
     },
     {
       "folketal": 49468,
@@ -2240,7 +2305,8 @@
       "husholdning_el_co2_ton": 9722.64980777,
       "husholdning_fjernvarme_tj": 635.543046262,
       "husholdning_fjernvarme_co2_ton": 15484.58905077,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18305.83556956667
     },
     {
       "folketal": 42641,
@@ -2274,7 +2340,8 @@
       "husholdning_el_co2_ton": 4814.70519079,
       "husholdning_fjernvarme_tj": 404.515184528,
       "husholdning_fjernvarme_co2_ton": 1019.050565659,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 24506.975439288944
     },
     {
       "folketal": 123250,
@@ -2308,7 +2375,8 @@
       "husholdning_el_co2_ton": 16026.9157013,
       "husholdning_fjernvarme_tj": 1664.517333258,
       "husholdning_fjernvarme_co2_ton": 20481.05842112,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19394.51832542537
     },
     {
       "folketal": 58405,
@@ -2342,7 +2410,8 @@
       "husholdning_el_co2_ton": 0.0,
       "husholdning_fjernvarme_tj": 752.5963878289999,
       "husholdning_fjernvarme_co2_ton": 18.167986555,
-      "affald_indberetning": "usikker_spring"
+      "affald_indberetning": "usikker_spring",
+      "foedevare_forbrug_pr_indb": 17880.11348623033
     },
     {
       "folketal": 49773,
@@ -2376,7 +2445,8 @@
       "husholdning_el_co2_ton": 4240.437989566,
       "husholdning_fjernvarme_tj": 726.802629379,
       "husholdning_fjernvarme_co2_ton": 11617.57021445,
-      "affald_indberetning": "usikker_spring"
+      "affald_indberetning": "usikker_spring",
+      "foedevare_forbrug_pr_indb": 17965.739351270076
     },
     {
       "folketal": 48578,
@@ -2410,7 +2480,8 @@
       "husholdning_el_co2_ton": 7686.9221466300005,
       "husholdning_fjernvarme_tj": 288.06014245899996,
       "husholdning_fjernvarme_co2_ton": 4277.562622549999,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17862.75713887003
     },
     {
       "folketal": 98806,
@@ -2444,7 +2515,8 @@
       "husholdning_el_co2_ton": 14033.49547908,
       "husholdning_fjernvarme_tj": 1087.440402785,
       "husholdning_fjernvarme_co2_ton": 26464.712345150005,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17295.313099081024
     },
     {
       "folketal": 36477,
@@ -2478,7 +2550,8 @@
       "husholdning_el_co2_ton": 3744.178632403,
       "husholdning_fjernvarme_tj": 576.2424939360001,
       "husholdning_fjernvarme_co2_ton": 393.009778314,
-      "affald_indberetning": "bekraeftet_fejl"
+      "affald_indberetning": "bekraeftet_fejl",
+      "foedevare_forbrug_pr_indb": 16917.339826852105
     },
     {
       "folketal": 24310,
@@ -2512,7 +2585,8 @@
       "husholdning_el_co2_ton": 6270.249605564,
       "husholdning_fjernvarme_tj": 304.912786452,
       "husholdning_fjernvarme_co2_ton": 8241.02577792,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18031.983959642563
     },
     {
       "folketal": 100564,
@@ -2546,7 +2620,8 @@
       "husholdning_el_co2_ton": 607.540197592,
       "husholdning_fjernvarme_tj": 1333.5547492809999,
       "husholdning_fjernvarme_co2_ton": 2356.3289160199997,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 16897.598643253707
     },
     {
       "folketal": 3617,
@@ -2580,7 +2655,8 @@
       "husholdning_el_co2_ton": 0.0,
       "husholdning_fjernvarme_tj": 43.159991436,
       "husholdning_fjernvarme_co2_ton": 13.630099536,
-      "affald_indberetning": "usikker_fraktion"
+      "affald_indberetning": "usikker_fraktion",
+      "foedevare_forbrug_pr_indb": 17325.699695391148
     },
     {
       "folketal": 102753,
@@ -2614,7 +2690,8 @@
       "husholdning_el_co2_ton": 19789.24812686,
       "husholdning_fjernvarme_tj": 1139.763023694,
       "husholdning_fjernvarme_co2_ton": 35592.71366309,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18404.018690640954
     },
     {
       "folketal": 66352,
@@ -2648,7 +2725,8 @@
       "husholdning_el_co2_ton": 13804.8312951,
       "husholdning_fjernvarme_tj": 847.254035173,
       "husholdning_fjernvarme_co2_ton": 18288.597544980003,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18989.92839903871
     },
     {
       "folketal": 44394,
@@ -2682,7 +2760,8 @@
       "husholdning_el_co2_ton": 10725.7756203,
       "husholdning_fjernvarme_tj": 488.202194975,
       "husholdning_fjernvarme_co2_ton": 3145.83016667,
-      "affald_indberetning": "bekraeftet_fejl"
+      "affald_indberetning": "bekraeftet_fejl",
+      "foedevare_forbrug_pr_indb": 17733.947242917806
     },
     {
       "folketal": 378361,
@@ -2716,7 +2795,8 @@
       "husholdning_el_co2_ton": 74235.35879171,
       "husholdning_fjernvarme_tj": 5378.598517240001,
       "husholdning_fjernvarme_co2_ton": 186253.2988197,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18323.757381951185
     },
     {
       "folketal": 90546,
@@ -2750,7 +2830,8 @@
       "husholdning_el_co2_ton": 3432.48471345,
       "husholdning_fjernvarme_tj": 1546.972133223,
       "husholdning_fjernvarme_co2_ton": 17713.41621033,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17636.610194144003
     },
     {
       "folketal": 59324,
@@ -2784,7 +2865,8 @@
       "husholdning_el_co2_ton": 3152.608455043,
       "husholdning_fjernvarme_tj": 1020.1589479470001,
       "husholdning_fjernvarme_co2_ton": 26166.45912098,
-      "affald_indberetning": "usikker_spring"
+      "affald_indberetning": "usikker_spring",
+      "foedevare_forbrug_pr_indb": 17504.923036832424
     },
     {
       "folketal": 43305,
@@ -2818,7 +2900,8 @@
       "husholdning_el_co2_ton": 2995.749638596,
       "husholdning_fjernvarme_tj": 589.172132373,
       "husholdning_fjernvarme_co2_ton": 3892.273373676,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17028.934088319613
     },
     {
       "folketal": 18596,
@@ -2852,7 +2935,8 @@
       "husholdning_el_co2_ton": 764.8863131200001,
       "husholdning_fjernvarme_tj": 362.32619734699995,
       "husholdning_fjernvarme_co2_ton": 379.978989325,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18663.992222466706
     },
     {
       "folketal": 55405,
@@ -2886,7 +2970,8 @@
       "husholdning_el_co2_ton": 468.50879450699995,
       "husholdning_fjernvarme_tj": 811.8467476019999,
       "husholdning_fjernvarme_co2_ton": 4086.3128869599996,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17815.077947412632
     },
     {
       "folketal": 44104,
@@ -2920,7 +3005,8 @@
       "husholdning_el_co2_ton": 0.0,
       "husholdning_fjernvarme_tj": 523.535419557,
       "husholdning_fjernvarme_co2_ton": 177.01621297399998,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17504.366659376305
     },
     {
       "folketal": 20122,
@@ -2954,7 +3040,8 @@
       "husholdning_el_co2_ton": 2668.030216615,
       "husholdning_fjernvarme_tj": 374.08976240199996,
       "husholdning_fjernvarme_co2_ton": 9694.824993794999,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17302.517222191353
     },
     {
       "folketal": 97874,
@@ -2988,7 +3075,8 @@
       "husholdning_el_co2_ton": 9654.2107327,
       "husholdning_fjernvarme_tj": 1183.771948677,
       "husholdning_fjernvarme_co2_ton": 34624.71662890001,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17530.752549111407
     },
     {
       "folketal": 36529,
@@ -3022,7 +3110,8 @@
       "husholdning_el_co2_ton": 1051.4202331840002,
       "husholdning_fjernvarme_tj": 575.458541384,
       "husholdning_fjernvarme_co2_ton": 3480.718795832,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17438.89159544084
     },
     {
       "folketal": 57523,
@@ -3056,7 +3145,8 @@
       "husholdning_el_co2_ton": 10855.09328091,
       "husholdning_fjernvarme_tj": 909.787976362,
       "husholdning_fjernvarme_co2_ton": 28267.1136314,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18372.894001908466
     },
     {
       "folketal": 62979,
@@ -3090,7 +3180,8 @@
       "husholdning_el_co2_ton": 5260.233827980001,
       "husholdning_fjernvarme_tj": 1044.902427975,
       "husholdning_fjernvarme_co2_ton": 19676.34457635,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17888.636278021637
     },
     {
       "folketal": 37998,
@@ -3124,7 +3215,8 @@
       "husholdning_el_co2_ton": 1580.185653173,
       "husholdning_fjernvarme_tj": 504.88996365099996,
       "husholdning_fjernvarme_co2_ton": 4059.28816317,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17580.61701778441
     },
     {
       "folketal": 1683,
@@ -3158,7 +3250,8 @@
       "husholdning_el_co2_ton": 374.948517782,
       "husholdning_fjernvarme_tj": 8.347302181,
       "husholdning_fjernvarme_co2_ton": 25.10288521,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18124.34494501372
     },
     {
       "folketal": 41541,
@@ -3192,7 +3285,8 @@
       "husholdning_el_co2_ton": 2455.683373925,
       "husholdning_fjernvarme_tj": 558.627510757,
       "husholdning_fjernvarme_co2_ton": 2768.1043974589998,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18229.820185881217
     },
     {
       "folketal": 19344,
@@ -3226,7 +3320,8 @@
       "husholdning_el_co2_ton": 0.0,
       "husholdning_fjernvarme_tj": 138.767318066,
       "husholdning_fjernvarme_co2_ton": 290.768441561,
-      "affald_indberetning": "usikker_spring"
+      "affald_indberetning": "usikker_spring",
+      "foedevare_forbrug_pr_indb": 17397.065768526783
     },
     {
       "folketal": 31280,
@@ -3260,7 +3355,8 @@
       "husholdning_el_co2_ton": 2451.510843396,
       "husholdning_fjernvarme_tj": 428.880860403,
       "husholdning_fjernvarme_co2_ton": 7176.755793310001,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 19050.06343310963
     },
     {
       "folketal": 42572,
@@ -3294,7 +3390,8 @@
       "husholdning_el_co2_ton": 2600.932846873,
       "husholdning_fjernvarme_tj": 680.280857612,
       "husholdning_fjernvarme_co2_ton": 13538.67792926,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17523.52770458822
     },
     {
       "folketal": 35632,
@@ -3328,7 +3425,8 @@
       "husholdning_el_co2_ton": 1126.057366922,
       "husholdning_fjernvarme_tj": 560.9762891879999,
       "husholdning_fjernvarme_co2_ton": 8706.072775010001,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 17622.72687093697
     },
     {
       "folketal": 226033,
@@ -3362,7 +3460,8 @@
       "husholdning_el_co2_ton": 106282.61358662,
       "husholdning_fjernvarme_tj": 4022.29905992,
       "husholdning_fjernvarme_co2_ton": 243264.03096260002,
-      "affald_indberetning": null
+      "affald_indberetning": null,
+      "foedevare_forbrug_pr_indb": 18369.20995772929
     }
   ]
 }

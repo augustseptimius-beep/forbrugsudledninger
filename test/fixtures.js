@@ -7,7 +7,8 @@
 
 export const land = {
   navn: "Hele landet",
-  disp_indkomst: 287682, folketal: 6025603, folketal_forrige: 5992734, areal: 42955.6,
+  disp_indkomst: 287682,
+  foedevare_forbrug_pr_indb: 19738.3119, folketal: 6025603, folketal_forrige: 5992734, areal: 42955.6,
   formue_gns: 2177950, formue_median: 800815, gini: 30.43,
   boliger_parcel: 1177875, boliger_raekke: 440156, boliger_etage: 1148673, boligareal: 111,
   byggeri: 25966,
@@ -21,7 +22,8 @@ export const land = {
 
 export const thisted = {
   navn: "Thisted", kode: 787, region: "Nordjylland",
-  disp_indkomst: 252934, folketal: 42572, folketal_forrige: 42698, areal: 1072.2,
+  disp_indkomst: 252934,
+  foedevare_forbrug_pr_indb: 17523.5277, folketal: 42572, folketal_forrige: 42698, areal: 1072.2,
   formue_gns: 1838139, formue_median: 813928, gini: 26.42,
   boliger_parcel: 14246, boliger_raekke: 2677, boliger_etage: 3295, boligareal: 133,
   byggeri: 103,
@@ -35,7 +37,8 @@ export const thisted = {
 
 export const greve = {
   navn: "Greve", kode: 253, region: "Sjælland",
-  disp_indkomst: 306548, folketal: 54120, folketal_forrige: 53536, areal: 60.4,
+  disp_indkomst: 306548,
+  foedevare_forbrug_pr_indb: 21861.2878, folketal: 54120, folketal_forrige: 53536, areal: 60.4,
   formue_gns: 2419897, formue_median: 1222322, gini: 26.35,
   boliger_parcel: 10368, boliger_raekke: 5625, boliger_etage: 6549, boligareal: 119,
   byggeri: 495,
