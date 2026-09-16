@@ -1,5 +1,5 @@
 {
-  "genereret": "2026-09-11",
+  "genereret": "2026-09-16",
   "kilder": [
     {
       "id": "FOLK1A",
@@ -24,6 +24,7 @@
       "felter": [
         "disp_indkomst"
       ],
+      "forbehold": "Gennemsnittet er følsomt over for få personer med meget stor kapitalindkomst: i en lille kommune kan én husstand flytte det flere procent. Tabellen hentes derfor også for lønindkomst tre år tilbage, og kommuner, hvor den disponible indkomst er løbet markant fra kommunens egen lønudvikling, markeres med et forbehold på kommunesiden. Tallet skjules ikke - det er rigtigt, men det beskriver ikke, hvordan borgerne i almindelighed lever.",
       "periode": "2024"
     },
     {
@@ -165,6 +166,30 @@
       ],
       "forbehold": "Kun kategorien Husholdninger - erhverv, fremstilling, offentlig service og transport hører til andre kategorier og er ikke med. Opgørelsen dækker udledningen fra forbrændingen og fra elnettet, ikke hele livscyklussen bag brændslet, og niveauet er derfor lavere end CONCITO's tal for El og varme. Sammenligningen med landsgennemsnittet er gyldig, fordi begge sider opgøres ens. NIRAS (2024) s. 18 peger på Energi- og CO2-Regnskabet som den rigtige kilde til energidelen. Klimaregnskabets el-faktor er kommunens egen produktion; værktøjet regner husholdningernes strøm med landets fælles faktor i stedet, fordi strøm deles på det fælles net. Fjernvarmens faktor er fjernvarmenettets egen og bruges, som den er.",
       "periode": "2023"
+    },
+    {
+      "id": "FU17",
+      "navn": "Forbrug efter forbrugsgruppe, region, prisenhed og tid",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/FU17",
+      "felter": [
+        "foedevare_forbrug_pr_indb"
+      ],
+      "forbehold": "Forbrugsundersøgelsen er en stikprøve, og et enkelt års regionskvotient er ustabil. Kvotienten udjævnes derfor over de ti seneste år. Målt over 2015-2024 adskiller kun Sjælland (6,9 % over landet) og Midtjylland (4,9 % under) sig påviseligt; Hovedstaden, Syddanmark og Nordjylland kan ikke skelnes fra landsgennemsnittet og heller ikke indbyrdes. Perioden er den nyeste årgang; de ni foregående hentes med.",
+      "periode": "2024"
+    },
+    {
+      "id": "INDKF111",
+      "navn": "Familiernes indkomster efter område",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/INDKF111",
+      "felter": [],
+      "forbehold": "Leverer både nævneren i regionens forbrugskvotient og kommunens samlede disponible indkomst, som fødevareforbruget skaleres med. Gennemsnittet kan trækkes skævt af få personer med meget stor kapitalindkomst i en lille kommune.",
+      "periode": "2024"
     }
   ],
   "referencer": [
@@ -185,6 +210,15 @@
       "url": "https://concito.dk/udgivelser/forbrugsbaserede-klimaaftryk-paa-lokalt-niveau",
       "anvendes_til": "Anbefalinger til, hvordan et kommunalt forbrugsaftryk bør opgøres - og dermed forklaringen på, hvorfor dette værktøj ikke selv beregner et",
       "sider": "s. 18 afsnit 4.2.3 (energi), s. 20 afsnit 4.2.6 (transport), s. 26 afsnit 4.2.10 (øvrigt forbrug), s. 29 afsnit 4.3.1 (offentligt forbrug)"
+    },
+    {
+      "id": "OSEI_OWUSU_2020",
+      "navn": "Tracking the carbon emissions of Denmark's five regions from a producer and consumer perspective",
+      "udgiver": "Ecological Economics 177, 106778",
+      "aar": 2020,
+      "url": "https://doi.org/10.1016/j.ecolecon.2020.106778",
+      "anvendes_til": "Fordelingsnøglen bag kommunernes fødevareforbrug. Værktøjet anvender artiklens metode på aktuelle registerdata og bruger ikke dens udledningstal",
+      "sider": "s. 4 (landsgennemsnitlig udledningsintensitet i alle kommuner), s. 8 (samme produktsammensætning i alle regioner), supplerende information ligning S9-S11 (fordelingsnøglen)"
     }
   ]
 }

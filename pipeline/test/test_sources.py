@@ -69,3 +69,23 @@ def test_ingen_antagelser_tilbage():
     assert "antagelser" not in sources.byg_sources()
     assert not hasattr(sources, "ANTAGELSER")
 
+
+
+def test_den_committede_sources_json_er_i_takt_med_katalogets_indhold():
+    """web/data/sources.json er genereret, men committet, så siden virker uden
+    Python. Bliver den ikke regenereret efter en ændring i KILDER, står der
+    nøgletal på kommunesiderne, hvis datakilde ikke er nævnt nogen steder - og
+    det er præcis den regel, hele projektet hviler på.
+
+    Datoen sammenlignes ikke: den ændrer sig ved hver kørsel og ville gøre
+    testen rød uden grund."""
+    import json, os
+    sti = os.path.join(os.path.dirname(__file__), "..", "..",
+                       "web", "data", "sources.json")
+    with open(sti, encoding="utf-8") as f:
+        committet = json.load(f)
+    forventet = sources.byg_sources()
+    for felt in ("kilder", "referencer"):
+        assert committet[felt] == forventet[felt], (
+            f"web/data/sources.json er ude af takt med sources.py ({felt}). "
+            "Kør pipeline/build.py, eller regenerér filen.")
