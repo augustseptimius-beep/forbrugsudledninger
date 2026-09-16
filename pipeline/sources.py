@@ -33,8 +33,16 @@ def _dst(id_, navn, periode_noegle, felter):
 KILDER = [
     _dst("FOLK1A", "Folketal efter område", "FOLK_KVARTAL",
          ["folketal", "folketal_forrige"]),
-    _dst("INDKP101", "Disponibel indkomst efter område", "INDKOMST_AAR",
-         ["disp_indkomst"]),
+    dict(_dst("INDKP101", "Disponibel indkomst efter område", "INDKOMST_AAR",
+              ["disp_indkomst"]),
+         forbehold="Gennemsnittet er følsomt over for få personer med meget stor "
+                   "kapitalindkomst: i en lille kommune kan én husstand flytte det "
+                   "flere procent. Tabellen hentes derfor også for lønindkomst tre "
+                   "år tilbage, og kommuner, hvor den disponible indkomst er løbet "
+                   "markant fra kommunens egen lønudvikling, markeres med et "
+                   "forbehold på kommunesiden. Tallet skjules ikke - det er "
+                   "rigtigt, men det beskriver ikke, hvordan borgerne i "
+                   "almindelighed lever."),
     dict(_dst("IFOR41", "Gini-koefficient efter område", "GINI_AAR", ["gini"]),
          forbehold="Vises ikke på kommunesiden. Ulighed siger noget om fordelingen af "
                    "forbruget, ikke om niveauet. Tallet hentes til en vurdering af "

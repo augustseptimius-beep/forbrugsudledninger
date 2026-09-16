@@ -318,6 +318,78 @@ def _tukey_hegn(vaerdier):
     return q1 - 1.5 * iqr, q3 + 1.5 * iqr
 
 
+# --- Indkomstens robusthed pr. kommune ---
+
+# Hvor mange år tilbage indkomsten sammenlignes med. Tre år, fordi et spring
+# skal kunne nå at vise sig som et vedvarende niveau og ikke kun som ét års
+# udsving: et engangsbeløb falder tilbage inden for et par år, mens en
+# vedvarende kapitalindkomst bliver liggende.
+INDKOMST_VINDUE_AAR = 3
+
+# Grænsen for den robuste z-score. 3,5 er Iglewicz og Hoaglins standardværdi
+# for median/MAD-metoden og er ikke valgt til dette datasæt. Den er ikke
+# kritisk her: over de 98 kommuner ligger den markerede på z ≈ 26 og den
+# næsthøjeste på z ≈ 2, så alt mellem 3 og 20 ville give samme resultat.
+INDKOMST_Z_GRAENSE = 3.5
+
+INDKOMST_TRUKKET_AF_FAA = "trukket_af_faa"
+
+
+def _robust_z(vaerdier):
+    """Median og MAD i stedet for middelværdi og spredning. Netop den kommune,
+    der skal findes, ville ellers trække både middelværdi og spredning op og
+    dermed skjule sig selv. Returnerer {navn: z} eller {} ved for få værdier."""
+    if len(vaerdier) < 8:
+        return {}
+    v = sorted(vaerdier.values())
+    median = v[len(v) // 2]
+    afvigelser = sorted(abs(x - median) for x in v)
+    mad = afvigelser[len(afvigelser) // 2]
+    if not mad:
+        return {}
+    return {navn: 0.6745 * (x - median) / mad for navn, x in vaerdier.items()}
+
+
+def klassificer_indkomst(disp_nu, disp_foer, loen_nu, loen_foer):
+    """Markerer kommuner, hvor den disponible indkomst har flyttet sig langt ud
+    af trit med kommunens egen lønudvikling.
+
+    Returnerer {navn: INDKOMST_TRUKKET_AF_FAA | None}.
+
+    Gennemsnitsindkomsten er følsom over for få personer med meget stor
+    kapitalindkomst. I en lille kommune kan én husstand flytte gennemsnittet
+    flere procent, og så beskriver tallet ikke længere, hvordan borgerne lever.
+    Lønnen er ikke følsom på samme måde, så gabet mellem de to væksttakster
+    afslører det: vokser den disponible indkomst meget hurtigere end lønnen,
+    kommer forskellen fra noget andet end arbejde.
+
+    ENSIDIG, som affaldets sammensætningssignal. Et gab den anden vej - løn
+    vokser hurtigere end disponibel indkomst - er almindeligt og betyder blot,
+    at kapitalindkomsten har ligget stille. Det er ikke et forbehold værd."""
+    gab = {}
+    for navn in disp_nu:
+        vaerdier = (disp_nu.get(navn), disp_foer.get(navn),
+                    loen_nu.get(navn), loen_foer.get(navn))
+        if not all(vaerdier) or not disp_foer.get(navn) or not loen_foer.get(navn):
+            continue
+        gab[navn] = ((disp_nu[navn] / disp_foer[navn])
+                     - (loen_nu[navn] / loen_foer[navn])) * 100
+    z = _robust_z(gab)
+    return {navn: (INDKOMST_TRUKKET_AF_FAA if z.get(navn, 0) > INDKOMST_Z_GRAENSE else None)
+            for navn in gab}
+
+
+def fetch_indkomst_og_loen(aar):
+    """Returnerer (disponibel indkomst, løn), begge {navn: kr. pr. person}."""
+    def hent(indkomsttype):
+        rows = dst_client.fetch(BASE, "INDKP101", {
+            "OMRÅDE": "*", "ENHED": "116", "KOEN": "MOK",
+            "INDKOMSTTYPE": indkomsttype, "Tid": aar,
+        })
+        return dst_client.sum_by(rows, ["OMRÅDE"])
+    return hent("100"), hent("115")
+
+
 def klassificer_affald(forhold, sammensaetning):
     """Afgør pr. kommune, hvor meget affaldstallene kan bære. Returnerer
     {navn: AFFALD_BEKRAEFTET_FEJL | AFFALD_USIKKER_FRAKTION |

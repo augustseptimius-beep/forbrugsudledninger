@@ -84,6 +84,28 @@ const FRITIDSHUS_FORBEHOLD = {
 const fritidshusForbehold = (m) => (fritidshusPrBolig(m) > 1 ? FRITIDSHUS_FORBEHOLD : null);
 const affaldForbehold = (m) => INDBERETNING_FORBEHOLD[m.affald_indberetning] ?? null;
 
+/** Gennemsnitsindkomsten er følsom over for få personer med meget stor
+ *  kapitalindkomst. I en lille kommune kan én husstand flytte gennemsnittet
+ *  flere procent, og så beskriver tallet ikke længere, hvordan borgerne lever.
+ *
+ *  Retningen spærres IKKE. Tallet er rigtigt: pengene er der, og de er
+ *  borgernes. Men de er så skævt fordelt, at gennemsnittet siger noget andet
+ *  end det læseren tror. Læseren skal have det at vide, ikke fratages tallet.
+ *
+ *  Pipelinen finder dem ved at holde væksten i disponibel indkomst op mod
+ *  kommunens egen lønvækst over tre år - se klassificer_indkomst i
+ *  fetch_dst.py. */
+const INDKOMST_FORBEHOLD = {
+  trukket_af_faa: {
+    spaerrer: false,
+    note: "Bemærk: kommunens disponible indkomst er vokset markant hurtigere end "
+      + "lønnen i kommunen over de seneste tre år. Forskellen kommer fra "
+      + "kapitalindkomst hos få personer, og gennemsnittet er derfor trukket op "
+      + "af nogle få husstande frem for af, hvordan borgerne i almindelighed lever.",
+  },
+};
+const indkomstForbehold = (m) => INDKOMST_FORBEHOLD[m.indkomst_robusthed] ?? null;
+
 // Hvilken vej et nøgletal peger, hvis værdien er høj.
 //   "hoejere"    en høj værdi peger mod højere udledning end landsgennemsnittet
 //   "lavere"     en høj værdi peger mod lavere udledning
@@ -133,6 +155,7 @@ const DRIVERE = [
   // som ikke findes blandt Energistyrelsens - og nåede derfor aldrig overblikket.
   { navn: "Disponibel indkomst", enhed: "kr.", val: (m) => m.disp_indkomst,
     type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "hoejere",
+    forbehold: indkomstForbehold,
     begrundelse: "CONCITO (2023) s. 27: mennesker med lav indkomst forbruger ofte færre "
       + "ting og sager og rejser mindre. NIRAS (2024) s. 27 anbefaler at undersøge, om "
       + "borgernes øvrige forbrug kan skaleres efter indkomsten. Sammenhængen er ikke "
@@ -153,6 +176,9 @@ const DRIVERE = [
   { navn: "Fødevareforbrug pr. indbygger", enhed: "kr./indb.",
     val: (m) => m.foedevare_forbrug_pr_indb,
     type: "relativ", kategori: KATEGORI.FOEDEVARER, paavirkning: "hoejere",
+    // Tallet ER kommunens disponible indkomst ganget med en regionskvotient, så
+    // et gennemsnit trukket af få personer slår lige så hårdt igennem her.
+    forbehold: indkomstForbehold,
     begrundelse: "Forbrugsudgiften til fødevarer, ikke en udledning: værktøjet "
       + "beregner intet kommunalt aftryk. Mere forbrug betyder flere producerede "
       + "fødevarer, og Osei-Owusu et al. (2020) opgør netop fødevareforbruget til "

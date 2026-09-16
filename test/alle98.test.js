@@ -357,3 +357,20 @@ test("affald: hver spærret kommune er navngivet i pipelinens kildeliste", () =>
       `${k.navn} er spærret uden at stå i den navngivne kildeliste`);
   }
 });
+
+test("indkomstens robusthed er vurderet for alle 98 kommuner", () => {
+  // Feltet skal findes på hver kommune. null er normaltilstanden og betyder
+  // "intet at bemærke" - mangler feltet helt, er vurderingen ikke kørt.
+  const uden = data.kommuner.filter((k) => !("indkomst_robusthed" in k));
+  assert.deepEqual(uden.map((k) => k.navn), []);
+  const markeret = data.kommuner.filter((k) => k.indkomst_robusthed);
+  // Markeringen skal være sjælden. Rammer den mange kommuner, er det reglen,
+  // der er for løs, ikke datasættet, der er blevet dårligt.
+  assert.ok(markeret.length <= 10,
+    `for mange markerede: ${markeret.map((k) => k.navn).join(", ")}`);
+  for (const k of markeret) {
+    const d = driverTabel(k, data.land).find((x) => x.navn === "Disponibel indkomst");
+    assert.match(d.begrundelse, /kapitalindkomst hos få personer/,
+      `${k.navn}: markeringen når ikke frem til nøgletallet`);
+  }
+});
