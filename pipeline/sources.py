@@ -11,6 +11,7 @@ i stedet for at drive fra virkeligheden efter et par årlige opdateringer."""
 
 from datetime import date
 
+import osei_owusu
 from constants import PERIODER
 
 DST = "Danmarks Statistik"
@@ -86,6 +87,42 @@ KILDER = [
                      "det fælles net. Fjernvarmens faktor er fjernvarmenettets egen og "
                      "bruges, som den er.",
     },
+    {
+        "id": "OSEI_OWUSU_2020",
+        "navn": "Kommunernes andel af Danmarks fødevareforbrug "
+                "(Osei-Owusu et al. 2020, supplerende regneark, arket CESM)",
+        "udbyder": "Ecological Economics",
+        "metode": "manuel",
+        "periode_noegle": None,
+        "periode_fast": str(osei_owusu.OPGOERELSESAAR),
+        "licens": "Artiklens supplerende materiale",
+        "url": "https://doi.org/10.1016/j.ecolecon.2020.106778",
+        "felter": ["foedevare_forbrugsandel"],
+        "forbehold": "Opgørelsesåret er 2011, hvor værktøjets øvrige nøgletal er "
+                     "aktuelle registerdata. Tallet måler forbrugets størrelse, ikke "
+                     "kostens sammensætning: artiklen antager landsgennemsnitlig kost "
+                     "i alle kommuner (s. 4 og s. 8), så det kan ikke se, om én "
+                     "kommune spiser mere oksekød end en anden. Over de 98 kommuner "
+                     "følger det disponibel indkomst tæt (r = +0,93) og siger derfor "
+                     "i praksis det samme som indkomsten, blot i fødevarernes "
+                     "kategori. Artiklens absolutte ton-tal bruges ikke - værktøjet "
+                     "viser kun afvigelsen fra landsgennemsnittet.",
+    },
+    {
+        "id": "FOLK1A_FOEDEVARE",
+        "navn": "Folketal efter område (opgørelsesåret for fødevareforbruget)",
+        "udbyder": DST,
+        "metode": "api_fast",
+        "periode_noegle": None,
+        "periode_fast": osei_owusu.FOLK_KVARTAL,
+        "licens": DST_LICENS,
+        "url": "https://www.statistikbanken.dk/FOLK1A",
+        "felter": ["foedevare_folketal"],
+        "forbehold": "Hentes for samme kvartal som fødevareforbruget er opgjort i, "
+                     "ikke for indeværende år. Ellers ville 2011-forbrug blive delt "
+                     "med nutidens indbyggertal. Perioden følger derfor kilden og "
+                     "opdateres ikke ved den årlige genkøring.",
+    },
 ]
 
 # Faglige referencer. Værktøjet indeholder ingen antagelser eller
@@ -117,6 +154,20 @@ REFERENCER = [
                  "s. 26 afsnit 4.2.10 (øvrigt forbrug), s. 29 afsnit 4.3.1 "
                  "(offentligt forbrug)",
     },
+    {
+        "id": "OSEI_OWUSU_2020",
+        "navn": "Tracking the carbon emissions of Denmark's five regions from a "
+                "producer and consumer perspective",
+        "udgiver": "Ecological Economics 177, 106778",
+        "aar": 2020,
+        "url": "https://doi.org/10.1016/j.ecolecon.2020.106778",
+        "anvendes_til": "Kommunernes indbyrdes fordeling af fødevareforbruget - den "
+                        "eneste offentliggjorte kommuneopdelte opgørelse af "
+                        "forbrugsbaserede fødevareudledninger",
+        "sider": "s. 4 (landsgennemsnitlig udledningsintensitet i alle kommuner), "
+                 "s. 8 (samme produktsammensætning i alle regioner), supplerende "
+                 "regneark arket CESM (kommunernes forbrugsandele)",
+    },
 ]
 
 
@@ -125,9 +176,12 @@ def byg_sources():
     den faktiske periode, så json-filen er selvforklarende for widgeten."""
     kilder = []
     for kilde in KILDER:
-        ud = {k: v for k, v in kilde.items() if k != "periode_noegle"}
+        ud = {k: v for k, v in kilde.items()
+              if k not in ("periode_noegle", "periode_fast")}
         noegle = kilde["periode_noegle"]
-        ud["periode"] = PERIODER[noegle] if noegle else None
+        # En kilde uden periode_noegle kan have en fast periode, der følger
+        # kilden selv i stedet for den årlige opdatering - se FOLK1A_FOEDEVARE.
+        ud["periode"] = PERIODER[noegle] if noegle else kilde.get("periode_fast")
         kilder.append(ud)
     return {
         "genereret": date.today().isoformat(),

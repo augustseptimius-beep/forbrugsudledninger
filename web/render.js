@@ -654,6 +654,10 @@ export function renderKommune(b, c, ens) {
 
 const METODE_MAERKAT = {
   api: { tekst: "API", klasse: "bg-gray-100 text-gray-700" },
+  // Hentes fra et API, men for en periode der følger kilden i stedet for den
+  // årlige opdatering. Skal kunne skelnes fra de øvrige API-kilder, ellers
+  // læses årstallet som om det var forældet.
+  api_fast: { tekst: "API, fast år", klasse: "bg-gray-100 text-gray-700" },
   manuel: { tekst: "Manuel", klasse: "bg-amber-100 text-amber-800" },
 };
 

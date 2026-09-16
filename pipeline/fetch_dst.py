@@ -14,17 +14,19 @@ def _to_float(s):
     return float(s.replace(",", "."))
 
 
+def fetch_folketal_kvartal(kvartal):
+    """Returnerer {navn: folketal (int)} for ét kvartal."""
+    rows = dst_client.fetch(BASE, "FOLK1A", {
+        "OMRÅDE": "*", "KØN": "TOT", "ALDER": "IALT", "CIVILSTAND": "TOT",
+        "Tid": kvartal,
+    })
+    return dst_client.sum_by(rows, ["OMRÅDE"])
+
+
 def fetch_folketal():
     """Returnerer (folketal_nu, folketal_forrige), begge {navn: int}."""
-    rows_nu = dst_client.fetch(BASE, "FOLK1A", {
-        "OMRÅDE": "*", "KØN": "TOT", "ALDER": "IALT", "CIVILSTAND": "TOT",
-        "Tid": PERIODER["FOLK_KVARTAL"],
-    })
-    rows_forrige = dst_client.fetch(BASE, "FOLK1A", {
-        "OMRÅDE": "*", "KØN": "TOT", "ALDER": "IALT", "CIVILSTAND": "TOT",
-        "Tid": PERIODER["FOLK_KVARTAL_FORRIGE"],
-    })
-    return dst_client.sum_by(rows_nu, ["OMRÅDE"]), dst_client.sum_by(rows_forrige, ["OMRÅDE"])
+    return (fetch_folketal_kvartal(PERIODER["FOLK_KVARTAL"]),
+            fetch_folketal_kvartal(PERIODER["FOLK_KVARTAL_FORRIGE"]))
 
 
 def fetch_indkomst():

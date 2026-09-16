@@ -21,6 +21,7 @@ import fetch_klimaregnskabet
 import sources
 import concito
 import ens
+import osei_owusu
 from constants import PERIODER
 from kommuner import KOMMUNER
 
@@ -40,12 +41,14 @@ FORVENTEDE_FELTER = [
     "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
     "husholdning_el_tj", "husholdning_el_co2_ton",
     "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton",
+    "foedevare_forbrugsandel", "foedevare_folketal",
 ]
 
 
 def saml_kommune_post(navn, dst_data, kode=None, region=None,
                       pendling=None,
-                      fritidshuse=None, husholdning=None, affald_indberetning=None):
+                      fritidshuse=None, husholdning=None, affald_indberetning=None,
+                      foedevare_folketal=None):
     """Samler ét kommune- (eller land-) objekt i motorens datakontrakt.
     Ren funktion - ingen I/O - så den kan testes uden netværk (Task 10)."""
     post = dict(dst_data.get(navn, {}))
@@ -74,6 +77,14 @@ def saml_kommune_post(navn, dst_data, kode=None, region=None,
     # FORVENTEDE_FELTER - der ville den blive talt som manglende data for de
     # 85 kommuner, hvor alt er i orden.
     post["affald_indberetning"] = (affald_indberetning or {}).get(navn)
+    # Kommunens andel af Danmarks fødevareforbrug (2011) og folketallet for
+    # samme år. Motoren regner de to om til forbrug pr. indbygger og viser kun
+    # afvigelsen fra landet - se osei_owusu.py for hvorfor tonnagen ikke bruges.
+    # Landet er hele fordelingen, altså andelen 1.
+    post["foedevare_forbrugsandel"] = (
+        1.0 if navn == "Hele landet"
+        else osei_owusu.FOEDEVARE_FORBRUGSANDEL.get(navn))
+    post["foedevare_folketal"] = (foedevare_folketal or {}).get(navn)
     for felt in FORVENTEDE_FELTER:
         post.setdefault(felt, None)
     return post
@@ -158,8 +169,21 @@ def main():
         affald_indberetning, _selskaber = {}, {}
         print(f"  ADVARSEL: kunne ikke hente LABY24 ({fejl}). Alle står uden forbehold.")
 
+    # Folketallet for artiklens opgørelsesår. Uden det kan kommunens andel af
+    # fødevareforbruget ikke gøres op pr. indbygger, og nøgletallet står tomt.
+    print(f"Henter DST FOLK1A for {osei_owusu.FOLK_KVARTAL} "
+          "(folketal til fødevareforbruget)...")
+    try:
+        foedevare_folketal = fetch_dst.fetch_folketal_kvartal(osei_owusu.FOLK_KVARTAL)
+        print(f"  {len(foedevare_folketal)} områder hentet.")
+    except Exception as fejl:
+        print(f"  ADVARSEL: kunne ikke hente folketal for {osei_owusu.FOLK_KVARTAL} "
+              f"({fejl}). Fødevarenøgletallet står tomt.")
+        foedevare_folketal = {}
+
     land_post = saml_kommune_post("Hele landet", dst_data, pendling=pendling,
-                                  fritidshuse=fritidshuse)
+                                  fritidshuse=fritidshuse,
+                                  foedevare_folketal=foedevare_folketal)
     # Landets husholdningstal er summen af kommunernes, ikke et selvstændigt
     # opslag - så tæller og nævner dækker præcis det samme område.
     def _sum(felt):
@@ -187,7 +211,8 @@ def main():
             navn, dst_data, kode=kode, region=region,
             pendling=pendling,
             fritidshuse=fritidshuse, husholdning=husholdning,
-            affald_indberetning=affald_indberetning))
+            affald_indberetning=affald_indberetning,
+            foedevare_folketal=foedevare_folketal))
 
     # Ingen "konstanter" i outputtet: der er ingen beregningskoefficienter
     # tilbage i modellen. De nationale sammenligningstal ligger i concito.json

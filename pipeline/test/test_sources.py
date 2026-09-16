@@ -55,10 +55,10 @@ def test_byg_sources_udfylder_perioder():
 def test_referencer_er_med_og_har_sidehenvisninger():
     # Testede tidligere for en liste af ANTAGELSER. Der er ingen antagelser
     # tilbage - koefficienterne er fjernet, fordi de ikke kunne kildebelægges.
-    # Tilbage står de to rapporter, de nationale tal er afskrevet fra.
+    # Tilbage står de rapporter, tallene er afskrevet fra.
     ud = sources.byg_sources()
     ids = {r["id"] for r in ud["referencer"]}
-    assert ids == {"CONCITO_2023", "NIRAS_2024"}
+    assert ids == {"CONCITO_2023", "NIRAS_2024", "OSEI_OWUSU_2020"}
     for r in ud["referencer"]:
         assert r["url"].startswith("https://"), f"{r['id']} mangler link"
         assert "s. " in r["sider"], f"{r['id']} mangler sidehenvisninger"
@@ -68,3 +68,15 @@ def test_referencer_er_med_og_har_sidehenvisninger():
 def test_ingen_antagelser_tilbage():
     assert "antagelser" not in sources.byg_sources()
     assert not hasattr(sources, "ANTAGELSER")
+
+
+def test_kilder_med_fast_periode_oplyser_den():
+    """En kilde uden periode_noegle må ikke ende med tom periode på
+    metodesiden. FOLK1A_FOEDEVARE henter en fast periode, der følger kilden
+    i stedet for den årlige opdatering, og skal oplyse hvilken."""
+    for kilde in sources.KILDER:
+        if kilde["periode_noegle"] is None:
+            assert kilde.get("periode_fast"), \
+                f"{kilde['id']} har hverken periode_noegle eller periode_fast"
+    for kilde in sources.byg_sources()["kilder"]:
+        assert kilde["periode"], f"{kilde['id']} mangler udfyldt periode"
