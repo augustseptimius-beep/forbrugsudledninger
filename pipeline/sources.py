@@ -7,7 +7,11 @@ ny tabel ikke kan snige sig ind uden kildehenvisning.
 
 periode_noegle peger ind i PERIODER i constants.py, så årstallene på
 metodesiden altid afspejler det, der faktisk blev hentet ved sidste kørsel,
-i stedet for at drive fra virkeligheden efter et par årlige opdateringer."""
+i stedet for at drive fra virkeligheden efter et par årlige opdateringer.
+
+kort er den korte form, kildeangivelsen på kommunesiden viser ved hvert
+nøgletal ("DST BIL54"). Den står her frem for i render.js, så navnet på en
+kilde kun skrives ét sted."""
 
 from datetime import date
 
@@ -17,10 +21,11 @@ DST = "Danmarks Statistik"
 DST_LICENS = "CC BY 4.0"
 
 
-def _dst(id_, navn, periode_noegle, felter):
+def _dst(id_, navn, periode_noegle, felter, kort=None):
     return {
         "id": id_,
         "navn": navn,
+        "kort": kort or f"DST {id_}",
         "udbyder": DST,
         "metode": "api",
         "periode_noegle": periode_noegle,
@@ -65,7 +70,7 @@ KILDER = [
                    "Den siger intet om transportmiddel og dækker kun arbejdsturen, "
                    "ikke indkøb, fritid og andre ærinder."),
     dict(_dst("BOL101_FRITID", "Fritidshuse uden CPR-tilmeldte personer",
-              "BOLIGER_AAR", ["fritidshuse"]),
+              "BOLIGER_AAR", ["fritidshuse"], kort="DST BOL101 (fritidshuse)"),
          url="https://www.statistikbanken.dk/BOL101",
          forbehold="Bruges til at fordele husholdningernes energi og udledning på "
                    "samtlige boliger. Fritidsboliger bruger energi, men deres ejere "
@@ -73,6 +78,7 @@ KILDER = [
     {
         "id": "KLIMAREGNSKABET_HUSHOLDNINGER",
         "navn": "Husholdningernes energiforbrug og udledning (Energi- og CO2-regnskabet)",
+        "kort": "Klimaregnskabet.dk",
         "udbyder": "Klimaregnskabet.dk",
         "metode": "api",
         "periode_noegle": "KLIMAREGNSKAB_AAR",
@@ -97,6 +103,7 @@ KILDER = [
     {
         "id": "FU17",
         "navn": "Forbrug efter forbrugsgruppe, region, prisenhed og tid",
+        "kort": "DST FU17",
         "udbyder": DST,
         "metode": "api",
         "periode_noegle": "FORBRUG_AAR",
@@ -114,6 +121,7 @@ KILDER = [
     {
         "id": "INDKF111",
         "navn": "Familiernes indkomster efter område",
+        "kort": "DST INDKF111",
         "udbyder": DST,
         "metode": "api",
         "periode_noegle": "INDKOMST_AAR",
@@ -135,6 +143,7 @@ REFERENCER = [
     {
         "id": "CONCITO_2023",
         "navn": "Danmarks globale forbrugsudledninger",
+        "kort": "CONCITO (2023)",
         "udgiver": "CONCITO",
         "aar": 2023,
         "url": "https://concito.dk/udgivelser/danmarks-globale-forbrugsudledninger",
@@ -146,6 +155,7 @@ REFERENCER = [
     {
         "id": "NIRAS_2024",
         "navn": "Forbrugsbaserede klimaaftryk på lokalt niveau",
+        "kort": "NIRAS (2024)",
         "udgiver": "NIRAS for CONCITO og C40 Cities",
         "aar": 2024,
         "url": "https://concito.dk/udgivelser/forbrugsbaserede-klimaaftryk-paa-lokalt-niveau",
@@ -158,6 +168,7 @@ REFERENCER = [
     },
     {
         "id": "OSEI_OWUSU_2020",
+        "kort": "Osei-Owusu et al. (2020)",
         "navn": "Tracking the carbon emissions of Denmark's five regions from a "
                 "producer and consumer perspective",
         "udgiver": "Ecological Economics 177, 106778",

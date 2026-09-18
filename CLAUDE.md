@@ -58,6 +58,12 @@ forbrugsudledninger/
 
 ## Hvorfor render.js og widget.js er adskilt
 
+Kommunesiden har ét nøgletalsafsnit, `renderIndikatorer`. Det havde tidligere
+et kategorioverblik oven over sig, som sagde med mærkater, hvad tabellen sagde
+igen med tal; vægt, beskrivelse, samlet retning og tal står nu samlet pr.
+kategori. Kategoriernes vægte og beskrivelser kommer fra `ens.json` og er ens
+på alle 98 sider - kun tallene i tabellerne er kommunens.
+
 `render.js` indeholder rene funktioner: beregningsresultat ind, HTML-streng ud.
 Det gør hele brugerfladen testbar uden jsdom eller browser - testene asserterer
 bare på strenge. `widget.js` er et tyndt lag, der henter data, læser
@@ -85,6 +91,13 @@ føres tilbage til en navngiven side i en navngiven rapport, hører den ikke
 hjemme i modellen. `pipeline/concito.py` indeholder de nationale tal som ren
 afskrift med sidehenvisning; `pipeline/constants.py` forklarer, hvilke
 koefficienter der er fjernet og hvorfor.
+
+Kilden står også ved hvert nøgletal på kommunesiden, og den skrives ikke i
+hånden: hver driver i `beregning.js` oplyser i `felter`, hvilke felter i
+`data.json` den læser, og `sources.json` siger, hvem der ejer hvert felt.
+Tilføjer du et nøgletal, skal `felter` med - `test/kildeangivelse.test.js`
+kører hvert regnestykke gennem en proxy og slår fejl, hvis de oplyste felter
+ikke er præcis dem, der faktisk læses.
 
 **2. Manglende data må aldrig vises som nul.**
 
@@ -138,8 +151,8 @@ dem kun hvis metoden selv ændres, og kør golden-testene bagefter.
 ## Tests
 
 ```bash
-npm test                              # 30+ JS-tests: motor og rendering
-cd pipeline && python3 -m pytest -q   # 44 Python-tests: pipeline
+npm test                              # 170+ JS-tests: motor og rendering
+cd pipeline && python3 -m pytest -q   # 100+ Python-tests: pipeline
 ```
 
 Golden-testene i `test/golden.test.js` holder motoren fast på fastfrosne

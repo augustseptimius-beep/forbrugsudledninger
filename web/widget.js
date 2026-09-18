@@ -6,6 +6,32 @@ import { beregnKommune } from "./beregning.js";
 import { renderKommune, renderForside, renderKommuneKort } from "./render.js";
 import { installerTooltips } from "./tooltip.js";
 
+/** Fold alle kategorier ud eller ind på én gang.
+ *
+ *  Den enkelte kategori klarer sig selv: den er et <details>, og browseren
+ *  åbner og lukker den uden JavaScript, også med tastaturet. Knappen her rammer
+ *  dem alle samtidig, og dens tekst følger tilstanden, så den ikke kommer til
+ *  at love noget andet, end den gør - også når afsnittene er foldet ud én ad
+ *  gangen. Findes knappen ikke, sker der ingenting: foldningen virker uden. */
+function installerFoldning(rod) {
+  const knap = rod.querySelector("#fold-alle");
+  const afsnit = [...rod.querySelectorAll("#noegletal details")];
+  if (!knap) return;
+  if (afsnit.length === 0) return knap.remove();
+
+  const opdater = () => {
+    knap.textContent = afsnit.every((d) => d.open) ? "Fold alle ind" : "Fold alle ud";
+  };
+  knap.addEventListener("click", () => {
+    const aabn = afsnit.some((d) => !d.open);
+    for (const d of afsnit) d.open = aabn;
+    opdater();
+  });
+  // toggle bobler ikke, så hvert afsnit lytter selv.
+  for (const d of afsnit) d.addEventListener("toggle", opdater);
+  opdater();
+}
+
 const app = document.getElementById("app");
 
 /** Embed-tilstand: ?embed=1 skjuler header, footer og navigation, så siden
@@ -43,7 +69,7 @@ function visForside(data) {
   input.focus({ preventScroll: true });
 }
 
-function visKommune(data, concito, ens, kommune) {
+function visKommune(data, concito, ens, sources, kommune) {
   const b = beregnKommune(kommune, data.land);
   document.title = `${kommune.navn} - Forbrugsbaserede udledninger`;
   app.innerHTML = `
@@ -51,20 +77,26 @@ function visKommune(data, concito, ens, kommune) {
        hover:text-gray-900 transition-colors mb-4 no-print">
       <span aria-hidden="true">&larr;</span> Alle kommuner
     </a>
-    ${renderKommune(b, concito, ens)}`;
+    ${renderKommune(b, concito, ens, sources)}`;
+  installerFoldning(app);
 }
 
 async function start() {
   anvendEmbed();
   installerTooltips();
-  let data, concito, ens;
+  // sources.json hentes med, fordi kildeangivelsen står ved hvert nøgletal på
+  // kommunesiden. Den bygges af pipelinen, så en tabel ikke kan skifte id eller
+  // årgang uden at siden følger med.
+  let data, concito, ens, sources;
   try {
-    const [d, c, e] = await Promise.all([
-      fetch("data/data.json"), fetch("data/concito.json"), fetch("data/ens.json")]);
+    const [d, c, e, s] = await Promise.all([
+      fetch("data/data.json"), fetch("data/concito.json"), fetch("data/ens.json"),
+      fetch("data/sources.json")]);
     if (!d.ok) throw new Error(`data.json: HTTP ${d.status}`);
     if (!c.ok) throw new Error(`concito.json: HTTP ${c.status}`);
     if (!e.ok) throw new Error(`ens.json: HTTP ${e.status}`);
-    [data, concito, ens] = await Promise.all([d.json(), c.json(), e.json()]);
+    if (!s.ok) throw new Error(`sources.json: HTTP ${s.status}`);
+    [data, concito, ens, sources] = await Promise.all([d.json(), c.json(), e.json(), s.json()]);
   } catch (fejl) {
     visFejl(`Kunne ikke hente datagrundlaget (${fejl.message}). Siden skal serveres over
       http, ikke åbnes direkte fra filsystemet.`);
@@ -82,7 +114,7 @@ async function start() {
       <a href="index.html" class="underline">Se listen over alle kommuner</a>.`);
     return;
   }
-  visKommune(data, concito, ens, kommune);
+  visKommune(data, concito, ens, sources, kommune);
 }
 
 start();

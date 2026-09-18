@@ -81,7 +81,7 @@ KATEGORIER = [
         "navn": "Føde- og drikkevarer",
         "ton": 1.649, "pct": 17.0,
         "poster": ["Husholdninger / Føde- og drikkevarer"],
-        "note": None,
+        "note": "Husholdningernes køb af føde- og drikkevarer.",
     },
     {
         "navn": "Forbrugsprodukter og services",
@@ -89,7 +89,9 @@ KATEGORIER = [
         "poster": ["Husholdninger / Services", "Husholdninger / Andre produkter",
                    "Husholdninger / Tekstiler", "Husholdninger / Kultur og fritid",
                    "Husholdninger / Elektronik"],
-        "note": "Fem af Energistyrelsens husholdningsgrupper lagt sammen.",
+        "note": "Services, elektronik, tekstiler, kultur og fritid og andre "
+                "produkter - fem af Energistyrelsens husholdningsgrupper lagt "
+                "sammen.",
     },
     {
         "navn": "Offentligt forbrug",

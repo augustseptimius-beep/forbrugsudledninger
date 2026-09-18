@@ -141,19 +141,32 @@ export const KATEGORI = {
 // af Energistyrelsens forbrugsgrupper den oplyser om.
 // afvigelsestype: "relativ" = (k−l)/l, "difference" = k−l.
 //
+// felter: de felter i data.json, nøgletallet faktisk læser. De er selve
+// kildeangivelsen: web/data/sources.json siger, hvilken kilde der ejer hvert
+// felt, og kommunesiden slår op dér frem for at have en liste over kilder
+// skrevet i hånden ved siden af. Listen holdes ærlig af testen "hvert nøgletal
+// oplyser præcis de felter, det læser", som sporer opslagene i val().
+//
+// ogsaaKilder og metodekilde: en kilde, der bidrager uden at eje et felt.
+// Fødevareforbruget er det eneste tilfælde - se nøgletallet nedenfor.
+//
 // rolle: "hjaelper" markerer nøgletal, der kun findes for at kvalificere et
 // andet tal - fritidshuse pr. helårsbolig forklarer husholdningstallene,
 // befolkningsudviklingen forklarer byggeaktiviteten, affaldstallene er kontekst
 // til det forbrug, disponibel indkomst beskriver. De står i tabellen som alle andre,
 // men holdes ude af overblikket, hvor de ellers ville fortrænge de tal, de er
 // sat i verden for at forklare.
-const DRIVERE = [
+// Eksporteret, så testen kan køre hvert regnestykke gennem en proxy og se
+// efter, at nøgletallet oplyser præcis de felter, det læser. Listen er
+// modellens specifikation - læs den, ændr den ikke udefra.
+export const DRIVERE = [
   // Står under Forbrugsprodukter og services. Kilderne kobler også indkomsten til
   // flyrejser (NIRAS s. 20) og regner fødevarer med til "øvrigt forbrug" (NIRAS
   // s. 22), men nøgletallet står kun ét sted, så det ikke tæller dobbelt i
   // overblikket. Det lå tidligere i en egen kategori, "På tværs af kategorier",
   // som ikke findes blandt Energistyrelsens - og nåede derfor aldrig overblikket.
   { navn: "Disponibel indkomst", enhed: "kr./år", val: (m) => m.disp_indkomst,
+    felter: ["disp_indkomst"],
     type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "hoejere",
     forbehold: indkomstForbehold,
     begrundelse: "CONCITO (2023) s. 27: mennesker med lav indkomst forbruger ofte færre "
@@ -175,6 +188,12 @@ const DRIVERE = [
   // ser den frem for at opdage den.
   { navn: "Fødevareforbrug pr. indbygger", enhed: "kr./indb./år",
     val: (m) => m.foedevare_forbrug_pr_indb,
+    felter: ["foedevare_forbrug_pr_indb"],
+    // FU17 ejer feltet, men tallet er FU17's regionskvotient ganget med
+    // kommunens samlede disponible indkomst fra INDKF111, efter fordelingsnøglen
+    // i Osei-Owusu et al. (2020). Alle tre skal stå ved nøgletallet, ellers
+    // ligner det et forbrugstal hentet direkte for kommunen.
+    ogsaaKilder: ["INDKF111"], metodekilde: "OSEI_OWUSU_2020",
     type: "relativ", kategori: KATEGORI.FOEDEVARER, paavirkning: "hoejere",
     // Tallet ER kommunens disponible indkomst ganget med en regionskvotient, så
     // et gennemsnit trukket af få personer slår lige så hårdt igennem her.
@@ -197,23 +216,27 @@ const DRIVERE = [
   // stadig, men vises ikke: ulighed siger noget om fordelingen af forbruget, ikke
   // om niveauet, og hører til en vurdering af rimelig og retfærdig omstilling.
   { navn: "Befolkningsudvikling", enhed: "pct.", val: vaekst,
+    felter: ["folketal", "folketal_forrige"],
     type: "difference", kategori: KATEGORI.BOLIG_BYGGERI, rolle: "hjaelper",
     paavirkning: "uafklaret",
     begrundelse: "Står her for at forklare byggeaktiviteten: en kommune, der vokser, "
       + "bygger flere boliger. Nøgletallene er opgjort pr. borger, så væksten peger ikke "
       + "selv mod en højere eller lavere udledning." },
   { navn: "Gennemsnitligt boligareal", enhed: "m²/bolig", val: (m) => m.boligareal,
+    felter: ["boligareal"],
     type: "relativ", kategori: KATEGORI.ENERGI, rolle: "hjaelper", paavirkning: "hoejere",
     begrundelse: "Større boliger koster mere varme - NIRAS (2024) s. 18 nævner "
       + "boligstørrelsen blandt det, rumvarmen følger. Står som forklarende tal under "
       + "energiforbruget, ikke under byggeriet: det er nybyggeriet, der giver "
       + "byggeriets udledning, ikke størrelsen på de huse, der allerede står." },
   { navn: "Byggeaktivitet", enhed: "pr. 1.000 indb.", val: byggeriPr1000,
+    felter: ["byggeri", "folketal"],
     type: "relativ", kategori: KATEGORI.BOLIG_BYGGERI, paavirkning: "hoejere",
     begrundelse: "Nybyggeri kræver materialer. Energistyrelsen opgør investering i "
       + "boliger til 0,48 ton pr. indbygger (2024). Det er selve byggeriet, der "
       + "tæller her - boligernes energiforbrug hører til Energi og forsyning." },
   { navn: "Biler pr. indbygger", enhed: "biler/pers.", val: bilerPrIndb,
+    felter: ["biler", "folketal"],
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "hoejere",
     begrundelse: "Flere biler betyder både mere kørsel og flere producerede "
       + "køretøjer. Energistyrelsen opgør husholdningernes transport plus køb af "
@@ -221,7 +244,7 @@ const DRIVERE = [
       + "husholdningernes egne biler tælles: firma- og leasingbiler står på "
       + "virksomhedens adresse, ikke der, hvor de bruges." },
   { navn: "El- og plugin-hybridandel", enhed: "pct.", val: elPluginAndel,
-    andel: "0-1",
+    andel: "0-1", felter: ["biler_el", "biler_plugin", "biler"],
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "lavere",
     begrundelse: "En elbil udleder mindre pr. kørt kilometer end en tilsvarende "
       + "benzin- eller dieselbil på et dansk elnet." },
@@ -235,43 +258,54 @@ const DRIVERE = [
   // korrelationen -1,00. De står som to nøgletal efter eksplicit valg, ikke
   // fordi de bærer hver sin oplysning.
   { navn: "Fossil-andel", enhed: "pct.", val: fossilBilAndel,
-    andel: "0-1",
+    andel: "0-1", felter: ["biler_benzin", "biler_diesel", "biler"],
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "hoejere",
     begrundelse: "Benzin- og dieselbiler tilsammen. En fossilbil udleder mere "
       + "CO2 pr. kørt kilometer end en el- eller plugin-hybridbil på et dansk "
       + "elnet, uanset hvordan de fossile biler fordeler sig på de to brændstoffer." },
   { navn: "Gennemsnitlig pendlingsafstand", enhed: "km", val: (m) => m.pendlingsafstand_km,
+    felter: ["pendlingsafstand_km"],
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "hoejere",
     begrundelse: "Længere afstand til arbejde betyder flere kørte kilometer. Siger "
       + "dog intet om transportmiddel." },
   { navn: "Husholdningernes CO2 fra energi", enhed: "ton CO2e/bolig",
-    val: husholdningCo2PrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
+    val: husholdningCo2PrBolig,
+    felter: ["husholdning_co2_ton", "husholdning_el_co2_ton", "husholdning_el_tj",
+             "boliger_parcel", "boliger_raekke", "boliger_etage", "fritidshuse"],
+    type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere", forbehold: fritidshusForbehold,
     begrundelse: "Udledningen fra borgernes eget energiforbrug i boligen. Strømmen er "
       + "regnet med samme udledning pr. kWh i alle kommuner, fordi den deles på det "
       + "fælles net; fjernvarmen med sit lokale nets." },
   { navn: "Husholdningernes energiforbrug", enhed: "GJ/bolig",
-    val: husholdningEnergiPrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
+    val: husholdningEnergiPrBolig,
+    felter: ["husholdning_energi_tj", "boliger_parcel", "boliger_raekke",
+             "boliger_etage", "fritidshuse"],
+    type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere", forbehold: fritidshusForbehold,
     begrundelse: "Mere energi brugt i boligen. Udledningen afhænger dog af, hvilken "
       + "energikilde der bruges - se de to øvrige nøgletal." },
   { navn: "Fossil andel af husholdningernes energi", enhed: "pct.",
     val: (m) => m.husholdning_fossil_andel, andel: "0-1",
+    felter: ["husholdning_fossil_andel"],
     type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere",
     begrundelse: "Naturgas, fyringsolie og LPG udleder ved forbrændingen." },
   { navn: "Fossil opvarmning", enhed: "pct.", val: fossilOpv,
-    andel: "0-1",
+    andel: "0-1", felter: ["opv_olie", "opv_naturgas", "opv_boliger_ialt"],
     type: "relativ", kategori: KATEGORI.ENERGI, paavirkning: "hoejere",
     begrundelse: "Olie- og gasfyr udleder ved forbrændingen i boligen." },
   { navn: "Fjernvarmens CO2 pr. kWh", enhed: "g CO2e/kWh", val: fjernvarmeCo2PrKwh,
+    felter: ["husholdning_fjernvarme_co2_ton", "husholdning_fjernvarme_tj"],
     type: "relativ", kategori: KATEGORI.ENERGI, paavirkning: "hoejere",
     begrundelse: "Hvor meget CO2 der følger med hver kWh fjernvarme, husholdningerne "
       + "aftager. Fjernvarme leveres i rør fra kommunens eget net, så tallet er "
       + "kommunens eget - modsat strøm, der deles på det fælles net. Tallet siger, "
       + "hvor ren fjernvarmen er, ikke hvor meget den fylder i kommunen." },
   { navn: "Fritidshuse pr. helårsbolig", enhed: "boliger/bolig",
-    val: fritidshusPrBolig, type: "relativ", kategori: KATEGORI.ENERGI,
+    val: fritidshusPrBolig,
+    felter: ["fritidshuse", "boliger_parcel", "boliger_raekke", "boliger_etage"],
+    type: "relativ", kategori: KATEGORI.ENERGI,
     rolle: "hjaelper", paavirkning: "uafklaret",
     begrundelse: "Findes kun for at kvalificere husholdningstallene." },
   // De to affaldsnøgletal stod en periode som uafklarede for ALLE 98 kommuner,
@@ -287,11 +321,12 @@ const DRIVERE = [
 // indkomsten (r = -0,25), og husholdningsaffaldet rummer haveaffald, hvis andel
 // svinger fra under 1 til knap 50 % mellem kommunerne.
   { navn: "Husholdningsaffald", enhed: "kg/pers.", val: (m) => m.affald_kg,
+    felter: ["affald_kg"],
     type: "relativ", kategori: KATEGORI.PRODUKTER, rolle: "hjaelper", paavirkning: "hoejere",
     forbehold: affaldForbehold,
     begrundelse: "Mere affald peger mod et større materielt forbrug." },
   { navn: "Genanvendelsesprocent", enhed: "pct.", val: (m) => m.genanvendelse_pct,
-    andel: "0-100",
+    andel: "0-100", felter: ["genanvendelse_pct"],
     type: "relativ", kategori: KATEGORI.PRODUKTER, rolle: "hjaelper", paavirkning: "lavere",
     forbehold: affaldForbehold,
     begrundelse: "Genanvendte materialer erstatter produktion af nye." },
@@ -472,6 +507,10 @@ export function driverTabel(kommune, land) {
     return {
       navn: d.navn, enhed: d.enhed, type: d.type, kategori: d.kategori,
       rolle: d.rolle ?? "hoved",
+      // Kildeangivelsen følger nøgletallet hele vejen ud i tabellen.
+      felter: d.felter ?? [],
+      ogsaaKilder: d.ogsaaKilder ?? [],
+      metodekilde: d.metodekilde ?? null,
       paavirkning,
       begrundelse,
       kommuneVaerdi: kv, landVaerdi: lv, afvigelse: afv,
@@ -509,6 +548,40 @@ export function optaelSignaler(drivere) {
     sumLidt: pr_signal["lidt højere"] + pr_signal["lidt lavere"],
     ialt: Object.values(pr_signal).reduce((a, b) => a + b, 0),
   };
+}
+
+/** Kategoriens SAMLEDE RETNING: hvert nøgletal tæller ét.
+ *
+ *  ALLE NØGLETAL VEJER LIGE. Et udsving på 2 % tæller nøjagtig som et på 40 %.
+ *  Det er en bevidst beslutning og forskellen på denne optælling og mærkatet
+ *  ved det enkelte nøgletal, hvor 10 %-tærsklen afgør, om der står "peger" eller
+ *  "peger lidt". Ville man veje de store udsving tungere, skulle man vide, hvor
+ *  meget hvert nøgletal betyder for udledningen - og det tal findes ikke i
+ *  nogen af kilderne. Så hellere tælle åbent end veje i blinde.
+ *
+ *  DEN SIGER IKKE, AT KATEGORIEN LIGGER HØJT ELLER LAVT. Den siger, hvor mange
+ *  af kategoriens nøgletal der peger hver sin vej. Tallene bag står i tabellen,
+ *  så læseren kan se optællingen efter.
+ *
+ *  Hjælpetal tæller ikke med. De står for at forklare et andet nøgletal
+ *  (fritidshuse forklarer husholdningstallene, affaldet er kontekst til
+ *  indkomsten), og i Forbrugsprodukter og services ville de to affaldstal
+ *  ellers udgøre flertallet over det ene nøgletal, kategorien har.
+ *  Nøgletal uden data tælles for sig - de må ikke forsvinde tavst. */
+export function samletRetning(drivere) {
+  const talte = drivere.filter((d) => d.rolle !== "hjaelper");
+  const medData = talte.filter((d) => d.signal !== "ukendt" && d.signal !== "uafklaret");
+  const op = medData.filter((d) => d.signal.endsWith("højere")).length;
+  const ned = medData.filter((d) => d.signal.endsWith("lavere")).length;
+  const paaNiveau = medData.filter((d) => d.signal === "på niveau").length;
+  const udenData = talte.length - medData.length;
+  const retning =
+    medData.length === 0 ? "ingen data"
+    : op > ned ? "højere"
+    : ned > op ? "lavere"
+    : op > 0 ? "delt"
+    : "på niveau";
+  return { retning, op, ned, paaNiveau, udenData, talte: medData.length };
 }
 
 export function driverePrKategori(drivere) {
