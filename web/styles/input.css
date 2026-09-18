@@ -22,6 +22,12 @@
   @page { margin: 1.5cm; }
 }
 
+/* Kategoriafsnittene på kommunesiden er foldbare. Browserens egen trekant
+   fjernes, fordi sammenfatningen har sin egen pil, der vender med tilstanden -
+   trekanten ville sidde i venstre margen og pege et andet sted hen. */
+summary.kategori-sammenfat { list-style: none; }
+summary.kategori-sammenfat::-webkit-details-marker { display: none; }
+
 /* Embed. Samme idé, anden kontekst: widget.js sætter .embed på <body> ved
    ?embed=1, så siden kan lægges i en iframe uden header, footer og navigation. */
 body.embed .no-embed { display: none !important; }

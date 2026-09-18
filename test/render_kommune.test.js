@@ -221,11 +221,19 @@ test("overskrift: viser kommunekode og region", () => {
 
 // --- Kategoriafsnittene ---
 
-// Ét kategoriafsnit: fra kategorinavnet til det næste.
+// Ét kategoriafsnit: hele kategoriens eget kort.
+//
+// Sliced tidligere fra kategorinavnet til det næste navn. Det holdt ikke, da
+// kategorierne blev foldbare: <details> og <summary> åbner FØR overskriften, så
+// hvert udsnit fik den næste kategoris foldning med og så foldbar ud, også når
+// det var en kategori uden nøgletal.
 const kategoriAfsnit = (h, navn) => {
-  const start = h.indexOf(`>${navn}<`);
-  const naeste = ens.kategorier.map((k) => h.indexOf(`>${k.navn}<`)).filter((i) => i > start);
-  return h.slice(start, naeste.length ? Math.min(...naeste) : undefined);
+  const kort = h.split('<section class="kategori-print').slice(1);
+  const fundet = kort.find((s) => s.includes(`>${navn}<`));
+  assert.ok(fundet, `kategorien ${navn} findes ikke i outputtet`);
+  // Det sidste kort løber ellers videre ned i den lille skrift under afsnittene.
+  const fodnote = fundet.indexOf('<p class="mt-5 border-t');
+  return fodnote === -1 ? fundet : fundet.slice(0, fodnote);
 };
 
 test("nøgletal: alle Energistyrelsens kategorier står med, også dem uden nøgletal", () => {
@@ -368,12 +376,69 @@ test("nøgletal: siger eksplicit at det ikke er en prioritering", () => {
   assert.ok(h.includes("ikke en prioritering"));
 });
 
-test("indikatorer: alle nøgletal står fremme uden foldning", () => {
+test("foldning: hver kategori med nøgletal kan foldes ud og ind", () => {
+  // Nøgletallene stod en periode alle fremme, fordi fem klik for at se nitten
+  // rækker ikke er et overblik. Med en kildeangivelse under hvert nøgletal er
+  // tabellerne dobbelt så høje, og de syv kategorier kan ikke længere ses på én
+  // skærm. Sammenfatningen står fremme; tallene og kilderne er det, der foldes.
   const h = noegletal(bThisted);
-  assert.ok(!h.includes("<details"), "fem klik for at se nitten rækker er ikke et overblik");
+  assert.equal((h.match(/<details/g) || []).length, bThisted.grupper.length,
+    "én foldning pr. kategori med nøgletal");
+  assert.equal((h.match(/<summary/g) || []).length, bThisted.grupper.length);
+  assert.equal((h.match(/Vis nøgletal og kilder/g) || []).length, bThisted.grupper.length,
+    "hver foldning skal sige, hvad der ligger bag den");
+  assert.ok(h.includes("Skjul nøgletal og kilder"), "og hvordan man lukker den igen");
+  // Antallet stod tidligere i knappen ("Vis 7 nøgletal med kilder") og modsagde
+  // den samlede retning lige ovenfor ("3 af 5 nøgletal"), fordi hjælpetallene
+  // ligger bag folden uden at tælle med i retningen.
+  assert.ok(!/Vis \d+ nøgletal/.test(h), "knappen må ikke sætte sit eget tal på nøgletallene");
+});
+
+test("foldning: afsnittene er lukkede fra start", () => {
+  // Formålet med foldningen er det korte overblik over alle syv kategorier.
+  // Åbnede de alle ved indlæsning, ville siden se ud præcis som før.
+  const h = noegletal(bThisted);
+  assert.ok(!/<details[^>]*\sopen/.test(h), "ingen kategori er åben fra start");
+  assert.ok(h.includes('id="fold-alle"'), "der skal være en knap, der folder alle ud");
+  assert.ok(h.includes("Fold alle ud"));
+});
+
+test("foldning: indholdet renderes, det skjules kun", () => {
+  // Rækkerne skal stå i HTML'en, også når afsnittet er lukket: print-reglen
+  // folder alt ud på papir, og en udskrift skal indeholde det hele. Bygges
+  // tabellen først ved klik, står der tomme kategorier på udskriften.
+  const h = noegletal(bThisted);
   const raekker = (h.match(/<tr/g) || []).length;
   assert.equal(raekker, bThisted.drivere.length + bThisted.grupper.length,
     "én række pr. nøgletal plus ét tabelhoved pr. kategori med nøgletal");
+  for (const d of bThisted.drivere) {
+    assert.ok(h.includes(`>${d.navn}<`), `${d.navn} mangler i HTML'en`);
+  }
+});
+
+test("foldning: en kategori uden nøgletal foldes ikke", () => {
+  // En pil, der åbner ind til ingenting, er værre end ingen pil.
+  const h = noegletal(bThisted);
+  for (const navn of ["Offentligt forbrug", "Øvrige investeringer"]) {
+    const afsnit = kategoriAfsnit(h, navn);
+    assert.ok(!afsnit.includes("<details"), `${navn} har intet at folde ud`);
+    assert.ok(!afsnit.includes("Vis "), `${navn} må ikke love nøgletal, der ikke findes`);
+  }
+});
+
+test("foldning: sammenfatningen står fremme, tallene ligger bag folden", () => {
+  // Det, en lukket side viser, er vægt, beskrivelse og samlet retning. Ligger
+  // et af dem inde i tabellen, er overblikket væk, når alt er foldet ind.
+  const h = noegletal(bThisted);
+  for (const g of bThisted.grupper) {
+    const afsnit = kategoriAfsnit(h, g.kategori);
+    const sammenfat = afsnit.slice(0, afsnit.indexOf("</summary>"));
+    assert.ok(sammenfat.includes("Samlet retning"), `${g.kategori}: retningen skal stå fremme`);
+    assert.ok(sammenfat.includes("af Danmarks forbrugsbaserede udledninger"),
+      `${g.kategori}: andelen skal stå fremme`);
+    assert.ok(!sammenfat.includes("Kilde: "), `${g.kategori}: kilderne hører bag folden`);
+    assert.ok(!sammenfat.includes("<table"), `${g.kategori}: tabellen hører bag folden`);
+  }
 });
 
 test("kommunevisning: den nationale vægt står én gang pr. kategori", () => {

@@ -505,7 +505,22 @@ function noegletalTabel(b, drivere, sources) {
 }
 
 /** Ét kategoriafsnit: overskrift med vægt og beskrivelse, den samlede retning,
- *  og kategoriens nøgletal.
+ *  og kategoriens nøgletal bag en foldning.
+ *
+ *  HVORFOR FOLDNINGEN ER KOMMET TILBAGE. Nøgletallene stod en periode alle
+ *  fremme, og begrundelsen var, at fem klik for at se nitten rækker ikke er et
+ *  overblik. Den holdt, da rækkerne var korte. Med en kildeangivelse under hvert
+ *  nøgletal er tabellerne blevet dobbelt så høje, og de syv kategorier kan ikke
+ *  længere ses på én skærm. Foldningen er derfor et andet valg under andre
+ *  omstændigheder: sammenfatningen - vægt, beskrivelse og samlet retning - står
+ *  altid fremme, og det, der foldes væk, er tallene og deres kilder.
+ *
+ *  Afsnittene er lukkede fra start. Formålet med foldningen er netop det korte
+ *  overblik over alle syv kategorier; åbnede de alle ved indlæsning, ville
+ *  siden se ud præcis som før.
+ *
+ *  Indholdet RENDERES altid, det skjules kun. Print-reglen i input.css folder
+ *  alle afsnit ud på papir, og en udskrift indeholder derfor det hele.
  *
  *  VÆGTEN ER NATIONAL. "Transport 1,84 ton pr. indbygger" på Albertslunds side
  *  ville ellers læses som Albertslunds eget transportaftryk - et tal, værktøjet
@@ -537,25 +552,47 @@ function kategoriAfsnit(k, b, c, sources, maksPct) {
 
   const retning = blind ? "" : samletMaerkat(samletRetning(drivere));
 
-  const indhold = blind
-    ? ""
-    : drivere.length > 0
-      ? noegletalTabel(b, drivere, sources)
-      : `<p class="px-4 py-3 text-sm text-gray-600">Ingen af kategoriens nøgletal kan
-          opgøres for ${esc(b.navn)}. Begrundelsen står under tabellerne.</p>`;
+  const indhold = drivere.length > 0
+    ? noegletalTabel(b, drivere, sources)
+    : `<p class="px-4 py-3 text-sm text-gray-600">Ingen af kategoriens nøgletal kan
+        opgøres for ${esc(b.navn)}. Begrundelsen står under afsnittene.</p>`;
 
-  return `<section class="kategori-print rounded-lg border border-gray-200 bg-white overflow-hidden">
-    <div class="border-b border-gray-200 bg-gray-50 px-4 py-3">
-      <div class="flex items-start justify-between gap-x-4 gap-y-2 flex-wrap">
-        <div class="min-w-0">
-          <h3 class="text-base font-bold text-gray-900">${esc(k.navn)}</h3>
-          ${andel}
-        </div>
-        ${retning}
+  const sammenfatning = `<div class="flex items-start justify-between gap-x-4 gap-y-2 flex-wrap">
+      <div class="min-w-0">
+        <h3 class="text-base font-bold text-gray-900">${esc(k.navn)}</h3>
+        ${andel}
       </div>
-      ${beskrivelse}
+      ${retning}
     </div>
-    ${indhold}
+    ${beskrivelse}`;
+
+  // En kategori uden nøgletal foldes ikke: der er intet bag folden, og en
+  // pil, der åbner ind til ingenting, er værre end ingen pil.
+  if (blind) {
+    return `<section class="kategori-print rounded-lg border border-gray-200 bg-white
+      overflow-hidden px-4 py-3">${sammenfatning}</section>`;
+  }
+
+  // INTET ANTAL I KNAPPEN. Den sagde "Vis 7 nøgletal med kilder", mens den
+  // samlede retning lige ovenfor sagde "3 af 5 nøgletal" - to tal for det samme,
+  // fordi hjælpetallene ligger bag folden uden at tælle med i retningen. Et
+  // læst modsætningsforhold koster mere end den affordance, tallet gav.
+  return `<section class="kategori-print rounded-lg border border-gray-200 bg-white overflow-hidden">
+    <details class="group">
+      <summary class="kategori-sammenfat cursor-pointer list-none bg-gray-50 px-4 py-3
+        transition-colors hover:bg-gray-100 group-open:border-b group-open:border-gray-200
+        focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-gray-500">
+        ${sammenfatning}
+        <span class="no-print mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-gray-600">
+          <svg viewBox="0 0 16 16" class="h-3.5 w-3.5 transition-transform group-open:rotate-180"
+            aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>
+          <span class="group-open:hidden">Vis nøgletal og kilder</span>
+          <span class="hidden group-open:inline">Skjul nøgletal og kilder</span>
+        </span>
+      </summary>
+      ${indhold}
+    </details>
   </section>`;
 }
 
@@ -607,9 +644,16 @@ export function renderIndikatorer(b, c, ens, sources) {
     <p class="mt-1 text-sm text-gray-600 max-w-3xl">Nøgletallene er grupperet efter den
       forbrugskategori, de vedrører. Kategoriens vægt og beskrivelse er national og ordret
       ens på alle 98 kommunesider - kun tallene i tabellerne handler om ${esc(b.navn)}.
-      Kilden står under hvert nøgletal.</p>
+      Fold en kategori ud for at se dens nøgletal med kilde og årgang.</p>
 
-    <div class="mt-4 space-y-4">${afsnit}</div>
+    <div class="mt-3 flex justify-end">
+      <button type="button" id="fold-alle"
+        class="no-print inline-flex items-center gap-1.5 rounded-md border border-gray-300
+               bg-white px-2.5 py-1 text-xs text-gray-700 transition-colors
+               hover:bg-gray-50 hover:border-gray-400">Fold alle ud</button>
+    </div>
+
+    <div class="mt-2 space-y-4">${afsnit}</div>
 
     <p class="mt-5 border-t border-gray-100 pt-3 text-xs text-gray-500 max-w-3xl">
       ▲ og ▼ peger mod højere og lavere udledning og afviger ${niveau}&nbsp;% eller mere

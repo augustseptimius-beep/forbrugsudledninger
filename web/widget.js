@@ -6,6 +6,32 @@ import { beregnKommune } from "./beregning.js";
 import { renderKommune, renderForside, renderKommuneKort } from "./render.js";
 import { installerTooltips } from "./tooltip.js";
 
+/** Fold alle kategorier ud eller ind på én gang.
+ *
+ *  Den enkelte kategori klarer sig selv: den er et <details>, og browseren
+ *  åbner og lukker den uden JavaScript, også med tastaturet. Knappen her rammer
+ *  dem alle samtidig, og dens tekst følger tilstanden, så den ikke kommer til
+ *  at love noget andet, end den gør - også når afsnittene er foldet ud én ad
+ *  gangen. Findes knappen ikke, sker der ingenting: foldningen virker uden. */
+function installerFoldning(rod) {
+  const knap = rod.querySelector("#fold-alle");
+  const afsnit = [...rod.querySelectorAll("#noegletal details")];
+  if (!knap) return;
+  if (afsnit.length === 0) return knap.remove();
+
+  const opdater = () => {
+    knap.textContent = afsnit.every((d) => d.open) ? "Fold alle ind" : "Fold alle ud";
+  };
+  knap.addEventListener("click", () => {
+    const aabn = afsnit.some((d) => !d.open);
+    for (const d of afsnit) d.open = aabn;
+    opdater();
+  });
+  // toggle bobler ikke, så hvert afsnit lytter selv.
+  for (const d of afsnit) d.addEventListener("toggle", opdater);
+  opdater();
+}
+
 const app = document.getElementById("app");
 
 /** Embed-tilstand: ?embed=1 skjuler header, footer og navigation, så siden
@@ -52,6 +78,7 @@ function visKommune(data, concito, ens, sources, kommune) {
       <span aria-hidden="true">&larr;</span> Alle kommuner
     </a>
     ${renderKommune(b, concito, ens, sources)}`;
+  installerFoldning(app);
 }
 
 async function start() {
