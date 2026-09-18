@@ -1,9 +1,10 @@
 {
-  "genereret": "2026-09-16",
+  "genereret": "2026-09-18",
   "kilder": [
     {
       "id": "FOLK1A",
       "navn": "Folketal efter område",
+      "kort": "DST FOLK1A",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -17,6 +18,7 @@
     {
       "id": "INDKP101",
       "navn": "Disponibel indkomst efter område",
+      "kort": "DST INDKP101",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -30,6 +32,7 @@
     {
       "id": "IFOR41",
       "navn": "Gini-koefficient efter område",
+      "kort": "DST IFOR41",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -43,6 +46,7 @@
     {
       "id": "BOL101",
       "navn": "Boliger efter anvendelse",
+      "kort": "DST BOL101",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -57,6 +61,7 @@
     {
       "id": "BOL103",
       "navn": "Boliger efter størrelse",
+      "kort": "DST BOL103",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -69,6 +74,7 @@
     {
       "id": "BOL102",
       "navn": "Boliger efter opvarmningsform",
+      "kort": "DST BOL102",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -83,6 +89,7 @@
     {
       "id": "BYGV33",
       "navn": "Fuldført byggeri efter område",
+      "kort": "DST BYGV33",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -95,6 +102,7 @@
     {
       "id": "BIL54",
       "navn": "Personbiler efter drivmiddel, husholdningernes",
+      "kort": "DST BIL54",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -112,6 +120,7 @@
     {
       "id": "LABY25",
       "navn": "Husholdningsaffald og genanvendelse",
+      "kort": "DST LABY25",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -125,6 +134,7 @@
     {
       "id": "AFSTB4",
       "navn": "Gennemsnitlig pendlingsafstand efter bopælsområde",
+      "kort": "DST AFSTB4",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -138,6 +148,7 @@
     {
       "id": "BOL101_FRITID",
       "navn": "Fritidshuse uden CPR-tilmeldte personer",
+      "kort": "DST BOL101 (fritidshuse)",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -151,6 +162,7 @@
     {
       "id": "KLIMAREGNSKABET_HUSHOLDNINGER",
       "navn": "Husholdningernes energiforbrug og udledning (Energi- og CO2-regnskabet)",
+      "kort": "Klimaregnskabet.dk",
       "udbyder": "Klimaregnskabet.dk",
       "metode": "api",
       "licens": "Kræver personlig API-nøgle, se klimaregnskabet.dk",
@@ -170,6 +182,7 @@
     {
       "id": "FU17",
       "navn": "Forbrug efter forbrugsgruppe, region, prisenhed og tid",
+      "kort": "DST FU17",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -183,6 +196,7 @@
     {
       "id": "INDKF111",
       "navn": "Familiernes indkomster efter område",
+      "kort": "DST INDKF111",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
@@ -196,6 +210,7 @@
     {
       "id": "CONCITO_2023",
       "navn": "Danmarks globale forbrugsudledninger",
+      "kort": "CONCITO (2023)",
       "udgiver": "CONCITO",
       "aar": 2023,
       "url": "https://concito.dk/udgivelser/danmarks-globale-forbrugsudledninger",
@@ -205,6 +220,7 @@
     {
       "id": "NIRAS_2024",
       "navn": "Forbrugsbaserede klimaaftryk på lokalt niveau",
+      "kort": "NIRAS (2024)",
       "udgiver": "NIRAS for CONCITO og C40 Cities",
       "aar": 2024,
       "url": "https://concito.dk/udgivelser/forbrugsbaserede-klimaaftryk-paa-lokalt-niveau",
@@ -213,6 +229,7 @@
     },
     {
       "id": "OSEI_OWUSU_2020",
+      "kort": "Osei-Owusu et al. (2020)",
       "navn": "Tracking the carbon emissions of Denmark's five regions from a producer and consumer perspective",
       "udgiver": "Ecological Economics 177, 106778",
       "aar": 2020,

@@ -1,16 +1,24 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { beregnKommune, optaelSignaler, beregnFordeling, driverTabel } from "../web/beregning.js";
+import { beregnKommune, optaelSignaler, beregnFordeling, driverTabel,
+         samletRetning } from "../web/beregning.js";
 import { renderNationaltAftryk, renderIndikatorer, renderHuller,
-         renderKategorioverblik, renderKommuneOverskrift, renderKommune,
+         renderKommuneOverskrift, renderKommune,
          renderTaerskelfordeling, renderEnsKategorier, tal, pct } from "../web/render.js";
 import { land, thisted, greve } from "./fixtures.js";
 
 const concito = JSON.parse(readFileSync(new URL("../web/data/concito.json", import.meta.url)));
 const ens = JSON.parse(readFileSync(new URL("../web/data/ens.json", import.meta.url)));
+const sources = JSON.parse(readFileSync(new URL("../web/data/sources.json", import.meta.url)));
 const bThisted = beregnKommune(thisted, land);
 const bGreve = beregnKommune(greve, land);
+
+// Kommunesiden har ét nøgletalsafsnit. Kategorioverblikket lå tidligere som en
+// egen sektion øverst og sagde med mærkater, hvad tabellen sagde igen med tal;
+// vægt, beskrivelse, samlet retning og tal står nu samlet pr. kategori.
+const noegletal = (b) => renderIndikatorer(b, concito, ens, sources);
+const side = (b) => renderKommune(b, concito, ens, sources);
 
 // --- Det nationale grundlag ---
 
@@ -47,28 +55,35 @@ test("nationalt aftryk: linker til kilden", () => {
 // --- Kommunens indikatorer ---
 
 test("indikatorer: grupperet efter Energistyrelsens gruppe med transport først", () => {
-  const h = renderIndikatorer(bThisted, concito);
+  const h = noegletal(bThisted);
   const iTransport = h.indexOf("Transport");
   const iBolig = h.indexOf("Bolig og byggeri");
   assert.ok(iTransport >= 0 && iBolig > iTransport,
     "Energistyrelsens vægt sætter transport først og bolig og byggeri sidst");
 });
 
-test("indikatorer: tabellen gentager ikke den nationale vægt - den står i overblikket", () => {
-  // Kun synlig tekst: begrundelsen bag "Biler pr. indbygger" nævner transportens
-  // vægt i sit hover-forbehold, og det er en begrundelse, ikke en gentagelse.
-  const h = renderIndikatorer(bThisted, concito).replace(/<[^>]*>/g, " ");
-  assert.ok(!h.includes("1,84 ton"), "transportens vægt står allerede i overblikket");
-  assert.ok(!h.includes("af aftrykket"));
+test("indikatorer: hver kategori viser sin nationale vægt én gang", () => {
+  // Vægten stod før i et overblik for sig og måtte derfor ikke stå i tabellen.
+  // Nu er de to ét afsnit, og vægten hører til i kategoriens overskrift - men
+  // stadig kun ét sted. Kun synlig tekst: begrundelsen bag "Biler pr. indbygger"
+  // nævner transportens vægt i sit hover-forbehold, og det er en begrundelse.
+  const h = noegletal(bThisted).replace(/<[^>]*>/g, " ");
+  for (const k of ens.kategorier) {
+    assert.equal(h.split(`${tal(k.ton, 2)} ton`).length - 1, 1,
+      `${k.navn}: vægten skal stå præcis én gang`);
+    assert.ok(h.includes(`${tal(k.pct, 1)}`), `${k.navn}: andelen af aftrykket mangler`);
+  }
+  assert.ok(h.includes("af Danmarks forbrugsbaserede udledninger"),
+    "andelen skal sige, hvad den er en andel af");
 });
 
 test("indikatorer: manglende værdi vises som tankestreg", () => {
-  const h = renderIndikatorer(bGreve, concito);
+  const h = noegletal(bGreve);
   assert.ok(h.includes("–"));
 });
 
 test("indikatorer: bruger egen tooltip, ikke browserens title", () => {
-  const h = renderIndikatorer(bThisted, concito);
+  const h = noegletal(bThisted);
   assert.ok(!/\stitle="/.test(h));
   assert.ok(h.includes("data-tip="));
 });
@@ -80,14 +95,14 @@ test("kommunevisning: intet nøgletal på siden står som uafklaret", () => {
   // kører både på en kommune uden og en med et spærrende forbehold.
   const spaerret = beregnKommune({ ...thisted, affald_indberetning: "bekraeftet_fejl" }, land);
   for (const b of [bThisted, spaerret]) {
-    const h = renderKommune(b, concito, ens);
+    const h = side(b);
     assert.ok(!h.includes("retningen kan ikke afgøres"), `${b.navn}: mærkatet står der stadig`);
     assert.ok(!/uafklaret/i.test(h), `${b.navn}: "uafklaret" står der stadig`);
   }
 });
 
 test("indikatorer: hjælpetal uden retning står i tabellen med begrundelse, men uden mærkat", () => {
-  const h = renderIndikatorer(bThisted, concito);
+  const h = noegletal(bThisted);
   for (const navn of ["Befolkningsudvikling"]) {
     const i = h.indexOf(`>${navn}<`);
     assert.ok(i > -1, `${navn} skal stå i tabellen`);
@@ -98,7 +113,7 @@ test("indikatorer: hjælpetal uden retning står i tabellen med begrundelse, men
 });
 
 test("indikatorer: pendlingsafstand vises i km, ikke omregnet", () => {
-  const h = renderIndikatorer(bThisted, concito);
+  const h = noegletal(bThisted);
   assert.ok(h.includes("Gennemsnitlig pendlingsafstand"));
   assert.ok(h.includes("23,6"), "Thisteds faktiske km skal stå der");
   assert.ok(!h.includes("bil-km"), "der må ikke stå en omregnet bil-km-værdi");
@@ -115,7 +130,7 @@ test("fødevarer: står med ét nationalt tal og har nu et kommunalt nøgletal",
   // Kategorien stod også som blind med "Ingen kommunal indikator". Det passer
   // ikke længere: Osei-Owusu et al. (2020) fordeler fødevareforbruget på alle 98
   // kommuner. Sætningen må ikke blive stående nogen steder på siden.
-  const h = renderKommune(bThisted, concito, ens);
+  const h = side(bThisted);
   const foede = ens.kategorier.find((k) => k.navn === "Føde- og drikkevarer");
   assert.ok(!h.includes("Ingen kommunal indikator"),
     "fødevarerne har et nøgletal og er ikke længere en blind kategori");
@@ -143,20 +158,23 @@ test("huller: forklarer hvorfor der ikke beregnes et samlet tal", () => {
 
 // --- Samlet ---
 
-test("kommunevisning: overblikket står før den fulde tabel", () => {
-  // Overblikket først, detaljerne bagefter - ikke omvendt.
-  const h = renderKommune(bThisted, concito, ens);
+test("kommunevisning: ét nøgletalsafsnit, ikke et overblik og en tabel", () => {
+  // Overblikket sagde med mærkater, hvad tabellen sagde igen med tal, og
+  // læseren skulle holde de to steder op mod hinanden for at se, hvad et
+  // mærkat byggede på. Det er nu ét afsnit.
+  const h = side(bThisted);
+  assert.ok(!h.includes("Forbrugskategorier i"), "det gamle overblik er væk");
+  assert.equal((h.match(/id="noegletal"/g) || []).length, 1, "ét afsnit med nøgletal");
   const iNavn = h.indexOf("Thisted");
-  const iOverblik = h.indexOf("Forbrugskategorier i");
-  const iTabel = h.indexOf("Alle nøgletal");
+  const iTabel = h.indexOf("Alle nøgletal for");
   const iHuller = h.indexOf("Hvad værktøjet ikke kan vise");
-  assert.ok(iNavn < iOverblik && iOverblik < iTabel && iTabel < iHuller,
-    `rækkefølge forkert: ${[iNavn, iOverblik, iTabel, iHuller]}`);
+  assert.ok(iNavn < iTabel && iTabel < iHuller,
+    `rækkefølge forkert: ${[iNavn, iTabel, iHuller]}`);
 });
 
 test("kommunevisning: intet output indeholder undefined, NaN eller null", () => {
   for (const b of [bThisted, bGreve]) {
-    const h = renderKommune(b, concito, ens);
+    const h = side(b);
     assert.ok(!h.includes("undefined"), `${b.navn}: undefined`);
     assert.ok(!h.includes("NaN"), `${b.navn}: NaN`);
     assert.ok(!/>\s*null\s*</.test(h), `${b.navn}: null`);
@@ -164,13 +182,13 @@ test("kommunevisning: intet output indeholder undefined, NaN eller null", () => 
 });
 
 test("kommunevisning: intet samlet aftryk i ton påstås", () => {
-  const h = renderKommune(bThisted, concito, ens);
+  const h = side(bThisted);
   assert.ok(!/aftryk pr\. borger/i.test(h), "værktøjet beregner ikke et kommunalt aftryk");
   assert.ok(h.includes("lægger dem ikke sammen"), "det skal siges eksplicit");
 });
 
 test("kommunevisning: bundforbeholdet overlever embed-tilstand", () => {
-  const h = renderKommune(bThisted, concito, ens);
+  const h = side(bThisted);
   const i = h.lastIndexOf("Uofficielt værktøj");
   assert.ok(i > 0);
   const afsnit = h.slice(h.lastIndexOf("<section", i), i);
@@ -181,7 +199,7 @@ test("kommunevisning: et kompakt forbehold står ØVERST i embed-tilstand", () =
   // Sidehovedets banner bærer .no-embed og forsvinder i en iframe. Uden dette
   // møder en læser på en fremmed side tallene uden at vide, hvem der står bag,
   // indtil de har scrollet forbi hele tabellen.
-  const h = renderKommune(bThisted, concito, ens);
+  const h = side(bThisted);
   const iEmbed = h.indexOf("kun-embed");
   const iNavn = h.indexOf("Thisted");
   assert.ok(iEmbed >= 0, "der skal være et embed-only forbehold");
@@ -201,42 +219,84 @@ test("overskrift: viser kommunekode og region", () => {
   assert.ok(h.includes("787") && h.includes("Nordjylland"));
 });
 
-// --- Kategorioverblik ---
+// --- Kategoriafsnittene ---
 
-// Én kategoris række i overblikket: fra navnet til næste kategori.
+// Ét kategoriafsnit: fra kategorinavnet til det næste.
 const kategoriAfsnit = (h, navn) => {
   const start = h.indexOf(`>${navn}<`);
   const naeste = ens.kategorier.map((k) => h.indexOf(`>${k.navn}<`)).filter((i) => i > start);
   return h.slice(start, naeste.length ? Math.min(...naeste) : undefined);
 };
 
-test("overblik: alle Energistyrelsens kategorier står med, også dem uden nøgletal", () => {
+test("nøgletal: alle Energistyrelsens kategorier står med, også dem uden nøgletal", () => {
   // Fødevarer og Offentligt forbrug udgør knap 30 % af aftrykket og har nul
   // kommunale nøgletal. Et overblik, der kun viser det, vi kan måle, ville
   // pege koordinatoren mod de forkerte kategorier.
-  const h = renderKategorioverblik(bThisted, ens);
+  const h = noegletal(bThisted);
   for (const k of ens.kategorier) {
     assert.ok(h.includes(k.navn), `mangler kategorien ${k.navn}`);
   }
 });
 
-test("overblik: kategorier uden nøgletal siger det tydeligt", () => {
-  // Eksemplet var fødevarerne, indtil de fik et nøgletal. Offentligt forbrug er
-  // blind af en anden grund: det fordeles ligeligt og varierer ikke mellem
-  // kommuner. Begge slags skal stå med ord, ikke bare mangle et tal.
-  const h = renderKategorioverblik(bThisted, ens);
-  const i = h.indexOf("Offentligt forbrug");
-  const afsnit = h.slice(i, i + 900);
-  assert.ok(afsnit.includes("Ingen kommunal variation"),
-    "blindheden skal stå med ord, ikke kun mangle et tal");
+test("nøgletal: hver kategori har en beskrivelse og sin andel af aftrykket", () => {
+  // En kategori uden beskrivelse er et navn, læseren selv skal tolke, og uden
+  // andelen ved man ikke, om man ser på 4,9 eller 21,2 % af aftrykket.
+  // Beskrivelsen er Energistyrelsens egen note, så kategorien ikke kan betyde
+  // én ting på metodesiden og en anden her.
+  const h = noegletal(bThisted);
+  for (const k of ens.kategorier) {
+    const afsnit = kategoriAfsnit(h, k.navn);
+    assert.ok(k.note, `${k.navn}: kilden mangler en beskrivelse i ens.json`);
+    assert.ok(afsnit.includes(k.note.slice(0, 40)), `${k.navn}: beskrivelsen mangler`);
+    assert.ok(afsnit.includes(`${tal(k.pct, 1)}&nbsp;%`), `${k.navn}: andelen mangler`);
+    assert.ok(afsnit.includes("af Danmarks forbrugsbaserede udledninger"),
+      `${k.navn}: andelen skal sige, hvad den er en andel af`);
+  }
 });
 
-test("overblik: fødevarerne viser en retning, og dubletten står i begrundelsen", () => {
+test("nøgletal: andelene er Energistyrelsens og summerer til hele aftrykket", () => {
+  // Andelen må ikke være regnet her. Summen er kildens egen og går op på
+  // afrundingen nær - det er selve grunden til at bruge Energistyrelsens
+  // kategorier frem for CONCITO's, hvis 15 varegrupper ikke summerer til
+  // deres eget hovedtal.
+  const sum = ens.kategorier.reduce((a, k) => a + k.ton, 0);
+  assert.ok(Math.abs(sum - ens.nationalt_aftryk.ton) < 0.01,
+    `kategorierne summerer til ${sum}, ikke ${ens.nationalt_aftryk.ton}`);
+  const h = noegletal(bThisted);
+  assert.ok(h.includes(`Energistyrelsen ${ens.nationalt_aftryk.aar}`),
+    "afsnittet skal navngive kilden til vægtene");
+});
+
+test("samlet retning: står ved hver kategori med nøgletal, og kun der", () => {
+  const h = noegletal(bThisted);
+  for (const k of ens.kategorier) {
+    const afsnit = kategoriAfsnit(h, k.navn);
+    const harNoegletal = bThisted.drivere.some((d) => d.kategori === k.navn);
+    assert.equal(afsnit.includes("Samlet retning"), harNoegletal,
+      `${k.navn}: samlet retning skal stå netop når der er nøgletal at tælle`);
+  }
+});
+
+test("nøgletal: kategorier uden nøgletal siger det tydeligt", () => {
+  // Eksemplet var fødevarerne, indtil de fik et nøgletal. Offentligt forbrug er
+  // blind af en anden grund: det fordeles ligeligt og varierer ikke mellem
+  // kommuner. Øvrige investeringer varierer givetvis - der findes bare ingen
+  // kilde, der fordeler dem. De to skal ikke sige det samme.
+  const h = noegletal(bThisted);
+  assert.ok(kategoriAfsnit(h, "Offentligt forbrug").includes("Ingen kommunal variation"),
+    "blindheden skal stå med ord, ikke kun mangle et tal");
+  const oevrige = kategoriAfsnit(h, "Øvrige investeringer");
+  assert.ok(oevrige.includes("Intet kommunalt nøgletal"),
+    "investeringerne varierer - der mangler en kilde, ikke variation");
+  assert.ok(!oevrige.includes("Ingen kommunal variation"),
+    "de to blinde kategorier er blinde af hver sin grund");
+});
+
+test("nøgletal: fødevarerne viser en retning, og dubletten står i begrundelsen", () => {
   // Nøgletallet gentager disponibel indkomst (r = +0,94). Det er accepteret,
   // men det skal stå, hvor læseren ser det, ikke kun i kildekoden.
-  const h = renderKategorioverblik(bThisted, ens);
-  const i = h.indexOf("Føde- og drikkevarer");
-  assert.ok(!h.slice(i, i + 900).includes("Ingen kommunal"),
+  const h = noegletal(bThisted);
+  assert.ok(!kategoriAfsnit(h, "Føde- og drikkevarer").includes("Ingen kommunal"),
     "kategorien har et nøgletal");
   const d = bThisted.drivere.find((x) => x.navn === "Fødevareforbrug pr. indbygger");
   assert.equal(d.kategori, "Føde- og drikkevarer");
@@ -245,8 +305,8 @@ test("overblik: fødevarerne viser en retning, og dubletten står i begrundelsen
     "dubletten mod indkomsten skal stå i begrundelsen");
 });
 
-test("overblik: rækkefølgen følger Energistyrelsens vægt, med restposter sidst", () => {
-  const h = renderKategorioverblik(bThisted, ens);
+test("nøgletal: rækkefølgen følger Energistyrelsens vægt, med restposter sidst", () => {
+  const h = noegletal(bThisted);
   const vist = ens.kategorier
     .map((k) => ({ ...k, i: h.indexOf(k.navn) }))
     .sort((a, b) => a.i - b.i);
@@ -259,53 +319,68 @@ test("overblik: rækkefølgen følger Energistyrelsens vægt, med restposter sid
     "den tungeste kategori, en kommune kan handle på, står først");
 });
 
-test("overblik: mærkatet siger 'peger mod', ikke om værdien er høj", () => {
+test("nøgletal: mærkatet siger 'peger mod', ikke om værdien er høj", () => {
   // El- og plugin-hybridandel er en LAV værdi (18,4 % mod landets 23,5 %), men
   // peger mod HØJERE udledning. Den skelnen forsvandt, da ordet var "markant".
-  const h = renderKategorioverblik(bThisted, ens);
+  const h = noegletal(bThisted);
   assert.ok(h.includes("peger mod højere udledning"));
   const d = bThisted.drivere.find((x) => x.navn === "El- og plugin-hybridandel");
   assert.ok(d.kommuneVaerdi < d.landVaerdi, "værdien er lavere end landets");
   assert.equal(d.signal, "højere", "men den peger mod højere udledning");
 });
 
-test("overblik: sammenligner kun med landsgennemsnittet, ikke med andre kommuner", () => {
+test("nøgletal: sammenligner kun med landsgennemsnittet, ikke med andre kommuner", () => {
   // To tidligere forsøg står som skiltet her: "markant hos 62 af 98" krævede at
   // læseren kendte en skjult tærskel, og spændet ("8 ud af 10 kommuner: X - Y")
   // lagde en tredje talstørrelse oven i kommunens egen værdi og landets. Begge
   // er væk. Tilbage står den ene sammenligning, en kommuneside kan bære.
-  const h = renderKategorioverblik(bThisted, ens);
+  const h = noegletal(bThisted);
   assert.ok(!h.includes("markant hos"), "den gamle optælling er væk");
   assert.ok(!/\d+\s*ud af\s*\d+\s*kommuner/i.test(h), "spændet er væk");
   assert.ok(!/spænd/i.test(h), "ingen omtale af et spænd overhovedet");
   assert.ok(h.includes("landsgennemsnittet"), "landsgennemsnittet står stadig");
 });
 
-test("overblik: hjælpetal fylder ikke overblikket", () => {
-  const h = renderKategorioverblik(bThisted, ens);
-  assert.ok(!h.includes("Befolkningsudvikling"));
-  assert.ok(!h.includes("Fritidshuse pr. helårsbolig"));
+test("samlet retning: hjælpetal står i tabellen, men tæller ikke med", () => {
+  // Hjælpetallene forklarer et andet nøgletal. Talte de med, ville de to
+  // affaldstal udgøre flertallet over det ene nøgletal, Forbrugsprodukter har.
+  // De er mærket i selve tabellen, så optællingen kan tælles efter i rækkerne.
+  const h = noegletal(bThisted);
+  for (const navn of ["Befolkningsudvikling", "Fritidshuse pr. helårsbolig",
+                      "Husholdningsaffald", "Genanvendelsesprocent"]) {
+    const d = bThisted.drivere.find((x) => x.navn === navn);
+    if (!d) continue;
+    assert.equal(d.rolle, "hjaelper", `${navn} skal være et hjælpetal`);
+    const i = h.indexOf(`>${navn}<`);
+    assert.ok(i > -1, `${navn} skal stå i tabellen`);
+    assert.ok(h.slice(i, h.indexOf("</tr>", i)).includes("forklarende"),
+      `${navn} skal være mærket som forklarende`);
+  }
+  for (const g of bThisted.grupper) {
+    const s = samletRetning(g.drivere);
+    assert.equal(s.talte + s.udenData, g.drivere.filter((d) => d.rolle !== "hjaelper").length,
+      `${g.kategori}: kun hovednøgletal tælles`);
+  }
 });
 
-test("overblik: siger eksplicit at det ikke er en prioritering", () => {
-  const h = renderKategorioverblik(bThisted, ens);
+test("nøgletal: siger eksplicit at det ikke er en prioritering", () => {
+  const h = noegletal(bThisted);
   assert.ok(h.includes("ikke en prioritering"));
 });
 
-test("indikatorer: alle nøgletal står i én tabel uden foldning", () => {
-  const h = renderIndikatorer(bThisted, concito);
+test("indikatorer: alle nøgletal står fremme uden foldning", () => {
+  const h = noegletal(bThisted);
   assert.ok(!h.includes("<details"), "fem klik for at se nitten rækker er ikke et overblik");
   const raekker = (h.match(/<tr/g) || []).length;
-  const grupper = bThisted.grupper.length;
-  assert.equal(raekker, bThisted.drivere.length + grupper + 1,
-    "én række pr. nøgletal, én overskrift pr. kategori, plus tabelhovedet");
+  assert.equal(raekker, bThisted.drivere.length + bThisted.grupper.length,
+    "én række pr. nøgletal plus ét tabelhoved pr. kategori med nøgletal");
 });
 
 test("kommunevisning: den nationale vægt står én gang pr. kategori", () => {
   // Stod før både i overblikket og i tabellens gruppeoverskrifter, med hver sin
   // afrunding (1,84 ton og 1,8 ton).
   // Kun synlig tekst - et hover-forbehold må gerne henvise til vægten.
-  const h = renderKommune(bThisted, concito, ens).replace(/<[^>]*>/g, " ");
+  const h = side(bThisted).replace(/<[^>]*>/g, " ");
   for (const k of ens.kategorier) {
     const antal = h.split(`${tal(k.ton, 2)} ton`).length - 1;
     assert.equal(antal, 1, `${k.navn}: ${antal} gange`);
@@ -313,44 +388,47 @@ test("kommunevisning: den nationale vægt står én gang pr. kategori", () => {
 });
 
 test("kommunevisning: forbeholdene står ikke gentaget", () => {
-  const h = renderKommune(bThisted, concito, ens);
+  const h = side(bThisted);
   const antal = (s) => h.split(s).length - 1;
   assert.equal(antal("ikke en prioritering"), 1);
   assert.ok(antal("vælger ikke kategori") <= 1);
   assert.ok(!h.includes("Hvad tallet er"), "boksen gentog bundforbeholdet");
 });
 
-test("overblik: linker til tabellen, hvor tallene står", () => {
-  assert.ok(renderKategorioverblik(bThisted, ens).includes('href="#noegletal"'));
-  assert.ok(renderIndikatorer(bThisted, concito).includes('id="noegletal"'));
+test("nøgletal: afsnittet henviser ikke til sig selv", () => {
+  // Overblikket linkede ned til tabellen. Der er ikke længere to steder at gå
+  // imellem, og et link til afsnittet selv ville sende læseren ingen steder.
+  const h = noegletal(bThisted);
+  assert.ok(h.includes('id="noegletal"'), "ankeret bliver stående til dybe links");
+  assert.ok(!h.includes('href="#noegletal"'), "ingen henvisning til afsnittet selv");
 });
 
 // --- Signalmærkater ---
 
 test("signalmærkat: farven er aldrig eneste bærer af betydning", () => {
   // Cirka 8 % af mænd er farveblinde. Tekst og symbol skal stå ved siden af.
-  const h = renderIndikatorer(bThisted, concito);
+  const h = noegletal(bThisted);
   for (const tekst of ["peger mod højere udledning"]) {
     assert.ok(h.includes(tekst), `signalet "${tekst}" mangler sin tekst`);
   }
 });
 
 test("signalmærkat: hvert nøgletal bærer sin begrundelse", () => {
-  const h = renderIndikatorer(bThisted, concito);
+  const h = noegletal(bThisted);
   // Befolkningsudviklingen er eksemplet på en retning, der ikke må gættes.
   assert.ok(h.includes("væksten peger ikke selv mod en højere eller lavere udledning"),
     "befolkningsudviklingens begrundelse skal stå ved ikonet");
 });
 
 test("indikatortabel: har en kolonne for hvad nøgletallet peger mod", () => {
-  const h = renderIndikatorer(bThisted, concito);
+  const h = noegletal(bThisted);
   assert.ok(h.includes("Peger mod"));
 });
 
-test("overblik: forklarer at værdi og udledningsretning ikke er det samme", () => {
+test("nøgletal: forklarer at værdi og udledningsretning ikke er det samme", () => {
   // En lav el-bilandel er en lav VÆRDI, men peger mod en høj UDLEDNING.
   // Uden den forklaring ser mærkatet ud som en fejl.
-  const h = renderKategorioverblik(bThisted, ens);
+  const h = noegletal(bThisted);
   assert.ok(h.includes("færre elbiler er en lavere andel, men peger mod højere udledning"),
     "det konkrete eksempel skal stå der");
 });
@@ -409,31 +487,31 @@ test("affald: forbeholdet følger kommunen, ikke nøgletallet", () => {
 });
 
 test("affald: forbeholdet forklarer fejlen og siger at tallet ikke er rettet", () => {
-  const h = renderIndikatorer(beregnKommune(thisted, land), concito);
+  const h = noegletal(beregnKommune(thisted, land));
   assert.ok(h.includes("kommunefordelte affaldsmængder er mere usikre"),
     "DST's eget forbehold skal citeres");
   assert.ok(h.includes("ikke rettet her"),
     "det skal fremgå, at værktøjet ikke retter kildens tal");
 });
 
-test("affald: begge affaldstal står i tabellen som kontekst, men tæller ikke i overblikket", () => {
+test("affald: begge affaldstal står i tabellen som kontekst, men tæller ikke med", () => {
   // Husholdningsaffald og genanvendelsesprocent er kontekst, ikke mål for forbruget.
   // Målt 2026-09-15 over de 91 kommuner, hvor affaldet vises, fulgte affaldet ikke
   // indkomsten (r = -0,25) og pegede oftere den modsatte vej. I Forbrugsprodukter og
-  // services er det derfor kun disponibel indkomst, der afgør retningen.
-  const overblik = renderKategorioverblik(bThisted, ens);
-  const tabel = renderIndikatorer(bThisted, concito);
+  // services er det derfor kun disponibel indkomst, der afgør den samlede retning.
+  const h = noegletal(bThisted);
   for (const navn of ["Husholdningsaffald", "Genanvendelsesprocent"]) {
     const d = bThisted.drivere.find((x) => x.navn === navn);
     assert.equal(d.rolle, "hjaelper", navn);
     assert.notEqual(d.signal, "uafklaret", `${navn}: retningen står stadig i tabellen`);
-    assert.ok(tabel.includes(`>${navn}<`), `${navn} skal stå i tabellen`);
-    assert.ok(!overblik.includes(navn), `${navn} må ikke stå i overblikket`);
+    assert.ok(h.includes(`>${navn}<`), `${navn} skal stå i tabellen`);
   }
-  // Meget affald (+29 %) flytter ikke mærkatet: indkomsten peger mod lavere.
-  const meget = renderKategorioverblik(beregnKommune({ ...thisted, affald_kg: 700 }, land), ens);
-  assert.ok(kategoriAfsnit(meget, "Forbrugsprodukter og services")
-    .includes(">peger mod lavere udledning<"));
+  // Meget affald (+29 %) flytter ikke den samlede retning: indkomsten peger mod lavere.
+  const meget = noegletal(beregnKommune({ ...thisted, affald_kg: 700 }, land));
+  const afsnit = kategoriAfsnit(meget, "Forbrugsprodukter og services");
+  assert.ok(afsnit.includes(">peger mod lavere udledning<"));
+  assert.ok(afsnit.includes("kategoriens ene nøgletal"),
+    "optællingen skal vise, at kun ét nøgletal tæller med");
 });
 
 // --- Nøgletal, hvis retning ikke kan afgøres for kommunen, vises ikke ---
@@ -443,8 +521,8 @@ const bSpaerret = beregnKommune({ ...thisted, affald_indberetning: "bekraeftet_f
 test("udeladt: nøgletallet har ingen række, men nævnes under tabellen med begrundelsen", () => {
   // Et hul skal forklares, ikke gemmes. Uden noten ville en koordinator lede
   // efter affaldstallene uden at kunne se, om de mangler eller er glemt.
-  const h = renderIndikatorer(bSpaerret, concito);
-  const slut = h.indexOf("</table>");
+  const h = noegletal(bSpaerret);
+  const slut = h.lastIndexOf("</table>");
   const tabel = h.slice(0, slut);
   const under = h.slice(slut);
   for (const navn of ["Husholdningsaffald", "Genanvendelsesprocent"]) {
@@ -457,14 +535,21 @@ test("udeladt: nøgletallet har ingen række, men nævnes under tabellen med beg
 });
 
 test("udeladt: ingen note, når intet er taget af siden", () => {
-  const h = renderIndikatorer(bThisted, concito);
+  const h = noegletal(bThisted);
   assert.ok(!h.includes("Vises ikke for"));
 });
 
-test("udeladt: overblikket tæller ikke nøgletallet med", () => {
-  const h = renderKategorioverblik(bSpaerret, ens);
-  assert.ok(!h.includes("Husholdningsaffald"));
-  assert.ok(!h.includes("Genanvendelsesprocent"));
+test("udeladt: den samlede retning tæller ikke nøgletallet med", () => {
+  // De to affaldstal er taget af siden hos kommuner, der deler indberetning.
+  // De er hjælpetal og talte alligevel ikke med, men optællingen må heller ikke
+  // få dem med som "uden data": de er ikke ukendte, de er holdt tilbage.
+  const produkter = bSpaerret.grupper.find((g) => g.kategori === "Forbrugsprodukter og services");
+  const s = samletRetning(produkter.drivere);
+  assert.equal(s.talte, 1, "kun disponibel indkomst tæller");
+  assert.equal(s.udenData, 0, "de spærrede nøgletal er ikke 'uden data'");
+  const afsnit = kategoriAfsnit(noegletal(bSpaerret), "Forbrugsprodukter og services");
+  assert.ok(!afsnit.includes(">Husholdningsaffald<"), "nøgletallet har ingen række");
+  assert.ok(!afsnit.includes("uden data"), "det spærrede tal må ikke tælles som manglende data");
 });
 
 // --- Fritidshuse: husholdningstallene er fordelt på samtlige boliger ---
@@ -536,7 +621,7 @@ test("fordeling: hverken placering, percentil, yderpunkter eller spænd vises", 
   // Den fulde udgave kører på alle 98 kommuner i alle98.test.js. Denne bliver
   // stående som den hurtige vagt i selve render-testen, og er udvidet med det
   // spænd-ordforråd, der netop er fjernet, så det ikke kan snige sig ind igen.
-  const h = renderKommune(beregnKommune(thisted, land), concito, ens);
+  const h = side(beregnKommune(thisted, land));
   assert.ok(!/\bnr\.\s*\d+\s*af\b/.test(h), "ingen placering");
   assert.ok(!/percentil/i.test(h), "ingen percentil i kommunevisningen");
   assert.ok(!/(laveste|højeste|lavest|højest) i landet/i.test(h), "ingen yderpunkter");
@@ -546,9 +631,9 @@ test("fordeling: hverken placering, percentil, yderpunkter eller spænd vises", 
 
 test("fordeling: tabellen får ikke flere rækker af den nye kontekst", () => {
   const b = beregnKommune(thisted, land);
-  const h = renderIndikatorer(b, concito);
+  const h = noegletal(b);
   const raekker = (h.match(/<tr/g) || []).length;
-  assert.equal(raekker, b.drivere.length + b.grupper.length + 1,
+  assert.equal(raekker, b.drivere.length + b.grupper.length,
     "al ny tekst skal ind i eksisterende celler");
 });
 
@@ -558,7 +643,7 @@ test("procentpoint: andele viser både relativ procent og procentpoint", () => {
   assert.ok(d.procentpoint != null, "andele skal bære procentpoint");
   // Den relative afvigelse skal være UÆNDRET - procentpoint er et visningsfelt.
   assert.ok(Math.abs(d.afvigelse - (d.kommuneVaerdi - d.landVaerdi) / d.landVaerdi) < 1e-9);
-  const h = renderIndikatorer(b, concito);
+  const h = noegletal(b);
   assert.ok(h.includes("procentpoint"), "procentpoint skal stå i tabellen");
 });
 
@@ -580,10 +665,9 @@ test("tærskelfordeling: metodetabellen genereres og udelader nøgletal uden afv
   assert.ok(!h.includes("undefined") && !h.includes("NaN"));
 });
 
-test("overblik: ethvert nøgletal med en retning når overblikket", () => {
-  // Overblikket finder nøgletallene ved at matche på Energistyrelsens
-  // kategorinavne. Et nøgletal i en kategori, der ikke findes dér, bliver
-  // stille væk fra overblikket, mens det står i tabellen. Sådan faldt
+test("nøgletal: ethvert nøgletal med en retning når sit kategoriafsnit", () => {
+  // Afsnittene findes ved at matche på Energistyrelsens kategorinavne. Et
+  // nøgletal i en kategori, der ikke findes dér, ville falde helt ud af siden. Sådan faldt
   // disponibel indkomst ud i sin egen kategori "På tværs af kategorier".
   // Kun hjælpetal må stå uden for. Kontekst-kategorien er væk: dens nøgletal
   // gentog andre nøgletal og er taget af siden.
@@ -593,134 +677,150 @@ test("overblik: ethvert nøgletal med en retning når overblikket", () => {
   assert.deepEqual(udenfor.map((d) => d.navn), []);
 });
 
-test("overblik: disponibel indkomst tæller under Forbrugsprodukter og services", () => {
+test("nøgletal: disponibel indkomst tæller under Forbrugsprodukter og services", () => {
   // CONCITO (2023) s. 27 og NIRAS (2024) s. 27 kobler indkomsten til mængden
   // af varer og tjenesteydelser. Se begrundelsen i beregning.js.
-  const h = renderKategorioverblik(bThisted, ens);
-  const start = h.indexOf("Forbrugsprodukter og services");
-  const slut = h.indexOf("Offentligt forbrug", start);
-  assert.ok(start > -1 && slut > start);
-  assert.ok(h.slice(start, slut).includes("Disponibel indkomst"));
+  const afsnit = kategoriAfsnit(noegletal(bThisted), "Forbrugsprodukter og services");
+  assert.ok(afsnit.includes("Disponibel indkomst"));
 });
 
-test("overblik: et lille udsving står som 'peger lidt' og flytter ikke konklusionen", () => {
-  // Tæller, vejer ikke: talte et udsving på 6 % med i konklusionen, ville det stå
-  // lige med et på 40 %. Greves transport har ét nøgletal på 10 % eller mere, der
-  // peger mod lavere udledning, og et lille, der peger den anden vej.
-  const afsnit = kategoriAfsnit(renderKategorioverblik(bGreve, ens), "Transport");
-  assert.ok(afsnit.includes("peger lidt mod højere udledning"), "det lille udsving står som lidt");
-  assert.ok(afsnit.includes(">peger mod lavere udledning<"), "konklusionen tæller kun det store");
+test("samlet retning: alle nøgletal vejer lige, også de små udsving", () => {
+  // SKIFTET. Mærkatet talte før kun de nøgletal, der afveg 10 % eller mere, og
+  // et lille udsving flyttede ingenting. Nu tæller hvert nøgletal ét: at veje de
+  // store tungere ville kræve at vide, hvor meget hvert nøgletal betyder for
+  // udledningen, og det tal findes ikke i kilderne.
+  //
+  // Greves transport: el- og plugin-hybridandelen afviger 27,6 % og peger mod
+  // lavere, fossil-andel og pendling peger lidt samme vej, biler lidt modsat.
+  // Tre af fire peger mod lavere - det er optællingen, mærkatet viser.
+  const afsnit = kategoriAfsnit(noegletal(bGreve), "Transport");
+  assert.ok(afsnit.includes("peger lidt mod højere udledning"),
+    "det enkelte nøgletal siger stadig, at udsvinget er lille");
+  assert.ok(afsnit.includes(">peger mod lavere udledning<"), "den samlede retning");
+  assert.ok(afsnit.includes("3 af 4 nøgletal"), "optællingen skal stå, så den kan tælles efter");
   assert.ok(!afsnit.includes("hver sin retning"));
+
+  const s = samletRetning(bGreve.grupper.find((g) => g.kategori === "Transport").drivere);
+  assert.deepEqual([s.op, s.ned, s.talte], [1, 3, 4]);
 });
 
-test("overblik: peger alle nøgletal kun lidt, siger mærkatet det", () => {
-  const b = beregnKommune({ ...thisted, disp_indkomst: 280000, genanvendelse_pct: 56 }, land);
-  const afsnit = kategoriAfsnit(renderKategorioverblik(b, ens), "Forbrugsprodukter og services");
-  assert.ok(afsnit.includes(">peger kun lidt<"), "mærkatet skal sige lidt");
+test("samlet retning: står lige mange nøgletal i hver retning, siger mærkatet det", () => {
+  // Med færre biler og kortere pendling deler Thisteds transport sig to mod to.
+  // Mærkatet må ikke vælge en vej, og optællingen skal vise hvorfor.
+  const b = beregnKommune({ ...thisted, biler: 20000, pendlingsafstand_km: 20 }, land);
+  const afsnit = kategoriAfsnit(noegletal(b), "Transport");
+  assert.ok(afsnit.includes(">trækker i hver sin retning<"), "ingen samlet vej");
+  assert.ok(afsnit.includes("2 mod 2 nøgletal"), "optællingen skal stå");
 });
 
-test("overblik: nøgletal, der tæller, står først, og hver retning samlet", () => {
-  // Greves transport: el- og plugin-hybridandelen afviger 27,6 % og tæller. Af de
-  // små udsving peger biler op (+4,7 %), fossil-andel og pendling ned (-8,5 og -8,4 %).
-  const afsnit = kategoriAfsnit(renderKategorioverblik(bGreve, ens), "Transport");
-  const i = (navn) => afsnit.indexOf(navn);
-  assert.ok(i("El- og plugin-hybridandel") > -1);
-  assert.ok(i("El- og plugin-hybridandel") < i("Biler pr. indbygger"));
-  assert.ok(i("Biler pr. indbygger") < i("Fossil-andel"), "det, der peger op, står samlet før det, der peger ned");
-  assert.ok(i("Fossil-andel") < i("Gennemsnitlig pendlingsafstand"), "største udsving først");
+test("tabel: hovednøgletallene står før hjælpetallene", () => {
+  // Rækkefølgen skal svare til optællingen i mærkatet ovenfor: det, der tæller
+  // med, står samlet først, og de forklarende tal står efter.
+  for (const g of bThisted.grupper) {
+    const afsnit = kategoriAfsnit(noegletal(bThisted), g.kategori);
+    const plads = (navn) => afsnit.indexOf(`>${navn}<`);
+    const hoved = g.drivere.filter((d) => d.rolle !== "hjaelper").map((d) => plads(d.navn));
+    const hjaelp = g.drivere.filter((d) => d.rolle === "hjaelper").map((d) => plads(d.navn));
+    if (hoved.length === 0 || hjaelp.length === 0) continue;
+    assert.ok(Math.max(...hoved) < Math.min(...hjaelp),
+      `${g.kategori}: et hjælpetal står før et nøgletal, der tæller med`);
+  }
 });
 
-test("overblik: nøgletal uden data nævnes med ordene 'ingen data'", () => {
-  // Thisteds fixtur mangler husholdningstallene. De må ikke forsvinde tavst fra
-  // overblikket, når de står med tankestreg i tabellen.
-  const afsnit = kategoriAfsnit(renderKategorioverblik(bThisted, ens), "Energi og forsyning");
+test("samlet retning: nøgletal uden data tælles for sig, ikke som nul", () => {
+  // Thisteds fixtur mangler husholdningstallene. De står med tankestreg i
+  // tabellen og må ikke forsvinde tavst ud af optællingen ovenfor.
+  const afsnit = kategoriAfsnit(noegletal(bThisted), "Energi og forsyning");
   assert.ok(afsnit.includes("Husholdningernes CO2 fra energi"));
-  assert.ok(afsnit.includes("ingen data"));
+  assert.ok(afsnit.includes("ingen data"), "rækken siger det med ord");
+  assert.ok(afsnit.includes("4 uden data"), "optællingen siger, hvor mange der ikke tæller med");
 });
 
-test("overblik: den nationale vægt må ikke kunne læses som kommunens eget tal", () => {
+test("nøgletal: den nationale vægt må ikke kunne læses som kommunens eget tal", () => {
   // "Transport 1,84 ton pr. indbygger" på en kommuneside læses ellers som
   // kommunens eget transportaftryk - et tal, værktøjet slet ikke kan opgøre.
   // Både tallet og søjlen er nationale og ens på alle 98 sider.
-  const h = renderKategorioverblik(bThisted, ens);
-  const i = h.indexOf("Transport");
-  const raekke = h.slice(i, i + 600);
-  assert.ok(/Nationalt[\s\S]{0,80}ton/.test(raekke),
+  const h = noegletal(bThisted);
+  const afsnit = kategoriAfsnit(h, "Transport");
+  assert.ok(/nationalt[\s\S]{0,80}ton/i.test(afsnit),
     "vægten skal være mærket som national");
   assert.ok(h.includes("ens på alle 98 kommunesider"),
-    "introen skal sige, at venstre kolonne ikke handler om kommunen");
+    "introen skal sige, at overskrifterne ikke handler om kommunen");
 });
 
-test("overblik: venstre kolonne er byte-identisk for to forskellige kommuner", () => {
-  // Den maskinelle udgave af påstanden ovenfor.
-  const venstre = (b) => (renderKategorioverblik(b, ens)
-    .match(/Nationalt[\s\S]*?af aftrykket/g) || []).map((s) => s.replace(/\s+/g, " "));
-  assert.deepEqual(venstre(bThisted), venstre(bGreve));
-  assert.ok(venstre(bThisted).length === ens.kategorier.length);
+test("nøgletal: kategoriernes overskrifter er byte-identiske for to kommuner", () => {
+  // Den maskinelle udgave af påstanden ovenfor: vægt, andel og beskrivelse er
+  // nationale og må ikke variere med kommunen. Kun tallene i tabellen gør.
+  const nationalt = (b) => (noegletal(b)
+    .match(/<h3[\s\S]*?<\/p>/g) || []).map((s) => s.replace(/\s+/g, " "));
+  assert.deepEqual(nationalt(bThisted), nationalt(bGreve));
+  assert.equal(nationalt(bThisted).length, ens.kategorier.length,
+    "én overskrift pr. kategori");
 });
 
 test("tabel: hvert nøgletal bærer sin enhed", () => {
   // "14,1" uden enhed er ikke et tal, en læser kan bruge. Enhederne står i
   // tabellen, fordi tallene gør.
-  const h = renderIndikatorer(bThisted, concito);
+  const h = noegletal(bThisted);
   for (const d of bThisted.drivere) {
     assert.ok(h.includes(`>${d.enhed}<`), `${d.navn}: mangler enheden ${d.enhed}`);
   }
 });
 
-test("overblik: viser ingen nøgletalsværdier - de står kun i tabellen", () => {
+test("nøgletal: hver værdi står præcis ét sted på siden", () => {
   // Overblikket gentog før hele tabellen som kort: kommunens værdi, landets og
-  // forskellen for hvert nøgletal. Nu siger det kun, hvilken vej hvert nøgletal
-  // peger. Tallene står én gang, i tabellen.
-  const overblik = renderKategorioverblik(bThisted, ens);
-  const tabel = renderIndikatorer(bThisted, concito);
+  // forskellen for hvert nøgletal. Det var grunden til at lægge de to sammen,
+  // og sammenlægningen må ikke selv genindføre dubletten.
+  const h = side(bThisted);
   const forskelle = bThisted.drivere
     .filter((d) => d.afvigelse != null && d.afvigelse !== 0 && d.type !== "difference")
     .map((d) => pct(d.afvigelse));
   assert.ok(forskelle.length > 5, "testen skal have noget at måle på");
   for (const f of forskelle) {
-    assert.ok(!overblik.includes(f), `overblikket gentager ${f}`);
-    assert.ok(tabel.includes(f), `tabellen mangler ${f}`);
+    assert.equal(h.split(f).length - 1, 1, `${f} står mere end ét sted`);
   }
-  assert.ok(!/landet\s/.test(overblik), "ingen landsværdi i overblikket");
 });
 
-test("overblik: konklusionen er et kort mærkat, ikke en sætning", () => {
-  // Tæller, vejer ikke. Mærkatet siger, hvilken vej de nøgletal, der afviger
-  // 10 % eller mere, peger - aldrig at kategorien som helhed ligger højt.
-  const h = renderKategorioverblik(bThisted, ens);
+test("samlet retning: mærkatet er kort, og regnestykket står under det", () => {
+  // Mærkatet siger retningen med to-tre ord, og optællingen står på linjen
+  // under. Stod tallene inde i mærkatet, skulle læseren læse en hel sætning for
+  // at se, hvilken vej kategorien trak.
+  const h = noegletal(bThisted);
   const forventet = {
-    "Transport": "peger mod højere udledning",
-    "Forbrugsprodukter og services": "peger mod lavere udledning",
-    "Energi og forsyning": "peger mod lavere udledning",
-    "Bolig og byggeri": "peger mod lavere udledning",
+    "Transport": ["peger mod højere udledning", "alle 4 nøgletal"],
+    "Forbrugsprodukter og services": ["peger mod lavere udledning", "kategoriens ene nøgletal"],
+    "Energi og forsyning": ["peger mod lavere udledning", "kategoriens ene nøgletal"],
+    "Bolig og byggeri": ["peger mod lavere udledning", "kategoriens ene nøgletal"],
   };
-  for (const [kategori, maerkat] of Object.entries(forventet)) {
-    assert.ok(kategoriAfsnit(h, kategori).includes(`>${maerkat}<`), `${kategori}: ${maerkat}`);
+  for (const [kategori, [maerkat, taelling]] of Object.entries(forventet)) {
+    const afsnit = kategoriAfsnit(h, kategori);
+    assert.ok(afsnit.includes(`>${maerkat}<`), `${kategori}: ${maerkat}`);
+    assert.ok(afsnit.includes(taelling), `${kategori}: optællingen "${taelling}" mangler`);
   }
-  // Med kort pendling (-34 %) trækker transportens nøgletal hver sin vej.
-  const modsat = renderKategorioverblik(
-    beregnKommune({ ...thisted, pendlingsafstand_km: 15 }, land), ens);
-  assert.ok(kategoriAfsnit(modsat, "Transport").includes(">trækker i hver sin retning<"));
   assert.ok(!/afviger 10 % eller mere, peger/.test(h), "den gamle sætning er væk");
   assert.ok(!/nøgletal peger mod højere udledning og/.test(h));
 });
 
-test("overblik: konklusionen påstår aldrig noget om kategorien som helhed", () => {
+test("samlet retning: påstår aldrig noget om kategorien som helhed", () => {
   // Værktøjet har intet mål for kategorien og kan ikke veje nøgletal mod
-  // hinanden. Konklusionen må derfor kun sige, hvad NØGLETALLENE peger mod.
-  const h = renderKategorioverblik(bThisted, ens);
+  // hinanden. Den samlede retning må derfor kun sige, hvad NØGLETALLENE peger
+  // mod - og skrive lige ud, at den tæller frem for at veje.
+  const h = noegletal(bThisted);
   assert.ok(!/[Kk]ategorien ligger/.test(h));
   assert.ok(!/Transport ligger (over|under)/.test(h));
   assert.ok(h.includes("talt, ikke vejet mod hinanden"),
     "forbeholdet om optælling frem for vægtning skal stå");
+  assert.ok(h.includes("Hvert nøgletal tæller ét"),
+    "den lige vægtning skal stå med ord, ikke kun i koden");
+  assert.ok(/ikke at kategorien som\s+helhed ligger over eller under/.test(h),
+    "forbeholdet mod at læse mærkatet som et mål for kategorien skal stå");
 });
 
-test("overblik: ingen rå HTML-entiteter slipper ud i teksten", () => {
+test("nøgletal: ingen rå HTML-entiteter slipper ud i teksten", () => {
   // esc() ramte engang selve entiteten, fordi den blev sat ind før escaping,
   // så der stod "&middot;" med bogstaver midt i konklusionen.
   for (const b of [bThisted, bGreve]) {
-    const h = renderKategorioverblik(b, ens);
+    const h = noegletal(b);
     assert.ok(!h.includes("&amp;middot;"), `${b.navn}: rå &middot;`);
     assert.ok(!h.includes("&amp;nbsp;"), `${b.navn}: rå &nbsp;`);
   }
@@ -730,7 +830,7 @@ test("enheder: beløb pr. år siger det, så tallet ikke læses som månedligt",
   // 19.738 kr. er ikke åbenlyst forkert som månedstal, bare urealistisk, og så
   // tvivler læseren på tallet i stedet for på enheden. Beløb, der er årlige,
   // skal sige det.
-  const h = renderKommune(bThisted, concito, ens);
+  const h = side(bThisted);
   for (const enhed of ["kr./år", "kr./indb./år"]) {
     assert.ok(h.includes(enhed), `enheden ${enhed} mangler i tabellen`);
   }
