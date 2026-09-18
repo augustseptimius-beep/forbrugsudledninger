@@ -106,6 +106,27 @@ const INDKOMST_FORBEHOLD = {
 };
 const indkomstForbehold = (m) => INDKOMST_FORBEHOLD[m.indkomst_robusthed] ?? null;
 
+/** Kommunens indkøb domineres af hovedkonto 2, Transport og infrastruktur.
+ *
+ *  Det er færgedrift. Læsø, Samsø og Ærø bruger 42-52 % af deres samlede
+ *  indkøb dér, mod 5,3 % for landet, og næste kommune på listen er Bornholm
+ *  med 17,4 %. Færgen er en regional transportopgave, som kommunen betaler,
+ *  og den gør sammenligningen pr. indbygger meningsløs for netop dem.
+ *
+ *  Retningen spærres, men tallet fjernes ikke: brændstoffet er en reel
+ *  udledning. Pipelinen sætter feltet - se indkoeb.klassificer_faergedrift. */
+const INDKOEB_FORBEHOLD = {
+  faergedrift: {
+    spaerrer: true,
+    note: "Kommunen driver færge, og hovedkonto 2, Transport og infrastruktur, "
+      + "fylder over en tredjedel af kommunens samlede indkøb mod 5 procent for "
+      + "landet. Indkøbet pr. indbygger er derfor ikke sammenligneligt: det måler "
+      + "først og fremmest en regional transportopgave, kommunen betaler for en "
+      + "befolkning, der er meget mindre end færgens opland.",
+  },
+};
+const indkoebForbehold = (m) => INDKOEB_FORBEHOLD[m.indkoeb_forbehold] ?? null;
+
 // Hvilken vej et nøgletal peger, hvis værdien er høj.
 //   "hoejere"    en høj værdi peger mod højere udledning end landsgennemsnittet
 //   "lavere"     en høj værdi peger mod lavere udledning
@@ -135,6 +156,12 @@ export const KATEGORI = {
   PRODUKTER: "Forbrugsprodukter og services",
   ENERGI: "Energi og forsyning",
   BOLIG_BYGGERI: "Bolig og byggeri",
+  // Kategorien stod uden ét eneste kommunalt nøgletal, med henvisning til
+  // NIRAS (2024) s. 29: offentligt forbrug fordeles ligeligt på alle borgere.
+  // Det er rigtigt om NIRAS' fordelingsmodel og forkert om virkeligheden -
+  // kommunernes eget indkøb varierer og ligger offentligt i DST REGK11. Se
+  // pipeline/indkoeb.py for afgrænsningen.
+  OFFENTLIGT: "Offentligt forbrug",
 };
 
 // Hver driver: hvordan værdien beregnes, hvordan afvigelsen dannes, og hvilken
@@ -330,6 +357,77 @@ export const DRIVERE = [
     type: "relativ", kategori: KATEGORI.PRODUKTER, rolle: "hjaelper", paavirkning: "lavere",
     forbehold: affaldForbehold,
     begrundelse: "Genanvendte materialer erstatter produktion af nye." },
+  // --- Kommunens eget indkøb ---
+  //
+  // De fire nøgletal nedenfor er de eneste i værktøjet, der handler om
+  // kommunen som ORGANISATION og ikke om borgerne. De står her, fordi
+  // Energistyrelsen henfører det offentlige forbrug til borgernes aftryk
+  // (1,15 ton pr. indbygger, 11,9 %), og fordi kommunen selv er den eneste
+  // aktør på siden, der kan handle direkte på tallet.
+  //
+  // DE ER KRONER, IKKE TON. Energistyrelsen ganger indkøb i kroner med en
+  // emissionsfaktor pr. indkøbskategori, men modellens indkøbsdata er
+  // fakturadata fra SKI kategoriseret på UNSPSC (GA23 baggrundsnotat 6 s. 8),
+  // og hverken data, hierarki eller faktorer er offentlige eller fordelt på
+  // kommuner. Der findes altså ingen offentlig nøgle fra DST's artskontoplan
+  // til faktorerne, og værktøjet opfinder ikke en.
+  //
+  // DE GENTAGER IKKE INDKOMSTEN. Målt over de 98 kommuner er korrelationen
+  // mellem driftsindkøb og disponibel indkomst r = -0,04. Det er det første
+  // nøgletal på siden, der ikke er indkomst i forklædning - fødevareforbruget
+  // ligger på r = +0,94.
+  { navn: "Kommunens driftsindkøb", enhed: "kr./indb./år",
+    val: (m) => m.indkoeb_drift_pr_indb,
+    felter: ["indkoeb_drift_pr_indb"],
+    metodekilde: "ENS_GA23_INDKOEB",
+    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
+    forbehold: indkoebForbehold,
+    begrundelse: "Kommunens eget køb af varer og tjenesteydelser hos leverandører, "
+      + "pr. indbygger. Energistyrelsen beregner indkøbets klimaaftryk som kroner "
+      + "gange en emissionsfaktor (baggrundsnotat 6, s. 5), så flere indkøbskroner "
+      + "betyder alt andet lige mere udledning. Tallet er ikke et mål for, om "
+      + "kommunen køber godt ind: det følger ikke indkomsten (r = -0,04 over de 98 "
+      + "kommuner), men det følger alderssammensætningen (r = +0,52 mod andelen på "
+      + "75 år og derover), og en lille kommune har færre borgere at dele de faste "
+      + "opgaver på. Forsyningsvirksomhederne er trukket fra i alle kommuner, fordi "
+      + "nogle har dem i regnskabet og andre i selskab." },
+  // Anlæg udjævnes over fem år, drift gør ikke. Grunden står i indkoeb.py:
+  // driftens afvigelse korrelerer r = +0,98 fra år til år, anlæggets kun
+  // +0,75, mens to adskilte femårsvinduer når +0,71. Ét skolebyggeri kan
+  // flytte en lille kommune flere hundrede procent på et enkelt år.
+  { navn: "Kommunens anlægsindkøb", enhed: "kr./indb./år",
+    val: (m) => m.indkoeb_anlaeg_pr_indb,
+    felter: ["indkoeb_anlaeg_pr_indb"],
+    metodekilde: "ENS_GA23_INDKOEB",
+    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
+    forbehold: indkoebForbehold,
+    begrundelse: "Kommunens køb til anlægsprojekter, gennemsnit over fem "
+      + "regnskabsår. Byggeri og anlæg er den største enkeltpost i det offentlige "
+      + "indkøbs klimaaftryk, og udledningen pr. indkøbskrone er samtidig høj "
+      + "(Energistyrelsen, baggrundsnotat 6, s. 4). Femårsgennemsnittet er "
+      + "nødvendigt, fordi ét enkelt byggeri ellers ville flytte en lille kommune "
+      + "flere hundrede procent på ét år." },
+  { navn: "Kommunens indkøb af brændsel og drivmidler", enhed: "kr./indb./år",
+    val: (m) => m.indkoeb_braendsel_pr_indb,
+    felter: ["indkoeb_braendsel_pr_indb"],
+    metodekilde: "KL_2022_INDKOEB",
+    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
+    forbehold: indkoebForbehold,
+    begrundelse: "Diesel, benzin og fyringsbrændsel til kommunens egen drift. KL "
+      + "(2022) fremhæver brændstof og køretøjer som det indkøbsområde, der har det "
+      + "største klimaaftryk pr. indkøbskrone. Tallet er kommunens udgift, ikke "
+      + "mængden: falder prisen, falder tallet, uden at der er købt mindre." },
+  { navn: "Kommunens indkøb af fødevarer", enhed: "kr./indb./år",
+    val: (m) => m.indkoeb_foedevarer_pr_indb,
+    felter: ["indkoeb_foedevarer_pr_indb"],
+    metodekilde: "ENS_GA23_INDKOEB",
+    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
+    forbehold: indkoebForbehold,
+    begrundelse: "Mad til plejehjem, daginstitutioner, skoler og kantiner. "
+      + "Energistyrelsen opgør fødevarer og kantinedrift som eget indkøbsområde "
+      + "(baggrundsnotat 6, s. 4). Tallet afhænger stærkt af, hvor mange borgere "
+      + "kommunen bespiser, og af om køkkendriften er udliciteret: er den lagt ud, "
+      + "bogføres maden som en tjenesteydelse og ikke her." },
 ];
 
 // Tærskler for, hvornår en afvigelse kaldes markant. De er en PRÆSENTATIONS-
@@ -585,12 +683,12 @@ export function samletRetning(drivere) {
 }
 
 export function driverePrKategori(drivere) {
-  // Rækkefølge efter Energistyrelsens nationale vægt, faldende. Offentligt
-  // forbrug har intet kommunalt nøgletal og optræder kun i kategorioverblikket.
-  // Fødevarer stod tidligere i samme kategori og er kommet til - se
-  // fødevarenøgletallet i DRIVERE.
+  // Rækkefølge efter Energistyrelsens nationale vægt, faldende. Både Fødevarer
+  // og Offentligt forbrug stod tidligere uden kommunalt nøgletal og optrådte
+  // kun i kategorioverblikket; begge er kommet til - se fødevarenøgletallet og
+  // nøgletallene for kommunens eget indkøb i DRIVERE.
   const raekkefoelge = [KATEGORI.TRANSPORT, KATEGORI.FOEDEVARER, KATEGORI.PRODUKTER,
-                        KATEGORI.ENERGI, KATEGORI.BOLIG_BYGGERI];
+                        KATEGORI.OFFENTLIGT, KATEGORI.ENERGI, KATEGORI.BOLIG_BYGGERI];
   return raekkefoelge
     .map((kategori) => ({ kategori, drivere: drivere.filter((d) => d.kategori === kategori) }))
     .filter((g) => g.drivere.length > 0);
@@ -604,6 +702,8 @@ const FORVENTEDE_FELTER = [
   "opv_boliger_ialt", "opv_olie",
   "opv_naturgas", "affald_kg", "genanvendelse_pct",
   "pendlingsafstand_km", "fritidshuse", "foedevare_forbrug_pr_indb",
+  "indkoeb_drift_pr_indb", "indkoeb_anlaeg_pr_indb",
+  "indkoeb_foedevarer_pr_indb", "indkoeb_braendsel_pr_indb",
   "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
   "husholdning_el_tj", "husholdning_el_co2_ton",
   "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton",

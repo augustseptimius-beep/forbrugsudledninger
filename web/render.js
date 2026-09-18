@@ -214,12 +214,14 @@ export function renderNationaltAftryk(c) {
 // Teksten siger det, Energistyrelsens egen beskrivelse af kategorien IKKE
 // siger: hvorfor der ingen tabel er. Gentog den beskrivelsen, stod det samme
 // to gange i træk i den samme overskrift.
+// Offentligt forbrug stod her, med teksten "Ingen kommunal variation.
+// Værktøjet har derfor intet kommunalt nøgletal for kategorien (NIRAS 2024,
+// afsnit 4.3.1, s. 29)." Det var en overfortolkning af NIRAS: rapporten
+// beskriver, hvordan offentligt forbrug FORDELES i en aftryksmodel, ikke at
+// kommunernes indkøb er ens. Kommunernes eget indkøb varierer betydeligt og
+// ligger offentligt fremme i DST REGK11, så kategorien har nu fire nøgletal.
+// Samme rettelse som fødevarerne fik, og af samme grund.
 const UDEN_INDIKATOR = {
-  "Offentligt forbrug": {
-    overskrift: "Ingen kommunal variation.",
-    tekst: "Værktøjet har derfor intet kommunalt nøgletal for kategorien "
-      + "(NIRAS 2024, afsnit 4.3.1, s. 29).",
-  },
   "Øvrige investeringer": {
     // Ikke "ingen variation": investeringerne varierer givetvis mellem
     // kommuner. Der findes bare ingen offentlig kilde, der fordeler dem.
@@ -923,7 +925,11 @@ export function renderReferencer(sources) {
       <span class="font-normal text-gray-500">&middot; ${esc(r.udgiver)}, ${esc(r.aar)}</span>
     </div>
     <p class="mt-1 text-xs text-gray-500">Anvendes til: ${esc(r.anvendes_til)}.</p>
-    <p class="mt-0.5 text-xs text-gray-500">Sidehenvisninger: ${esc(r.sider)}.</p>
+    <p class="mt-0.5 text-xs text-gray-500">${r.sider
+      ? `Sidehenvisninger: ${esc(r.sider)}.`
+      // En webartikel har ingen sider. Den peger på sine afsnit i stedet -
+      // et opfundet sidetal ville være værre end ingen henvisning.
+      : `Henvisning: ${esc(r.afsnit)}`}</p>
   </div>`).join("");
   return `<div>${poster}</div>`;
 }

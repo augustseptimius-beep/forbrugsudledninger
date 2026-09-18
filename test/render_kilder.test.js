@@ -43,7 +43,13 @@ test("referencer: begge rapporter med sidehenvisninger", () => {
   assert.ok(h.includes("NIRAS"));
   for (const r of sources.referencer) {
     assert.ok(h.includes(r.url), `${r.id} mangler link`);
-    assert.ok(h.includes(r.sider.slice(0, 20)), `${r.id} mangler sidehenvisninger`);
+    // Enhver reference skal kunne slås op ET BESTEMT sted. For en pagineret
+    // rapport er det sidetallet; KL's kilde er en webartikel uden sider og
+    // peger på sine afsnit i stedet. Et opfundet "s. 1" ville være værre end
+    // ingen henvisning - se test_referencer_er_med_og_har_sidehenvisninger.
+    const henvisning = r.sider ?? r.afsnit;
+    assert.ok(henvisning, `${r.id} har hverken sider eller afsnit`);
+    assert.ok(h.includes(henvisning.slice(0, 20)), `${r.id} mangler henvisning`);
   }
 });
 

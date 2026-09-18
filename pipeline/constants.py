@@ -19,6 +19,9 @@ PERIODER = {
     "AFFALD_AAR": "2023",
     "PENDLING_AAR": "2024",
     "KLIMAREGNSKAB_AAR": "2023",
+    # Nyeste kommunale regnskabsår. Driftsindkøbet vises for dette år alene;
+    # anlægsindkøbet udjævnes over de fem år, der slutter her - se indkoeb.py.
+    "REGNSKAB_AAR": "2025",
     # Forbrugsundersøgelsens nyeste år. Regionskvotienten udjævnes over de ti
     # år, der slutter her - se osei_owusu.py.
     "FORBRUG_AAR": "2024",

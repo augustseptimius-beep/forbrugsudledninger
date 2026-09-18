@@ -19,9 +19,11 @@ import fetch_dst
 import fetch_forbrug
 import fetch_pendling
 import fetch_klimaregnskabet
+import fetch_regk
 import sources
 import concito
 import ens
+import indkoeb
 import osei_owusu
 from constants import PERIODER
 from kommuner import KOMMUNER
@@ -43,13 +45,16 @@ FORVENTEDE_FELTER = [
     "husholdning_el_tj", "husholdning_el_co2_ton",
     "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton",
     "foedevare_forbrug_pr_indb",
+    "indkoeb_drift_pr_indb", "indkoeb_anlaeg_pr_indb",
+    "indkoeb_foedevarer_pr_indb", "indkoeb_braendsel_pr_indb",
 ]
 
 
 def saml_kommune_post(navn, dst_data, kode=None, region=None,
                       pendling=None,
                       fritidshuse=None, husholdning=None, affald_indberetning=None,
-                      foedevareforbrug=None, indkomst_robusthed=None):
+                      foedevareforbrug=None, indkomst_robusthed=None,
+                      kommunalt_indkoeb=None, indkoeb_forbehold=None):
     """Samler ét kommune- (eller land-) objekt i motorens datakontrakt.
     Ren funktion - ingen I/O - så den kan testes uden netværk (Task 10)."""
     post = dict(dst_data.get(navn, {}))
@@ -85,6 +90,15 @@ def saml_kommune_post(navn, dst_data, kode=None, region=None,
     # Fødevareforbrug pr. indbygger i kroner, beregnet efter Osei-Owusu et al.
     # (2020), ligning S9-S11. Ikke et udledningstal - se osei_owusu.py.
     post["foedevare_forbrug_pr_indb"] = (foedevareforbrug or {}).get(navn)
+    # Kommunens eget indkøb pr. indbygger, uden forsyningsvirksomhederne.
+    # Kroner, ikke ton: der findes ingen offentlig nøgle fra artskontoplanen
+    # til Energistyrelsens emissionsfaktorer - se indkoeb.py.
+    for felt, vaerdi in ((kommunalt_indkoeb or {}).get(navn) or {}).items():
+        post[f"indkoeb_{felt}"] = vaerdi
+    # Færgekommunerne, hvor hovedkonto 2 dominerer indkøbet. None er den
+    # normale tilstand og må derfor IKKE med i FORVENTEDE_FELTER - se
+    # affald_indberetning ovenfor, samme begrundelse.
+    post["indkoeb_forbehold"] = (indkoeb_forbehold or {}).get(navn)
     for felt in FORVENTEDE_FELTER:
         post.setdefault(felt, None)
     return post
@@ -150,6 +164,53 @@ def _beregn_foedevareforbrug(dst_data):
     print(f"  {len(kvotient_pr_aar)} årgange udjævnet, "
           f"{sum(1 for v in pr_kommune.values() if v is not None)} områder beregnet.")
     return pr_kommune
+
+
+def _hent_kommunalt_indkoeb():
+    """Kommunens eget indkøb pr. indbygger for alle 98 kommuner og for landet.
+
+    Returnerer (felter pr. område, færgeforbehold pr. område). Fejler
+    hentningen, står nøgletallene tomme for alle, og resten af datasættet er
+    upåvirket - samme regel som for de øvrige valgfrie kilder.
+
+    Drift vises for det nyeste regnskabsår, anlæg som gennemsnittet over fem
+    år. Baggrunden for forskellen står i indkoeb.py: driftsindkøbet er stabilt
+    fra år til år, anlægsindkøbet er det ikke."""
+    seneste = PERIODER["REGNSKAB_AAR"]
+    vindue = indkoeb.anlaeg_vindue(seneste)
+    print(f"Henter DST REGK11 (kommunens eget indkøb, drift {seneste}, "
+          f"anlæg {vindue[0]}-{vindue[-1]})...")
+    try:
+        drift = fetch_regk.fetch_indkoeb(fetch_regk.DRANST_DRIFT, [seneste])
+        anlaeg = fetch_regk.fetch_indkoeb(fetch_regk.DRANST_ANLAEG, vindue)
+    except Exception as fejl:
+        print(f"  ADVARSEL: {fejl}. Indkøbsnøgletallene står tomme.")
+        return {}, {}
+
+    felter, andele = {}, {}
+    for navn, pr_aar in drift.items():
+        aktuelt = pr_aar.get(seneste)
+        if aktuelt is None:
+            continue
+        felter[navn] = {
+            "drift_pr_indb": indkoeb.indkoeb_uden_forsyning(aktuelt),
+            "foedevarer_pr_indb": indkoeb.indkoeb_uden_forsyning(
+                aktuelt, [indkoeb.ART_FOEDEVARER]),
+            "braendsel_pr_indb": indkoeb.indkoeb_uden_forsyning(
+                aktuelt, [indkoeb.ART_BRAENDSEL]),
+            # Anlægget udjævnes over vinduet. Et år uden tal springes over -
+            # udjaevn_over_vindue() tæller det ikke som nul.
+            "anlaeg_pr_indb": indkoeb.udjaevn_over_vindue({
+                aar: indkoeb.indkoeb_uden_forsyning(pr_hk)
+                for aar, pr_hk in (anlaeg.get(navn) or {}).items()}),
+        }
+        andele[navn] = indkoeb.transportandel(aktuelt)
+
+    forbehold = indkoeb.klassificer_faergedrift(andele)
+    print(f"  {len(felter)} områder beregnet, "
+          f"{len(forbehold)} med færgeforbehold"
+          f"{': ' + ', '.join(sorted(forbehold)) if forbehold else ''}.")
+    return felter, forbehold
 
 
 def _klassificer_indkomst():
@@ -234,12 +295,15 @@ def main():
         print(f"  ADVARSEL: kunne ikke hente LABY24 ({fejl}). Alle står uden forbehold.")
 
     foedevareforbrug = _beregn_foedevareforbrug(dst_data)
+    kommunalt_indkoeb, indkoeb_forbehold = _hent_kommunalt_indkoeb()
     indkomst_robusthed = _klassificer_indkomst()
 
     land_post = saml_kommune_post("Hele landet", dst_data, pendling=pendling,
                                   fritidshuse=fritidshuse,
                                   foedevareforbrug=foedevareforbrug,
-                                  indkomst_robusthed=indkomst_robusthed)
+                                  indkomst_robusthed=indkomst_robusthed,
+                                  kommunalt_indkoeb=kommunalt_indkoeb,
+                                  indkoeb_forbehold=indkoeb_forbehold)
     # Landets husholdningstal er summen af kommunernes, ikke et selvstændigt
     # opslag - så tæller og nævner dækker præcis det samme område.
     def _sum(felt):
@@ -269,7 +333,9 @@ def main():
             fritidshuse=fritidshuse, husholdning=husholdning,
             affald_indberetning=affald_indberetning,
             foedevareforbrug=foedevareforbrug,
-            indkomst_robusthed=indkomst_robusthed))
+            indkomst_robusthed=indkomst_robusthed,
+            kommunalt_indkoeb=kommunalt_indkoeb,
+            indkoeb_forbehold=indkoeb_forbehold))
 
     # Ingen "konstanter" i outputtet: der er ingen beregningskoefficienter
     # tilbage i modellen. De nationale sammenligningstal ligger i concito.json

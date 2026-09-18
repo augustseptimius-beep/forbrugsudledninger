@@ -133,6 +133,24 @@ KILDER = [
                      "skaleres med. Gennemsnittet kan trækkes skævt af få personer "
                      "med meget stor kapitalindkomst i en lille kommune.",
     },
+    dict(_dst("REGK11", "Kommunernes regnskaber på hovedkonti", "REGNSKAB_AAR",
+              ["indkoeb_drift_pr_indb", "indkoeb_anlaeg_pr_indb",
+               "indkoeb_foedevarer_pr_indb", "indkoeb_braendsel_pr_indb"]),
+         forbehold="Kommunens eget indkøb som organisation, ikke borgernes forbrug. "
+                   "Hentes pr. indbygger direkte fra tabellen. Med er artskonti for "
+                   "varekøb og tjenesteydelser hos leverandører; uden er lønninger, "
+                   "køb af jord og bygninger, overførsler til borgere, interne poster "
+                   "og betalinger til stat, kommuner og regioner - Energistyrelsen "
+                   "opgør tilsvarende indkøb hos private leverandører og fratrækker "
+                   "interne offentlige betalinger. Hovedkonto 1, "
+                   "Forsyningsvirksomheder, er udeladt for alle 98 kommuner, fordi "
+                   "nogle har forsyningen i regnskabet og andre i selskab; forskellen "
+                   "er bogføring og flytter enkelte kommuner over 20 procentpoint. "
+                   "Tallet er kroner, ikke ton: der findes ingen offentligt "
+                   "tilgængelig nøgle fra artskontoplanen til Energistyrelsens "
+                   "emissionsfaktorer. Driften vises for det nyeste regnskabsår, "
+                   "anlægget som gennemsnit over fem år, fordi anlæg svinger med "
+                   "enkeltprojekter."),
 ]
 
 # Faglige referencer. Værktøjet indeholder ingen antagelser eller
@@ -180,6 +198,47 @@ REFERENCER = [
         "sider": "s. 4 (landsgennemsnitlig udledningsintensitet i alle kommuner), "
                  "s. 8 (samme produktsammensætning i alle regioner), supplerende "
                  "information ligning S9-S11 (fordelingsnøglen)",
+    },
+    {
+        "id": "ENS_GA23_INDKOEB",
+        "kort": "Energistyrelsen (2023), baggrundsnotat 6",
+        "navn": "Global Afrapportering 2023: Klimaaftryk af de offentlige indkøb",
+        "udgiver": "Energistyrelsen",
+        "aar": 2023,
+        "url": "https://ens.dk/media/2760/download",
+        "anvendes_til": "Afgrænsningen af, hvad der tælles som indkøb, og retningen "
+                        "på nøgletallene for kommunens eget indkøb. Notatets egen "
+                        "model bruger fakturadata fra SKI og emissionsfaktorer fra "
+                        "EXIOBASE; ingen af delene er offentligt tilgængelige eller "
+                        "fordelt på kommuner, og værktøjet omregner derfor ikke "
+                        "kroner til ton",
+        "sider": "s. 3 (kommunerne står for 42 % af det offentlige indkøbs aftryk), "
+                 "s. 4 (byggeri og anlæg som største post, høj udledning pr. "
+                 "indkøbskrone), s. 5 (aktivitetsbaseret model, EXIOBASE, indkøb hos "
+                 "private leverandører, interne offentlige betalinger fratrukket), "
+                 "s. 8 (kommunernes fakturadata fra SKI, kategoriseret med machine "
+                 "learning på UNSPSC), s. 14 (kroner frem for mængder: et dyrere "
+                 "indkøb giver et højere beregnet aftryk)",
+    },
+    {
+        "id": "KL_2022_INDKOEB",
+        "kort": "KL (2022)",
+        "navn": "Klimaaftrykket fra kommunernes indkøb - hvor er udledningen størst?",
+        "udgiver": "KL, Nyhedsbrevet Råderum nr. 40",
+        "aar": 2022,
+        "url": "https://www.kl.dk/oekonomi-og-administration/oekonomi-og-styring/"
+               "omstilling-og-udvikling/nyhedsbrevet-raaderum/2022/nr-40/"
+               "klimaaftrykket-fra-kommunernes-indkoeb-hvor-er-udledningen-stoerst",
+        "anvendes_til": "Rangordningen mellem indkøbsområder: hvilke der vejer "
+                        "tungest samlet, og hvilke der vejer tungest pr. indkøbskrone",
+        # Webartikel uden sidetal. Feltet står tomt frem for at få opfundet en
+        # sidehenvisning, der ikke kan slås op - se test_referencer_er_med_og_
+        # har_sidehenvisninger for, hvordan kontrakten skelner.
+        "sider": None,
+        "afsnit": "Afsnittene om de største indkøbskategorier og om aftryk pr. "
+                  "indkøbskrone. Artiklen refererer Økonomistyrelsens opgørelse "
+                  "for 2019, som er forløberen for Energistyrelsens baggrundsnotat "
+                  "ovenfor; de to skal derfor ikke lægges sammen.",
     },
 ]
 

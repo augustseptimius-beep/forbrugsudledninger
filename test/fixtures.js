@@ -18,6 +18,10 @@ export const land = {
   affald_kg: 543, genanvendelse_pct: 58,
   elco2_g_kwh: 51.8, boligpris_m2: 18439,
   ve_daekning_pct: 28.3, pendlingsafstand_km: 22.6,
+  // Kommunens eget indkøb, DST REGK11 2025 (anlæg: gennemsnit 2021-2025),
+  // uden hovedkonto 1 Forsyningsvirksomheder - se pipeline/indkoeb.py.
+  indkoeb_drift_pr_indb: 17054, indkoeb_anlaeg_pr_indb: 3316,
+  indkoeb_foedevarer_pr_indb: 502, indkoeb_braendsel_pr_indb: 671,
 };
 
 export const thisted = {
@@ -33,6 +37,8 @@ export const thisted = {
   affald_kg: 508, genanvendelse_pct: 45,
   elco2_g_kwh: 26.7, boligpris_m2: 7430,
   ve_daekning_pct: 79.7, pendlingsafstand_km: 23.6,
+  indkoeb_drift_pr_indb: 14836, indkoeb_anlaeg_pr_indb: 4311.4,
+  indkoeb_foedevarer_pr_indb: 585, indkoeb_braendsel_pr_indb: 787,
 };
 
 export const greve = {
@@ -48,6 +54,8 @@ export const greve = {
   affald_kg: null, genanvendelse_pct: null, // ingen data
   elco2_g_kwh: null, boligpris_m2: 30347,
   ve_daekning_pct: null, pendlingsafstand_km: 20.7,
+  indkoeb_drift_pr_indb: 17445, indkoeb_anlaeg_pr_indb: 2448.2,
+  indkoeb_foedevarer_pr_indb: 453, indkoeb_braendsel_pr_indb: 632,
 };
 
 // Der er ingen koefficienter i modellen længere. Fixturen indeholdt tidligere

@@ -286,18 +286,29 @@ test("samlet retning: står ved hver kategori med nøgletal, og kun der", () => 
 });
 
 test("nøgletal: kategorier uden nøgletal siger det tydeligt", () => {
-  // Eksemplet var fødevarerne, indtil de fik et nøgletal. Offentligt forbrug er
-  // blind af en anden grund: det fordeles ligeligt og varierer ikke mellem
-  // kommuner. Øvrige investeringer varierer givetvis - der findes bare ingen
-  // kilde, der fordeler dem. De to skal ikke sige det samme.
+  // Eksemplet var først fødevarerne, så Offentligt forbrug. Begge har nu
+  // nøgletal - Offentligt forbrug fik dem, da kommunens eget indkøb viste sig
+  // at variere og ligge offentligt fremme i DST REGK11. Tilbage står Øvrige
+  // investeringer, som varierer givetvis; der findes bare ingen kilde, der
+  // fordeler dem. Ordlyden skal sige netop det og ikke "ingen variation".
   const h = noegletal(bThisted);
-  assert.ok(kategoriAfsnit(h, "Offentligt forbrug").includes("Ingen kommunal variation"),
-    "blindheden skal stå med ord, ikke kun mangle et tal");
   const oevrige = kategoriAfsnit(h, "Øvrige investeringer");
   assert.ok(oevrige.includes("Intet kommunalt nøgletal"),
     "investeringerne varierer - der mangler en kilde, ikke variation");
   assert.ok(!oevrige.includes("Ingen kommunal variation"),
-    "de to blinde kategorier er blinde af hver sin grund");
+    "en kategori uden kilde er ikke en kategori uden variation");
+});
+
+test("nøgletal: Offentligt forbrug er ikke længere blind", () => {
+  // Kategorien vejer 11,9 % af det nationale aftryk og stod uden ét eneste
+  // kommunalt tal, med henvisning til NIRAS (2024) s. 29. Den henvisning var
+  // en overfortolkning: NIRAS beskriver, hvordan offentligt forbrug FORDELES
+  // i en aftryksmodel, ikke at kommunernes indkøb er ens.
+  const afsnit = kategoriAfsnit(noegletal(bThisted), "Offentligt forbrug");
+  assert.ok(!afsnit.includes("Ingen kommunal variation"),
+    "påstanden om ingen variation skal være væk");
+  assert.ok(afsnit.includes("Kommunens driftsindkøb"),
+    "kategorien skal have kommunens eget indkøb som nøgletal");
 });
 
 test("nøgletal: fødevarerne viser en retning, og dubletten står i begrundelsen", () => {
@@ -419,7 +430,7 @@ test("foldning: indholdet renderes, det skjules kun", () => {
 test("foldning: en kategori uden nøgletal foldes ikke", () => {
   // En pil, der åbner ind til ingenting, er værre end ingen pil.
   const h = noegletal(bThisted);
-  for (const navn of ["Offentligt forbrug", "Øvrige investeringer"]) {
+  for (const navn of ["Øvrige investeringer"]) {
     const afsnit = kategoriAfsnit(h, navn);
     assert.ok(!afsnit.includes("<details"), `${navn} har intet at folde ud`);
     assert.ok(!afsnit.includes("Vis "), `${navn} må ikke love nøgletal, der ikke findes`);
