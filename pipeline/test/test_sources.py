@@ -58,11 +58,19 @@ def test_referencer_er_med_og_har_sidehenvisninger():
     # Tilbage står de rapporter, tallene er afskrevet fra.
     ud = sources.byg_sources()
     ids = {r["id"] for r in ud["referencer"]}
-    assert ids == {"CONCITO_2023", "NIRAS_2024", "OSEI_OWUSU_2020"}
+    assert ids == {"CONCITO_2023", "NIRAS_2024", "OSEI_OWUSU_2020",
+                   "ENS_GA23_INDKOEB", "KL_2022_INDKOEB"}
     for r in ud["referencer"]:
         assert r["url"].startswith("https://"), f"{r['id']} mangler link"
-        assert "s. " in r["sider"], f"{r['id']} mangler sidehenvisninger"
         assert r["anvendes_til"], f"{r['id']} mangler formål"
+        # Enhver reference skal kunne slås op ET BESTEMT sted, ikke bare
+        # nævnes. For en pagineret rapport er det sidetallet. En webartikel
+        # har ingen sider, og et opfundet "s. 1" ville være værre end ingen
+        # henvisning - den skal i stedet pege på sine afsnit.
+        if r.get("sider") is None:
+            assert r.get("afsnit"), f"{r['id']} har hverken sider eller afsnit"
+        else:
+            assert "s. " in r["sider"], f"{r['id']} mangler sidehenvisninger"
 
 
 def test_ingen_antagelser_tilbage():

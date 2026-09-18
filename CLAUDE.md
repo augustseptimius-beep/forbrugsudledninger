@@ -42,6 +42,8 @@ forbrugsudledninger/
 │   ├── constants.py        <- ★ ANTAGELSER OG PERIODER. Årets ét sted at redigere.
 │   ├── sources.py          <- kildekatalog til metodesiden
 │   ├── fetch_dst.py        <- de 9 DST-tabeller
+│   ├── indkoeb.py          <- ★ KOMMUNENS EGET INDKØB: afgrænsning og forbehold
+│   ├── fetch_regk.py       <- DST REGK11, kommunernes regnskaber
 │   ├── dst_client.py, kommuner.py
 │   └── test/               <- pytest
 ├── web/
@@ -99,6 +101,12 @@ Tilføjer du et nøgletal, skal `felter` med - `test/kildeangivelse.test.js`
 kører hvert regnestykke gennem en proxy og slår fejl, hvis de oplyste felter
 ikke er præcis dem, der faktisk læses.
 
+Det gælder også afgrænsninger. `pipeline/indkoeb.py` dokumenterer, hvilke
+artskonti der tælles som kommunens indkøb og hvilke der ikke gør, med
+Energistyrelsens egen formulering som grundlag - og hvorfor hovedkonto 1,
+Forsyningsvirksomheder, udelades for alle 98 kommuner frem for at blive skjult
+for de 17, der står med nul.
+
 **2. Manglende data må aldrig vises som nul.**
 
 `estimat()` returnerer `null` for komponenter, der ikke kan opgøres, og lister
@@ -143,6 +151,8 @@ kommune, så en genkørsel tager sekunder. Den er gitignoreret. Omgå den med
 2. Læs rapporten. Den bekræfter, at Thisted stadig rammer golden-tallene, og
    tæller kommuner med manglende drivere.
 3. Opdatér `PERIODER` i `constants.py`, hvis nyere perioder er tilgængelige.
+   `REGNSKAB_AAR` styrer både driftsindkøbets år og slutåret i anlæggets
+   femårsvindue.
 4. Commit og push. Udgivelsen sker automatisk.
 
 `KONSTANTER` i `constants.py` er metodiske antagelser, ikke datapunkter. Ændr

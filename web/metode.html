@@ -121,10 +121,99 @@
       kombineret med Danmarks Statistiks Forbrugsundersøgelse.
       <em>Kommerciel.</em> (s. 26, afsnit 4.2.10)</li>
     <li><strong>Offentligt forbrug og investeringer:</strong> fordeles ligeligt på alle
-      borgere, og varierer dermed ikke mellem kommuner. (s. 29, afsnit 4.3.1)</li>
+      borgere, og varierer dermed ikke mellem kommuner. (s. 29, afsnit 4.3.1)
+      <em>Denne del har vi siden kunnet dække delvist - se afsnittet nedenfor.</em></li>
   </ul>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Indtil det datagrundlag foreligger, kan et kommunalt aftryk ikke beregnes
     uden at opfinde koefficienter. Det gør dette værktøj ikke.</p>
+</div>
+
+<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 class="text-xl font-semibold text-gray-900">Kommunens eget indkøb: hvad vi kunne, og hvad vi ikke kunne</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Kategorien <em>Offentligt forbrug</em> vejer 11,9 procent af det nationale
+    aftryk og stod indtil videre uden ét eneste kommunalt nøgletal, med henvisning
+    til NIRAS' punkt ovenfor. Den henvisning var strakt for langt. NIRAS beskriver,
+    hvordan offentligt forbrug <em>fordeles</em> i en aftryksmodel, ikke at
+    kommunernes indkøb er ens. Kommunerne står for 42 procent af det offentlige
+    indkøbs klimaaftryk
+    (<a href="https://ens.dk/media/2760/download" target="_blank" rel="noopener"
+      class="underline decoration-dotted hover:text-gray-900">Energistyrelsen 2023</a>,
+    baggrundsnotat 6, s. 3), og hvad de køber, ligger offentligt fremme i Danmarks
+    Statistiks REGK11 med kroner pr. indbygger som prisenhed. Kategorien har derfor
+    nu fire nøgletal.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Der beregnes stadig ingen ton</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Energistyrelsen ganger indkøbet i kroner med en emissionsfaktor pr.
+    indkøbskategori fra EXIOBASE (s. 5). Men modellens indkøbsdata er fakturadata
+    leveret af SKI, kategoriseret med machine learning på UNSPSC-koder og aggregeret
+    i SKI's eget varehierarki (s. 8). Hverken fakturadata, hierarkiet eller
+    emissionsfaktorerne er offentligt tilgængelige, og ingen af dem er fordelt på
+    kommuner. Der findes altså ingen offentlig nøgle fra Danmarks Statistiks
+    artskonti til faktorerne, og at bygge en selv ville være præcis den slags
+    ukildebelagte koefficient, værktøjet har fjernet seks af. Nøgletallene er
+    kroner. Retningen kommer fra kildernes egne udsagn om, hvilke indkøbsområder
+    der vejer tungt.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Hvad tallet er, og hvad det ikke er</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det er udløste indkøbskroner pr. borger, ikke en præstation. Målt over de 98
+    kommuner følger driftsindkøbet <em>ikke</em> disponibel indkomst
+    (r&nbsp;=&nbsp;−0,04), og det er dermed det første nøgletal i værktøjet, som ikke
+    gentager indkomsten - fødevareforbruget ligger på r&nbsp;=&nbsp;+0,94. Til
+    gengæld følger det alderssammensætningen: r&nbsp;=&nbsp;+0,52 mod andelen på 75
+    år og derover og r&nbsp;=&nbsp;−0,40 mod andelen på 0-16 år. Yderpunkterne er
+    små ø-kommuner. En kommune med mange ældre og få borgere at dele de faste
+    opgaver på udløser flere indkøbskroner pr. indbygger, og de kroner giver reelle
+    udledninger - men tallet siger ikke, at kommunen køber dårligt ind.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Forsyningsvirksomhederne er taget ud af alle 98</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hovedkonto 1 er udeladt. Nogle kommuner har forsyningen i regnskabet, andre
+    har den i selskab, og forskellen er bogføring, ikke forbrug. Målt på 2025 flytter
+    den Albertslund 26 procentpoint, Fredericia 23 og Gentofte 21; for Fredericia
+    vender fortegnet fra plus 12 til minus 12 procent. Den nærliggende løsning - at
+    skjule de kommuner, der ikke har tallet - virker ikke: Danmarks Statistik
+    markerer ingen af dem som manglende. 17 kommuner står med præcis 0 kroner, 2 med
+    et negativt beløb og 9 med under 200 kroner, mens medianen er 1.616 og maksimum
+    7.104. Det er et kontinuum, og en grænse midt i det ville være en opfundet
+    koefficient. Hovedkontoen udelades derfor for alle 98, så ingen kommune skjules,
+    og landsgennemsnittet regnes på samme afgrænsning.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Hvad der tælles som indkøb</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Med er artskonti for varekøb og tjenesteydelser hos leverandører: fødevarer,
+    brændsel og drivmidler, anskaffelser, øvrige varekøb, tjenesteydelser uden moms,
+    entreprenør- og håndværkerydelser og øvrige tjenesteydelser. Uden er lønninger
+    (ikke et indkøb), køb af jord og bygninger (en formueoverførsel), overførsler til
+    borgere, interne poster, og betalinger til stat, kommuner og regioner -
+    Energistyrelsen opgør tilsvarende indkøb hos <em>private</em> leverandører og
+    fratrækker interne offentlige betalinger (s. 5). Fravalget har en pris, og den
+    skal stå: en kommune, der køber sin opgave hos et §60-fællesskab, bogfører det
+    som betaling til kommuner og ser derfor ud til at købe mindre ind end en kommune,
+    der løser opgaven selv.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Drift og anlæg udjævnes forskelligt</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Driftsindkøbet er stabilt: afvigelsen fra landet korrelerer r&nbsp;=&nbsp;+0,98
+    mellem 2024 og 2025 og r&nbsp;=&nbsp;+0,96 mellem 2021 og 2025. Det vises derfor
+    for det nyeste regnskabsår alene. Anlægsindkøbet svinger med enkeltprojekter -
+    ét skolebyggeri kan flytte en lille kommune flere hundrede procent - og
+    enkeltår korrelerer kun r&nbsp;=&nbsp;+0,75. To adskilte femårsvinduer korrelerer
+    derimod r&nbsp;=&nbsp;+0,71, så der er en vedvarende komponent at få fat i.
+    Anlæg vises som gennemsnit over fem regnskabsår, efter samme logik som
+    forbrugsundersøgelsens ti-årsvindue: udjævn kun det, der kræver det.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Færgekommunerne får et forbehold</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Læsø, Samsø og Ærø bruger 42-52 procent af deres samlede indkøb på hovedkonto
+    2, Transport og infrastruktur, mod 5,3 procent for landet. Det er færgedrift, en
+    regional transportopgave betalt af kommunen for en befolkning, der er meget
+    mindre end færgens opland. Retningen spærres for de tre, og tallet forklares i
+    stedet. Næste kommune på listen er Bornholm med 17,4 procent, så grænsen på en
+    tredjedel ligger i et bredt spring: flyttes den fra 20 til 40 procent, rammer den
+    de samme tre kommuner.</p>
+
+  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Prisen tæller, ikke mængden</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Energistyrelsen noterer selv, at et dyrere indkøb alt andet lige giver et
+    højere beregnet aftryk, fordi størstedelen af indkøbet opgøres i kroner og ikke i
+    mængder (s. 14). Det rammer især, når en grøn produktvariant er dyrere end en
+    konventionel. Samme forbehold gælder her: køber kommunen økologisk eller
+    klimavenligt til en højere pris, stiger tallet, uden at der er købt mere.</p>
 </div>
 
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">

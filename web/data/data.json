@@ -31,7 +31,12 @@
     "husholdning_fjernvarme_co2_ton": 1563185.539821364,
     "affald_indberetning": null,
     "foedevare_forbrug_pr_indb": 19738.311930066353,
-    "indkomst_robusthed": null
+    "indkomst_robusthed": null,
+    "indkoeb_drift_pr_indb": 17054.0,
+    "indkoeb_foedevarer_pr_indb": 502.0,
+    "indkoeb_braendsel_pr_indb": 671.0,
+    "indkoeb_anlaeg_pr_indb": 3316.0,
+    "indkoeb_forbehold": null
   },
   "kommuner": [
     {
@@ -68,7 +73,12 @@
       "husholdning_fjernvarme_co2_ton": 152823.8635547,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 20512.179316276233,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16282.0,
+      "indkoeb_foedevarer_pr_indb": 637.0,
+      "indkoeb_braendsel_pr_indb": 561.0,
+      "indkoeb_anlaeg_pr_indb": 4683.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 106150,
@@ -104,7 +114,12 @@
       "husholdning_fjernvarme_co2_ton": 30644.76355486,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 24196.517429221974,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16794.0,
+      "indkoeb_foedevarer_pr_indb": 580.0,
+      "indkoeb_braendsel_pr_indb": 487.0,
+      "indkoeb_anlaeg_pr_indb": 3594.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 14474,
@@ -140,7 +155,12 @@
       "husholdning_fjernvarme_co2_ton": 0.0,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 25534.17728284884,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16843.0,
+      "indkoeb_foedevarer_pr_indb": 437.0,
+      "indkoeb_braendsel_pr_indb": 605.0,
+      "indkoeb_anlaeg_pr_indb": 2422.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 44214,
@@ -176,7 +196,12 @@
       "husholdning_fjernvarme_co2_ton": 4580.8021072,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 20331.21243727362,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14448.0,
+      "indkoeb_foedevarer_pr_indb": 348.0,
+      "indkoeb_braendsel_pr_indb": 848.0,
+      "indkoeb_anlaeg_pr_indb": 2418.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 29262,
@@ -212,7 +237,12 @@
       "husholdning_fjernvarme_co2_ton": 6504.27230257,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 16311.389957942249,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 24392.0,
+      "indkoeb_foedevarer_pr_indb": 521.0,
+      "indkoeb_braendsel_pr_indb": 1189.0,
+      "indkoeb_anlaeg_pr_indb": 6072.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 53950,
@@ -248,7 +278,12 @@
       "husholdning_fjernvarme_co2_ton": 4444.99744692,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19087.6503501559,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 21756.0,
+      "indkoeb_foedevarer_pr_indb": 781.0,
+      "indkoeb_braendsel_pr_indb": 792.0,
+      "indkoeb_anlaeg_pr_indb": 5347.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 40990,
@@ -284,7 +319,12 @@
       "husholdning_fjernvarme_co2_ton": 10242.804226549999,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 16723.18257159156,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 20845.0,
+      "indkoeb_foedevarer_pr_indb": 600.0,
+      "indkoeb_braendsel_pr_indb": 772.0,
+      "indkoeb_anlaeg_pr_indb": 4857.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 75106,
@@ -320,7 +360,12 @@
       "husholdning_fjernvarme_co2_ton": 20089.41614389,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 39146.30859921906,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 20175.0,
+      "indkoeb_foedevarer_pr_indb": 1040.0,
+      "indkoeb_braendsel_pr_indb": 898.0,
+      "indkoeb_anlaeg_pr_indb": 3343.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 71185,
@@ -356,7 +401,12 @@
       "husholdning_fjernvarme_co2_ton": 9132.348937929999,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 20876.195960204757,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 18549.0,
+      "indkoeb_foedevarer_pr_indb": 770.0,
+      "indkoeb_braendsel_pr_indb": 719.0,
+      "indkoeb_anlaeg_pr_indb": 5149.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 25834,
@@ -392,7 +442,12 @@
       "husholdning_fjernvarme_co2_ton": 3402.8394519000003,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18368.21719692054,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17984.0,
+      "indkoeb_foedevarer_pr_indb": 742.0,
+      "indkoeb_braendsel_pr_indb": 990.0,
+      "indkoeb_anlaeg_pr_indb": 3963.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 32030,
@@ -428,7 +483,12 @@
       "husholdning_fjernvarme_co2_ton": 2782.0849352,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19025.963836303436,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 18600.0,
+      "indkoeb_foedevarer_pr_indb": 582.0,
+      "indkoeb_braendsel_pr_indb": 753.0,
+      "indkoeb_anlaeg_pr_indb": 3170.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 54228,
@@ -464,7 +524,12 @@
       "husholdning_fjernvarme_co2_ton": 8280.6416723,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19081.353563460612,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 19343.0,
+      "indkoeb_foedevarer_pr_indb": 613.0,
+      "indkoeb_braendsel_pr_indb": 831.0,
+      "indkoeb_anlaeg_pr_indb": 2526.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 60458,
@@ -500,7 +565,12 @@
       "husholdning_fjernvarme_co2_ton": 10284.27805026,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17695.118321416914,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 19365.0,
+      "indkoeb_foedevarer_pr_indb": 485.0,
+      "indkoeb_braendsel_pr_indb": 580.0,
+      "indkoeb_anlaeg_pr_indb": 4223.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 24685,
@@ -536,7 +606,12 @@
       "husholdning_fjernvarme_co2_ton": 3255.410214,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 16411.527831785144,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 25181.0,
+      "indkoeb_foedevarer_pr_indb": 632.0,
+      "indkoeb_braendsel_pr_indb": 184.0,
+      "indkoeb_anlaeg_pr_indb": 4115.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 58614,
@@ -572,7 +647,12 @@
       "husholdning_fjernvarme_co2_ton": 4681.390784274,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 27335.48157853151,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 19638.0,
+      "indkoeb_foedevarer_pr_indb": 373.0,
+      "indkoeb_braendsel_pr_indb": 666.0,
+      "indkoeb_anlaeg_pr_indb": 3607.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 45138,
@@ -608,7 +688,12 @@
       "husholdning_fjernvarme_co2_ton": 6038.9202932200005,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18937.91234363504,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 19024.0,
+      "indkoeb_foedevarer_pr_indb": 581.0,
+      "indkoeb_braendsel_pr_indb": 858.0,
+      "indkoeb_anlaeg_pr_indb": 3862.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 18689,
@@ -644,7 +729,12 @@
       "husholdning_fjernvarme_co2_ton": 2200.8366346000003,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19021.528634266942,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 18069.0,
+      "indkoeb_foedevarer_pr_indb": 558.0,
+      "indkoeb_braendsel_pr_indb": 711.0,
+      "indkoeb_anlaeg_pr_indb": 5296.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 26496,
@@ -680,7 +770,12 @@
       "husholdning_fjernvarme_co2_ton": 1000.2804102,
       "affald_indberetning": "bekraeftet_fejl",
       "foedevare_forbrug_pr_indb": 24230.669348997097,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 20302.0,
+      "indkoeb_foedevarer_pr_indb": 399.0,
+      "indkoeb_braendsel_pr_indb": 575.0,
+      "indkoeb_anlaeg_pr_indb": 2018.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 46240,
@@ -716,7 +811,12 @@
       "husholdning_fjernvarme_co2_ton": 2793.746852727,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 21333.716772965625,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17301.0,
+      "indkoeb_foedevarer_pr_indb": 628.0,
+      "indkoeb_braendsel_pr_indb": 587.0,
+      "indkoeb_anlaeg_pr_indb": 3523.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 42445,
@@ -752,7 +852,12 @@
       "husholdning_fjernvarme_co2_ton": 4956.3048085,
       "affald_indberetning": "bekraeftet_fejl",
       "foedevare_forbrug_pr_indb": 23516.56603603854,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 22351.0,
+      "indkoeb_foedevarer_pr_indb": 654.0,
+      "indkoeb_braendsel_pr_indb": 547.0,
+      "indkoeb_anlaeg_pr_indb": 3808.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 47450,
@@ -788,7 +893,12 @@
       "husholdning_fjernvarme_co2_ton": 6346.88267767,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 20110.71510120282,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 19940.0,
+      "indkoeb_foedevarer_pr_indb": 371.0,
+      "indkoeb_braendsel_pr_indb": 787.0,
+      "indkoeb_anlaeg_pr_indb": 2645.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 42874,
@@ -824,7 +934,12 @@
       "husholdning_fjernvarme_co2_ton": 6592.24485098,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 24711.536308174607,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 15851.0,
+      "indkoeb_foedevarer_pr_indb": 598.0,
+      "indkoeb_braendsel_pr_indb": 667.0,
+      "indkoeb_anlaeg_pr_indb": 2522.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 41787,
@@ -860,7 +975,12 @@
       "husholdning_fjernvarme_co2_ton": 6413.035442200001,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 21087.903321171227,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 27144.0,
+      "indkoeb_foedevarer_pr_indb": 432.0,
+      "indkoeb_braendsel_pr_indb": 532.0,
+      "indkoeb_anlaeg_pr_indb": 2998.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 31738,
@@ -896,7 +1016,12 @@
       "husholdning_fjernvarme_co2_ton": 948.98769311,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19258.753307862233,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 20498.0,
+      "indkoeb_foedevarer_pr_indb": 495.0,
+      "indkoeb_braendsel_pr_indb": 510.0,
+      "indkoeb_anlaeg_pr_indb": 3219.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 64244,
@@ -932,7 +1057,12 @@
       "husholdning_fjernvarme_co2_ton": 8998.505845700001,
       "affald_indberetning": "bekraeftet_fejl",
       "foedevare_forbrug_pr_indb": 21902.64074145017,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 21088.0,
+      "indkoeb_foedevarer_pr_indb": 503.0,
+      "indkoeb_braendsel_pr_indb": 804.0,
+      "indkoeb_anlaeg_pr_indb": 3108.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 55182,
@@ -968,7 +1098,12 @@
       "husholdning_fjernvarme_co2_ton": 12554.32170705,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 21974.74219075006,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17701.0,
+      "indkoeb_foedevarer_pr_indb": 456.0,
+      "indkoeb_braendsel_pr_indb": 591.0,
+      "indkoeb_anlaeg_pr_indb": 4014.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 25354,
@@ -1004,7 +1139,12 @@
       "husholdning_fjernvarme_co2_ton": 3467.229109384,
       "affald_indberetning": "bekraeftet_fejl",
       "foedevare_forbrug_pr_indb": 31468.542990612877,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 20165.0,
+      "indkoeb_foedevarer_pr_indb": 583.0,
+      "indkoeb_braendsel_pr_indb": 709.0,
+      "indkoeb_anlaeg_pr_indb": 4209.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 57912,
@@ -1040,7 +1180,12 @@
       "husholdning_fjernvarme_co2_ton": 5761.8864503,
       "affald_indberetning": "bekraeftet_fejl",
       "foedevare_forbrug_pr_indb": 36185.53448830426,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 19019.0,
+      "indkoeb_foedevarer_pr_indb": 673.0,
+      "indkoeb_braendsel_pr_indb": 838.0,
+      "indkoeb_anlaeg_pr_indb": 3850.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 38677,
@@ -1076,7 +1221,12 @@
       "husholdning_fjernvarme_co2_ton": 9257.16501533,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17750.499768837824,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 15485.0,
+      "indkoeb_foedevarer_pr_indb": 561.0,
+      "indkoeb_braendsel_pr_indb": 1092.0,
+      "indkoeb_anlaeg_pr_indb": 1892.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 54120,
@@ -1112,7 +1262,12 @@
       "husholdning_fjernvarme_co2_ton": 4545.489027954,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 21861.287823320486,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17445.0,
+      "indkoeb_foedevarer_pr_indb": 453.0,
+      "indkoeb_braendsel_pr_indb": 632.0,
+      "indkoeb_anlaeg_pr_indb": 2448.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 63962,
@@ -1148,7 +1303,12 @@
       "husholdning_fjernvarme_co2_ton": 3090.516964651,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 21215.04978082537,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 19176.0,
+      "indkoeb_foedevarer_pr_indb": 469.0,
+      "indkoeb_braendsel_pr_indb": 702.0,
+      "indkoeb_anlaeg_pr_indb": 3374.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 29879,
@@ -1184,7 +1344,12 @@
       "husholdning_fjernvarme_co2_ton": 663.620520324,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 21881.271440835575,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16717.0,
+      "indkoeb_foedevarer_pr_indb": 512.0,
+      "indkoeb_braendsel_pr_indb": 629.0,
+      "indkoeb_anlaeg_pr_indb": 4422.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 92697,
@@ -1220,7 +1385,12 @@
       "husholdning_fjernvarme_co2_ton": 14701.4033237,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 23539.385287973386,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17104.0,
+      "indkoeb_foedevarer_pr_indb": 633.0,
+      "indkoeb_braendsel_pr_indb": 890.0,
+      "indkoeb_anlaeg_pr_indb": 3093.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 25040,
@@ -1256,7 +1426,12 @@
       "husholdning_fjernvarme_co2_ton": 1838.1488672849998,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 23695.767595002922,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 19866.0,
+      "indkoeb_foedevarer_pr_indb": 260.0,
+      "indkoeb_braendsel_pr_indb": 669.0,
+      "indkoeb_anlaeg_pr_indb": 3461.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 38143,
@@ -1292,7 +1467,12 @@
       "husholdning_fjernvarme_co2_ton": 960.8658554369999,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19564.722330130076,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 20041.0,
+      "indkoeb_foedevarer_pr_indb": 339.0,
+      "indkoeb_braendsel_pr_indb": 596.0,
+      "indkoeb_anlaeg_pr_indb": 1894.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 59119,
@@ -1328,7 +1508,12 @@
       "husholdning_fjernvarme_co2_ton": 18821.12668041,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18853.559830062757,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 20660.0,
+      "indkoeb_foedevarer_pr_indb": 435.0,
+      "indkoeb_braendsel_pr_indb": 831.0,
+      "indkoeb_anlaeg_pr_indb": 2471.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 75009,
@@ -1364,7 +1549,12 @@
       "husholdning_fjernvarme_co2_ton": 3935.23690374,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 20500.515045797463,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 18977.0,
+      "indkoeb_foedevarer_pr_indb": 282.0,
+      "indkoeb_braendsel_pr_indb": 648.0,
+      "indkoeb_anlaeg_pr_indb": 4102.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 47954,
@@ -1400,7 +1590,12 @@
       "husholdning_fjernvarme_co2_ton": 2149.96805123,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 20612.603365843333,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17867.0,
+      "indkoeb_foedevarer_pr_indb": 469.0,
+      "indkoeb_braendsel_pr_indb": 987.0,
+      "indkoeb_anlaeg_pr_indb": 3822.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 38533,
@@ -1436,7 +1631,12 @@
       "husholdning_fjernvarme_co2_ton": 76.432084706,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18419.118829360294,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 24361.0,
+      "indkoeb_foedevarer_pr_indb": 335.0,
+      "indkoeb_braendsel_pr_indb": 877.0,
+      "indkoeb_anlaeg_pr_indb": 2986.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 85163,
@@ -1472,7 +1672,12 @@
       "husholdning_fjernvarme_co2_ton": 24882.85866115,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19787.545543646214,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 18841.0,
+      "indkoeb_foedevarer_pr_indb": 333.0,
+      "indkoeb_braendsel_pr_indb": 735.0,
+      "indkoeb_anlaeg_pr_indb": 2760.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 31988,
@@ -1508,7 +1713,12 @@
       "husholdning_fjernvarme_co2_ton": 5562.74597456,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19636.26055750099,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 23263.0,
+      "indkoeb_foedevarer_pr_indb": 469.0,
+      "indkoeb_braendsel_pr_indb": 667.0,
+      "indkoeb_anlaeg_pr_indb": 2378.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 36010,
@@ -1544,7 +1754,12 @@
       "husholdning_fjernvarme_co2_ton": 1773.7478866,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 20408.940176785058,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 23347.0,
+      "indkoeb_foedevarer_pr_indb": 441.0,
+      "indkoeb_braendsel_pr_indb": 385.0,
+      "indkoeb_anlaeg_pr_indb": 3376.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 80959,
@@ -1580,7 +1795,12 @@
       "husholdning_fjernvarme_co2_ton": 8252.92497441,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19230.113914472568,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 20516.0,
+      "indkoeb_foedevarer_pr_indb": 442.0,
+      "indkoeb_braendsel_pr_indb": 930.0,
+      "indkoeb_anlaeg_pr_indb": 2023.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 30853,
@@ -1616,7 +1836,12 @@
       "husholdning_fjernvarme_co2_ton": 1325.5004440139999,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 20333.037498096695,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 20258.0,
+      "indkoeb_foedevarer_pr_indb": 365.0,
+      "indkoeb_braendsel_pr_indb": 577.0,
+      "indkoeb_anlaeg_pr_indb": 2550.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 23842,
@@ -1652,7 +1877,12 @@
       "husholdning_fjernvarme_co2_ton": 0.0,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 20553.038174463876,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16865.0,
+      "indkoeb_foedevarer_pr_indb": 525.0,
+      "indkoeb_braendsel_pr_indb": 609.0,
+      "indkoeb_anlaeg_pr_indb": 2608.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 44831,
@@ -1688,7 +1918,12 @@
       "husholdning_fjernvarme_co2_ton": 145.141828021,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19567.03792753824,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 20246.0,
+      "indkoeb_foedevarer_pr_indb": 522.0,
+      "indkoeb_braendsel_pr_indb": 771.0,
+      "indkoeb_anlaeg_pr_indb": 3056.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 40369,
@@ -1724,7 +1959,12 @@
       "husholdning_fjernvarme_co2_ton": 2971.00331165,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17503.351678983294,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16713.0,
+      "indkoeb_foedevarer_pr_indb": 394.0,
+      "indkoeb_braendsel_pr_indb": 565.0,
+      "indkoeb_anlaeg_pr_indb": 2249.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 52328,
@@ -1760,7 +2000,12 @@
       "husholdning_fjernvarme_co2_ton": 2075.293177796,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17468.490942305212,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17394.0,
+      "indkoeb_foedevarer_pr_indb": 397.0,
+      "indkoeb_braendsel_pr_indb": 609.0,
+      "indkoeb_anlaeg_pr_indb": 1940.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 24299,
@@ -1796,7 +2041,12 @@
       "husholdning_fjernvarme_co2_ton": 7847.1134539899995,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18274.439514833408,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 15657.0,
+      "indkoeb_foedevarer_pr_indb": 380.0,
+      "indkoeb_braendsel_pr_indb": 889.0,
+      "indkoeb_anlaeg_pr_indb": 3249.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 11841,
@@ -1832,7 +2082,12 @@
       "husholdning_fjernvarme_co2_ton": 91.991501026,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 16917.218463775716,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 23511.0,
+      "indkoeb_foedevarer_pr_indb": 518.0,
+      "indkoeb_braendsel_pr_indb": 1224.0,
+      "indkoeb_anlaeg_pr_indb": 892.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 40625,
@@ -1868,7 +2123,12 @@
       "husholdning_fjernvarme_co2_ton": 4993.64717447,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19588.04798113713,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14857.0,
+      "indkoeb_foedevarer_pr_indb": 470.0,
+      "indkoeb_braendsel_pr_indb": 642.0,
+      "indkoeb_anlaeg_pr_indb": 4654.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 29179,
@@ -1904,7 +2164,12 @@
       "husholdning_fjernvarme_co2_ton": 5926.16584208,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17562.31474196897,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16219.0,
+      "indkoeb_foedevarer_pr_indb": 443.0,
+      "indkoeb_braendsel_pr_indb": 547.0,
+      "indkoeb_anlaeg_pr_indb": 2356.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 32401,
@@ -1940,7 +2205,12 @@
       "husholdning_fjernvarme_co2_ton": 36803.602694600006,
       "affald_indberetning": "usikker_fraktion",
       "foedevare_forbrug_pr_indb": 17837.610667478253,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16574.0,
+      "indkoeb_foedevarer_pr_indb": 461.0,
+      "indkoeb_braendsel_pr_indb": 761.0,
+      "indkoeb_anlaeg_pr_indb": 3121.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 213168,
@@ -1976,7 +2246,12 @@
       "husholdning_fjernvarme_co2_ton": 130560.6018649,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17534.24283099171,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14668.0,
+      "indkoeb_foedevarer_pr_indb": 363.0,
+      "indkoeb_braendsel_pr_indb": 586.0,
+      "indkoeb_anlaeg_pr_indb": 2408.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 60027,
@@ -2012,7 +2287,12 @@
       "husholdning_fjernvarme_co2_ton": 11889.50146518,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18130.72200772993,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14877.0,
+      "indkoeb_foedevarer_pr_indb": 416.0,
+      "indkoeb_braendsel_pr_indb": 623.0,
+      "indkoeb_anlaeg_pr_indb": 2882.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 5766,
@@ -2048,7 +2328,12 @@
       "husholdning_fjernvarme_co2_ton": 20.305288932,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17263.64774892911,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 35537.0,
+      "indkoeb_foedevarer_pr_indb": 1471.0,
+      "indkoeb_braendsel_pr_indb": 5381.0,
+      "indkoeb_anlaeg_pr_indb": 6293.6,
+      "indkoeb_forbehold": "faergedrift"
     },
     {
       "folketal": 27200,
@@ -2084,7 +2369,12 @@
       "husholdning_fjernvarme_co2_ton": 2707.5707906999996,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19301.06981431253,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17789.0,
+      "indkoeb_foedevarer_pr_indb": 541.0,
+      "indkoeb_braendsel_pr_indb": 607.0,
+      "indkoeb_anlaeg_pr_indb": 4152.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 114947,
@@ -2120,7 +2410,12 @@
       "husholdning_fjernvarme_co2_ton": 97716.7047906,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18831.85673692288,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14561.0,
+      "indkoeb_foedevarer_pr_indb": 416.0,
+      "indkoeb_braendsel_pr_indb": 719.0,
+      "indkoeb_anlaeg_pr_indb": 2849.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 3332,
@@ -2156,7 +2451,12 @@
       "husholdning_fjernvarme_co2_ton": 2372.91278544,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19526.700810853916,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 18733.0,
+      "indkoeb_foedevarer_pr_indb": 431.0,
+      "indkoeb_braendsel_pr_indb": 809.0,
+      "indkoeb_anlaeg_pr_indb": 771.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 52939,
@@ -2192,7 +2492,12 @@
       "husholdning_fjernvarme_co2_ton": 14065.873185639999,
       "affald_indberetning": "usikker_spring",
       "foedevare_forbrug_pr_indb": 18408.015767835284,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 15097.0,
+      "indkoeb_foedevarer_pr_indb": 413.0,
+      "indkoeb_braendsel_pr_indb": 706.0,
+      "indkoeb_anlaeg_pr_indb": 4712.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 55218,
@@ -2228,7 +2533,12 @@
       "husholdning_fjernvarme_co2_ton": 886.821467977,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17419.140047302157,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17680.0,
+      "indkoeb_foedevarer_pr_indb": 333.0,
+      "indkoeb_braendsel_pr_indb": 464.0,
+      "indkoeb_anlaeg_pr_indb": 2855.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 96214,
@@ -2264,7 +2574,12 @@
       "husholdning_fjernvarme_co2_ton": 21606.74691284,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18490.40217479047,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 15119.0,
+      "indkoeb_foedevarer_pr_indb": 343.0,
+      "indkoeb_braendsel_pr_indb": 688.0,
+      "indkoeb_anlaeg_pr_indb": 3808.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 74123,
@@ -2300,7 +2615,12 @@
       "husholdning_fjernvarme_co2_ton": 14784.40404777,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17592.82039846838,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 15177.0,
+      "indkoeb_foedevarer_pr_indb": 512.0,
+      "indkoeb_braendsel_pr_indb": 879.0,
+      "indkoeb_anlaeg_pr_indb": 3149.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 36174,
@@ -2336,7 +2656,12 @@
       "husholdning_fjernvarme_co2_ton": 3024.1681034699996,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17183.51288121048,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17043.0,
+      "indkoeb_foedevarer_pr_indb": 495.0,
+      "indkoeb_braendsel_pr_indb": 959.0,
+      "indkoeb_anlaeg_pr_indb": 3376.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 49468,
@@ -2372,7 +2697,12 @@
       "husholdning_fjernvarme_co2_ton": 15484.58905077,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18305.83556956667,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 15463.0,
+      "indkoeb_foedevarer_pr_indb": 308.0,
+      "indkoeb_braendsel_pr_indb": 622.0,
+      "indkoeb_anlaeg_pr_indb": 2496.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 42641,
@@ -2408,7 +2738,12 @@
       "husholdning_fjernvarme_co2_ton": 1019.050565659,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 24506.975439288944,
-      "indkomst_robusthed": "trukket_af_faa"
+      "indkomst_robusthed": "trukket_af_faa",
+      "indkoeb_drift_pr_indb": 16913.0,
+      "indkoeb_foedevarer_pr_indb": 375.0,
+      "indkoeb_braendsel_pr_indb": 462.0,
+      "indkoeb_anlaeg_pr_indb": 1796.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 123250,
@@ -2444,7 +2779,12 @@
       "husholdning_fjernvarme_co2_ton": 20481.05842112,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19394.51832542537,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17685.0,
+      "indkoeb_foedevarer_pr_indb": 529.0,
+      "indkoeb_braendsel_pr_indb": 683.0,
+      "indkoeb_anlaeg_pr_indb": 4751.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 58405,
@@ -2480,7 +2820,12 @@
       "husholdning_fjernvarme_co2_ton": 18.167986555,
       "affald_indberetning": "usikker_spring",
       "foedevare_forbrug_pr_indb": 17880.11348623033,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17789.0,
+      "indkoeb_foedevarer_pr_indb": 417.0,
+      "indkoeb_braendsel_pr_indb": 673.0,
+      "indkoeb_anlaeg_pr_indb": 2070.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 49773,
@@ -2516,7 +2861,12 @@
       "husholdning_fjernvarme_co2_ton": 11617.57021445,
       "affald_indberetning": "usikker_spring",
       "foedevare_forbrug_pr_indb": 17965.739351270076,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14471.0,
+      "indkoeb_foedevarer_pr_indb": 307.0,
+      "indkoeb_braendsel_pr_indb": 543.0,
+      "indkoeb_anlaeg_pr_indb": 3287.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 48578,
@@ -2552,7 +2902,12 @@
       "husholdning_fjernvarme_co2_ton": 4277.562622549999,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17862.75713887003,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14486.0,
+      "indkoeb_foedevarer_pr_indb": 492.0,
+      "indkoeb_braendsel_pr_indb": 519.0,
+      "indkoeb_anlaeg_pr_indb": 2144.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 98806,
@@ -2588,7 +2943,12 @@
       "husholdning_fjernvarme_co2_ton": 26464.712345150005,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17295.313099081024,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14880.0,
+      "indkoeb_foedevarer_pr_indb": 463.0,
+      "indkoeb_braendsel_pr_indb": 711.0,
+      "indkoeb_anlaeg_pr_indb": 2798.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 36477,
@@ -2624,7 +2984,12 @@
       "husholdning_fjernvarme_co2_ton": 393.009778314,
       "affald_indberetning": "bekraeftet_fejl",
       "foedevare_forbrug_pr_indb": 16917.339826852105,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16938.0,
+      "indkoeb_foedevarer_pr_indb": 591.0,
+      "indkoeb_braendsel_pr_indb": 812.0,
+      "indkoeb_anlaeg_pr_indb": 2216.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 24310,
@@ -2660,7 +3025,12 @@
       "husholdning_fjernvarme_co2_ton": 8241.02577792,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18031.983959642563,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16311.0,
+      "indkoeb_foedevarer_pr_indb": 453.0,
+      "indkoeb_braendsel_pr_indb": 683.0,
+      "indkoeb_anlaeg_pr_indb": 2398.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 100564,
@@ -2696,7 +3066,12 @@
       "husholdning_fjernvarme_co2_ton": 2356.3289160199997,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 16897.598643253707,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 13728.0,
+      "indkoeb_foedevarer_pr_indb": 611.0,
+      "indkoeb_braendsel_pr_indb": 597.0,
+      "indkoeb_anlaeg_pr_indb": 2634.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 3617,
@@ -2732,7 +3107,12 @@
       "husholdning_fjernvarme_co2_ton": 13.630099536,
       "affald_indberetning": "usikker_fraktion",
       "foedevare_forbrug_pr_indb": 17325.699695391148,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 40759.0,
+      "indkoeb_foedevarer_pr_indb": 1361.0,
+      "indkoeb_braendsel_pr_indb": 4865.0,
+      "indkoeb_anlaeg_pr_indb": 2866.2,
+      "indkoeb_forbehold": "faergedrift"
     },
     {
       "folketal": 102753,
@@ -2768,7 +3148,12 @@
       "husholdning_fjernvarme_co2_ton": 35592.71366309,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18404.018690640954,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 13695.0,
+      "indkoeb_foedevarer_pr_indb": 419.0,
+      "indkoeb_braendsel_pr_indb": 621.0,
+      "indkoeb_anlaeg_pr_indb": 4066.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 66352,
@@ -2804,7 +3189,12 @@
       "husholdning_fjernvarme_co2_ton": 18288.597544980003,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18989.92839903871,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 13463.0,
+      "indkoeb_foedevarer_pr_indb": 566.0,
+      "indkoeb_braendsel_pr_indb": 631.0,
+      "indkoeb_anlaeg_pr_indb": 3321.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 44394,
@@ -2840,7 +3230,12 @@
       "husholdning_fjernvarme_co2_ton": 3145.83016667,
       "affald_indberetning": "bekraeftet_fejl",
       "foedevare_forbrug_pr_indb": 17733.947242917806,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 13019.0,
+      "indkoeb_foedevarer_pr_indb": 408.0,
+      "indkoeb_braendsel_pr_indb": 627.0,
+      "indkoeb_anlaeg_pr_indb": 2994.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 378361,
@@ -2876,7 +3271,12 @@
       "husholdning_fjernvarme_co2_ton": 186253.2988197,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18323.757381951185,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 13218.0,
+      "indkoeb_foedevarer_pr_indb": 589.0,
+      "indkoeb_braendsel_pr_indb": 577.0,
+      "indkoeb_anlaeg_pr_indb": 3336.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 90546,
@@ -2912,7 +3312,12 @@
       "husholdning_fjernvarme_co2_ton": 17713.41621033,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17636.610194144003,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14042.0,
+      "indkoeb_foedevarer_pr_indb": 378.0,
+      "indkoeb_braendsel_pr_indb": 643.0,
+      "indkoeb_anlaeg_pr_indb": 3452.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 59324,
@@ -2948,7 +3353,12 @@
       "husholdning_fjernvarme_co2_ton": 26166.45912098,
       "affald_indberetning": "usikker_spring",
       "foedevare_forbrug_pr_indb": 17504.923036832424,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 18849.0,
+      "indkoeb_foedevarer_pr_indb": 474.0,
+      "indkoeb_braendsel_pr_indb": 643.0,
+      "indkoeb_anlaeg_pr_indb": 1760.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 43305,
@@ -2984,7 +3394,12 @@
       "husholdning_fjernvarme_co2_ton": 3892.273373676,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17028.934088319613,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16726.0,
+      "indkoeb_foedevarer_pr_indb": 400.0,
+      "indkoeb_braendsel_pr_indb": 516.0,
+      "indkoeb_anlaeg_pr_indb": 2835.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 18596,
@@ -3020,7 +3435,12 @@
       "husholdning_fjernvarme_co2_ton": 379.978989325,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18663.992222466706,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16020.0,
+      "indkoeb_foedevarer_pr_indb": 646.0,
+      "indkoeb_braendsel_pr_indb": 687.0,
+      "indkoeb_anlaeg_pr_indb": 2129.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 55405,
@@ -3056,7 +3476,12 @@
       "husholdning_fjernvarme_co2_ton": 4086.3128869599996,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17815.077947412632,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16679.0,
+      "indkoeb_foedevarer_pr_indb": 409.0,
+      "indkoeb_braendsel_pr_indb": 653.0,
+      "indkoeb_anlaeg_pr_indb": 2350.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 44104,
@@ -3092,7 +3517,12 @@
       "husholdning_fjernvarme_co2_ton": 177.01621297399998,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17504.366659376305,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 15976.0,
+      "indkoeb_foedevarer_pr_indb": 487.0,
+      "indkoeb_braendsel_pr_indb": 866.0,
+      "indkoeb_anlaeg_pr_indb": 2016.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 20122,
@@ -3128,7 +3558,12 @@
       "husholdning_fjernvarme_co2_ton": 9694.824993794999,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17302.517222191353,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 19355.0,
+      "indkoeb_foedevarer_pr_indb": 574.0,
+      "indkoeb_braendsel_pr_indb": 615.0,
+      "indkoeb_anlaeg_pr_indb": 2011.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 97874,
@@ -3164,7 +3599,12 @@
       "husholdning_fjernvarme_co2_ton": 34624.71662890001,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17530.752549111407,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14275.0,
+      "indkoeb_foedevarer_pr_indb": 429.0,
+      "indkoeb_braendsel_pr_indb": 680.0,
+      "indkoeb_anlaeg_pr_indb": 2686.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 36529,
@@ -3200,7 +3640,12 @@
       "husholdning_fjernvarme_co2_ton": 3480.718795832,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17438.89159544084,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 21628.0,
+      "indkoeb_foedevarer_pr_indb": 247.0,
+      "indkoeb_braendsel_pr_indb": 560.0,
+      "indkoeb_anlaeg_pr_indb": 2449.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 57523,
@@ -3236,7 +3681,12 @@
       "husholdning_fjernvarme_co2_ton": 28267.1136314,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18372.894001908466,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14927.0,
+      "indkoeb_foedevarer_pr_indb": 454.0,
+      "indkoeb_braendsel_pr_indb": 688.0,
+      "indkoeb_anlaeg_pr_indb": 2241.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 62979,
@@ -3272,7 +3722,12 @@
       "husholdning_fjernvarme_co2_ton": 19676.34457635,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17888.636278021637,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 19439.0,
+      "indkoeb_foedevarer_pr_indb": 403.0,
+      "indkoeb_braendsel_pr_indb": 670.0,
+      "indkoeb_anlaeg_pr_indb": 3097.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 37998,
@@ -3308,7 +3763,12 @@
       "husholdning_fjernvarme_co2_ton": 4059.28816317,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17580.61701778441,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 28210.0,
+      "indkoeb_foedevarer_pr_indb": 225.0,
+      "indkoeb_braendsel_pr_indb": 600.0,
+      "indkoeb_anlaeg_pr_indb": 2338.2,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 1683,
@@ -3344,7 +3804,12 @@
       "husholdning_fjernvarme_co2_ton": 25.10288521,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18124.34494501372,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 57385.0,
+      "indkoeb_foedevarer_pr_indb": 2322.0,
+      "indkoeb_braendsel_pr_indb": 10465.0,
+      "indkoeb_anlaeg_pr_indb": 4323.8,
+      "indkoeb_forbehold": "faergedrift"
     },
     {
       "folketal": 41541,
@@ -3380,7 +3845,12 @@
       "husholdning_fjernvarme_co2_ton": 2768.1043974589998,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18229.820185881217,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 15531.0,
+      "indkoeb_foedevarer_pr_indb": 391.0,
+      "indkoeb_braendsel_pr_indb": 529.0,
+      "indkoeb_anlaeg_pr_indb": 2657.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 19344,
@@ -3416,7 +3886,12 @@
       "husholdning_fjernvarme_co2_ton": 290.768441561,
       "affald_indberetning": "usikker_spring",
       "foedevare_forbrug_pr_indb": 17397.065768526783,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 17473.0,
+      "indkoeb_foedevarer_pr_indb": 661.0,
+      "indkoeb_braendsel_pr_indb": 723.0,
+      "indkoeb_anlaeg_pr_indb": 2857.0,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 31280,
@@ -3452,7 +3927,12 @@
       "husholdning_fjernvarme_co2_ton": 7176.755793310001,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 19050.06343310963,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 16999.0,
+      "indkoeb_foedevarer_pr_indb": 422.0,
+      "indkoeb_braendsel_pr_indb": 474.0,
+      "indkoeb_anlaeg_pr_indb": 1988.6,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 42572,
@@ -3488,7 +3968,12 @@
       "husholdning_fjernvarme_co2_ton": 13538.67792926,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17523.52770458822,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14836.0,
+      "indkoeb_foedevarer_pr_indb": 585.0,
+      "indkoeb_braendsel_pr_indb": 787.0,
+      "indkoeb_anlaeg_pr_indb": 4311.4,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 35632,
@@ -3524,7 +4009,12 @@
       "husholdning_fjernvarme_co2_ton": 8706.072775010001,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 17622.72687093697,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 21106.0,
+      "indkoeb_foedevarer_pr_indb": 448.0,
+      "indkoeb_braendsel_pr_indb": 657.0,
+      "indkoeb_anlaeg_pr_indb": 3307.8,
+      "indkoeb_forbehold": null
     },
     {
       "folketal": 226033,
@@ -3560,7 +4050,12 @@
       "husholdning_fjernvarme_co2_ton": 243264.03096260002,
       "affald_indberetning": null,
       "foedevare_forbrug_pr_indb": 18369.20995772929,
-      "indkomst_robusthed": null
+      "indkomst_robusthed": null,
+      "indkoeb_drift_pr_indb": 14396.0,
+      "indkoeb_foedevarer_pr_indb": 428.0,
+      "indkoeb_braendsel_pr_indb": 541.0,
+      "indkoeb_anlaeg_pr_indb": 3139.2,
+      "indkoeb_forbehold": null
     }
   ]
 }
