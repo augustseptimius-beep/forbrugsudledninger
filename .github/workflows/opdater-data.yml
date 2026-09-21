@@ -1,0 +1,154 @@
+name: Årlig dataopdatering
+
+# Kører hele pipelinen med API-nøglen og foreslår resultatet som en pull
+# request. Startes i hånden fra Actions-fanen.
+#
+# HVORFOR EN PULL REQUEST OG IKKE ET PUSH TIL MAIN.
+# build.py springer en kilde over, hvis den fejler, og udgiver resten. Det er
+# den rigtige opførsel for en ubemandet kørsel - én død tabel må ikke vælte
+# hele datasættet - men den betyder også, at en nedetid hos Klimaregnskabet.dk
+# ville tømme husholdningsfelterne for alle 98 kommuner uden at fejle. Skrev
+# workflowet direkte til main, ville det slå igennem på den offentlige side
+# med det samme.
+#
+# En pull request gør tabet synligt: syv felter gange 98 kommuner sat til null
+# fylder i diffen og kan ikke overses. Mennesket, der trykker på knappen, er
+# også det menneske, der skal læse valideringsrapporten - se CLAUDE.md,
+# "Årlig opdatering", punkt 2. Derfor stopper workflowet ved forslaget.
+
+#
+# FORUDSÆTNING I REPOETS INDSTILLINGER. `gh pr create` kræver, at
+# Settings -> Actions -> General -> Workflow permissions har
+# "Allow GitHub Actions to create and approve pull requests" slået til.
+# Er den slået fra, fejler sidste trin med 403, mens datasættet allerede er
+# bygget og testet - så kan pull requesten laves i hånden fra grenen.
+
+on:
+  workflow_dispatch:
+
+# Én opdatering ad gangen. To samtidige kørsler ville hente de samme kilder og
+# åbne hver sin pull request med samme indhold.
+concurrency:
+  group: dataopdatering
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  opdater:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Installér afhængigheder
+        run: |
+          pip install pytest
+          npm ci
+
+      - name: Hent alle kilder og skriv datasættet
+        env:
+          # Læses af fetch_klimaregnskabet._api_noegle(). Uden den springes
+          # kilden over, og husholdningsfelterne står tomme - tjekket nedenfor
+          # fanger det, så en manglende nøgle ikke bliver til et tavst datatab.
+          KLIMAREGNSKABET_API_KEY: ${{ secrets.KLIMAREGNSKABET_API_KEY }}
+        working-directory: pipeline
+        run: python3 build.py
+
+      - name: Kontrollér at ingen kilde faldt tavst ud
+        # build.py fejler kun på kerne-input. En valgfri kilde, der er nede,
+        # giver tomme felter og exit 0. Her slås det fast, at de kilder, der
+        # kræver en nøgle eller et eksternt kald, faktisk leverede noget.
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          d = json.load(open("web/data/data.json", encoding="utf-8"))
+          kommuner = d["kommuner"]
+          krav = {
+              "husholdning_co2_ton": "Klimaregnskabet.dk",
+              "husholdning_energi_tj": "Klimaregnskabet.dk",
+              "indkoeb_drift_pr_indb": "DST REGK11",
+              "foedevare_forbrug_pr_indb": "DST FU17 + INDKF111",
+              "pendlingsafstand_km": "DST AFSTB4",
+          }
+          fejl = []
+          for felt, kilde in krav.items():
+              tomme = sum(1 for k in kommuner if k.get(felt) is None)
+              print(f"  {felt}: tomt hos {tomme}/{len(kommuner)} kommuner ({kilde})")
+              # En enkelt kommune må godt mangle et tal. Falder kilden HELT ud,
+              # er alle 98 tomme, og så er det en fejlet hentning, ikke et hul.
+              if tomme == len(kommuner):
+                  fejl.append(f"{felt} er tomt for alle 98 kommuner - {kilde} leverede intet")
+          if fejl:
+              print("\nFEJL:")
+              for f in fejl:
+                  print(" -", f)
+              sys.exit(1)
+          print("\nAlle kilder leverede data.")
+          PY
+
+      - name: Byg CSS og kør testene
+        # Samme rækkefølge som udgivelsen: en rød test skal stoppe forslaget,
+        # ikke lande i en pull request, nogen skal opdage bagefter.
+        run: |
+          npm run css
+          npm test
+          cd pipeline && python3 -m pytest -q
+
+      - name: Foreslå opdateringen som pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet -- web/data web/styles; then
+            echo "Ingen ændringer i datasættet. Kilderne har ikke nyere tal."
+            exit 0
+          fi
+
+          # Kørsels-id'et med i navnet, ikke kun datoen. To kørsler samme dag
+          # er det normale, ikke undtagelsen: man kører én gang, opdager at
+          # PERIODER skal frem, retter og kører igen. Med et rent datonavn
+          # ville anden kørsel blive afvist som non-fast-forward, fordi grenen
+          # allerede findes på remote med en anden commit.
+          gren="data/opdatering-$(date +%Y-%m-%d)-${{ github.run_id }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$gren"
+          git add web/data web/styles
+          git commit -m "Årlig dataopdatering $(date +%Y-%m-%d)"
+          git push -u origin "$gren"
+
+          gh pr create --draft --base main --head "$gren" \
+            --title "Årlig dataopdatering $(date +%Y-%m-%d)" \
+            --body-file - <<'EOF'
+          Automatisk kørsel af `pipeline/build.py` med alle kilder, inklusive
+          Klimaregnskabet.dk.
+
+          **Læs valideringsrapporten i kørslens log, før denne merges.** Den er
+          punkt 2 i CLAUDE.md's årlige opdatering og kan ikke erstattes af
+          testene: den tæller kommuner med manglende drivere, viser
+          affaldsindberetningens forbehold og holder Thisted op mod
+          golden-tallene.
+
+          Workflowet har kontrolleret, at ingen kilde faldt helt ud, og at CSS
+          og begge testsuiter er grønne. Det har ikke vurderet, om tallene
+          giver mening - det er læserens opgave.
+
+          **Denne PR viser ingen checks, og det er forventet.** GitHub starter
+          ikke workflows af et push, der er lavet med `GITHUB_TOKEN`, så
+          Tests-workflowet kører ikke her. Testene ER kørt - i kørslen, der
+          åbnede denne PR, på præcis dette indhold. Linket til kørslen står
+          under Actions.
+
+          Husk at tjekke, om `PERIODER` i `pipeline/constants.py` skal frem til
+          nyere årgange, og kør i så fald workflowet igen bagefter.
+          EOF

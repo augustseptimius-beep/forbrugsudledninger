@@ -135,8 +135,16 @@ KLIMAREGNSKABET_API_KEY=...
 ```
 
 Udgivelses-workflowet bruger ikke nøglen: det kører kun tests og CSS, ikke
-`build.py`. Skulle den årlige opdatering en dag automatiseres i CI, hører
-nøglen hjemme som en GitHub Actions-secret, ikke i repoet.
+`build.py`.
+
+Den årlige opdatering kan derimod køres i CI. Nøglen ligger som GitHub
+Actions-secret under navnet `KLIMAREGNSKABET_API_KEY`, og
+`.github/workflows/opdater-data.yml` læser den derfra. En secret er
+skrive-kun: værdien kan ikke læses tilbage af nogen, heller ikke af repoets
+ejer. Skal den skiftes, overskrives den med `gh secret set`.
+
+Det betyder, at opdateringen ikke længere hænger på én bestemt maskine. Vil
+du alligevel køre lokalt, virker `pipeline/.env` som før.
 
 ## Cachefiler under udvikling
 
@@ -146,10 +154,17 @@ kommune, så en genkørsel tager sekunder. Den er gitignoreret. Omgå den med
 
 ## Årlig opdatering
 
+Kør workflowet **Årlig dataopdatering** fra Actions-fanen. Det henter alle
+kilder med nøglen, kontrollerer at ingen kilde faldt tavst ud, kører CSS og
+begge testsuiter, og åbner en draft-PR med det nye datasæt. Trinene nedenfor
+gælder både den vej og en lokal kørsel.
+
 1. `python3 pipeline/build.py` - genhenter alle API-kilder, skriver
    `data.json` og `sources.json`, og udskriver en valideringsrapport.
+   I CI står rapporten i kørslens log.
 2. Læs rapporten. Den bekræfter, at Thisted stadig rammer golden-tallene, og
-   tæller kommuner med manglende drivere.
+   tæller kommuner med manglende drivere. Det trin kan ikke automatiseres:
+   testene fanger brudte regnestykker, ikke tal der er rigtige men urimelige.
 3. Opdatér `PERIODER` i `constants.py`, hvis nyere perioder er tilgængelige.
    `REGNSKAB_AAR` styrer både driftsindkøbets år og slutåret i anlæggets
    femårsvindue.
