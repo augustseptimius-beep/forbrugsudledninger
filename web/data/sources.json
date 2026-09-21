@@ -1,5 +1,5 @@
 {
-  "genereret": "2026-09-18",
+  "genereret": "2026-09-21",
   "kilder": [
     {
       "id": "FOLK1A",
@@ -177,7 +177,7 @@
         "husholdning_fjernvarme_co2_ton"
       ],
       "forbehold": "Kun kategorien Husholdninger - erhverv, fremstilling, offentlig service og transport hører til andre kategorier og er ikke med. Opgørelsen dækker udledningen fra forbrændingen og fra elnettet, ikke hele livscyklussen bag brændslet, og niveauet er derfor lavere end CONCITO's tal for El og varme. Sammenligningen med landsgennemsnittet er gyldig, fordi begge sider opgøres ens. NIRAS (2024) s. 18 peger på Energi- og CO2-Regnskabet som den rigtige kilde til energidelen. Klimaregnskabets el-faktor er kommunens egen produktion; værktøjet regner husholdningernes strøm med landets fælles faktor i stedet, fordi strøm deles på det fælles net. Fjernvarmens faktor er fjernvarmenettets egen og bruges, som den er.",
-      "periode": "2023"
+      "periode": "2024"
     },
     {
       "id": "FU17",

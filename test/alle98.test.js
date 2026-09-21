@@ -129,15 +129,35 @@ test("landets husholdningstal er summen af kommunernes", () => {
     `${sum} mod ${data.land.husholdning_co2_ton}`);
 });
 
-test("husholdningernes CO2 pr. bolig følger IKKE fritidshustætheden", () => {
-  // Kernen i hvorfor tallet fordeles på boliger og ikke på indbyggere. Gør
-  // det det alligevel, er nævneren forkert igen.
+test("husholdningernes energi pr. bolig følger IKKE fritidshustætheden", () => {
+  // Kernen i hvorfor husholdningstallene fordeles på boliger og ikke på
+  // indbyggere: et sommerhus bruger energi, men ejeren er registreret i en
+  // anden kommune og tæller ikke med i folketallet. Fordeles der på
+  // indbyggere, ser en sommerhuskommune ud, som om dens borgere bruger
+  // urimeligt meget. Holder fordelingen ikke sommerhuseffekten nede, er
+  // nævneren forkert igen.
+  //
+  // MÅLT PÅ ENERGI, IKKE PÅ CO2, OG DET ER ET BEVIDST VALG.
+  //
+  // Testen målte tidligere husholdning_co2_ton. Dér findes sammenhængen ikke
+  // i nogen brugbar styrke: på 2023-tallene lå den 0,20 mod 0,21 og bestod
+  // altså med en hundrededels margin, og på 2024-tallene vendte den om, 0,22
+  // mod 0,14. Årsagen er, at udledningen er energiforbruget ganget med
+  // fjernvarmenettets egen faktor, og den faktor svinger så voldsomt mellem
+  // kommunerne - fra flis til gas - at den overdøver sommerhuseffekten. En
+  // vagt, der bestod med 0,01, holdt ikke øje med noget.
+  //
+  // Energien bærer derimod signalet rent, og det er også energien,
+  // fetch_klimaregnskabet._maalte_sammenhaenge dokumenterer beslutningen med:
+  // pr. indbygger omkring +0,7, fordelt på samtlige boliger tæt på nul.
+  // Nævneren bruges af BEGGE husholdningsnøgletal, så vagten dækker også
+  // CO2-tallet - den står bare dér, hvor sammenhængen kan måles.
   const r = data.kommuner.map((k) => {
     const helaar = k.boliger_parcel + k.boliger_raekke + k.boliger_etage;
     return {
       fritidsandel: k.fritidshuse / helaar,
-      prBolig: k.husholdning_co2_ton / (helaar + k.fritidshuse),
-      prIndb: k.husholdning_co2_ton / k.folketal,
+      prBolig: k.husholdning_energi_tj / (helaar + k.fritidshuse),
+      prIndb: k.husholdning_energi_tj / k.folketal,
     };
   });
   const korr = (xs, ys) => {
