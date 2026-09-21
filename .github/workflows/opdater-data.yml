@@ -16,8 +16,21 @@ name: Årlig dataopdatering
 # også det menneske, der skal læse valideringsrapporten - se CLAUDE.md,
 # "Årlig opdatering", punkt 2. Derfor stopper workflowet ved forslaget.
 
+#
+# FORUDSÆTNING I REPOETS INDSTILLINGER. `gh pr create` kræver, at
+# Settings -> Actions -> General -> Workflow permissions har
+# "Allow GitHub Actions to create and approve pull requests" slået til.
+# Er den slået fra, fejler sidste trin med 403, mens datasættet allerede er
+# bygget og testet - så kan pull requesten laves i hånden fra grenen.
+
 on:
   workflow_dispatch:
+
+# Én opdatering ad gangen. To samtidige kørsler ville hente de samme kilder og
+# åbne hver sin pull request med samme indhold.
+concurrency:
+  group: dataopdatering
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -101,7 +114,12 @@ jobs:
             exit 0
           fi
 
-          gren="data/opdatering-$(date +%Y-%m-%d)"
+          # Kørsels-id'et med i navnet, ikke kun datoen. To kørsler samme dag
+          # er det normale, ikke undtagelsen: man kører én gang, opdager at
+          # PERIODER skal frem, retter og kører igen. Med et rent datonavn
+          # ville anden kørsel blive afvist som non-fast-forward, fordi grenen
+          # allerede findes på remote med en anden commit.
+          gren="data/opdatering-$(date +%Y-%m-%d)-${{ github.run_id }}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$gren"
@@ -124,6 +142,12 @@ jobs:
           Workflowet har kontrolleret, at ingen kilde faldt helt ud, og at CSS
           og begge testsuiter er grønne. Det har ikke vurderet, om tallene
           giver mening - det er læserens opgave.
+
+          **Denne PR viser ingen checks, og det er forventet.** GitHub starter
+          ikke workflows af et push, der er lavet med `GITHUB_TOKEN`, så
+          Tests-workflowet kører ikke her. Testene ER kørt - i kørslen, der
+          åbnede denne PR, på præcis dette indhold. Linket til kørslen står
+          under Actions.
 
           Husk at tjekke, om `PERIODER` i `pipeline/constants.py` skal frem til
           nyere årgange, og kør i så fald workflowet igen bagefter.
