@@ -206,7 +206,7 @@ export const DRIVERE = [
   // står med efter eksplicit valg: Osei-Owusu et al. (2020) fordeler
   // fødevareforbruget som regionens forbrugskvotient gange kommunens samlede
   // disponible indkomst (SI, ligning S9-S11), så hele den kommunale variation
-  // kommer derfra. Målt over de 98 kommuner er r = +0,94 mod disponibel
+  // kommer derfra. Målt over de 98 kommuner er r = +0,97 mod disponibel
   // indkomst, altså samme leje som de nøgletal, der er taget af siden nedenfor.
   //
   // Det bliver alligevel stående, fordi alternativet er en tom kategori, der
@@ -230,7 +230,7 @@ export const DRIVERE = [
       + "fødevarer, og Osei-Owusu et al. (2020) opgør netop fødevareforbruget til "
       + "kommunens del af det nationale aftryk. Tallet er beregnet, ikke målt - "
       + "det er regionens forbrugskvotient ganget med kommunens disponible "
-      + "indkomst, og det gentager derfor indkomsten (r = +0,94 over de 98 "
+      + "indkomst, og det gentager derfor indkomsten (r = +0,97 over de 98 "
       + "kommuner). Det siger noget om, hvor meget der bruges på mad, ikke om "
       + "hvad der spises: kilden regner med landsgennemsnitlig kost i alle "
       + "kommuner (s. 4 og s. 8), så den kan ikke se forskel på oksekød og "
@@ -373,9 +373,9 @@ export const DRIVERE = [
   // til faktorerne, og værktøjet opfinder ikke en.
   //
   // DE GENTAGER IKKE INDKOMSTEN. Målt over de 98 kommuner er korrelationen
-  // mellem driftsindkøb og disponibel indkomst r = -0,04. Det er det første
+  // mellem driftsindkøb og disponibel indkomst r = -0,10. Det er det første
   // nøgletal på siden, der ikke er indkomst i forklædning - fødevareforbruget
-  // ligger på r = +0,94.
+  // ligger på r = +0,97.
   { navn: "Kommunens driftsindkøb", enhed: "kr./indb./år",
     val: (m) => m.indkoeb_drift_pr_indb,
     felter: ["indkoeb_drift_pr_indb"],
@@ -386,7 +386,7 @@ export const DRIVERE = [
       + "pr. indbygger. Energistyrelsen beregner indkøbets klimaaftryk som kroner "
       + "gange en emissionsfaktor (baggrundsnotat 6, s. 5), så flere indkøbskroner "
       + "betyder alt andet lige mere udledning. Tallet er ikke et mål for, om "
-      + "kommunen køber godt ind: det følger ikke indkomsten (r = -0,04 over de 98 "
+      + "kommunen køber godt ind: det følger ikke indkomsten (r = -0,10 over de 98 "
       + "kommuner), men det følger alderssammensætningen (r = +0,52 mod andelen på "
       + "75 år og derover), og en lille kommune har færre borgere at dele de faste "
       + "opgaver på. Forsyningsvirksomhederne er trukket fra i alle kommuner, fordi "

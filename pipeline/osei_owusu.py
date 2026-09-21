@@ -44,7 +44,7 @@ DET GENTAGER INDKOMSTEN, OG DET SKAL STÅ
 
 Af formlen følger, at den kommunale variation kommer fra den disponible
 indkomst alene; regionskvotienten modulerer med 2 til 8 %. Over de 98
-kommuner er korrelationen med disponibel indkomst r = +0,94. Nøgletallet
+kommuner er korrelationen med disponibel indkomst r = +0,97. Nøgletallet
 siger derfor i praksis det samme som indkomsten, blot i fødevarernes
 kategori. Det står med som eneste kommunale nøgletal for en kategori, der
 ellers er tom, ikke fordi det bærer ny information.

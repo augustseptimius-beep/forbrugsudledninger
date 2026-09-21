@@ -101,6 +101,15 @@ Tilføjer du et nøgletal, skal `felter` med - `test/kildeangivelse.test.js`
 kører hvert regnestykke gennem en proxy og slår fejl, hvis de oplyste felter
 ikke er præcis dem, der faktisk læses.
 
+Det gælder også metodesidens egen brødtekst. Kildetabellen holder sig selv i
+takt, fordi den læser `sources.json`, men prosaen gør ikke: ved opdateringen til
+Klimaregnskabet 2024 rådnede fem tal stille. `test/metodeside.test.js`
+genberegner de tal, der KAN genberegnes fra `data.json`, og fejler hvis siden
+siger noget andet. Citater med sidehenvisning og historiske begrundelser står
+bevidst udenfor - de skal ikke følge data. Tal, der kræver felter uden for
+`data.json`, er markeret med deres opgørelsesår i teksten. Tilføjer du et afledt
+tal til metodesiden, så skriv det ind i testen.
+
 Det gælder også afgrænsninger. `pipeline/indkoeb.py` dokumenterer, hvilke
 artskonti der tælles som kommunens indkøb og hvilke der ikke gør, med
 Energistyrelsens egen formulering som grundlag - og hvorfor hovedkonto 1,
@@ -176,7 +185,7 @@ dem kun hvis metoden selv ændres, og kør golden-testene bagefter.
 ## Tests
 
 ```bash
-npm test                              # 170+ JS-tests: motor og rendering
+npm test                              # 180+ JS-tests: motor, rendering, metodeside
 cd pipeline && python3 -m pytest -q   # 100+ Python-tests: pipeline
 ```
 

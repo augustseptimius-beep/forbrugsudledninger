@@ -42,8 +42,8 @@ udsagn om, hvilke indkøbsområder der vejer tungt.
 HVAD TALLET ER: UDLØSTE INDKØBSKRONER, IKKE EN PRÆSTATION
 
 Målt over de 98 kommuner følger driftsindkøbet pr. indbygger ikke disponibel
-indkomst (r = -0,04). Det er dermed det første nøgletal i værktøjet, som ikke
-gentager indkomsten - fødevareforbruget ligger på r = +0,94.
+indkomst (r = -0,10). Det er dermed det første nøgletal i værktøjet, som ikke
+gentager indkomsten - fødevareforbruget ligger på r = +0,97.
 
 Til gengæld følger det alderssammensætningen: r = +0,52 mod andelen på 75 år
 og derover, r = -0,40 mod andelen på 0-16 år. Yderpunkterne er små ø-kommuner.
