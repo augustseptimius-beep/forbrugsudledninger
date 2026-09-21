@@ -50,12 +50,19 @@ TIMEOUT_SEKUNDER = 90
 MAKS_FORSOEG = 4
 PAUSE_SEKUNDER = 0.3
 
-# Målt på alle 98 kommuner, 2023. Dokumenteret her, fordi valget af nævner
-# hviler på dem og ikke på et skøn.
+# Målt på alle 98 kommuner, opgørelsesår 2024. Dokumenteret her, fordi valget
+# af nævner hviler på dem og ikke på et skøn.
+#
+# Tallene drifter en smule med hver årgang - i 2023 stod de på 0,72, 0,77 og
+# -0,19 - men billedet er stabilt: fordelt på indbyggere følger energien
+# sommerhustætheden tæt, fordelt på samtlige boliger forsvinder den
+# sammenhæng. Det er dét, og ikke den enkelte decimal, valget hviler på.
+# Sammenhængen efterprøves af "husholdningernes energi pr. bolig følger IKKE
+# fritidshustætheden" i test/alle98.test.js ved hver kørsel.
 _maalte_sammenhaenge = {
-    "energi pr. indbygger mod fritidshustæthed": 0.72,
-    "energi pr. helårsbolig mod fritidshustæthed": 0.77,
-    "energi pr. bolig inkl. fritidshuse mod fritidshustæthed": -0.19,
+    "energi pr. indbygger mod fritidshustæthed": 0.71,
+    "energi pr. helårsbolig mod fritidshustæthed": 0.76,
+    "energi pr. bolig inkl. fritidshuse mod fritidshustæthed": -0.12,
 }
 
 # Energikilder, der er fossile. Bruges til at opgøre den fossile andel af
@@ -68,11 +75,12 @@ FOSSILE_KILDER = {
 #
 # Klimaregnskabet beregner el-faktoren pr. kommune ud fra den el, der produceres
 # i kommunen (Energistyrelsens metode til strategisk energiplanlægning), så lokal
-# vind og sol tæller som nul hos kommunens egne forbrugere - i 2023 fra 0,04 g
-# CO2e/kWh i Lolland til 174 i Odense. Strøm deles på det fælles net, så motoren
-# regner strømmen med landets fælles faktor: summen af el-udledningen delt med
-# summen af elforbruget. Fjernvarme leveres i rør fra kommunens eget net, og
-# Klimaregnskabet beregner faktoren pr. net; den er kommunens egen.
+# vind og sol tæller som nul hos kommunens egne forbrugere - i 2024 står fire
+# kommuner på nul, mens Aalborg ligger på 418 g CO2e/kWh. Strøm deles på det
+# fælles net, så motoren regner strømmen med landets fælles faktor: summen af
+# el-udledningen delt med summen af elforbruget. Fjernvarme leveres i rør fra
+# kommunens eget net, og Klimaregnskabet beregner faktoren pr. net; den er
+# kommunens egen.
 EL_KILDER = ("El til andet", "El til paneler", "El til varmepumpe")
 FJERNVARME = "Fjernvarme"
 
