@@ -65,6 +65,20 @@ jobs:
         working-directory: pipeline
         run: python3 build.py
 
+      - name: Gem datasættet som artefakt
+        # Ligger FØR kontrollen og testene, og kører altid. Fejler et af de
+        # følgende trin, springes pull request-trinnet over, og så ville
+        # datasættet være tabt - man kunne kun se AT noget fejlede, ikke
+        # undersøge hvorfor uden at bruge otte minutter og 196 API-kald på en
+        # ny kørsel. Det skete i første rigtige kørsel, hvor en test om
+        # sommerhus-sammenhængen slog fejl på nye tal.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: datasaet
+          path: web/data
+          retention-days: 14
+
       - name: Kontrollér at ingen kilde faldt tavst ud
         # build.py fejler kun på kerne-input. En valgfri kilde, der er nede,
         # giver tomme felter og exit 0. Her slås det fast, at de kilder, der
