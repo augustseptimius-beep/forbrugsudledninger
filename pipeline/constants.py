@@ -18,7 +18,7 @@ PERIODER = {
     "BILER_MAANED": "2026M01",
     "AFFALD_AAR": "2023",
     "PENDLING_AAR": "2024",
-    "KLIMAREGNSKAB_AAR": "2023",
+    "KLIMAREGNSKAB_AAR": "2024",
     # Nyeste kommunale regnskabsår. Driftsindkøbet vises for dette år alene;
     # anlægsindkøbet udjævnes over de fem år, der slutter her - se indkoeb.py.
     "REGNSKAB_AAR": "2025",
