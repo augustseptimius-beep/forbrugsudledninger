@@ -59,6 +59,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { beregnFordeling, beregnForbehold, driverTabel,
          FORBEHOLD_VIRKNING } from "../web/beregning.js";
+import { FORBEHOLD_MAERKAT_TEKST } from "../web/render.js";
 
 const data = JSON.parse(readFileSync(new URL("../web/data/data.json", import.meta.url)));
 const ENS = JSON.parse(readFileSync(new URL("../web/data/ens.json", import.meta.url)));
@@ -377,4 +378,12 @@ test("metodesiden: de ramte kommuner remses ikke op i prosaen", () => {
       + `affaldsforbeholdet ved navn (${naevnt.join(", ")}). Listen afgøres af årets `
       + "data og hører i forbeholdstabellen, ikke i prosaen.");
   }
+});
+
+test("metodesiden: mærkatets ordlyd er den, kommunesiden faktisk viser", () => {
+  // Siden citerer mærkatet ordret. Omdøbes det i render.js, skal citatet med -
+  // ellers beskriver metodesiden et mærkat, der ikke findes.
+  assert.ok(tekst.includes(FORBEHOLD_MAERKAT_TEKST),
+    `metodesiden skal citere mærkatet "${FORBEHOLD_MAERKAT_TEKST}", som `
+    + "render.js sætter på et spærret nøgletal.");
 });

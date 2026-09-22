@@ -100,9 +100,11 @@ const KORT = "kort-print rounded-lg border border-gray-200 bg-white";
 // Formen bærer signalet lige så meget som farven, og teksten står altid ved
 // siden af - farve må aldrig være eneste bærer af betydning.
 //
-// Der er intet mærkat for en retning, der ikke kan afgøres. Et hovednøgletal
-// uden retning tages af kommunens side (se beregnKommune), og et hjælpetal uden
-// retning står uden mærkat.
+// Der er intet SIGNAL for en retning, der ikke kan afgøres, men der er ikke
+// nødvendigvis en tom celle. Et hovednøgletal, som et forbehold har spærret,
+// står med forbeholdMaerkat(); et, hvis retning kilderne slet ikke kan begrunde,
+// tages af kommunens side (se beregnKommune); og et hjælpetal uden retning står
+// uden mærkat, mærket "forklarende".
 //
 // Under 10 % peger nøgletallet "lidt": retningen står, men svagt, og formen er
 // en åben trekant. Kun en afvigelse, der vises som 0,0 %, peger hverken op eller ned.
@@ -442,9 +444,15 @@ function kategoriNote(c, kategori) {
   return "";
 }
 
-/** De nøgletal, der er taget af kommunens side, fordi deres retning ikke kan
- *  afgøres her. Et hul skal forklares, ikke gemmes. Nøgletal med samme
- *  begrundelse samles, så forbeholdet står én gang. */
+/** De nøgletal, der er taget af kommunens side, fordi TALLET SELV er ramt -
+ *  affaldstonnagen bogført på nabokommunen, husholdningstallet delt med for
+ *  mange boliger. Et hul skal forklares, ikke gemmes. Nøgletal med samme
+ *  begrundelse samles, så forbeholdet står én gang.
+ *
+ *  Den siger bevidst ikke "hvis retning ikke kan afgøres". Det ville også
+ *  dække de spærrede nøgletal, og de står jo lige ovenfor i tabellen med tal og
+ *  forbehold - på Læsø ville noten ellers påstå, at fire indkøbstal var taget
+ *  af siden, mens de stod der. */
 function udeladtNote(b) {
   if (b.udeladt.length === 0) return "";
   const prNote = new Map();
@@ -457,19 +465,46 @@ function udeladtNote(b) {
   }).join("");
   return `<div class="mt-4 border-t border-gray-100 pt-3 text-xs text-gray-500 max-w-3xl">
       <p><strong class="font-semibold text-gray-600">Vises ikke for ${esc(b.navn)}.</strong>
-        Et nøgletal, hvis retning ikke kan afgøres for kommunen, er taget af siden.</p>
+        Et nøgletal, hvis eget tal er ramt af et forbehold, er taget af siden.
+        Nøgletal, hvor kun retningen er holdt tilbage, står i tabellen ovenfor
+        med deres tal.</p>
       <ul class="mt-1 list-none m-0 p-0">${punkter}</ul>
     </div>`;
+}
+
+/** Mærkat for et nøgletal, hvis retning et forbehold holder tilbage.
+ *
+ *  Samme form som de øvrige signalmærkater - tekst først, tegn ved siden af -
+ *  så farven aldrig er eneste bærer. Tegnet er en cirkel og ikke en trekant
+ *  eller en streg: trekanterne betyder op og ned, stregen betyder "hverken op
+ *  eller ned", og ingen af delene er sandt her. Her er retningen ikke målt til
+ *  nul, den er holdt tilbage. */
+export const FORBEHOLD_MAERKAT_TEKST = "forbehold: ingen retning";
+
+function forbeholdMaerkat() {
+  return `<span class="inline-flex items-center gap-1 rounded-full border whitespace-nowrap
+    text-xs px-2 py-0.5 font-medium ${NEUTRAL_MAERKAT}"
+    ><span aria-hidden="true" class="text-[11px] leading-none">○</span>${FORBEHOLD_MAERKAT_TEKST}</span>`;
 }
 
 /** Én række: nøgletallets navn, enhed, kilde, tallene og retningen. */
 function noegletalRaekke(d, sources) {
   const fb = DRIVER_FORBEHOLD[d.navn];
   const tom = d.kommuneVaerdi == null;
-  // Et hjælpetal uden retning får intet mærkat; begrundelsen ved ikonet siger,
-  // hvad det forklarer. Et hovednøgletal uden retning når aldrig hertil -
-  // beregnKommune tager det af kommunens side.
-  const maerkat = d.signal === "uafklaret" ? "" : signalMaerkat(d.signal);
+  // Tre tilfælde, og de ser forskellige ud med vilje:
+  //
+  //   Et SPÆRRET nøgletal står med et mærkat, der siger, at retningen er holdt
+  //   tilbage. Tidligere gav det en tom celle, der lignede et hjælpetals -
+  //   men metodesiden lover, at forbeholdet står ved tallet, og et tomt felt
+  //   siger ingenting. Ordlyden står ved ikonet, som den gør for alle rækker.
+  //
+  //   Et HJÆLPETAL uden retning får intet mærkat; det er mærket "forklarende",
+  //   og begrundelsen ved ikonet siger, hvad det forklarer.
+  //
+  //   Alle andre får deres signalmærkat.
+  const maerkat = d.spaerret ? forbeholdMaerkat()
+    : d.signal === "uafklaret" ? ""
+    : signalMaerkat(d.signal);
   // Hjælpetallene er mærket i selve tabellen, fordi den samlede retning holder
   // dem ude. Står det kun i den lille skrift under tabellen, ser optællingen
   // forkert ud for den, der tæller rækkerne efter.
@@ -886,7 +921,7 @@ const FORBEHOLD_VIRKNING_TEKST = {
   skjuler: ["Nøgletallet tages af kommunens side",
     "Tallet selv er ramt, så det vises ikke. Begrundelsen står under tabellen på kommunens side."],
   spaerrer: ["Nøgletallet står uden retning",
-    "Tallet er rigtigt, men ikke sammenligneligt. Det står med sin værdi og sit forbehold, uden mærkat."],
+    "Tallet er rigtigt, men ikke sammenligneligt. Det står med sin værdi og et mærkat, der siger, at retningen er holdt tilbage."],
   note: ["Nøgletallet står med en bemærkning",
     "Tal og retning står som ellers. Forbeholdet oplyser, hvad læseren skal have med."],
 };

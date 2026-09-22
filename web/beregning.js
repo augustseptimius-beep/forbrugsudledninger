@@ -69,10 +69,12 @@ const fjernvarmeCo2PrKwh = (m) =>
 //
 // DE TO FLAG GØR HVER SIT, og forskellen er hele pointen:
 //
-//   spaerrer  retningen kan ikke afgøres, så nøgletallet står uden mærkat.
-//             Tallet selv er rigtigt og bliver stående.
+//   spaerrer  retningen kan ikke afgøres, så nøgletallet står uden RETNING -
+//             men med et mærkat, der siger hvorfor. Tallet selv er rigtigt og
+//             bliver stående.
 //   skjuler   selve tallet er ramt, så det tages af kommunens side. Noten
-//             står i stedet under tabellen. Indebærer spaerrer.
+//             står i stedet under tabellen. Indebærer spaerrer - det udledes i
+//             driverTabel, så et forbehold ikke kan glemme at sætte begge.
 //
 // De var længe det samme flag, og det kostede: færgeforbeholdet var ment som
 // det første - kommentaren nedenfor sagde "tallet fjernes ikke" - men fjernede
@@ -681,10 +683,15 @@ export function driverTabel(kommune, land) {
       baand: niveauBaand(afv),
       signal: udledningsSignal(afv, paavirkning),
       // Forbeholdets note for sig. Spærrer forbeholdet retningen, står
-      // nøgletallet uden mærkat; skjuler det tallet, er noten den begrundelse,
-      // siden giver under tabellen i stedet.
+      // nøgletallet med et forbeholdsmærkat i stedet for en retning; skjuler
+      // det tallet, er noten den begrundelse, siden giver under tabellen.
       forbeholdNote: forbehold?.note ?? null,
-      spaerret: forbehold?.spaerrer === true,
+      // skjuler INDEBÆRER spaerrer, og det udledes her frem for at stå som en
+      // regel, hver ny forbeholdsdefinition skal huske. Skrev nogen
+      // {skjuler: true} uden spaerrer, ville nøgletallet blive taget af siden
+      // og samtidig bære en rigtig retning - og beregnForbehold ville føre det
+      // under "skjuler", mens signalet sagde "markant højere".
+      spaerret: forbehold?.spaerrer === true || forbehold?.skjuler === true,
       skjult: forbehold?.skjuler === true,
     };
   });

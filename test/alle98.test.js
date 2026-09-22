@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { beregnKommune, beregnFordeling, driverTabel } from "../web/beregning.js";
+import { beregnKommune, beregnFordeling, driverTabel, samletRetning } from "../web/beregning.js";
 import { renderKommune } from "../web/render.js";
 
 // Kører mod det ægte datasæt, ikke mod fixtures. Fanger felter, der findes
@@ -338,12 +338,18 @@ test("et hovednøgletal uden retning vises kun, når et forbehold bevidst behold
   // sammenligningen - færgedriften - bliver stående med forbeholdet ved siden
   // af, fordi tallet er rigtigt. Blandes de to, forsvinder færgekommunernes
   // indkøb igen, sådan som de gjorde før.
+  //
+  // BEMÆRK, hvad der IKKE står nedenfor. At et vist, retningsløst hovednøgletal
+  // har spaerret sat, følger af vises() selv og kan ikke fejle - den slags
+  // assertion ser streng ud og beviser ingenting. Det, der kan fejle, er om
+  // nøgletallet har et tal og en forklaring at stå med, om regnskabet går op,
+  // og om mekanismen overhovedet bliver brugt. Det er dem, der står her.
+  let visteUdenRetning = 0;
   for (const k of data.kommuner) {
     const b = beregnKommune(k, data.land);
     const vist = b.drivere.filter((d) => d.signal === "uafklaret" && d.rolle !== "hjaelper");
+    visteUdenRetning += vist.length;
     for (const d of vist) {
-      assert.ok(d.spaerret && !d.skjult,
-        `${k.navn}/${d.navn}: står uden retning uden et forbehold, der beholder det`);
       assert.ok(d.forbeholdNote, `${k.navn}/${d.navn}: står uden retning og uden forklaring`);
       assert.notEqual(d.kommuneVaerdi, null,
         `${k.navn}/${d.navn}: beholdt uden retning, men har intet tal at vise`);
@@ -351,6 +357,70 @@ test("et hovednøgletal uden retning vises kun, når et forbehold bevidst behold
     // Intet må forsvinde tavst: hvert nøgletal står enten på siden eller som udeladt.
     assert.equal(b.drivere.length + b.udeladt.length, driverTabel(k, data.land).length,
       `${k.navn}: et nøgletal er hverken vist eller udeladt`);
+    // Optællingen bag den samlede retning skal gå op i hver kategori, også når
+    // nogle nøgletal er spærrede. Prøves den kun på en kommune uden forbehold,
+    // er udenRetning altid nul, og en manglende bunke ses ikke.
+    for (const g of b.grupper) {
+      const sr = samletRetning(g.drivere);
+      assert.equal(sr.talte + sr.udenData + sr.udenRetning,
+        g.drivere.filter((d) => d.rolle !== "hjaelper").length,
+        `${k.navn}/${g.kategori}: optællingen taber et hovednøgletal`);
+    }
+  }
+  // Smelter de to flag sammen igen, forsvinder de spærrede nøgletal fra
+  // siderne, og løkken ovenfor går glat igennem med nul iterationer. Derfor
+  // skal mekanismen være brugt af mindst ét nøgletal et sted.
+  assert.ok(visteUdenRetning > 0,
+    "intet nøgletal står vist uden retning. Enten udløser datasættet ingen "
+    + "spaerrer-forbehold, eller også skjuler spaerrer igen tallet - se vises()");
+});
+
+test("et spærret nøgletal bærer sit forbehold synligt i tabellen", () => {
+  // Metodesiden lover, at forbeholdet står ved tallet. Før bar rækken et tomt
+  // "Peger mod"-felt, der lignede et hjælpetals, og ordlyden lå kun i
+  // tooltippen - altså bag en hover, som en tastaturbruger på en telefon ikke
+  // har. Mærkatet skal stå i selve rækken, med tekst og ikke kun en farve.
+  const faerge = data.kommuner.filter((k) => k.indkoeb_forbehold === "faergedrift");
+  assert.ok(faerge.length > 0, "datasættet har ingen spærrede nøgletal at teste på");
+  for (const k of faerge) {
+    const b = beregnKommune(k, data.land);
+    const h = renderKommune(b, concito, ens);
+    const raekke = (navn) => {
+      const i = h.indexOf(`>${navn}<`);
+      assert.ok(i > -1, `${k.navn}: ${navn} står ikke i tabellen`);
+      return h.slice(i, h.indexOf("</tr>", i));
+    };
+    for (const d of b.drivere.filter((x) => x.spaerret)) {
+      const r = raekke(d.navn);
+      assert.ok(r.includes("forbehold: ingen retning"),
+        `${k.navn}/${d.navn}: spærret, men rækken har intet synligt mærkat`);
+      assert.ok(!r.includes("peger mod"),
+        `${k.navn}/${d.navn}: spærret, men bærer alligevel et retningsmærkat`);
+    }
+  }
+  // Et hjælpetal uden retning skal derimod stadig stå uden mærkat - det er
+  // mærket "forklarende", og et forbeholdsmærkat ville sige noget forkert.
+  const b = beregnKommune(data.kommuner.find((k) => k.navn === "Thisted"), data.land);
+  const h = renderKommune(b, concito, ens);
+  const i = h.indexOf(">Fritidshuse pr. helårsbolig<");
+  assert.ok(i > -1);
+  assert.ok(!h.slice(i, h.indexOf("</tr>", i)).includes("forbehold: ingen retning"),
+    "et hjælpetal uden retning må ikke få forbeholdsmærkatet");
+});
+
+test("skjuler indebærer spaerret, så et skjult nøgletal aldrig bærer en retning", () => {
+  // Reglen er dokumenteret i beregning.js og udledes i driverTabel. Testen
+  // holder den fast: et {skjuler: true} skrevet uden spaerrer ville give et
+  // nøgletal, der er taget af siden og samtidig har et rigtigt signal, og
+  // beregnForbehold ville føre det under "skjuler" med et "markant højere"
+  // ved siden af.
+  for (const k of data.kommuner) {
+    for (const d of driverTabel(k, data.land)) {
+      if (!d.skjult) continue;
+      assert.ok(d.spaerret, `${k.navn}/${d.navn}: skjult uden at være spærret`);
+      assert.equal(d.signal, "uafklaret",
+        `${k.navn}/${d.navn}: skjult, men bærer stadig signalet "${d.signal}"`);
+    }
   }
 });
 
