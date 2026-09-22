@@ -768,21 +768,35 @@ export function renderKommuneOverskrift(b) {
     b.region ? `Region ${esc(b.region)}` : null,
   ].filter(Boolean).join(" &middot; ");
 
-  const printknap = `<button type="button" onclick="window.print()"
-      class="no-print no-embed inline-flex items-center gap-1.5 rounded-md border
+  const knapklasse = `no-print no-embed inline-flex items-center gap-1.5 rounded-md border
              border-gray-300 bg-white px-2.5 py-1 text-xs text-gray-700
-             hover:bg-gray-50 hover:border-gray-400 transition-colors">
+             hover:bg-gray-50 hover:border-gray-400 transition-colors
+             disabled:opacity-60 disabled:cursor-progress`;
+
+  const printknap = `<button type="button" onclick="window.print()" class="${knapklasse}">
       <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" aria-hidden="true" fill="none"
         stroke="currentColor" stroke-width="1.5">
         <path d="M4 6V2h8v4M4 12H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1"/>
         <rect x="4" y="10" width="8" height="4"/></svg>
       Print eller gem som PDF</button>`;
 
+  // Regnearket er den eksport, man kan regne videre i: rådata, regnestykke og
+  // konklusion hvert sit sted, og regnestykket som formler, så egne tal slår
+  // igennem. Print og PDF bliver stående ved siden af - de to gør ikke det
+  // samme. Knappen har ingen handler her; widget.js sætter den på, fordi
+  // render.js ikke rører DOM'en.
+  const arkknap = `<button type="button" id="hent-regneark" class="${knapklasse}">
+      <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" aria-hidden="true" fill="none"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+        stroke-linejoin="round">
+        <path d="M8 2v8M5 7.5 8 10.5l3-3M2.5 11.5v1a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1"/></svg>
+      Hent som regneark</button>`;
+
   return `<section class="mb-5">
     <div class="flex items-center justify-between gap-x-4 gap-y-2 flex-wrap">
       <h2 class="text-2xl sm:text-3xl font-bold text-gray-900">${esc(b.navn)}</h2>
       <div class="flex items-center gap-3 flex-wrap">
-        <span class="text-xs text-gray-500">${meta}</span>${printknap}
+        <span class="text-xs text-gray-500">${meta}</span>${arkknap}${printknap}
       </div>
     </div>
     <p class="mt-2 text-sm text-gray-600 max-w-3xl">Offentligt tilgængelige nøgletal for
