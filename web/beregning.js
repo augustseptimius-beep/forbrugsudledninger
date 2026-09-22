@@ -192,6 +192,15 @@ export const KATEGORI = {
 // skrevet i hånden ved siden af. Listen holdes ærlig af testen "hvert nøgletal
 // oplyser præcis de felter, det læser", som sporer opslagene i val().
 //
+// formel: samme regnestykke som val(), skrevet som en almindelig
+// aritmetisk streng over feltnavnene. Den findes for regnearkseksporten, der
+// oversætter feltnavne til celleadresser, så den, der henter arket, kan rette
+// et rådatafelt og se afvigelsen, niveauet og retningen regne sig om. Et bart
+// feltnavn betyder kommunens tal; præfikset `land.` betyder landets. Den er
+// IKKE motorens sandhed - val() er - og test/formel.test.js kører begge over
+// alle 98 kommuner og landet og fejler ved første tal, der ikke er ens. Ændrer
+// du et regnestykke, skal formlen følge med, ellers stopper testen dig.
+//
 // ogsaaKilder og metodekilde: en kilde, der bidrager uden at eje et felt.
 // Fødevareforbruget er det eneste tilfælde - se nøgletallet nedenfor.
 //
@@ -212,6 +221,7 @@ export const DRIVERE = [
   // som ikke findes blandt Energistyrelsens - og nåede derfor aldrig overblikket.
   { navn: "Disponibel indkomst", enhed: "kr./år", val: (m) => m.disp_indkomst,
     felter: ["disp_indkomst"],
+    formel: "disp_indkomst",
     type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "hoejere",
     forbehold: indkomstForbehold,
     begrundelse: "CONCITO (2023) s. 27: mennesker med lav indkomst forbruger ofte færre "
@@ -234,6 +244,7 @@ export const DRIVERE = [
   { navn: "Fødevareforbrug pr. indbygger", enhed: "kr./indb./år",
     val: (m) => m.foedevare_forbrug_pr_indb,
     felter: ["foedevare_forbrug_pr_indb"],
+    formel: "foedevare_forbrug_pr_indb",
     // FU17 ejer feltet, men tallet er FU17's regionskvotient ganget med
     // kommunens samlede disponible indkomst fra INDKF111, efter fordelingsnøglen
     // i Osei-Owusu et al. (2020). Alle tre skal stå ved nøgletallet, ellers
@@ -262,6 +273,7 @@ export const DRIVERE = [
   // om niveauet, og hører til en vurdering af rimelig og retfærdig omstilling.
   { navn: "Befolkningsudvikling", enhed: "pct.", val: vaekst,
     felter: ["folketal", "folketal_forrige"],
+    formel: "folketal / folketal_forrige - 1",
     type: "difference", kategori: KATEGORI.BOLIG_BYGGERI, rolle: "hjaelper",
     paavirkning: "uafklaret",
     begrundelse: "Står her for at forklare byggeaktiviteten: en kommune, der vokser, "
@@ -269,6 +281,7 @@ export const DRIVERE = [
       + "selv mod en højere eller lavere udledning." },
   { navn: "Gennemsnitligt boligareal", enhed: "m²/bolig", val: (m) => m.boligareal,
     felter: ["boligareal"],
+    formel: "boligareal",
     type: "relativ", kategori: KATEGORI.ENERGI, rolle: "hjaelper", paavirkning: "hoejere",
     begrundelse: "Større boliger koster mere varme - NIRAS (2024) s. 18 nævner "
       + "boligstørrelsen blandt det, rumvarmen følger. Står som forklarende tal under "
@@ -276,12 +289,14 @@ export const DRIVERE = [
       + "byggeriets udledning, ikke størrelsen på de huse, der allerede står." },
   { navn: "Byggeaktivitet", enhed: "pr. 1.000 indb.", val: byggeriPr1000,
     felter: ["byggeri", "folketal"],
+    formel: "byggeri / folketal * 1000",
     type: "relativ", kategori: KATEGORI.BOLIG_BYGGERI, paavirkning: "hoejere",
     begrundelse: "Nybyggeri kræver materialer. Energistyrelsen opgør investering i "
       + "boliger til 0,48 ton pr. indbygger (2024). Det er selve byggeriet, der "
       + "tæller her - boligernes energiforbrug hører til Energi og forsyning." },
   { navn: "Biler pr. indbygger", enhed: "biler/pers.", val: bilerPrIndb,
     felter: ["biler", "folketal"],
+    formel: "biler / folketal",
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "hoejere",
     begrundelse: "Flere biler betyder både mere kørsel og flere producerede "
       + "køretøjer. Energistyrelsen opgør husholdningernes transport plus køb af "
@@ -290,6 +305,7 @@ export const DRIVERE = [
       + "virksomhedens adresse, ikke der, hvor de bruges." },
   { navn: "El- og plugin-hybridandel", enhed: "pct.", val: elPluginAndel,
     andel: "0-1", felter: ["biler_el", "biler_plugin", "biler"],
+    formel: "(biler_el + biler_plugin) / biler",
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "lavere",
     begrundelse: "En elbil udleder mindre pr. kørt kilometer end en tilsvarende "
       + "benzin- eller dieselbil på et dansk elnet." },
@@ -304,12 +320,14 @@ export const DRIVERE = [
   // fordi de bærer hver sin oplysning.
   { navn: "Fossil-andel", enhed: "pct.", val: fossilBilAndel,
     andel: "0-1", felter: ["biler_benzin", "biler_diesel", "biler"],
+    formel: "(biler_benzin + biler_diesel) / biler",
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "hoejere",
     begrundelse: "Benzin- og dieselbiler tilsammen. En fossilbil udleder mere "
       + "CO2 pr. kørt kilometer end en el- eller plugin-hybridbil på et dansk "
       + "elnet, uanset hvordan de fossile biler fordeler sig på de to brændstoffer." },
   { navn: "Gennemsnitlig pendlingsafstand", enhed: "km", val: (m) => m.pendlingsafstand_km,
     felter: ["pendlingsafstand_km"],
+    formel: "pendlingsafstand_km",
     type: "relativ", kategori: KATEGORI.TRANSPORT, paavirkning: "hoejere",
     begrundelse: "Længere afstand til arbejde betyder flere kørte kilometer. Siger "
       + "dog intet om transportmiddel." },
@@ -317,6 +335,9 @@ export const DRIVERE = [
     val: husholdningCo2PrBolig,
     felter: ["husholdning_co2_ton", "husholdning_el_co2_ton", "husholdning_el_tj",
              "boliger_parcel", "boliger_raekke", "boliger_etage", "fritidshuse"],
+    formel: "(husholdning_co2_ton - husholdning_el_co2_ton + husholdning_el_tj"
+      + " * (land.husholdning_el_co2_ton / land.husholdning_el_tj))"
+      + " / (boliger_parcel + boliger_raekke + boliger_etage + fritidshuse)",
     type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere", forbehold: fritidshusForbehold,
     begrundelse: "Udledningen fra borgernes eget energiforbrug i boligen. Strømmen er "
@@ -326,6 +347,8 @@ export const DRIVERE = [
     val: husholdningEnergiPrBolig,
     felter: ["husholdning_energi_tj", "boliger_parcel", "boliger_raekke",
              "boliger_etage", "fritidshuse"],
+    formel: "husholdning_energi_tj * 1000"
+      + " / (boliger_parcel + boliger_raekke + boliger_etage + fritidshuse)",
     type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere", forbehold: fritidshusForbehold,
     begrundelse: "Mere energi brugt i boligen. Udledningen afhænger dog af, hvilken "
@@ -333,15 +356,19 @@ export const DRIVERE = [
   { navn: "Fossil andel af husholdningernes energi", enhed: "pct.",
     val: (m) => m.husholdning_fossil_andel, andel: "0-1",
     felter: ["husholdning_fossil_andel"],
+    formel: "husholdning_fossil_andel",
     type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere",
     begrundelse: "Naturgas, fyringsolie og LPG udleder ved forbrændingen." },
   { navn: "Fossil opvarmning", enhed: "pct.", val: fossilOpv,
     andel: "0-1", felter: ["opv_olie", "opv_naturgas", "opv_boliger_ialt"],
+    formel: "(opv_olie + opv_naturgas) / opv_boliger_ialt",
     type: "relativ", kategori: KATEGORI.ENERGI, paavirkning: "hoejere",
     begrundelse: "Olie- og gasfyr udleder ved forbrændingen i boligen." },
   { navn: "Fjernvarmens CO2 pr. kWh", enhed: "g CO2e/kWh", val: fjernvarmeCo2PrKwh,
     felter: ["husholdning_fjernvarme_co2_ton", "husholdning_fjernvarme_tj"],
+    formel: "husholdning_fjernvarme_co2_ton * 1000000 /"
+      + " (husholdning_fjernvarme_tj * (1000000000000 / 3600000))",
     type: "relativ", kategori: KATEGORI.ENERGI, paavirkning: "hoejere",
     begrundelse: "Hvor meget CO2 der følger med hver kWh fjernvarme, husholdningerne "
       + "aftager. Fjernvarme leveres i rør fra kommunens eget net, så tallet er "
@@ -350,6 +377,7 @@ export const DRIVERE = [
   { navn: "Fritidshuse pr. helårsbolig", enhed: "boliger/bolig",
     val: fritidshusPrBolig,
     felter: ["fritidshuse", "boliger_parcel", "boliger_raekke", "boliger_etage"],
+    formel: "fritidshuse / (boliger_parcel + boliger_raekke + boliger_etage)",
     type: "relativ", kategori: KATEGORI.ENERGI,
     rolle: "hjaelper", paavirkning: "uafklaret",
     begrundelse: "Findes kun for at kvalificere husholdningstallene." },
@@ -367,11 +395,13 @@ export const DRIVERE = [
 // svinger fra under 1 til knap 50 % mellem kommunerne.
   { navn: "Husholdningsaffald", enhed: "kg/pers.", val: (m) => m.affald_kg,
     felter: ["affald_kg"],
+    formel: "affald_kg",
     type: "relativ", kategori: KATEGORI.PRODUKTER, rolle: "hjaelper", paavirkning: "hoejere",
     forbehold: affaldForbehold,
     begrundelse: "Mere affald peger mod et større materielt forbrug." },
   { navn: "Genanvendelsesprocent", enhed: "pct.", val: (m) => m.genanvendelse_pct,
     andel: "0-100", felter: ["genanvendelse_pct"],
+    formel: "genanvendelse_pct",
     type: "relativ", kategori: KATEGORI.PRODUKTER, rolle: "hjaelper", paavirkning: "lavere",
     forbehold: affaldForbehold,
     begrundelse: "Genanvendte materialer erstatter produktion af nye." },
@@ -397,6 +427,7 @@ export const DRIVERE = [
   { navn: "Kommunens driftsindkøb", enhed: "kr./indb./år",
     val: (m) => m.indkoeb_drift_pr_indb,
     felter: ["indkoeb_drift_pr_indb"],
+    formel: "indkoeb_drift_pr_indb",
     metodekilde: "ENS_GA23_INDKOEB",
     type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
     forbehold: indkoebForbehold,
@@ -416,6 +447,7 @@ export const DRIVERE = [
   { navn: "Kommunens anlægsindkøb", enhed: "kr./indb./år",
     val: (m) => m.indkoeb_anlaeg_pr_indb,
     felter: ["indkoeb_anlaeg_pr_indb"],
+    formel: "indkoeb_anlaeg_pr_indb",
     metodekilde: "ENS_GA23_INDKOEB",
     type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
     forbehold: indkoebForbehold,
@@ -428,6 +460,7 @@ export const DRIVERE = [
   { navn: "Kommunens indkøb af brændsel og drivmidler", enhed: "kr./indb./år",
     val: (m) => m.indkoeb_braendsel_pr_indb,
     felter: ["indkoeb_braendsel_pr_indb"],
+    formel: "indkoeb_braendsel_pr_indb",
     metodekilde: "KL_2022_INDKOEB",
     type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
     forbehold: indkoebForbehold,
@@ -438,6 +471,7 @@ export const DRIVERE = [
   { navn: "Kommunens indkøb af fødevarer", enhed: "kr./indb./år",
     val: (m) => m.indkoeb_foedevarer_pr_indb,
     felter: ["indkoeb_foedevarer_pr_indb"],
+    formel: "indkoeb_foedevarer_pr_indb",
     metodekilde: "ENS_GA23_INDKOEB",
     type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
     forbehold: indkoebForbehold,
@@ -673,6 +707,13 @@ export function driverTabel(kommune, land) {
       rolle: d.rolle ?? "hoved",
       // Kildeangivelsen følger nøgletallet hele vejen ud i tabellen.
       felter: d.felter ?? [],
+      // Regnestykket og andelsformen følger med ud i tabellen af samme grund
+      // som felterne: regnearkseksporten bygger en Excel-formel og vælger
+      // talformat ud fra dem, og den skal kunne gøre det på rækken alene.
+      // Slog den nøgletallet op i DRIVERE på navnet, ville et omdøbt nøgletal
+      // knække eksporten stille.
+      formel: d.formel ?? null,
+      andel: d.andel ?? null,
       ogsaaKilder: d.ogsaaKilder ?? [],
       metodekilde: d.metodekilde ?? null,
       paavirkning,

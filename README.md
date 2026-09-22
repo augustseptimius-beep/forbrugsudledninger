@@ -21,6 +21,12 @@ Pick a municipality and you get:
   from a named public register.
 - **Explicit "not quantified" markers** wherever the underlying data does not
   exist. Never a silent zero.
+- **A spreadsheet export** carrying the same figures, sources and conclusions
+  across seven sheets. The arithmetic ships as live formulas over a raw-data
+  sheet, so anyone with better numbers can type them into the yellow cells and
+  watch the deviations, bands, directions and category tallies recompute. The
+  source's own value stays beside theirs, and the sheet flags an entry made
+  without a source of its own.
 
 ## What it deliberately does not do
 
@@ -69,9 +75,15 @@ automatic via GitHub Actions.
 ## Tests
 
 ```bash
-npm test                      # JavaScript: engine and rendering
+npm test                      # JavaScript: engine, rendering and spreadsheet export
 cd pipeline && python3 -m pytest -q   # Python: data pipeline
 ```
+
+The export carries each indicator's arithmetic twice, as the engine's `val()`
+and as a spreadsheet formula. `test/formel.test.js` runs both across all 98
+municipalities and fails on the first figure that differs, and
+`test/eksport.test.js` evaluates the generated workbook cell by cell against the
+engine, so the sheet cannot quietly say something the site does not.
 
 The deploy workflow runs the JavaScript tests before publishing. A red test
 stops the release.

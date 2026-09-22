@@ -51,11 +51,14 @@ forbrugsudledninger/
 │   ├── metode.html, om.html
 │   ├── beregning.js        <- ★ REN BEREGNINGSMOTOR. Ingen I/O, ingen DOM.
 │   ├── render.js           <- ★ RENE RENDER-FUNKTIONER. Data ind, HTML-streng ud.
+│   ├── eksport.js          <- ★ REGNEARKSEKSPORT. Arkmodel ud, ingen DOM.
+│   ├── xlsx.js             <- minimal xlsx-skriver. Ingen afhængigheder.
 │   ├── widget.js           <- tyndt DOM-lag. Ingen forretningslogik.
 │   ├── styles/input.css    <- Tailwind-kilde
 │   ├── styles/styles.css   <- genereret, MEN COMMITTET (så repoet virker uden Node)
 │   └── data/               <- data.json, sources.json
 └── test/                   <- node --test
+    └── regneark.js         <- lille regnemotor, så testene kan regne arket efter
 ```
 
 ## Hvorfor render.js og widget.js er adskilt
@@ -73,6 +76,43 @@ query-parameteren og sætter strengene ind i siden.
 
 Det er også broen til søsterprojekterne: hver render-funktion kan blive til en
 React-komponent, hvis platformen senere flettes ind i doughnut-projektet.
+
+## Regnearkseksporten
+
+Knappen **Hent som regneark** på en kommuneside bygger en xlsx-fil i browseren.
+Arket har syv faneblade: Læs mig, Overblik, Nøgletal, Data, Grundlag, Kilder og
+Nationalt.
+
+Pointen er, at **regnestykket ligger i arket som formler, ikke som færdige
+tal**. Fanebladet Data har rådata med kilde og periode, og hvert felt har tre
+kolonner: kildens værdi, en tom gul celle til ens egen værdi, og en anvendt
+værdi, der vælger den egne, når den findes. Retter man et rådatafelt, regner
+afvigelsen, niveauet, retningen og kategoriens optælling sig om af sig selv.
+Kildens tal bliver stående ved siden af, der er en kolonne til ens egen
+kildeangivelse, og arket siger til, hvis den mangler - det er reglen om, at
+intet tal står uden kilde, skrevet i regneark.
+
+Arket viser præcis det, kommunens side viser. Et nøgletal, som et forbehold har
+taget af siden, er heller ikke med her, og **dets rådatafelter er ikke med på
+fanebladet Data**: ellers kunne enhver regne det skjulte tal ud af de felter,
+der blev liggende. Den grænse holdes af en test.
+
+`beregning.js` bærer regnestykket to gange: som `val()` og som `formel`, en
+aritmetisk streng over feltnavnene, som eksporten oversætter til celleadresser.
+To skrivemåder af samme regnestykke driver fra hinanden, så snart nogen retter
+den ene, og `test/formel.test.js` kører derfor begge over alle 98 kommuner og
+landet og fejler ved første tal, der ikke er ens. Ændrer du et regnestykke, skal
+formlen følge med.
+
+`test/eksport.test.js` regner hele arket igennem med `test/regneark.js` - en
+lille regnemotor, der kan netop den delmængde af Excel, eksporten bruger - og
+holder hver celle op mod motoren. En test, der kun kiggede på formelstrengene,
+kunne se, at der stod noget, ikke at det regnede rigtigt.
+
+`xlsx.js` skriver filen i hånden, fordi repoet ingen bundler har og ingen
+runtime-afhængigheder vil have. Zip-arkivet er ukomprimeret: deflate ville kræve
+enten `CompressionStream`, som er asynkron, eller en egen implementering, og et
+ark på et par hundrede kilobyte er ikke værd at betale nogen af delene for.
 
 ## To UI-mønstre der er arvet af faglige grunde
 
@@ -213,7 +253,7 @@ dem kun hvis metoden selv ændres, og kør golden-testene bagefter.
 ## Tests
 
 ```bash
-npm test                              # 200+ JS-tests: motor, rendering, metodeside
+npm test                              # 250+ JS-tests: motor, rendering, metodeside, eksport
 cd pipeline && python3 -m pytest -q   # 100+ Python-tests: pipeline
 ```
 

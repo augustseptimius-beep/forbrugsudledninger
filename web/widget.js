@@ -5,6 +5,8 @@
 import { beregnKommune } from "./beregning.js";
 import { renderKommune, renderForside, renderKommuneKort } from "./render.js";
 import { installerTooltips } from "./tooltip.js";
+import { byggProjektmappe, eksportFilnavn } from "./eksport.js";
+import { bygXlsx } from "./xlsx.js";
 
 /** Fold alle kategorier ud eller ind på én gang.
  *
@@ -30,6 +32,57 @@ function installerFoldning(rod) {
   // toggle bobler ikke, så hvert afsnit lytter selv.
   for (const d of afsnit) d.addEventListener("toggle", opdater);
   opdater();
+}
+
+/** Gem bytes som en fil hos brugeren.
+ *
+ *  Et <a download> frem for et nyt vindue: et vindue ville blive blokeret som
+ *  pop-up i flere browsere, og et data:-URL knækker på de par hundrede
+ *  kilobyte, arket fylder. Objekt-URL'en frigives igen, for ellers holder
+ *  browseren hele arket i hukommelsen, til fanen lukkes.
+ *
+ *  revokeObjectURL skydes til næste makrotask. Kalder man den i samme tick som
+ *  click(), er der browsere, der ikke er nået at læse URL'en endnu, og så
+ *  hentes en tom fil. */
+function gemFil(bytes, filnavn, mime) {
+  const url = URL.createObjectURL(new Blob([bytes], { type: mime }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filnavn;
+  a.style.display = "none";
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+const XLSX_MIME =
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+/** Sæt hent-knappen på plads. Selve arket bygges først ved klik: langt de
+ *  fleste besøgende henter det aldrig, og arbejdet hører ikke til i
+ *  sideindlæsningen. */
+function installerEksport(rod, byg) {
+  const knap = rod.querySelector("#hent-regneark");
+  if (!knap) return;
+  knap.addEventListener("click", () => {
+    const oprindelig = knap.textContent;
+    knap.disabled = true;
+    knap.textContent = "Bygger regneark ...";
+    // Næste frame, så browseren når at tegne teksten, før den bygger arket.
+    requestAnimationFrame(() => {
+      try {
+        byg();
+      } catch (fejl) {
+        knap.textContent = "Kunne ikke bygge regnearket";
+        console.error("regnearkseksport:", fejl);
+        setTimeout(() => { knap.textContent = oprindelig; knap.disabled = false; }, 4000);
+        return;
+      }
+      knap.textContent = oprindelig;
+      knap.disabled = false;
+    });
+  });
 }
 
 const app = document.getElementById("app");
@@ -79,6 +132,13 @@ function visKommune(data, concito, ens, sources, kommune) {
     </a>
     ${renderKommune(b, concito, ens, sources)}`;
   installerFoldning(app);
+  installerEksport(app, () => {
+    const genereret = new Date().toISOString().slice(0, 10);
+    const ark = byggProjektmappe({
+      b, kommune, land: data.land, sources, ens, genereret, url: location.href,
+    });
+    gemFil(bygXlsx(ark), eksportFilnavn(kommune.navn, genereret), XLSX_MIME);
+  });
 }
 
 async function start() {
