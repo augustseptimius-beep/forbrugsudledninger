@@ -62,10 +62,18 @@ UDVIKLING = [
 
 # Forbrugskategorierne.
 #
-# GRUPPERINGEN ER VORES, TALLENE ER ENS'. ENS opgør 62 poster på niveau 2.
-# Feltet "poster" angiver præcis hvilke af dem, hver kategori lægger sammen,
-# så enhver sum kan efterprøves mod kilden. Der lægges intet til, og intet
-# udelades: de syv kategorier summerer til hovedtallet.
+# GRUPPERINGEN ER VORES, TALLENE ER ENS'. Feltet "poster" angiver præcis,
+# hvilke af Energistyrelsens poster hver kategori lægger sammen, så enhver sum
+# kan efterprøves mod kilden. Der lægges intet til, og intet udelades: de syv
+# kategorier summerer til hovedtallet.
+#
+# HER STOD "ENS opgør 62 poster på niveau 2". Det er taget ud, fordi det ikke
+# kunne efterprøves: de navngivne poster nedenfor summerer til 57 (2+1+5+39+
+# 1+1+8), ikke 62. Forskellen ligger formentlig i bundlen "øvrige poster og
+# lagerændringer", som kan dække flere poster på niveau 2, men det kræver
+# GA26-regnearket at afgøre. Tallet bar intet regnestykke og stod kun som
+# oplysning, så hellere et hul end et plausibelt gæt. Skal det tilbage, så
+# tæl arket "Forbrugsgrupper" efter først.
 #
 # Grupperingen følger de områder, en kommunal klimahandlingsplan arbejder med,
 # så en klimakoordinator kan genkende dem. Den er ikke Energistyrelsens egen.

@@ -1,9 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { renderKilder, renderReferencer } from "../web/render.js";
+import { renderKilder, renderReferencer, renderForbehold, esc } from "../web/render.js";
+import { beregnForbehold } from "../web/beregning.js";
 
 const sources = JSON.parse(readFileSync(new URL("../web/data/sources.json", import.meta.url)));
+const data = JSON.parse(readFileSync(new URL("../web/data/data.json", import.meta.url)));
 
 test("kilder: hver kilde får en række med id, udbyder og periode", () => {
   const h = renderKilder(sources);
@@ -62,4 +64,35 @@ test("referencer: der er ingen antagelser tilbage at vise", () => {
 test("kilder: hvert felt i data.json har præcis én kilde", () => {
   const felter = sources.kilder.flatMap((k) => k.felter);
   assert.equal(new Set(felter).size, felter.length, "et felt har to kilder");
+});
+
+// ---------------------------------------------------------------------------
+// Forbeholdstabellen på metodesiden.
+//
+// Den afløste en håndskreven opremsning af de ramte kommuner. Pointen med
+// skiftet er, at listen ikke kan komme bagud for data - så testen holder den
+// op mod beregnForbehold() og ikke mod en forventet tekst.
+
+test("forbehold: hver gruppe står med sine nøgletal, sine kommuner og sin ordlyd", () => {
+  const grupper = beregnForbehold(data.kommuner, data.land);
+  assert.ok(grupper.length > 0, "datasættet udløser ingen forbehold at vise");
+  const h = renderForbehold(grupper);
+  for (const g of grupper) {
+    for (const navn of g.noegletal) assert.ok(h.includes(navn), `mangler nøgletallet ${navn}`);
+    for (const navn of g.kommuner) assert.ok(h.includes(navn), `mangler kommunen ${navn}`);
+    assert.ok(h.includes(esc(g.note)), "forbeholdets ordlyd skal stå, som kommunesiden viser den");
+  }
+});
+
+test("forbehold: de tre virkninger står hver for sig, så læseren kan se forskel", () => {
+  // At blande dem var netop fejlen: færgeforbeholdet var ment som "uden
+  // retning", men virkede som "taget af siden". Tabellen skal vise forskellen.
+  const h = renderForbehold(beregnForbehold(data.kommuner, data.land));
+  assert.ok(h.includes("Nøgletallet tages af kommunens side"));
+  assert.ok(h.includes("Nøgletallet står uden retning"));
+  assert.ok(h.includes("Nøgletallet står med en bemærkning"));
+});
+
+test("forbehold: et datasæt uden forbehold giver en tom, men ærlig tabel", () => {
+  assert.ok(renderForbehold([]).includes("ingen forbehold"));
 });

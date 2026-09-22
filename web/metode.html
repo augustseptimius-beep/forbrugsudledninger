@@ -67,7 +67,7 @@
 <div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
   <h2 class="text-xl font-semibold text-gray-900">Hvorfor der ikke står et samlet tal</h2>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">En tidligere version af dette værktøj beregnede et estimeret aftryk pr.
-    borger. Det hvilede på fem koefficienter, og ingen af dem kunne kildebelægges:</p>
+    borger. Det hvilede på seks koefficienter, og ingen af dem kunne kildebelægges:</p>
   <div class="mt-3 overflow-x-auto tabel-scroll">
     <table class="w-full min-w-[34rem] text-sm">
       <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
@@ -206,10 +206,22 @@
     2, Transport og infrastruktur, mod 5,3 procent for landet (2025-regnskabet). Det
     er færgedrift, en
     regional transportopgave betalt af kommunen for en befolkning, der er meget
-    mindre end færgens opland. Retningen spærres for de tre, og tallet forklares i
-    stedet. Næste kommune på listen er Bornholm med 17,4 procent samme år, så grænsen på en
+    mindre end færgens opland. Næste kommune på listen er Bornholm med 17,4 procent samme år, så grænsen på en
     tredjedel ligger i et bredt spring: flyttes den fra 20 til 40 procent, rammer den
     de samme tre kommuner.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>De tre beholder deres
+    indkøbstal.</strong> Kronerne er udløst, og brændstoffet er brændt - det er
+    sammenligningen med landsgennemsnittet, færgen gør skæv, ikke bogføringen. Derfor
+    står alle fire indkøbsnøgletal på deres sider med værdi, landsgennemsnit og
+    afvigelse. I stedet for et retningsmærkat bærer rækken mærkatet
+    <em>forbehold: ingen retning</em>, og ordlyden står ved ikonet som ved
+    ethvert andet nøgletal. Kategoriens
+    samlede retning siger tilsvarende <em>retningen kan ikke afgøres</em> frem for
+    <em>ingen data</em>: tallene er der, det er sammenligneligheden, der mangler.
+    Værktøjet tog tidligere de fire nøgletal helt af de tre kommuners sider.
+    Det var hverken meningen eller det, dette afsnit lovede: forbeholdet spærrede
+    retningen og skjulte tallet i ét og samme greb, fordi koden ikke skelnede
+    mellem de to.</p>
 
   <h3 class="mt-4 font-semibold text-gray-900 text-sm">Prisen tæller, ikke mængden</h3>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Energistyrelsen noterer selv, at et dyrere indkøb alt andet lige giver et
@@ -256,16 +268,16 @@
 
   <h3 class="mt-4 font-semibold text-gray-900 text-sm">En region beskriver ikke sine kommuner</h3>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Spændet i disponibel indkomst mellem regionsgennemsnittene er 20,9 pct.point.
-    Spændet <em>inde i</em> regionerne er 46,6 pct.point i gennemsnit og 113,6 i Region
+    Spændet <em>inde i</em> regionerne er 46,6 pct.point i gennemsnit og 113,8 i Region
     Hovedstaden. Regionsgennemsnittet beskriver derfor ikke den enkelte kommune, og for
-    en del af dem vender det forkert: Albertslunds egen disponible indkomst ligger 13,6
-    pct. under landsgennemsnittet, mens regionens ligger 11,8 pct. over. Et regionalt
+    en del af dem vender det forkert: Albertslunds egen disponible indkomst ligger 13,5
+    pct. under landsgennemsnittet, mens regionens ligger 11,9 pct. over. Et regionalt
     forbrugstal ville fortælle Albertslund, at kommunen forbruger mere end
     landsgennemsnittet. Det er ikke en unøjagtighed, som et forbehold kan dække -
     fortegnet er forkert.</p>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det er grunden til, at fødevarenøgletallet
     ikke bruger regionens forbrug, men regionens forbrugskvotient ganget med kommunens
-    egen indkomst. Albertslund lander derfor 17 pct. under landsgennemsnittet, i takt med
+    egen indkomst. Albertslund lander derfor 17,4 pct. under landsgennemsnittet, i takt med
     kommunens egen indkomst, og ikke over det.</p>
 
   <h3 class="mt-4 font-semibold text-gray-900 text-sm">Transport er tavs</h3>
@@ -323,7 +335,7 @@
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">De nationale vægte kommer fra
     <strong>Energistyrelsens Globale Afrapportering</strong>. Kategorierne på hver
     kommuneside står i den rækkefølge, de fylder nationalt, og summerer eksakt til
-    hovedtallet. Grupperingen af Energistyrelsens 62 poster i syv kategorier er vores;
+    hovedtallet. Grupperingen af Energistyrelsens poster i syv kategorier er vores;
     tallene er kildens, og posterne bag hver kategori står i tabellen, så enhver sum kan
     efterprøves.</p>
   <div id="ens-kategorier" class="mt-4"></div>
@@ -400,12 +412,20 @@
     resten af bilparken kører på benzin og diesel. Derfor står der "peger mod ..." og
     ikke "højere" eller "lavere" alene. Værdien står i tabellen og taler for sig selv.</p>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Retningen gættes ikke.</strong> Hvert nøgletal bærer sin begrundelse -
-    hold musen over ikonet ved mærkatet. <strong>Kan retningen ikke afgøres for en
-    kommune, vises nøgletallet ikke på kommunens side.</strong> Under tabellen står,
-    hvilke nøgletal det gælder, og hvorfor. Reglen følger kommunens egne tal og rammer
-    i dag to forbehold, der er beskrevet længere nede: affaldstallene hos de kommuner,
-    der deler indberetning, og husholdningstallene pr. bolig hos kommuner med flere
-    fritidshuse end helårsboliger.</p>
+    hold musen over ikonet ved mærkatet. Kan et nøgletals retning slet ikke begrundes
+    af kilderne, står det ikke på nogen kommuneside. Det er en egenskab ved nøgletallet
+    og gælder alle 98 ens.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Derudover kan kommunens egne
+    tal udløse et forbehold</strong>, og de gør tre forskellige ting. Enten er tallet
+    selv ramt, og så tages det af kommunens side med begrundelsen under tabellen.
+    Eller tallet er rigtigt, men ikke sammenligneligt, og så bliver det stående med
+    et mærkat, der siger, at retningen er holdt tilbage - det gælder
+    færgekommunernes indkøb. Eller tal og retning står som
+    ellers, og forbeholdet er en bemærkning, læseren skal have med. Hvilke kommuner der
+    rammes af hvad, står i tabellen nedenfor. Den er regnet af årets datasæt, ikke
+    skrevet i hånden, så den ikke kan komme bagud, når en kilde retter sin
+    indberetning.</p>
+  <div id="forbehold" class="mt-4"></div>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Hjælpetallene er undtaget.</strong>
     De står i tabellen for at forklare et andet nøgletal, er mærket
     <em>forklarende</em> og tæller ikke med i kategoriens samlede retning:</p>
@@ -420,7 +440,15 @@
       husholdningsaffaldet rummer haveaffald, hvis andel svinger fra under 1 til knap 50 %
       mellem kommunerne. Hos kommuner, der deler affaldsindberetning, tages begge af siden,
       fordi tallene selv er ramt.</li>
+    <li><strong>Gennemsnitligt boligareal.</strong> Står under Energi og forsyning for at
+      forklare husholdningernes energiforbrug: større boliger koster mere varme. Det har
+      et mærkat, fordi retningen er entydig, men tæller ikke med i kategoriens samlede
+      retning - det ville lade boligstørrelsen tælle to gange, én gang som sig selv og
+      én gang gennem energiforbruget, den forklarer.</li>
   </ul>
+  <p class="mt-3 text-sm text-gray-700 max-w-3xl">Hjælpetallene er mærket
+    <em>forklarende</em> i tabellen på kommunesiden, så optællingen bag den samlede
+    retning kan tælles efter uden at læse denne side først.</p>
   <p class="mt-3 text-sm text-gray-700 max-w-3xl"><strong>Et nøgletal har fået en
     retning.</strong> Diesel-andelen stod tidligere som uafklaret: en dieselbil udleder
     mindre CO2 pr. kilometer end en benzinbil, men køres til gengæld længere, og
@@ -446,15 +474,15 @@
     alle nøgletal, selvom nøgletallene ikke er lige spredte.</strong> Fossil andel af
     husholdningernes energi ligger mindst 33 % fra landsgennemsnittet i 78 af landets
     98 kommuner; gennemsnitligt boligareal gør det i ingen. "Meget højere"
-    og "meget lavere" betyder derfor ikke det samme fra nøgletal til nøgletal. Tabellen nederst på denne
-    side viser sort på hvidt, hvor skævt det fordeler sig. Kommunesiderne viste tidligere
+    og "meget lavere" betyder derfor ikke det samme fra nøgletal til nøgletal. Tærskeltabellen
+    i afsnittet nedenfor viser sort på hvidt, hvor skævt det fordeler sig. Kommunesiderne viste tidligere
     det samme som et spænd ved hvert tal, men det er fjernet: en læser af én kommunes
     side sammenligner ikke på tværs af kommuner, og spændet lagde blot en tredje
     talstørrelse oven i kommunens egen værdi og landsgennemsnittet.</p>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>For andele står forskellen
-    også i procentpoint.</strong> Med et landsgennemsnit på 9,2 % bliver en kommune med
-    37 % fossil andel til "+302 %", hvilket lyder ekstremt for en forskel på 28
-    procentpoint. Begge tal er sande, og begge står der.</p>
+    også i procentpoint.</strong> Med et landsgennemsnit på 9,2 % bliver kommunen med den
+    højeste fossile andel af husholdningernes energi, 46,7 %, til "+409 %", hvilket lyder
+    ekstremt for en forskel på 38 procentpoint. Begge tal er sande, og begge står der.</p>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Kategorierne lægges ikke sammen.</strong>
     Den samlede retning <em>tæller</em>, hvor mange nøgletal der peger hver vej - den vejer
     dem ikke mod hinanden. En samlet score pr. kategori ville kræve en vægtning, der ikke
@@ -491,12 +519,13 @@
     et tal fra en kilde. Forbeholdet sættes derimod pr. kommune, efter hvor tungt beviset
     vejer:</p>
   <ul class="mt-2 ml-5 list-disc text-sm text-gray-700 max-w-3xl space-y-1">
-    <li><strong>De syv ejerkommuner bag Norfors og Reno Djurs</strong> (Allerød,
-      Fredensborg, Helsingør, Hørsholm, Rudersdal, Norddjurs og Syddjurs) får ikke de to
-      affaldsnøgletal vist, fordi retningen ikke kan afgøres. Her er byttet af tonnage eftervist
+    <li><strong>Ejerkommunerne bag Norfors og Reno Djurs</strong> får ikke de to
+      affaldsnøgletal vist, fordi tallene selv er ramt. Her er byttet af tonnage eftervist
       i Danmarks Statistiks egne mængdetal, og tallet beskriver derfor ikke kommunen alene.
       Hele ejerkredsen er mærket, ikke kun de medlemmer hvis eget tal ser skævt ud det
-      enkelte år: fejlkilden er selskabets indberetning.</li>
+      enkelte år: fejlkilden er selskabets indberetning. Hvilke kommuner det er i år,
+      står i forbeholdstabellen ovenfor - navnene skrives ikke her, fordi de så ville
+      blive stående, når et selskab retter sin indberetning.</li>
     <li><strong>Kommuner, hvor tallet skiller sig ud</strong>, beholder retningen, men
       får årsagen oplyst. Enten springer restaffaldet usædvanligt meget fra året før,
       eller også er en affaldsfraktion, der fylder meget i alle andre kommuner, næsten

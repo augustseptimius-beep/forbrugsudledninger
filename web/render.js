@@ -4,7 +4,8 @@
 // platformen senere flettes ind i doughnut-projektet.
 
 // Optællingen bor i motoren, hvor den er testet - ikke her.
-import { samletRetning, TAERSKEL_NIVEAU, TAERSKEL_MARKANT } from "./beregning.js";
+import { samletRetning, TAERSKEL_NIVEAU, TAERSKEL_MARKANT,
+         FORBEHOLD_VIRKNING } from "./beregning.js";
 
 // ---------- Formatering ----------
 
@@ -99,9 +100,11 @@ const KORT = "kort-print rounded-lg border border-gray-200 bg-white";
 // Formen bærer signalet lige så meget som farven, og teksten står altid ved
 // siden af - farve må aldrig være eneste bærer af betydning.
 //
-// Der er intet mærkat for en retning, der ikke kan afgøres. Et hovednøgletal
-// uden retning tages af kommunens side (se beregnKommune), og et hjælpetal uden
-// retning står uden mærkat.
+// Der er intet SIGNAL for en retning, der ikke kan afgøres, men der er ikke
+// nødvendigvis en tom celle. Et hovednøgletal, som et forbehold har spærret,
+// står med forbeholdMaerkat(); et, hvis retning kilderne slet ikke kan begrunde,
+// tages af kommunens side (se beregnKommune); og et hjælpetal uden retning står
+// uden mærkat, mærket "forklarende".
 //
 // Under 10 % peger nøgletallet "lidt": retningen står, men svagt, og formen er
 // en åben trekant. Kun en afvigelse, der vises som 0,0 %, peger hverken op eller ned.
@@ -249,6 +252,9 @@ function samletMaerkat(s) {
     : s.retning === "lavere" ? ["peger mod lavere udledning", SIGNAL["lavere"].klasse, "▼"]
     : s.retning === "delt" ? ["trækker i hver sin retning", NEUTRAL_MAERKAT, ""]
     : s.retning === "på niveau" ? ["på landsgennemsnittet", NEUTRAL_MAERKAT, "–"]
+    // "ingen retning" er ikke "ingen data": tallene står i tabellen nedenunder,
+    // men et forbehold holder retningen tilbage for netop denne kommune.
+    : s.retning === "ingen retning" ? ["retningen kan ikke afgøres", NEUTRAL_MAERKAT, "–"]
     : ["ingen data", SIGNAL.ukendt.klasse, "–"];
 
   // Selve regnestykket står under mærkatet, ikke inde i det. Læseren skal kunne
@@ -261,6 +267,9 @@ function samletMaerkat(s) {
   else if (s.retning === "højere") led.push(enige(s.op));
   else if (s.retning === "lavere") led.push(enige(s.ned));
   else if (s.retning === "på niveau") led.push(enige(s.paaNiveau));
+  if (s.udenRetning > 0) {
+    led.push(s.udenRetning === 1 ? "1 med forbehold" : `${tal(s.udenRetning)} med forbehold`);
+  }
   if (s.udenData > 0) {
     led.push(`${tal(s.udenData)} uden data`);
   }
@@ -435,9 +444,15 @@ function kategoriNote(c, kategori) {
   return "";
 }
 
-/** De nøgletal, der er taget af kommunens side, fordi deres retning ikke kan
- *  afgøres her. Et hul skal forklares, ikke gemmes. Nøgletal med samme
- *  begrundelse samles, så forbeholdet står én gang. */
+/** De nøgletal, der er taget af kommunens side, fordi TALLET SELV er ramt -
+ *  affaldstonnagen bogført på nabokommunen, husholdningstallet delt med for
+ *  mange boliger. Et hul skal forklares, ikke gemmes. Nøgletal med samme
+ *  begrundelse samles, så forbeholdet står én gang.
+ *
+ *  Den siger bevidst ikke "hvis retning ikke kan afgøres". Det ville også
+ *  dække de spærrede nøgletal, og de står jo lige ovenfor i tabellen med tal og
+ *  forbehold - på Læsø ville noten ellers påstå, at fire indkøbstal var taget
+ *  af siden, mens de stod der. */
 function udeladtNote(b) {
   if (b.udeladt.length === 0) return "";
   const prNote = new Map();
@@ -450,19 +465,46 @@ function udeladtNote(b) {
   }).join("");
   return `<div class="mt-4 border-t border-gray-100 pt-3 text-xs text-gray-500 max-w-3xl">
       <p><strong class="font-semibold text-gray-600">Vises ikke for ${esc(b.navn)}.</strong>
-        Et nøgletal, hvis retning ikke kan afgøres for kommunen, er taget af siden.</p>
+        Et nøgletal, hvis eget tal er ramt af et forbehold, er taget af siden.
+        Nøgletal, hvor kun retningen er holdt tilbage, står i tabellen ovenfor
+        med deres tal.</p>
       <ul class="mt-1 list-none m-0 p-0">${punkter}</ul>
     </div>`;
+}
+
+/** Mærkat for et nøgletal, hvis retning et forbehold holder tilbage.
+ *
+ *  Samme form som de øvrige signalmærkater - tekst først, tegn ved siden af -
+ *  så farven aldrig er eneste bærer. Tegnet er en cirkel og ikke en trekant
+ *  eller en streg: trekanterne betyder op og ned, stregen betyder "hverken op
+ *  eller ned", og ingen af delene er sandt her. Her er retningen ikke målt til
+ *  nul, den er holdt tilbage. */
+export const FORBEHOLD_MAERKAT_TEKST = "forbehold: ingen retning";
+
+function forbeholdMaerkat() {
+  return `<span class="inline-flex items-center gap-1 rounded-full border whitespace-nowrap
+    text-xs px-2 py-0.5 font-medium ${NEUTRAL_MAERKAT}"
+    ><span aria-hidden="true" class="text-[11px] leading-none">○</span>${FORBEHOLD_MAERKAT_TEKST}</span>`;
 }
 
 /** Én række: nøgletallets navn, enhed, kilde, tallene og retningen. */
 function noegletalRaekke(d, sources) {
   const fb = DRIVER_FORBEHOLD[d.navn];
   const tom = d.kommuneVaerdi == null;
-  // Et hjælpetal uden retning får intet mærkat; begrundelsen ved ikonet siger,
-  // hvad det forklarer. Et hovednøgletal uden retning når aldrig hertil -
-  // beregnKommune tager det af kommunens side.
-  const maerkat = d.signal === "uafklaret" ? "" : signalMaerkat(d.signal);
+  // Tre tilfælde, og de ser forskellige ud med vilje:
+  //
+  //   Et SPÆRRET nøgletal står med et mærkat, der siger, at retningen er holdt
+  //   tilbage. Tidligere gav det en tom celle, der lignede et hjælpetals -
+  //   men metodesiden lover, at forbeholdet står ved tallet, og et tomt felt
+  //   siger ingenting. Ordlyden står ved ikonet, som den gør for alle rækker.
+  //
+  //   Et HJÆLPETAL uden retning får intet mærkat; det er mærket "forklarende",
+  //   og begrundelsen ved ikonet siger, hvad det forklarer.
+  //
+  //   Alle andre får deres signalmærkat.
+  const maerkat = d.spaerret ? forbeholdMaerkat()
+    : d.signal === "uafklaret" ? ""
+    : signalMaerkat(d.signal);
   // Hjælpetallene er mærket i selve tabellen, fordi den samlede retning holder
   // dem ude. Står det kun i den lille skrift under tabellen, ser optællingen
   // forkert ud for den, der tæller rækkerne efter.
@@ -872,6 +914,63 @@ export function renderTaerskelfordeling(fordeling) {
       90-percentil af den absolutte afvigelse. Tallene beskriver nøgletallet, ikke den
       enkelte kommune, og er ens på alle kommunesider.</p>
   </div>`;
+}
+
+// Overskrift og forklaring for hver af de tre virkninger.
+const FORBEHOLD_VIRKNING_TEKST = {
+  skjuler: ["Nøgletallet tages af kommunens side",
+    "Tallet selv er ramt, så det vises ikke. Begrundelsen står under tabellen på kommunens side."],
+  spaerrer: ["Nøgletallet står uden retning",
+    "Tallet er rigtigt, men ikke sammenligneligt. Det står med sin værdi og et mærkat, der siger, at retningen er holdt tilbage."],
+  note: ["Nøgletallet står med en bemærkning",
+    "Tal og retning står som ellers. Forbeholdet oplyser, hvad læseren skal have med."],
+};
+
+/** Forbeholdene, som de rammer årets datasæt.
+ *
+ *  Metodesiden skrev de ramte kommuner af i hånden, indtil denne tabel kom til.
+ *  Det holdt ikke: retter et affaldsselskab sin indberetning, falder
+ *  forbeholdet bort i pipelinen, mens sætningen bliver stående og lyver.
+ *  Tabellen læser beregnForbehold() og kan derfor ikke komme bagud for data.
+ *
+ *  Kommunerne navngives her, og kun her. Tærskeltabellen ovenfor må ikke - den
+ *  beskriver nøgletal, ikke kommuner. Her er navnet selve oplysningen: en
+ *  læser skal kunne se, om hans egen kommune er ramt, og hvorfor. */
+export function renderForbehold(grupper) {
+  if (!grupper.length) {
+    return `<p class="text-sm text-gray-500">Årets datasæt udløser ingen forbehold.</p>`;
+  }
+  const afsnit = FORBEHOLD_VIRKNING.map((virkning) => {
+    const raekker = grupper.filter((g) => g.virkning === virkning);
+    if (!raekker.length) return "";
+    const [overskrift, forklaring] = FORBEHOLD_VIRKNING_TEKST[virkning];
+    const kroppe = raekker.map((g) => `<tr class="border-t border-gray-100 align-top">
+      <td class="py-2 pr-3 text-sm text-gray-900">${g.noegletal.map(esc).join("<br>")}</td>
+      <td class="py-2 px-3 text-sm text-gray-700">${
+        esc(g.kommuner.join(", "))}<span class="block text-xs text-gray-500 tabular-nums">${
+        g.kommuner.length === 1 ? "1 kommune" : `${tal(g.kommuner.length)} kommuner`}</span></td>
+      <td class="py-2 pl-3 text-xs text-gray-500">${esc(g.note)}</td>
+    </tr>`).join("");
+    return `<div class="mt-5 first:mt-0">
+      <h3 class="text-sm font-semibold text-gray-900">${esc(overskrift)}</h3>
+      <p class="mt-1 text-xs text-gray-500 max-w-3xl">${esc(forklaring)}</p>
+      <div class="mt-2 overflow-x-auto tabel-scroll">
+        <table class="w-full min-w-[42rem]">
+          <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
+            <th class="py-2 pr-3 text-left font-medium">Nøgletal</th>
+            <th class="py-2 px-3 text-left font-medium">Kommuner</th>
+            <th class="py-2 pl-3 text-left font-medium">Forbeholdets ordlyd</th>
+          </tr></thead>
+          <tbody>${kroppe}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join("");
+
+  return `${afsnit}
+    <p class="mt-4 text-xs text-gray-500 max-w-3xl">Listen er regnet af årets datasæt ved
+      hver sidevisning, ikke skrevet i hånden. Retter en kilde sin indberetning, falder
+      forbeholdet bort af sig selv, og nøgletallet vender tilbage på kommunens side.</p>`;
 }
 
 /** Energistyrelsens kategorier med de poster, hver af dem lægger sammen.

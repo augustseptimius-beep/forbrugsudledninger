@@ -116,7 +116,8 @@ indbygger meningsløs for netop dem. Næste kommune på listen er Bornholm med
 Grænsen er en tredjedel. Den er valgt, fordi den ligger midt i springet og
 ikke afhænger af en finindstilling - flyttes den fra 20 % til 40 %, rammer den
 de samme tre kommuner. Færgedriften udelades ikke: brændstoffet er en reel
-udledning. Retningen spærres, og tallet forklares.
+udledning. Retningen spærres, men tallet bliver stående med forbeholdet ved
+siden af - se forskellen på spaerrer og skjuler i web/beregning.js.
 """
 
 # Artskonti, der tælles som indkøb hos en leverandør. Se docstringen for de

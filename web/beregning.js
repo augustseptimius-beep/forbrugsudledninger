@@ -64,9 +64,24 @@ const fjernvarmeCo2PrKwh = (m) =>
   (m.husholdning_fjernvarme_co2_ton * 1e6) / (m.husholdning_fjernvarme_tj * KWH_PR_TJ);
 
 // Forbehold, der gælder for netop én kommune. En driver med et forbehold kalder
-// funktionen med kommunens data; får den {spaerrer, note} tilbage, lægges noten
-// til begrundelsen. Er spaerrer sand, spærres retningen, og nøgletallet vises
-// ikke på kommunens side - noten står i stedet under tabellen.
+// funktionen med kommunens data; får den {spaerrer, skjuler, note} tilbage,
+// lægges noten til begrundelsen.
+//
+// DE TO FLAG GØR HVER SIT, og forskellen er hele pointen:
+//
+//   spaerrer  retningen kan ikke afgøres, så nøgletallet står uden RETNING -
+//             men med et mærkat, der siger hvorfor. Tallet selv er rigtigt og
+//             bliver stående.
+//   skjuler   selve tallet er ramt, så det tages af kommunens side. Noten
+//             står i stedet under tabellen. Indebærer spaerrer - det udledes i
+//             driverTabel, så et forbehold ikke kan glemme at sætte begge.
+//
+// De var længe det samme flag, og det kostede: færgeforbeholdet var ment som
+// det første - kommentaren nedenfor sagde "tallet fjernes ikke" - men fjernede
+// i praksis alle fire indkøbsnøgletal fra Læsø, Samsø og Ærø. Færgen gør
+// SAMMENLIGNINGEN pr. indbygger skæv, ikke bogføringen; kronerne er udløst og
+// brændstoffet brændt. Affaldsforbeholdet er det modsatte: dér er tonnagen
+// bogført på den forkerte kommune, og så er tallet ikke kommunens at vise.
 //
 // Fritidshuse: husholdningstallene er fordelt på samtlige boliger, og et
 // fritidshus bruger mindre energi end en helårsbolig. Har kommunen flere
@@ -75,7 +90,7 @@ const fjernvarmeCo2PrKwh = (m) =>
 // Grænsen er metodesidens egen formulering. Den fossile andel rammes ikke - den
 // er ikke fordelt på boliger.
 const FRITIDSHUS_FORBEHOLD = {
-  spaerrer: true,
+  spaerrer: true, skjuler: true,
   note: "Kommunen har flere fritidshuse end helårsboliger. Husholdningstallene er "
     + "fordelt på samtlige boliger, og da et fritidshus bruger mindre energi end en "
     + "helårsbolig, trækkes gennemsnittet ned med en størrelse, der ikke kan opgøres. "
@@ -113,8 +128,11 @@ const indkomstForbehold = (m) => INDKOMST_FORBEHOLD[m.indkomst_robusthed] ?? nul
  *  med 17,4 %. Færgen er en regional transportopgave, som kommunen betaler,
  *  og den gør sammenligningen pr. indbygger meningsløs for netop dem.
  *
- *  Retningen spærres, men tallet fjernes ikke: brændstoffet er en reel
- *  udledning. Pipelinen sætter feltet - se indkoeb.klassificer_faergedrift. */
+ *  Retningen spærres, men tallet fjernes IKKE: kronerne er udløst, og
+ *  brændstoffet er brændt. Det er sammenligningen med landsgennemsnittet, der
+ *  ikke holder, ikke bogføringen - derfor spaerrer uden skjuler, så tallet står
+ *  med forbeholdet ved siden af frem for at forsvinde.
+ *  Pipelinen sætter feltet - se indkoeb.klassificer_faergedrift. */
 const INDKOEB_FORBEHOLD = {
   faergedrift: {
     spaerrer: true,
@@ -462,7 +480,7 @@ export function niveauBaand(afvigelse) {
  *  fordi en kommune, hvis fraktion mangler, ikke har svinget. */
 const INDBERETNING_FORBEHOLD = {
   bekraeftet_fejl: {
-    spaerrer: true,
+    spaerrer: true, skjuler: true,
     note: "Kommunen deler affaldsindberetning med nabokommuner, og tonnagen er "
       + "påviseligt bogført på hinanden for det seneste opgjorte år. Danmarks "
       + "Statistiks tal beskriver derfor ikke kommunen alene.",
@@ -571,6 +589,52 @@ export function beregnFordeling(kommuner, land) {
   return fordeling;
 }
 
+/** Forbeholdene, som de faktisk rammer årets 98 kommuner.
+ *
+ *  HVORFOR DEN FINDES. Metodesiden skrev tidligere de ramte kommuner af i
+ *  hånden - "de syv ejerkommuner bag Norfors og Reno Djurs (Allerød, ...)".
+ *  Den slags prosa er kun rigtig indtil næste dataopdatering: retter et
+ *  affaldsselskab sin indberetning, falder forbeholdet bort af sig selv i
+ *  pipelinen, mens sætningen bliver stående. Nu udleder siden listen af
+ *  datasættet, så den ikke kan komme bagud.
+ *
+ *  Grupperet på forbeholdets note, fordi det er noten, der er forbeholdets
+ *  identitet - den står ordret på hver ramt kommuneside.
+ *
+ *  Returnerer en liste af {virkning, note, noegletal, kommuner}, hvor virkning
+ *  er en af:
+ *    "skjuler"   tallet selv er ramt og tages af kommunens side
+ *    "spaerrer"  tallet står, men uden retning
+ *    "note"      tallet og retningen står; forbeholdet er en bemærkning
+ *  Sorteret med det, der griber hårdest ind, først. */
+export const FORBEHOLD_VIRKNING = ["skjuler", "spaerrer", "note"];
+
+/** Dansk sortering, så Æ, Ø og Å lander bagest og ikke som A og O. */
+const DA = (a, b) => a.localeCompare(b, "da");
+
+export function beregnForbehold(kommuner, land) {
+  const grupper = new Map();
+  for (const k of kommuner) {
+    for (const d of driverTabel(k, land)) {
+      if (!d.forbeholdNote) continue;
+      const virkning = d.skjult ? "skjuler" : d.spaerret ? "spaerrer" : "note";
+      const noegle = `${virkning}\u0000${d.forbeholdNote}`;
+      if (!grupper.has(noegle)) {
+        grupper.set(noegle, { virkning, note: d.forbeholdNote,
+                              noegletal: new Set(), kommuner: new Set() });
+      }
+      const g = grupper.get(noegle);
+      g.noegletal.add(d.navn);
+      g.kommuner.add(k.navn);
+    }
+  }
+  return [...grupper.values()]
+    .map((g) => ({ virkning: g.virkning, note: g.note,
+                   noegletal: [...g.noegletal], kommuner: [...g.kommuner].sort(DA) }))
+    .sort((a, b) => FORBEHOLD_VIRKNING.indexOf(a.virkning) - FORBEHOLD_VIRKNING.indexOf(b.virkning)
+      || a.noegletal[0].localeCompare(b.noegletal[0], "da"));
+}
+
 /** Byg indikatortabellen: værdi, landsværdi, afvigelse (efter type) og retning. */
 export function driverTabel(kommune, land) {
   return DRIVERE.map((d) => {
@@ -590,8 +654,10 @@ export function driverTabel(kommune, land) {
       else if (d.type === "difference") afv = kv - lv;
     }
     // Procentpoint ved siden af den relative afvigelse for de nøgletal, der er
-    // andele. Med et landsgennemsnit på 9,8 % bliver 37,5 % til "+283 %",
-    // hvilket lyder ekstremt for en forskel på 28 procentpoint.
+    // andele. Med et landsgennemsnit på 9,2 % bliver 46,7 % til "+409 %",
+    // hvilket lyder ekstremt for en forskel på 38 procentpoint. Tallene er
+    // 2024-datasættets yderpunkt for fossil andel af husholdningernes energi;
+    // metodesiden viser samme eksempel og har en test på det.
     //
     // VIGTIGT: dette er et RENT VISNINGSFELT. Læg ikke andelene om til
     // type "difference" for at opnå det samme - niveauBaand() og
@@ -616,10 +682,17 @@ export function driverTabel(kommune, land) {
       retning: afv == null ? "kontekst" : afv > 0 ? "over land" : afv < 0 ? "under land" : "på niveau",
       baand: niveauBaand(afv),
       signal: udledningsSignal(afv, paavirkning),
-      // Forbeholdets note for sig. Spærrer forbeholdet retningen, vises
-      // nøgletallet ikke, og noten er den begrundelse, siden giver i stedet.
+      // Forbeholdets note for sig. Spærrer forbeholdet retningen, står
+      // nøgletallet med et forbeholdsmærkat i stedet for en retning; skjuler
+      // det tallet, er noten den begrundelse, siden giver under tabellen.
       forbeholdNote: forbehold?.note ?? null,
-      spaerret: forbehold?.spaerrer === true,
+      // skjuler INDEBÆRER spaerrer, og det udledes her frem for at stå som en
+      // regel, hver ny forbeholdsdefinition skal huske. Skrev nogen
+      // {skjuler: true} uden spaerrer, ville nøgletallet blive taget af siden
+      // og samtidig bære en rigtig retning - og beregnForbehold ville føre det
+      // under "skjuler", mens signalet sagde "markant højere".
+      spaerret: forbehold?.spaerrer === true || forbehold?.skjuler === true,
+      skjult: forbehold?.skjuler === true,
     };
   });
 }
@@ -665,21 +738,27 @@ export function optaelSignaler(drivere) {
  *  (fritidshuse forklarer husholdningstallene, affaldet er kontekst til
  *  indkomsten), og i Forbrugsprodukter og services ville de to affaldstal
  *  ellers udgøre flertallet over det ene nøgletal, kategorien har.
- *  Nøgletal uden data tælles for sig - de må ikke forsvinde tavst. */
+ *  Nøgletal uden retning tælles for sig - de må ikke forsvinde tavst. Og de
+ *  tælles i TO bunker, fordi de to grunde ikke er den samme:
+ *
+ *    udenData      tallet findes ikke for kommunen. Der står en tankestreg.
+ *    udenRetning   tallet findes, men et forbehold spærrer retningen -
+ *                  færgekommunernes indkøb. At kalde det "uden data" ville
+ *                  sige, at kommunen ikke har købt ind, og det har den. */
 export function samletRetning(drivere) {
   const talte = drivere.filter((d) => d.rolle !== "hjaelper");
   const medData = talte.filter((d) => d.signal !== "ukendt" && d.signal !== "uafklaret");
   const op = medData.filter((d) => d.signal.endsWith("højere")).length;
   const ned = medData.filter((d) => d.signal.endsWith("lavere")).length;
   const paaNiveau = medData.filter((d) => d.signal === "på niveau").length;
-  const udenData = talte.length - medData.length;
+  const udenRetning = talte.filter((d) => d.signal === "uafklaret").length;
+  const udenData = talte.filter((d) => d.signal === "ukendt").length;
   const retning =
-    medData.length === 0 ? "ingen data"
-    : op > ned ? "højere"
-    : ned > op ? "lavere"
-    : op > 0 ? "delt"
-    : "på niveau";
-  return { retning, op, ned, paaNiveau, udenData, talte: medData.length };
+    medData.length > 0 ? (op > ned ? "højere" : ned > op ? "lavere"
+                          : op > 0 ? "delt" : "på niveau")
+    : udenRetning > 0 ? "ingen retning"
+    : "ingen data";
+  return { retning, op, ned, paaNiveau, udenData, udenRetning, talte: medData.length };
 }
 
 export function driverePrKategori(drivere) {
@@ -711,18 +790,26 @@ const FORVENTEDE_FELTER = [
 
 /** Om et nøgletal vises på kommunens side.
  *
- *  Et nøgletal, hvis retning ikke kan afgøres for netop denne kommune, vises
- *  ikke. Det sker, når et forbehold spærrer retningen: affaldstallene hos
- *  kommuner, der deler indberetning, og husholdningstallene pr. bolig, hvor der
- *  er flere fritidshuse end helårsboliger.
+ *  To forskellige grunde til at stå uden retning, og kun den ene tager tallet
+ *  af siden:
  *
- *  Hjælpetal uden retning er undtaget. De fleste har aldrig en retning, fordi de
- *  står for at forklare et andet nøgletal, og ville ellers forsvinde fra alle 98
- *  sider. Har et forbehold derimod spærret retningen, er tallet selv ramt - som
- *  genanvendelsesprocenten hos kommuner, der deler affaldsindberetning - og så
- *  tages også et hjælpetal af siden.
+ *    Et FORBEHOLD, DER SKJULER, siger at tallet selv er ramt - affaldstonnagen
+ *    er bogført på nabokommunen, husholdningstallet er delt med for mange
+ *    boliger. Så vises det ikke, og noten står under tabellen i stedet.
+ *
+ *    Et FORBEHOLD, DER KUN SPÆRRER, siger at tallet er rigtigt, men ikke
+ *    sammenligneligt - færgekommunernes indkøb. Tallet bliver stående uden
+ *    mærkat, med forbeholdet ved siden af.
+ *
+ *    Et hovednøgletal, hvis retning slet ikke kan begrundes af kilderne, vises
+ *    ikke. Den regel er værktøjets egen og har intet med kommunen at gøre.
+ *
+ *  Hjælpetal uden retning er undtaget den sidste regel: de fleste har aldrig en
+ *  retning, fordi de står for at forklare et andet nøgletal, og ville ellers
+ *  forsvinde fra alle 98 sider.
  *  Manglende data ("ukendt") rammes heller ikke - dér står en tankestreg. */
-const vises = (d) => !d.spaerret && (d.rolle === "hjaelper" || d.signal !== "uafklaret");
+const vises = (d) => !d.skjult
+  && (d.rolle === "hjaelper" || d.spaerret || d.signal !== "uafklaret");
 
 /** Fuld sammenligning for én kommune: indikatortabel, gruppering, udeladte
  *  nøgletal og manglende felter. */

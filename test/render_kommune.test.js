@@ -377,8 +377,13 @@ test("samlet retning: hjælpetal står i tabellen, men tæller ikke med", () => 
   }
   for (const g of bThisted.grupper) {
     const s = samletRetning(g.drivere);
-    assert.equal(s.talte + s.udenData, g.drivere.filter((d) => d.rolle !== "hjaelper").length,
-      `${g.kategori}: kun hovednøgletal tælles`);
+    // Regnskabet skal gå op: hvert hovednøgletal ligger i præcis én bunke.
+    // udenRetning skal med - den kom til, da forbeholdene blev delt i spaerrer
+    // og skjuler, og uden den passede summen kun, fordi Thisted-fixturet ikke
+    // har et spærret nøgletal at tabe.
+    assert.equal(s.talte + s.udenData + s.udenRetning,
+      g.drivere.filter((d) => d.rolle !== "hjaelper").length,
+      `${g.kategori}: kun hovednøgletal tælles, og alle tre bunker skal med`);
   }
 });
 
