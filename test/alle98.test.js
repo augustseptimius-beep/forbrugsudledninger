@@ -328,16 +328,49 @@ test("affald: nøgletallene vises ikke præcis hos dem, der deler indberetning",
   }
 });
 
-test("ingen kommuneside viser et nøgletal, hvis retning ikke kan afgøres - hjælpetal undtaget", () => {
+test("et hovednøgletal uden retning vises kun, når et forbehold bevidst beholder det", () => {
   // Reglen testes på mekanismen, ikke på en liste over ramte kommuner: hvilke
   // nøgletal der spærres, afgøres af årets tal.
+  //
+  // Der er to slags "uden retning", og de må ikke smelte sammen igen. Et
+  // hovednøgletal, hvis retning værktøjet slet ikke kan begrunde, hører ikke
+  // hjemme på en kommuneside. Et, hvor kommunens EGET forhold spærrer
+  // sammenligningen - færgedriften - bliver stående med forbeholdet ved siden
+  // af, fordi tallet er rigtigt. Blandes de to, forsvinder færgekommunernes
+  // indkøb igen, sådan som de gjorde før.
   for (const k of data.kommuner) {
     const b = beregnKommune(k, data.land);
     const vist = b.drivere.filter((d) => d.signal === "uafklaret" && d.rolle !== "hjaelper");
-    assert.deepEqual(vist.map((d) => d.navn), [], `${k.navn}: står uden retning`);
+    for (const d of vist) {
+      assert.ok(d.spaerret && !d.skjult,
+        `${k.navn}/${d.navn}: står uden retning uden et forbehold, der beholder det`);
+      assert.ok(d.forbeholdNote, `${k.navn}/${d.navn}: står uden retning og uden forklaring`);
+      assert.notEqual(d.kommuneVaerdi, null,
+        `${k.navn}/${d.navn}: beholdt uden retning, men har intet tal at vise`);
+    }
     // Intet må forsvinde tavst: hvert nøgletal står enten på siden eller som udeladt.
     assert.equal(b.drivere.length + b.udeladt.length, driverTabel(k, data.land).length,
       `${k.navn}: et nøgletal er hverken vist eller udeladt`);
+  }
+});
+
+test("færgekommunerne beholder deres indkøbstal, men får ingen retning", () => {
+  // Det var her den gamle sammenblanding gjorde skade: forbeholdet var ment som
+  // "retningen kan ikke afgøres", men fjernede alle fire indkøbsnøgletal fra
+  // Læsø, Samsø og Ærø. Kronerne er udløst, og brændstoffet er brændt - det er
+  // sammenligningen pr. indbygger, færgen gør skæv, ikke bogføringen.
+  const faerge = data.kommuner.filter((k) => k.indkoeb_forbehold === "faergedrift");
+  assert.ok(faerge.length > 0, "datasættet har ingen færgekommuner at teste på");
+  for (const k of faerge) {
+    const b = beregnKommune(k, data.land);
+    const indkoeb = b.drivere.filter((d) => d.navn.startsWith("Kommunens "));
+    assert.equal(indkoeb.length, 4, `${k.navn}: alle fire indkøbsnøgletal skal stå på siden`);
+    for (const d of indkoeb) {
+      assert.equal(d.signal, "uafklaret", `${k.navn}/${d.navn}: må ikke have en retning`);
+      assert.notEqual(d.kommuneVaerdi, null, `${k.navn}/${d.navn}: tallet skal stå`);
+    }
+    assert.deepEqual(b.udeladt.filter((u) => u.navn.startsWith("Kommunens ")), [],
+      `${k.navn}: intet indkøbsnøgletal må være taget af siden`);
   }
 });
 

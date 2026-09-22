@@ -101,14 +101,31 @@ Tilføjer du et nøgletal, skal `felter` med - `test/kildeangivelse.test.js`
 kører hvert regnestykke gennem en proxy og slår fejl, hvis de oplyste felter
 ikke er præcis dem, der faktisk læses.
 
-Det gælder også metodesidens egen brødtekst. Kildetabellen holder sig selv i
-takt, fordi den læser `sources.json`, men prosaen gør ikke: ved opdateringen til
-Klimaregnskabet 2024 rådnede fem tal stille. `test/metodeside.test.js`
-genberegner de tal, der KAN genberegnes fra `data.json`, og fejler hvis siden
-siger noget andet. Citater med sidehenvisning og historiske begrundelser står
-bevidst udenfor - de skal ikke følge data. Tal, der kræver felter uden for
-`data.json`, er markeret med deres opgørelsesår i teksten. Tilføjer du et afledt
-tal til metodesiden, så skriv det ind i testen.
+Det gælder også metodesidens egen brødtekst, og dér er rangordenen **render
+før test, test før prosa**:
+
+1. **Kan oplysningen regnes af siden selv, så lad den det.** Kildetabellen,
+   tærskelfordelingen og forbeholdstabellen (`renderForbehold`) læser data ved
+   hver sidevisning og kan derfor ikke komme bagud. De ramte kommuner bag hvert
+   forbehold stod længe navngivet i prosaen - "de syv ejerkommuner bag Norfors
+   og Reno Djurs (Allerød, ...)" - og hørte hjemme i en tabel, fordi listen
+   afgøres af årets egne tal.
+2. **Kan den ikke, så sæt en test på tallet.** `test/metodeside.test.js`
+   genberegner hvert afledt tal fra `data.json`, `ens.json` og `concito.json` og
+   fejler, hvis siden siger noget andet. Den har også strukturelle vagter, der
+   fanger en oplysning, som aldrig kom med: at hvert hjælpetal er nævnt ved
+   navn, og at en datadrevet kommuneliste ikke er sneget tilbage i prosaen.
+3. **Kun det, der hverken kan regnes eller testes, står frit.** Citater med
+   sidehenvisning og historiske begrundelser skal ikke følge data - fulgte de
+   med, var de ikke længere citater. Tal, der kræver felter uden for
+   datafilerne (alderssammensætning, hovedkonto-opdeling, færgeandel), er
+   markeret med deres opgørelsesår i teksten.
+
+Baggrunden er, at prosaen rådner stille: ved opdateringen til Klimaregnskabet
+2024 løb fem tal fra data, og ved et senere eftersyn viste tre tal i
+regionsafsnittet sig regnet mod et andet landsgennemsnit end det, siden selv
+viser. Tilføjer du et afledt tal til metodesiden, så find det rigtige trin på
+listen ovenfor.
 
 Det gælder også afgrænsninger. `pipeline/indkoeb.py` dokumenterer, hvilke
 artskonti der tælles som kommunens indkøb og hvilke der ikke gør, med
@@ -128,6 +145,17 @@ værdi i konstanterne, og viser først "ikke opgjort", når ingen af delene
 findes.
 
 Hvis du ændrer i `beregning.js`, så tjek at denne skelnen overlever.
+
+**Og der er en skelnen mere: `spaerrer` er ikke `skjuler`.** Et forbehold i
+`beregning.js` kan gøre to forskellige ting, og de må ikke smelte sammen.
+`spaerrer` siger, at retningen ikke kan afgøres, men tallet er rigtigt og bliver
+stående uden mærkat - færgekommunernes indkøb. `skjuler` siger, at tallet selv
+er ramt, og tager det af kommunens side med begrundelsen under tabellen -
+affaldstonnagen bogført på nabokommunen. De var længe det samme flag, og det
+kostede: færgeforbeholdet var ment som det første, men fjernede i praksis alle
+fire indkøbsnøgletal fra Læsø, Samsø og Ærø, mens metodesiden lovede det
+modsatte. `samletRetning` tæller dem tilsvarende hver for sig, så en kategori
+med spærrede nøgletal siger "retningen kan ikke afgøres" og ikke "ingen data".
 
 ## API-nøgler
 
@@ -185,7 +213,7 @@ dem kun hvis metoden selv ændres, og kør golden-testene bagefter.
 ## Tests
 
 ```bash
-npm test                              # 180+ JS-tests: motor, rendering, metodeside
+npm test                              # 200+ JS-tests: motor, rendering, metodeside
 cd pipeline && python3 -m pytest -q   # 100+ Python-tests: pipeline
 ```
 

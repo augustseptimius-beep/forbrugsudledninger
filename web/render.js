@@ -4,7 +4,8 @@
 // platformen senere flettes ind i doughnut-projektet.
 
 // Optællingen bor i motoren, hvor den er testet - ikke her.
-import { samletRetning, TAERSKEL_NIVEAU, TAERSKEL_MARKANT } from "./beregning.js";
+import { samletRetning, TAERSKEL_NIVEAU, TAERSKEL_MARKANT,
+         FORBEHOLD_VIRKNING } from "./beregning.js";
 
 // ---------- Formatering ----------
 
@@ -249,6 +250,9 @@ function samletMaerkat(s) {
     : s.retning === "lavere" ? ["peger mod lavere udledning", SIGNAL["lavere"].klasse, "▼"]
     : s.retning === "delt" ? ["trækker i hver sin retning", NEUTRAL_MAERKAT, ""]
     : s.retning === "på niveau" ? ["på landsgennemsnittet", NEUTRAL_MAERKAT, "–"]
+    // "ingen retning" er ikke "ingen data": tallene står i tabellen nedenunder,
+    // men et forbehold holder retningen tilbage for netop denne kommune.
+    : s.retning === "ingen retning" ? ["retningen kan ikke afgøres", NEUTRAL_MAERKAT, "–"]
     : ["ingen data", SIGNAL.ukendt.klasse, "–"];
 
   // Selve regnestykket står under mærkatet, ikke inde i det. Læseren skal kunne
@@ -261,6 +265,9 @@ function samletMaerkat(s) {
   else if (s.retning === "højere") led.push(enige(s.op));
   else if (s.retning === "lavere") led.push(enige(s.ned));
   else if (s.retning === "på niveau") led.push(enige(s.paaNiveau));
+  if (s.udenRetning > 0) {
+    led.push(s.udenRetning === 1 ? "1 med forbehold" : `${tal(s.udenRetning)} med forbehold`);
+  }
   if (s.udenData > 0) {
     led.push(`${tal(s.udenData)} uden data`);
   }
@@ -872,6 +879,63 @@ export function renderTaerskelfordeling(fordeling) {
       90-percentil af den absolutte afvigelse. Tallene beskriver nøgletallet, ikke den
       enkelte kommune, og er ens på alle kommunesider.</p>
   </div>`;
+}
+
+// Overskrift og forklaring for hver af de tre virkninger.
+const FORBEHOLD_VIRKNING_TEKST = {
+  skjuler: ["Nøgletallet tages af kommunens side",
+    "Tallet selv er ramt, så det vises ikke. Begrundelsen står under tabellen på kommunens side."],
+  spaerrer: ["Nøgletallet står uden retning",
+    "Tallet er rigtigt, men ikke sammenligneligt. Det står med sin værdi og sit forbehold, uden mærkat."],
+  note: ["Nøgletallet står med en bemærkning",
+    "Tal og retning står som ellers. Forbeholdet oplyser, hvad læseren skal have med."],
+};
+
+/** Forbeholdene, som de rammer årets datasæt.
+ *
+ *  Metodesiden skrev de ramte kommuner af i hånden, indtil denne tabel kom til.
+ *  Det holdt ikke: retter et affaldsselskab sin indberetning, falder
+ *  forbeholdet bort i pipelinen, mens sætningen bliver stående og lyver.
+ *  Tabellen læser beregnForbehold() og kan derfor ikke komme bagud for data.
+ *
+ *  Kommunerne navngives her, og kun her. Tærskeltabellen ovenfor må ikke - den
+ *  beskriver nøgletal, ikke kommuner. Her er navnet selve oplysningen: en
+ *  læser skal kunne se, om hans egen kommune er ramt, og hvorfor. */
+export function renderForbehold(grupper) {
+  if (!grupper.length) {
+    return `<p class="text-sm text-gray-500">Årets datasæt udløser ingen forbehold.</p>`;
+  }
+  const afsnit = FORBEHOLD_VIRKNING.map((virkning) => {
+    const raekker = grupper.filter((g) => g.virkning === virkning);
+    if (!raekker.length) return "";
+    const [overskrift, forklaring] = FORBEHOLD_VIRKNING_TEKST[virkning];
+    const kroppe = raekker.map((g) => `<tr class="border-t border-gray-100 align-top">
+      <td class="py-2 pr-3 text-sm text-gray-900">${g.noegletal.map(esc).join("<br>")}</td>
+      <td class="py-2 px-3 text-sm text-gray-700">${
+        esc(g.kommuner.join(", "))}<span class="block text-xs text-gray-500 tabular-nums">${
+        g.kommuner.length === 1 ? "1 kommune" : `${tal(g.kommuner.length)} kommuner`}</span></td>
+      <td class="py-2 pl-3 text-xs text-gray-500">${esc(g.note)}</td>
+    </tr>`).join("");
+    return `<div class="mt-5 first:mt-0">
+      <h3 class="text-sm font-semibold text-gray-900">${esc(overskrift)}</h3>
+      <p class="mt-1 text-xs text-gray-500 max-w-3xl">${esc(forklaring)}</p>
+      <div class="mt-2 overflow-x-auto tabel-scroll">
+        <table class="w-full min-w-[42rem]">
+          <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
+            <th class="py-2 pr-3 text-left font-medium">Nøgletal</th>
+            <th class="py-2 px-3 text-left font-medium">Kommuner</th>
+            <th class="py-2 pl-3 text-left font-medium">Forbeholdets ordlyd</th>
+          </tr></thead>
+          <tbody>${kroppe}</tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join("");
+
+  return `${afsnit}
+    <p class="mt-4 text-xs text-gray-500 max-w-3xl">Listen er regnet af årets datasæt ved
+      hver sidevisning, ikke skrevet i hånden. Retter en kilde sin indberetning, falder
+      forbeholdet bort af sig selv, og nøgletallet vender tilbage på kommunens side.</p>`;
 }
 
 /** Energistyrelsens kategorier med de poster, hver af dem lægger sammen.

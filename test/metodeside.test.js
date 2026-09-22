@@ -14,10 +14,27 @@
 // test_den_committede_sources_json_er_i_takt_med_katalogets_indhold i
 // pipelinen: den genberegner sandheden og holder det committede op imod den.
 //
+// RANGORDEN: RENDER FØR TEST, TEST FØR PROSA.
+//
+// En test er den næstbedste løsning. Den fanger et tal, der er løbet fra data,
+// men den kræver stadig et menneske til at skrive det rigtige tal ind. Kan en
+// oplysning i stedet REGNES af siden selv, hører den ikke hjemme her: de ramte
+// kommuner bag hvert forbehold stod længe navngivet i prosaen ("de syv
+// ejerkommuner bag Norfors og Reno Djurs (Allerød, ...)") og blev flyttet til
+// renderForbehold(), fordi listen afgøres af årets egne tal. Tærskeltabellen og
+// kildetabellen er flyttet samme vej tidligere. Overvej altid den vej først.
+//
+// HVAD DEN FANGER UD OVER FORKERTE TAL.
+//
+// Fraserne nedenfor fanger et tal, der er blevet forkert. De strukturelle
+// vagter nederst fanger en oplysning, der aldrig kom med - siden nævnte fire
+// hjælpetal, mens motoren havde fem - og en liste, der er sneget tilbage i
+// prosaen, efter at den blev gjort datadrevet.
+//
 // HVAD DEN IKKE DÆKKER, OG HVORFOR IKKE.
 //
-// Kun tal, der kan genberegnes af data.json alene. Tre slags står udenfor med
-// vilje:
+// Kun tal, der kan genberegnes af data.json, ens.json og concito.json. Tre
+// slags står udenfor med vilje:
 //
 //   Citater. CONCITO's 11 ton s. 8, Energistyrelsens 42 procent s. 3, NIRAS'
 //   afsnitsnumre. De skal sige, hvad rapporten siger, ikke hvad data siger.
@@ -40,9 +57,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { beregnFordeling } from "../web/beregning.js";
+import { beregnFordeling, beregnForbehold, driverTabel,
+         FORBEHOLD_VIRKNING } from "../web/beregning.js";
 
 const data = JSON.parse(readFileSync(new URL("../web/data/data.json", import.meta.url)));
+const ENS = JSON.parse(readFileSync(new URL("../web/data/ens.json", import.meta.url)));
+const CONCITO = JSON.parse(readFileSync(new URL("../web/data/concito.json", import.meta.url)));
 const raaHtml = readFileSync(new URL("../web/metode.html", import.meta.url), "utf8");
 
 /** Siden som ren tekst med samlet mellemrum, så en påstand kan findes uanset
@@ -81,6 +101,27 @@ const komma = (v, decimaler = 1) => v.toFixed(decimaler).replace(".", ",");
  *  skifter både ord og bøjning med værdien. Her er listen kort nok til at
  *  testen kan følge med. */
 const TAL_ORD = ["nul", "én", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni", "ti"];
+
+/** Regionens folketalsvægtede gennemsnit. Vægtet, ikke uvægtet: en region er
+ *  sine borgere, ikke sine kommunegrænser, og uvægtet ville Læsø veje som
+ *  Aarhus. Metodesidens regionsafsnit er regnet sådan. */
+const regionSnit = (felt, filter = () => true) => {
+  const valgte = K.filter(filter);
+  return valgte.reduce((sum, k) => sum + k[felt] * k.folketal, 0)
+    / valgte.reduce((sum, k) => sum + k.folketal, 0);
+};
+
+/** Afvigelse fra LANDSTALLET I DATASÆTTET, i procent.
+ *
+ *  Nulpunktet er det eneste rigtige her, og det var netop dét, der gik galt:
+ *  tre tal i regionsafsnittet var regnet mod et folketalsvægtet gennemsnit af
+ *  de 98 (288.135 kr.) i stedet for mod land-feltet (287.682 kr.), som er det
+ *  landsgennemsnit, kommunesiderne viser. Forskellen er 0,1-0,2 pct.point - nok
+ *  til at en læser, der slog Albertslund op, fik et andet tal end metodesiden
+ *  lovede. Regn altid mod LAND. */
+const afvPct = (v, landVaerdi) => ((v - landVaerdi) / landVaerdi) * 100;
+
+const REGIONER = [...new Set(K.map((k) => k.region))];
 
 const elFaktor = (k) =>
   k.husholdning_el_tj
@@ -160,6 +201,98 @@ const PAASTANDE = [
         : `gennemsnitligt boligareal gør det i ${f.markant}`;
     },
   },
+  {
+    // Regionsafsnittets fire tal. De tre sidste var regnet mod et andet
+    // nulpunkt end siden viser - se afvPct ovenfor.
+    navn: "spændet mellem regionsgennemsnittene",
+    frase: () => {
+      const afv = REGIONER.map((r) =>
+        afvPct(regionSnit("disp_indkomst", (k) => k.region === r), LAND.disp_indkomst));
+      return `mellem regionsgennemsnittene er ${komma(Math.max(...afv) - Math.min(...afv))} pct.point`;
+    },
+  },
+  {
+    navn: "spændet inde i regionerne, i gennemsnit",
+    frase: () => {
+      const spaend = REGIONER.map((r) => {
+        const inde = K.filter((k) => k.region === r)
+          .map((k) => afvPct(k.disp_indkomst, LAND.disp_indkomst));
+        return Math.max(...inde) - Math.min(...inde);
+      });
+      return `regionerne er ${komma(spaend.reduce((a, b) => a + b) / spaend.length)} pct.point i gennemsnit`;
+    },
+  },
+  {
+    navn: "spændet inde i Region Hovedstaden",
+    frase: () => {
+      const inde = K.filter((k) => k.region === "Hovedstaden")
+        .map((k) => afvPct(k.disp_indkomst, LAND.disp_indkomst));
+      return `og ${komma(Math.max(...inde) - Math.min(...inde))} i Region Hovedstaden`;
+    },
+  },
+  {
+    // Hele argumentet for ikke at bruge regionstal hviler på, at fortegnet
+    // vender for Albertslund. Holder tallene ikke, falder afsnittet.
+    navn: "Albertslunds egen indkomst mod landet",
+    frase: () => {
+      const a = K.find((k) => k.navn === "Albertslund");
+      return `ligger ${komma(Math.abs(afvPct(a.disp_indkomst, LAND.disp_indkomst)))} pct. under landsgennemsnittet`;
+    },
+  },
+  {
+    navn: "Region Hovedstadens indkomst mod landet",
+    frase: () => `mens regionens ligger ${komma(afvPct(
+      regionSnit("disp_indkomst", (k) => k.region === "Hovedstaden"), LAND.disp_indkomst))} pct. over`,
+  },
+  {
+    navn: "Albertslunds fødevareforbrug mod landet",
+    frase: () => {
+      const a = K.find((k) => k.navn === "Albertslund");
+      return `Albertslund lander derfor ${komma(Math.abs(afvPct(
+        a.foedevare_forbrug_pr_indb, LAND.foedevare_forbrug_pr_indb)))} pct. under`;
+    },
+  },
+  {
+    // Procentpoint-eksemplet stod tidligere med et opdigtet "37 %" og et
+    // "+302 %", der ikke passede til nogen kommune. Nu er det den faktiske
+    // yderkommune, og tallene skal være dem, siden ville vise.
+    navn: "procentpoint-eksemplet er et tal fra datasættet",
+    frase: () => {
+      const top = K.map((k) => driverTabel(k, LAND)
+        .find((d) => d.navn === "Fossil andel af husholdningernes energi"))
+        .filter((d) => d.afvigelse != null)
+        .reduce((a, b) => (b.afvigelse > a.afvigelse ? b : a));
+      return `energi, ${komma(top.kommuneVaerdi * 100)} %, til "+${
+        Math.round(top.afvigelse * 100)} %", hvilket lyder ekstremt for en forskel på ${
+        Math.round(top.procentpoint)} procentpoint`;
+    },
+  },
+  {
+    // Bemærkningen om, at fossil-andel og el-andel siger det samme fra hver
+    // sin ende, holder kun så længe restdrivmidlerne er forsvindende.
+    navn: "øvrige drivmidler er forsvindende i hver kommune",
+    frase: () => {
+      const maks = Math.max(...K.map((k) =>
+        ((k.biler - k.biler_benzin - k.biler_diesel - k.biler_el - k.biler_plugin) / k.biler) * 100));
+      return maks < 0.1 ? "udgør under 0,1 pct." : `udgør op til ${komma(maks, 2)} pct.`;
+    },
+  },
+  {
+    navn: "Offentligt forbrugs vægt i det nationale aftryk",
+    frase: () => `Offentligt forbrug vejer ${komma(
+      ENS.kategorier.find((k) => k.navn === "Offentligt forbrug").pct)} procent`,
+  },
+  {
+    navn: "fødevarernes vægt i det nationale aftryk",
+    frase: () => `fødevarerne vejer ${Math.round(
+      ENS.kategorier.find((k) => k.navn === "Føde- og drikkevarer").pct)} % af det nationale aftryk`,
+  },
+  {
+    navn: "Energistyrelsens transporttal mod CONCITO's",
+    frase: () => `Energistyrelsen transport til ${komma(
+      ENS.kategorier.find((k) => k.navn === "Transport").ton)} ton, hvor CONCITO når ${
+      komma(CONCITO.kategorier.find((k) => k.navn === "Transport").ton)}`,
+  },
 ];
 
 for (const p of PAASTANDE) {
@@ -180,5 +313,68 @@ test("metodesiden: hver påstand har en unik frase", () => {
     const antal = tekst.split(frase).length - 1;
     assert.equal(antal, 1,
       `"${frase}" står ${antal} gange - frasen skal pege på præcis ét sted`);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Strukturelle vagter.
+//
+// Fraserne ovenfor fanger et tal, der er blevet forkert. De fanger ikke en
+// oplysning, der aldrig kom med. Metodesiden nævnte i lang tid fire hjælpetal,
+// mens motoren havde fem - gennemsnitligt boligareal var et af dem, uden at
+// nogen havde skrevet det ind. Den slags hul kan kun findes ved at holde siden
+// op mod motorens egen liste.
+
+test("metodesiden: hvert hjælpetal er nævnt ved navn", () => {
+  // Et hjælpetal tæller ikke med i kategoriens samlede retning. Læseren, der
+  // tæller rækkerne efter, får et andet resultat end mærkatet, hvis han ikke
+  // ved hvilke der er undtaget. Så skal de stå der, alle sammen.
+  const hjaelpere = driverTabel(K[0], LAND)
+    .filter((d) => d.rolle === "hjaelper").map((d) => d.navn);
+  assert.ok(hjaelpere.length > 0, "motoren har ingen hjælpetal - er rollen omdøbt?");
+  for (const navn of hjaelpere) {
+    // Siden skriver dem i løbende tekst, så forbogstavet kan være stort eller
+    // småt afhængigt af hvor i sætningen navnet står.
+    const fundet = tekst.includes(navn)
+      || tekst.includes(navn.charAt(0).toLowerCase() + navn.slice(1));
+    assert.ok(fundet,
+      `"${navn}" er et hjælpetal, men står ikke på metodesiden. Skriv det ind i `
+      + "listen over undtagne nøgletal - ellers kan optællingen bag den samlede "
+      + "retning ikke tælles efter.");
+  }
+});
+
+test("metodesiden: antallet af nøgletal under Offentligt forbrug passer", () => {
+  const antal = driverTabel(K[0], LAND)
+    .filter((d) => d.kategori === "Offentligt forbrug" && d.rolle !== "hjaelper").length;
+  assert.equal(antal, 4,
+    "siden siger, at kategorien har fire nøgletal. Ændres antallet, skal både "
+    + "indkøbsafsnittet og færgeafsnittet rettes.");
+  assert.ok(tekst.includes("Kategorien har derfor nu fire nøgletal"));
+  assert.ok(tekst.includes("alle fire indkøbsnøgletal"));
+});
+
+test("metodesiden: forbeholdene har de tre virkninger, prosaen beskriver", () => {
+  // Siden siger, at et forbehold "gør tre forskellige ting". Kommer der en
+  // fjerde virkning til, eller falder en bort, holder sætningen ikke.
+  assert.deepEqual(FORBEHOLD_VIRKNING, ["skjuler", "spaerrer", "note"]);
+});
+
+test("metodesiden: de ramte kommuner remses ikke op i prosaen", () => {
+  // Affaldsforbeholdet afgøres af årets egne tal: retter et selskab sin
+  // indberetning, falder det bort i pipelinen. En håndskreven liste over
+  // ejerkredsen ville blive stående og lyve. Derfor står navnene kun i den
+  // genererede forbeholdstabel.
+  //
+  // Grænsen er to: en enkelt kommune kan godt være nævnt som eksempel et andet
+  // sted på siden, men en opremsning af hele kredsen er en liste, der rådner.
+  const affald = beregnForbehold(K, LAND)
+    .filter((g) => g.virkning === "skjuler" && g.noegletal.includes("Husholdningsaffald"));
+  for (const g of affald) {
+    const naevnt = g.kommuner.filter((navn) => tekst.includes(navn));
+    assert.ok(naevnt.length <= 2,
+      `metodesiden nævner ${naevnt.length} af de ${g.kommuner.length} kommuner bag `
+      + `affaldsforbeholdet ved navn (${naevnt.join(", ")}). Listen afgøres af årets `
+      + "data og hører i forbeholdstabellen, ikke i prosaen.");
   }
 });
