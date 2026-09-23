@@ -351,7 +351,7 @@ test("metodesiden: antallet af nøgletal under Offentligt forbrug passer", () =>
   assert.equal(antal, 4,
     "siden siger, at kategorien har fire nøgletal. Ændres antallet, skal både "
     + "indkøbsafsnittet og færgeafsnittet rettes.");
-  assert.ok(tekst.includes("Kategorien har derfor nu fire nøgletal"));
+  assert.ok(tekst.includes("Kategorien har derfor fire nøgletal"));
   assert.ok(tekst.includes("alle fire indkøbsnøgletal"));
 });
 
@@ -386,4 +386,22 @@ test("metodesiden: mærkatets ordlyd er den, kommunesiden faktisk viser", () => 
   assert.ok(tekst.includes(FORBEHOLD_MAERKAT_TEKST),
     `metodesiden skal citere mærkatet "${FORBEHOLD_MAERKAT_TEKST}", som `
     + "render.js sætter på et spærret nøgletal.");
+});
+
+test("metodesiden: indholdsfortegnelsen følger overskrifterne", () => {
+  // Afsnitsnumrene sættes af CSS ud fra rækkefølgen, både i fortegnelsen og
+  // ved overskrifterne. De passer kun sammen, så længe fortegnelsen rummer
+  // præcis de nummererede overskrifter i samme rækkefølge og med samme ordlyd.
+  // Flyttes et afsnit uden fortegnelsen, peger "afsnit 6.4" i en sag på noget
+  // andet end det, læseren finder.
+  const nav = raaHtml.match(/<nav id="indhold"[\s\S]*?<\/nav>/);
+  assert.ok(nav, "metodesiden skal have en indholdsfortegnelse med id=\"indhold\"");
+  const renTekst = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const links = [...nav[0].matchAll(/<a href="#([^"]+)">([\s\S]*?)<\/a>/g)]
+    .map(([, id, navn]) => ({ id, navn: renTekst(navn) }));
+  const overskrifter = [...raaHtml.matchAll(
+    /<h([23]) id="([^"]+)" class="nr[\s"][^>]*>([\s\S]*?)<\/h\1>/g)]
+    .map(([, , id, navn]) => ({ id, navn: renTekst(navn) }));
+  assert.ok(overskrifter.length > 10, "fandt næsten ingen nummererede overskrifter - er klassen omdøbt?");
+  assert.deepEqual(links, overskrifter);
 });

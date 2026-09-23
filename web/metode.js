@@ -4,7 +4,7 @@
 
 import { renderKilder, renderReferencer, renderNationaltAftryk,
          renderTaerskelfordeling, renderEnsKategorier,
-         renderForbehold } from "./render.js";
+         renderForbehold, danskDato } from "./render.js";
 import { beregnFordeling, beregnForbehold } from "./beregning.js";
 import { installerTooltips } from "./tooltip.js";
 
@@ -20,6 +20,27 @@ function fejl(el, besked) {
 
 installerTooltips();
 
+// PDF'en bygges af udgivelses-workflowet (scripts/metode-pdf.mjs) og findes
+// derfor ikke i en lokal preview. Mangler den, bliver knappen til browserens
+// egen udskrift, som bruger samme printlayout, så knappen aldrig giver en 404.
+const pdfKnap = document.getElementById("hent-pdf");
+if (pdfKnap) {
+  fetch(pdfKnap.getAttribute("href"), { method: "HEAD" })
+    .then((svar) => { if (!svar.ok) throw new Error(`HTTP ${svar.status}`); })
+    .catch(() => {
+      pdfKnap.removeAttribute("download");
+      pdfKnap.setAttribute("href", "#");
+      pdfKnap.addEventListener("click", (e) => { e.preventDefault(); window.print(); });
+      const tekst = document.getElementById("hent-pdf-tekst");
+      if (tekst) tekst.textContent = "Print eller gem som PDF";
+    });
+}
+
+// Dokumentets dato står kun på papir og i PDF'en, hvor læseren ikke kan se,
+// hvornår siden blev hentet.
+const dokumentDato = document.getElementById("dokument-dato");
+if (dokumentDato) dokumentDato.textContent = danskDato(new Date());
+
 const kilderEl = document.getElementById("kilder");
 const referencerEl = document.getElementById("referencer");
 const nationaltEl = document.getElementById("nationalt");
@@ -33,6 +54,8 @@ try {
   const [sources, concito, data, ens] = await Promise.all([
     hent("data/sources.json"), hent("data/concito.json"), hent("data/data.json"),
     hent("data/ens.json")]);
+  const datasaetDato = document.getElementById("datasaet-dato");
+  if (datasaetDato) datasaetDato.textContent = danskDato(sources.genereret);
   if (kilderEl) kilderEl.innerHTML = renderKilder(sources);
   if (referencerEl) referencerEl.innerHTML = renderReferencer(sources);
   if (nationaltEl) nationaltEl.innerHTML = renderNationaltAftryk(concito);
@@ -45,6 +68,9 @@ try {
   if (forbeholdEl) {
     forbeholdEl.innerHTML = renderForbehold(beregnForbehold(data.kommuner, data.land));
   }
+  // Signal til scripts/metode-pdf.mjs: tabellerne er på plads. Uden det kunne
+  // PDF'en blive trykt, før data var hentet, og mangle alle genererede tabeller.
+  document.body.dataset.klar = "ja";
 } catch (e) {
   const besked = `Kunne ikke hente kildeoversigten (${e.message}).
     Forbeholdene ovenfor gælder uanset.`;

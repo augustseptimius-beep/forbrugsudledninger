@@ -72,6 +72,21 @@ export function intervalTil(a, b) {
   return interval(a, b, " til ");
 }
 
+const MAANEDER = ["januar", "februar", "marts", "april", "maj", "juni", "juli",
+  "august", "september", "oktober", "november", "december"];
+
+/** "2026-09-21" eller et Date-objekt -> "21. september 2026".
+ *
+ *  En ISO-dato læses som kalenderdato og ikke gennem new Date(): "2026-09-21"
+ *  bliver midnat UTC og dermed den 20. i en browser vest for Greenwich. Et
+ *  Date-objekt læses i browserens egen tidszone, fordi det er "i dag". */
+export function danskDato(d) {
+  if (d instanceof Date) return `${d.getDate()}. ${MAANEDER[d.getMonth()]} ${d.getFullYear()}`;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d ?? "");
+  if (!m) return MANGLER;
+  return `${Number(m[3])}. ${MAANEDER[Number(m[2]) - 1]} ${m[1]}`;
+}
+
 // ---------- Forbehold ----------
 
 /** Forbeholdsikon med tooltip. Selve boksen tegnes af tooltip.js i
@@ -152,7 +167,11 @@ function kildeHenvisning(c, side, tekst) {
 }
 
 /** CONCITO's nationale opgørelse. Samme for alle kommuner - det er et
- *  nationalt tal, og værktøjet regner det ikke om til kommuneniveau. */
+ *  nationalt tal, og værktøjet regner det ikke om til kommuneniveau.
+ *
+ *  Uden egen overskrift og ramme: metodesiden sætter den ind under sin egen
+ *  overskrift om CONCITO, og en ramme i rammen med overskriften "Danmarks
+ *  forbrugsudledning" gentog afsnittet om Energistyrelsens tal lige ovenover. */
 export function renderNationaltAftryk(c) {
   const n = c.nationalt_aftryk;
   const maks = Math.max(...c.kategorier.map((k) => k.ton));
@@ -174,9 +193,8 @@ export function renderNationaltAftryk(c) {
     `<li class="mt-2"><strong class="font-medium text-gray-700">${esc(n.emne)}.</strong>
       ${esc(n.tekst)}</li>`).join("");
 
-  return `<section class="${KORT} p-5 sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">Danmarks forbrugsudledning</h2>
-    <p class="mt-1 text-sm text-gray-600 max-w-3xl">Tallene herunder er nationale og
+  return `<div>
+    <p class="text-sm text-gray-600 max-w-3xl">Tallene herunder er nationale og
       gælder hele landet. De er ikke beregnet af dette værktøj, men afskrevet fra
       ${kildeHenvisning(c, n.side, "CONCITO's rapport")} med sidehenvisning.</p>
 
@@ -187,18 +205,18 @@ export function renderNationaltAftryk(c) {
     <p class="mt-1 text-xs text-gray-500">${esc(n.opgoerelse)}, gengivet i
       ${kildeHenvisning(c, n.side)}: &raquo;${esc(n.citat)}&laquo;</p>
 
-    <h3 class="mt-6 text-sm font-semibold text-gray-900">Fordelt på varegrupper og tjenester</h3>
+    <h4 class="mt-6 text-sm font-semibold text-gray-900">Fordelt på varegrupper og tjenester</h4>
     <p class="text-xs text-gray-500">${kildeHenvisning(c, 16)}, figur 7</p>
     <ul class="mt-3 divide-y divide-gray-100">${rækker}</ul>
 
     <details class="mt-5 text-xs text-gray-500">
       <summary class="cursor-pointer font-medium text-gray-600 hover:text-gray-900">
-        Forbehold ved de nationale tal</summary>
+        Forbehold ved CONCITO's tal</summary>
       <ul class="mt-2 space-y-1">${noter}</ul>
       <p class="mt-3 font-medium text-gray-600">Andre offentliggjorte opgørelser:</p>
       <ul class="mt-1 list-disc pl-5 space-y-1">${andre}</ul>
     </details>
-  </section>`;
+  </div>`;
 }
 
 // ---------- Kommunens nøgletal, kategori for kategori ----------
