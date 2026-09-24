@@ -43,7 +43,13 @@ forbrugsudledninger/
 │   ├── build.py            <- orkestrerer alt, skriver data.json + sources.json
 │   ├── constants.py        <- ★ ANTAGELSER OG PERIODER. Årets ét sted at redigere.
 │   ├── sources.py          <- kildekatalog til metodesiden
+│   ├── ens.py              <- Energistyrelsens nationale tal. Ren afskrift.
+│   ├── concito.py          <- CONCITO's nationale tal med sidehenvisning. Ren afskrift.
 │   ├── fetch_dst.py        <- de 9 DST-tabeller
+│   ├── fetch_pendling.py   <- DST AFSTB4, pendlingsafstand
+│   ├── fetch_forbrug.py    <- DST FU17 og INDKF111 bag fødevareforbruget
+│   ├── osei_owusu.py       <- fødevareforbruget efter Osei-Owusu m.fl. (2020)
+│   ├── fetch_klimaregnskabet.py <- husholdningernes energi og CO2 (kræver API-nøgle)
 │   ├── indkoeb.py          <- ★ KOMMUNENS EGET INDKØB: afgrænsning og forbehold
 │   ├── fetch_regk.py       <- DST REGK11, kommunernes regnskaber
 │   ├── dst_client.py, kommuner.py
@@ -132,9 +138,9 @@ Begge er overtaget fra doughnut-projektet, hvor de blev fundet nødvendige.
 
 **1. Ingen ukildebelagte tal.** Dukker der en koefficient op, som ikke kan
 føres tilbage til en navngiven side i en navngiven rapport, hører den ikke
-hjemme i modellen. `pipeline/concito.py` indeholder de nationale tal som ren
-afskrift med sidehenvisning; `pipeline/constants.py` forklarer, hvilke
-koefficienter der er fjernet og hvorfor.
+hjemme i modellen. `pipeline/ens.py` og `pipeline/concito.py` indeholder de
+nationale tal som ren afskrift med kildehenvisning; `pipeline/constants.py`
+forklarer, hvilke koefficienter der er fjernet og hvorfor.
 
 Kilden står også ved hvert nøgletal på kommunesiden, og den skrives ikke i
 hånden: hver driver i `beregning.js` oplyser i `felter`, hvilke felter i
@@ -185,16 +191,24 @@ flyt linjen i fortegnelsen med.
 
 **2. Manglende data må aldrig vises som nul.**
 
-`estimat()` returnerer `null` for komponenter, der ikke kan opgøres, og lister
-dem i `uoplyst`. Brugerfladen viser dem som "ikke opgjort".
+Et felt, der mangler i `data.json`, er `null` hele vejen igennem og bliver
+aldrig til 0. I `beregning.js` giver `sikker()` `null`, når et regnestykke
+ender i NaN eller Infinity, og `afvigelse()` giver `null`, når kommunens eller
+landets værdi mangler. Nøgletallet får så signalet `"ukendt"`, som
+kommunesiden viser som mærkatet "ingen data", og `beregnKommune()` lister de
+manglende felter i `manglende`. `render.js` viser `null` som tankestreg
+(`MANGLER`). I regnearket er feltet en tom celle, og formlerne giver også en
+tom celle tilbage (`IF(OR(...=""),"",IFERROR(...,""))`), så en tom celle ikke
+bliver regnet som 0.
 
-Baggrunden: transporteffekten hviler på en proxy, og hvis den degraderer
-stiltiende til nul, læser en kommune et ukendt bidrag som en måling. Motoren
-foretrækker kommunens eget `bilkm_afvigelse`, falder tilbage til regionens
-værdi i konstanterne, og viser først "ikke opgjort", når ingen af delene
-findes.
+Baggrunden er, at et nul ligner en måling. En kommune, der ser 0 kg affald
+eller 0 biler, læser det som et faktum om sig selv, mens en tankestreg siger,
+at tallet ikke findes.
 
-Hvis du ændrer i `beregning.js`, så tjek at denne skelnen overlever.
+Hvis du ændrer i `beregning.js`, `render.js` eller `eksport.js`, så tjek at
+denne skelnen overlever. Golden-testen "manglende data giver streg, ikke nul"
+og eksporttesten "manglende rådata giver en tom celle, aldrig et nul" fanger
+de fleste brud.
 
 **Og der er en skelnen mere: `spaerrer` er ikke `skjuler`.** Et forbehold i
 `beregning.js` kan gøre to forskellige ting, og de må ikke smelte sammen.
@@ -221,8 +235,8 @@ email og formål. Filformat:
 KLIMAREGNSKABET_API_KEY=...
 ```
 
-Udgivelses-workflowet bruger ikke nøglen: det kører kun tests og CSS, ikke
-`build.py`.
+Udgivelses-workflowet bruger ikke nøglen: det kører tests, CSS og
+PDF-trykningen af metodesiden, ikke `build.py`.
 
 Den årlige opdatering kan derimod køres i CI. Nøglen ligger som GitHub
 Actions-secret under navnet `KLIMAREGNSKABET_API_KEY`, og
