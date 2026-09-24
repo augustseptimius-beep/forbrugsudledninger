@@ -366,7 +366,7 @@ const DRIVER_FORBEHOLD = {
     "vindmøller og solceller tælle som nul hos kommunens egne forbrugere, men strøm " +
     "deles på det fælles net. Fjernvarmen er regnet med sit lokale nets udledning. " +
     "Dækker forbrændingen og elnettet, ikke hele livscyklussen bag brændslet - " +
-    "niveauet er derfor lavere end CONCITO's nationale tal, men sammenligningen med " +
+    "niveauet er derfor lavere end CONCITO's tal for El og varme, men sammenligningen med " +
     "landet er gyldig, fordi begge sider opgøres ens.",
   "Fjernvarmens CO2 pr. kWh":
     "Husholdningernes fjernvarme i kommunen, fra Klimaregnskabet.dk. Udledningen " +
@@ -839,7 +839,7 @@ function embedForbehold() {
       px-3 py-2 text-xs text-amber-900">
     <strong class="font-semibold">Uofficielt værktøj.</strong>
     Faktuelle nøgletal fra offentlige registre, stillet op mod landsgennemsnittet
-    og sat ved siden af CONCITO's nationale opgørelse. Ikke en beregning af
+    og sat ved siden af Energistyrelsens nationale opgørelse. Ikke en beregning af
     kommunens klimaaftryk og ikke en myndighedsopgørelse.
     <a href="metode.html" target="_blank" rel="noopener"
        class="underline hover:text-amber-950">Se metode og kilder</a>.
@@ -862,7 +862,7 @@ export function renderKommune(b, c, ens, sources) {
     `<section class="mt-6 text-xs text-gray-500 max-w-3xl">
       <p><strong class="font-semibold text-gray-600">Uofficielt værktøj.</strong>
         Ingen myndighed står bag. Tallene er faktuelle nøgletal fra offentlige
-        registre, sammenholdt med CONCITO's nationale opgørelse. De er ikke en
+        registre, sammenholdt med Energistyrelsens nationale opgørelse. De er ikke en
         beregning af kommunens klimaaftryk og egner sig ikke til at rangordne
         kommuner mod hinanden. Kilder med tabel-id, årstal og sidehenvisning står på
         <a href="metode.html" class="underline hover:text-gray-700">metodesiden</a>.</p>
@@ -1087,7 +1087,7 @@ export function renderForside() {
       <p class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">Et forbrugsbaseret klimaaftryk
         tæller de udledninger, borgernes forbrug giver anledning til - også dem, der sker
         uden for kommunegrænsen og uden for Danmark. Slå din kommune op og se dens nøgletal
-        mod landsgennemsnittet, sat ved siden af CONCITO's nationale opgørelse.</p>
+        mod landsgennemsnittet, sat ved siden af Energistyrelsens nationale opgørelse.</p>
     </div>
     <div class="mb-8">
       <div class="relative">
