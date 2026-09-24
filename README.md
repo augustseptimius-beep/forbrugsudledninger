@@ -86,7 +86,11 @@ municipalities and fails on the first figure that differs, and
 engine, so the sheet cannot quietly say something the site does not.
 
 The deploy workflow runs the JavaScript tests before publishing. A red test
-stops the release.
+stops the release. It then prints the methodology page to `web/metode.pdf` with
+the runner's headless Chrome (`npm run pdf`), so the page's "Hent som PDF"
+button serves a ready-made file. The PDF is built, not committed, because it
+contains tables computed from the current dataset. Locally, set
+`CHROME=/path/to/chrome` if Chrome is not on the path.
 
 ## Licence
 

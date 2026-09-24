@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="styles/styles.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><circle cx=%2216%22 cy=%2216%22 r=%2213%22 fill=%22none%22 stroke=%22%23059669%22 stroke-width=%223%22/><line x1=%225%22 y1=%2216%22 x2=%2227%22 y2=%2216%22 stroke=%22%23f59e0b%22 stroke-width=%223%22/></svg>">
 </head>
-<body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
+<body class="metode-side min-h-screen bg-gray-50 text-gray-900 antialiased">
 
 <header class="no-print no-embed border-b border-gray-200 bg-white">
   <div class="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-2 sm:gap-4">
@@ -21,10 +21,12 @@
         <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="3" class="text-emerald-600"/>
         <line x1="5" y1="16" x2="27" y2="16" stroke="currentColor" stroke-width="3" class="text-amber-500"/>
       </svg>
-      <h1 class="text-sm sm:text-lg font-semibold text-gray-900">
+      <!-- Ikke <h1> her: sidens egen titel nedenfor er overskriften, og PDF'ens
+           bogmærker bygges af overskrifterne. -->
+      <span class="text-sm sm:text-lg font-semibold text-gray-900">
         <span class="hidden sm:inline">Forbrugsbaserede udledninger</span>
         <span class="sm:hidden">Forbrugsudledninger</span>
-      </h1>
+      </span>
     </a>
     <nav class="flex items-center gap-3 sm:gap-5 text-xs sm:text-sm">
       <a href="index.html" class="text-gray-500 hover:text-gray-900 transition-colors">Kommuner</a>
@@ -51,23 +53,113 @@
 <main class="mx-auto max-w-6xl px-4 py-6">
 <div class="space-y-6">
 
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Hvad værktøjet gør</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det stiller en kommunes offentligt tilgængelige nøgletal op mod
-    landsgennemsnittet, og sætter dem ved siden af Energistyrelsens nationale opgørelse
-    af danskernes forbrugsbaserede udledninger. Ikke andet.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Værktøjet beregner ikke et klimaaftryk for kommunen.</strong> Det
-    lægger ikke tal sammen, vægter dem ikke og omregner dem ikke til ton CO2e. Hver
-    eneste værdi på en kommuneside er enten hentet direkte fra et offentligt register
-    eller afskrevet fra en navngiven rapport med sidehenvisning.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Fortolkningen af, hvad tallene betyder for CO2, ligger hos kilderne. Vi
-    gengiver deres opgørelser; vi laver ikke vores egen.</p>
+<!-- Forsiden. I PDF'en står den alene på første side med titel, oprindelse og
+     indholdsfortegnelse, så dokumentet kan lægges på en sag og læses uden
+     skærmen ved siden af. -->
+<div class="metode-forside rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <div class="flex items-start justify-between gap-x-4 gap-y-3 flex-wrap">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Metode og data</h1>
+    <a id="hent-pdf" href="metode.pdf" download="Forbrugsbaserede-udledninger-metode.pdf"
+      class="no-print inline-flex items-center gap-1.5 rounded-md border border-gray-300
+             bg-white px-2.5 py-1 text-xs text-gray-700 hover:bg-gray-50
+             hover:border-gray-400 transition-colors">
+      <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" aria-hidden="true" fill="none"
+        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+        stroke-linejoin="round">
+        <path d="M8 2v8M5 7.5 8 10.5l3-3M2.5 11.5v1a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1"/></svg>
+      <span id="hent-pdf-tekst">Hent som PDF</span></a>
+  </div>
+  <p class="kun-print-blok mt-1 text-base text-gray-700">Forbrugsbaserede udledninger i Danmarks 98 kommuner</p>
+  <p class="mt-3 text-sm text-gray-700 max-w-3xl">Siden beskriver, hvor tallene på
+    kommunesiderne kommer fra, hvordan de sammenlignes med landsgennemsnittet, og
+    hvilke forbehold der gælder. Værktøjet er uofficielt, og ingen myndighed står bag.</p>
+  <p class="mt-2 text-xs text-gray-500 max-w-3xl">Datasættet er dannet
+    <span id="datasaet-dato">–</span>.<span class="kun-print"> Dokumentet er dannet
+    <span id="dokument-dato">–</span> fra
+    https://augustseptimius-beep.github.io/forbrugsudledninger/metode.html.</span></p>
+
+  <nav id="indhold" aria-labelledby="indhold-titel" class="mt-5 border-t border-gray-100 pt-4">
+    <h2 id="indhold-titel" class="text-sm font-semibold text-gray-900">Indhold</h2>
+    <ol class="indhold mt-2 space-y-1 text-sm">
+      <li><a href="#formaal">Hvad værktøjet gør</a></li>
+      <li><a href="#intet-samlet-tal">Hvorfor der ikke beregnes et samlet aftryk</a></li>
+      <li><a href="#nationalt-grundlag">Det nationale grundlag</a>
+        <ol>
+          <li><a href="#ens">Energistyrelsens opgørelse</a></li>
+          <li><a href="#concito">CONCITO som supplerende kilde</a></li>
+        </ol></li>
+      <li><a href="#laesning">Sådan læses et nøgletal</a>
+        <ol>
+          <li><a href="#retning">Retningen: hvad afvigelsen peger mod</a></li>
+          <li><a href="#taerskler">Tærskler</a></li>
+          <li><a href="#samlet-retning">Kategoriens samlede retning</a></li>
+          <li><a href="#hjaelpetal">Hjælpetal</a></li>
+        </ol></li>
+      <li><a href="#forbehold-kommuner">Forbehold for enkelte kommuner</a></li>
+      <li><a href="#noegletal">Nøgletallene kategori for kategori</a>
+        <ol>
+          <li><a href="#transport">Transport</a></li>
+          <li><a href="#foedevarer">Føde- og drikkevarer</a></li>
+          <li><a href="#forbrugsprodukter">Forbrugsprodukter og services</a></li>
+          <li><a href="#affald">Affaldstallene</a></li>
+          <li><a href="#indkoeb">Offentligt forbrug: kommunens eget indkøb</a></li>
+          <li><a href="#energi">Energi og forsyning</a></li>
+        </ol></li>
+      <li><a href="#fravalgt">Afprøvet og fravalgt</a>
+        <ol>
+          <li><a href="#forbrugsundersoegelsen">Forbrugsundersøgelsen som kommunalt forbrugstal</a></li>
+          <li><a href="#fjernet">Nøgletal, der er taget af siden</a></li>
+        </ol></li>
+      <li><a href="#kilder-og-referencer">Kilder og referencer</a>
+        <ol>
+          <li><a href="#datakilder">Datakilder</a></li>
+          <li><a href="#faglige-referencer">Faglige referencer</a></li>
+        </ol></li>
+    </ol>
+  </nav>
 </div>
 
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Hvorfor der ikke står et samlet tal</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">En tidligere version af dette værktøj beregnede et estimeret aftryk pr.
-    borger. Det hvilede på seks koefficienter, og ingen af dem kunne kildebelægges:</p>
+<section class="metode-afsnit rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 id="formaal" class="nr scroll-mt-4 text-xl font-semibold text-gray-900">Hvad værktøjet gør</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Værktøjet stiller hver kommunes
+    offentligt tilgængelige nøgletal op mod landsgennemsnittet og sætter dem ved siden
+    af Energistyrelsens nationale opgørelse af danskernes forbrugsbaserede udledninger.
+    Hver værdi på en kommuneside er enten hentet direkte fra et offentligt register
+    eller afskrevet fra en navngiven rapport med sidehenvisning.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Værktøjet beregner ikke et
+    klimaaftryk for kommunen.</strong> Det lægger ikke tallene sammen, vægter dem ikke
+    og omregner dem ikke til ton CO2e. Hvad tallene betyder for udledningen, bygger på
+    kildernes egne opgørelser.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hver kommuneside kan hentes som
+    regneark. Arket indeholder de samme tal, kilder og forbehold som siden, og
+    regnestykkerne ligger i det som formler, så man kan erstatte et kildetal med sit
+    eget og se resultatet regne sig om.</p>
+</section>
+
+<section class="metode-afsnit rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 id="intet-samlet-tal" class="nr scroll-mt-4 text-xl font-semibold text-gray-900">Hvorfor der ikke beregnes et samlet aftryk</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">NIRAS udarbejdede i 2024 for CONCITO
+    og C40 Cities en anbefaling til, hvordan et forbrugsbaseret klimaaftryk kan opgøres
+    for en kommune. Modellen hviler på fire dele, og tre af dem bygger på data, der ikke
+    er offentligt tilgængelige:</p>
+  <ul class="mt-3 space-y-2 text-sm text-gray-700 max-w-3xl list-disc pl-5">
+    <li><strong>Transport:</strong> DTU's Transportvaneundersøgelse, som kan estimere
+      privat transportarbejde på kommuneniveau fordelt på transportform.
+      <em>Kræver aftale om kommercielle vilkår.</em> (s. 6, afsnit 1.4)</li>
+    <li><strong>Energiforbrug:</strong> Energistyrelsens Energi- og CO2-Regnskab på
+      adresseniveau. <em>Kræver dataaftale.</em> (s. 18, afsnit 4.2.3)</li>
+    <li><strong>Øvrigt forbrug:</strong> en kommerciel forbrugersegmenteringsmodel
+      kombineret med Danmarks Statistiks Forbrugsundersøgelse.
+      <em>Kommerciel.</em> (s. 26, afsnit 4.2.10)</li>
+    <li><strong>Offentligt forbrug og investeringer:</strong> fordeles ligeligt på alle
+      borgere og varierer dermed ikke mellem kommuner (s. 29, afsnit 4.3.1). Værktøjet
+      viser alligevel kommunens eget indkøb i kroner, se
+      <a href="#indkoeb" class="underline decoration-dotted hover:text-gray-900">Offentligt forbrug</a>.</li>
+  </ul>
+  <p class="mt-3 text-sm text-gray-700 max-w-3xl">Uden det datagrundlag kan et
+    kommunalt aftryk kun beregnes ved at opfinde koefficienter. En tidligere version af
+    værktøjet gjorde det og beregnede et aftryk pr. borger ud fra seks koefficienter.
+    Ingen af dem kunne kildebelægges, og de er fjernet sammen med estimatet:</p>
   <div class="mt-3 overflow-x-auto tabel-scroll">
     <table class="w-full min-w-[34rem] text-sm">
       <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
@@ -102,201 +194,410 @@
       </tbody>
     </table>
   </div>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">De er fjernet, og estimatet med dem. Pendlingsafstanden står nu som det, den
-    er: kilometer fra Danmarks Statistik.</p>
-</div>
+  <p class="mt-3 text-sm text-gray-700 max-w-3xl">Pendlingsafstanden indgår i dag som
+    et selvstændigt nøgletal i kilometer fra Danmarks Statistik.</p>
+</section>
 
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Hvad der skulle til for at beregne et kommunalt aftryk</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">NIRAS udarbejdede i 2024 for CONCITO og C40 Cities en anbefaling til netop
-    en sådan model. Den hviler på fire dele, og tre af dem er ikke offentligt
-    tilgængelige:</p>
+<section class="metode-afsnit rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 id="nationalt-grundlag" class="nr scroll-mt-4 text-xl font-semibold text-gray-900">Det nationale grundlag</h2>
+
+  <h3 id="ens" class="nr scroll-mt-4 mt-4 font-semibold text-gray-900">Energistyrelsens opgørelse</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">De nationale tal kommer fra
+    <strong>Energistyrelsens Globale Afrapportering</strong>. Kommunesiderne er inddelt
+    i syv kategorier, som summerer præcis til hovedtallet. De står i den rækkefølge, de
+    fylder nationalt, bortset fra Øvrige investeringer. Den er størst, men står sidst,
+    fordi der ikke findes et kommunalt nøgletal for den. Inddelingen af Energistyrelsens poster i de syv kategorier
+    er værktøjets egen. Tallene er kildens, og posterne bag hver kategori står i
+    tabellen, så summerne kan efterprøves.</p>
+  <div id="ens-kategorier" class="mt-4"></div>
+
+  <h3 id="concito" class="nr scroll-mt-4 mt-6 font-semibold text-gray-900">CONCITO som supplerende kilde</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">CONCITO's opgørelse fra 2023 bruges
+    til det, Energistyrelsen ikke opgør: fødevarernes sammensætning, herunder
+    oksekødets andel, og forbrugsprofilerne efter indkomst. <strong>De to opgørelser må
+    ikke lægges sammen.</strong> Energistyrelsen holder investeringer og offentligt
+    forbrug ude som selvstændige blokke, mens CONCITO fordeler dem ud på
+    forbrugskategorierne. Derfor opgør Energistyrelsen transport til 1,8 ton, hvor
+    CONCITO når 3,1. Forskellen skyldes systemafgrænsningen.</p>
+  <div id="nationalt" class="mt-4"></div>
+</section>
+
+<section class="metode-afsnit rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 id="laesning" class="nr scroll-mt-4 text-xl font-semibold text-gray-900">Sådan læses et nøgletal</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hvert nøgletal vises med kommunens
+    værdi, landsgennemsnittet og forskellen mellem dem. Forskellen er en relativ
+    afvigelse, altså (kommune minus land) divideret med land. Befolkningsudviklingen er
+    en undtagelse: den er i forvejen en procent, så dér trækkes de to fra hinanden, og
+    forskellen står i procentpoint.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">For andele står forskellen også i
+    procentpoint, fordi den relative afvigelse ser voldsom ud, når landsgennemsnittet
+    er lavt. Med et landsgennemsnit på 9,2 % bliver kommunen med den højeste fossile
+    andel af husholdningernes energi, 46,7 %, til "+409 %", hvilket lyder ekstremt for en
+    forskel på 38 procentpoint. Begge tal står på siden.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Mangler et tal, vises en tankestreg.
+    Et manglende tal vises aldrig som nul, fordi et nul ville ligne en måling.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Nøgletallene er grupperet efter den
+    af Energistyrelsens kategorier, de handler om. Grupperingen siger ikke noget om,
+    hvor meget et nøgletal betyder for udledningen.</p>
+
+  <h3 id="retning" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Retningen: hvad afvigelsen peger mod</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Forskellens fortegn viser kun, om
+    kommunen ligger over eller under landsgennemsnittet. Om det trækker udledningen op
+    eller ned, står i et mærkat ved hvert nøgletal, fx "peger mod højere udledning".
+    Det er den eneste vurdering, værktøjet foretager. Den er med, fordi en lang række
+    procenttal er svær at overskue uden.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Mærkatet beskriver udledningen og kan
+    derfor pege modsat værdien. En lav andel el- og plugin-hybridbiler er en lav værdi,
+    men den peger mod en <em>høj</em> udledning, fordi resten af bilparken kører på
+    benzin og diesel.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hvert mærkat har en begrundelse fra
+    kilderne, som vises, når man holder musen over ikonet ved siden af eller går til
+    det med tastaturet. Kan kilderne ikke begrunde et nøgletals retning, vises
+    nøgletallet ikke på nogen kommuneside. Det gælder alle 98 kommuner ens.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Mærkatet har altid både tekst og et
+    symbol, en fyldt eller åben trekant eller en vandret streg, så det kan læses uden at
+    skelne farverne.</p>
+
+  <h3 id="taerskler" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Tærskler</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Afvigelsen inddeles i tre bånd. Under
+    10 % peger nøgletallet <em>lidt</em> mod højere eller lavere udledning og står med
+    en åben trekant. Mellem 10 og 33 % peger det mod <em>højere</em> eller
+    <em>lavere</em> udledning, og fra 33 % mod <em>meget</em> højere eller lavere. Kun en
+    afvigelse, der vises som 0,0 %, peger hverken op eller ned. Tærsklerne har ingen
+    kilde. De er valgt for at gøre siden læsbar, og råtallet står altid ved siden af.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Tærsklerne er de samme for alle
+    nøgletal, selvom nøgletallene spreder sig meget forskelligt. Fossil andel af
+    husholdningernes energi ligger mindst 33 % fra landsgennemsnittet i 78 af landets
+    98 kommuner; gennemsnitligt boligareal gør det i ingen. "Meget højere" betyder
+    derfor ikke det samme fra nøgletal til nøgletal. Tabellen viser, hvordan kommunerne
+    fordeler sig på båndene for hvert nøgletal i årets datasæt.</p>
+  <div id="taerskelfordeling" class="mt-4"></div>
+
+  <h3 id="samlet-retning" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Kategoriens samlede retning</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hver kategori har en samlet retning,
+    der tæller, hvor mange af kategoriens nøgletal der peger mod højere, og hvor mange
+    mod lavere udledning. Hvert nøgletal tæller ét, uanset om det afviger 2 eller 40 %,
+    og et nøgletal under 10 % tæller med som alle andre. Optællingen står ved mærkatet
+    ("3 af 4 nøgletal"), så den kan tælles efter i tabellen.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Den lige vægtning er et valg. Skulle de
+    store udsving veje tungere, skulle man vide, hvor meget hvert nøgletal betyder for
+    kommunens udledning, og det tal findes ikke i kilderne. Mærkatet siger derfor, hvad
+    nøgletallene peger mod. Det siger ikke, om kategorien som helhed ligger over eller
+    under landsgennemsnittet. Af samme grund lægges kategorierne ikke sammen til en
+    samlet score.</p>
+
+  <h3 id="hjaelpetal" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Hjælpetal</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Nogle nøgletal står i tabellen for at
+    forklare et andet nøgletal. De er mærket <em>forklarende</em> og tæller ikke med i
+    kategoriens samlede retning:</p>
   <ul class="mt-3 space-y-2 text-sm text-gray-700 max-w-3xl list-disc pl-5">
-    <li><strong>Transport:</strong> DTU's Transportvaneundersøgelse, som kan estimere
-      privat transportarbejde på kommuneniveau fordelt på transportform.
-      <em>Kræver aftale om kommercielle vilkår.</em> (s. 6, afsnit 1.4)</li>
-    <li><strong>Energiforbrug:</strong> Energistyrelsens Energi- og CO2-Regnskab på
-      adresseniveau. <em>Kræver dataaftale.</em> (s. 18, afsnit 4.2.3)</li>
-    <li><strong>Øvrigt forbrug:</strong> en kommerciel forbrugersegmenteringsmodel
-      kombineret med Danmarks Statistiks Forbrugsundersøgelse.
-      <em>Kommerciel.</em> (s. 26, afsnit 4.2.10)</li>
-    <li><strong>Offentligt forbrug og investeringer:</strong> fordeles ligeligt på alle
-      borgere, og varierer dermed ikke mellem kommuner. (s. 29, afsnit 4.3.1)
-      <em>Denne del har vi siden kunnet dække delvist - se afsnittet nedenfor.</em></li>
+    <li><strong>Befolkningsudvikling og fritidshuse pr. helårsbolig</strong> forklarer
+      byggeaktiviteten og husholdningernes energital. De peger ikke selv nogen vej og
+      står uden mærkat.</li>
+    <li><strong>Gennemsnitligt boligareal</strong> står under Energi og forsyning og
+      forklarer husholdningernes energiforbrug, fordi større boliger bruger mere varme.
+      Det har et mærkat, fordi retningen er entydig. Talte det med i den samlede
+      retning, ville boligstørrelsen tælle to gange, én gang direkte og én gang gennem
+      energiforbruget.</li>
+    <li><strong>Husholdningsaffald og genanvendelsesprocent</strong> står under
+      Forbrugsprodukter og services som baggrund og har mærkat. Kategoriens samlede
+      retning afgøres alene af disponibel indkomst, fordi affaldet siger lidt om
+      forbrugets størrelse: det følger ikke indkomsten (r = -0,25 over de 91 kommuner,
+      hvor det vises), og husholdningsaffaldet rummer haveaffald, hvis andel svinger fra
+      under 1 til knap 50 % mellem kommunerne.</li>
   </ul>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Indtil det datagrundlag foreligger, kan et kommunalt aftryk ikke beregnes
-    uden at opfinde koefficienter. Det gør dette værktøj ikke.</p>
-</div>
+</section>
 
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Kommunens eget indkøb: hvad vi kunne, og hvad vi ikke kunne</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Kategorien <em>Offentligt forbrug</em> vejer 11,9 procent af det nationale
-    aftryk og stod indtil videre uden ét eneste kommunalt nøgletal, med henvisning
-    til NIRAS' punkt ovenfor. Den henvisning var strakt for langt. NIRAS beskriver,
-    hvordan offentligt forbrug <em>fordeles</em> i en aftryksmodel, ikke at
-    kommunernes indkøb er ens. Kommunerne står for 42 procent af det offentlige
-    indkøbs klimaaftryk
+<section class="metode-afsnit rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 id="forbehold-kommuner" class="nr scroll-mt-4 text-xl font-semibold text-gray-900">Forbehold for enkelte kommuner</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">En kommunes egne tal kan udløse et
+    forbehold. Forbeholdet har en af tre virkninger:</p>
+  <ul class="mt-3 space-y-2 text-sm text-gray-700 max-w-3xl list-disc pl-5">
+    <li><strong>Tallet er ramt.</strong> Nøgletallet tages af kommunens side, og
+      begrundelsen står under tabellen. Det gælder fx affaldstal, der er bogført på en
+      nabokommune.</li>
+    <li><strong>Tallet er rigtigt, men kan ikke sammenlignes med landsgennemsnittet.</strong>
+      Nøgletallet står med værdi, landsgennemsnit og afvigelse, men i stedet for en
+      retning har det mærkatet <em>forbehold: ingen retning</em>. Kategoriens samlede
+      retning siger så <em>retningen kan ikke afgøres</em>. Det gælder færgekommunernes
+      indkøb.</li>
+    <li><strong>Tallet står med en bemærkning.</strong> Tal og retning vises som ellers,
+      og bemærkningen fortæller, hvad læseren skal have med.</li>
+  </ul>
+  <p class="mt-3 text-sm text-gray-700 max-w-3xl">Tabellen viser, hvilke kommuner der
+    er ramt i årets datasæt. Den regnes ud fra data, hver gang siden vises, og følger
+    derfor med, når en kilde retter sin indberetning. Baggrunden for de enkelte
+    forbehold står under nøgletallene i næste afsnit.</p>
+  <div id="forbehold" class="mt-4"></div>
+</section>
+
+<section class="metode-afsnit rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 id="noegletal" class="nr scroll-mt-4 text-xl font-semibold text-gray-900">Nøgletallene kategori for kategori</h2>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Kategorierne står i samme rækkefølge
+    som på kommunesiden. Bolig og byggeri er udeladt, fordi dens nøgletal ikke kræver
+    forklaring ud over det, der står ovenfor, og Øvrige investeringer har intet
+    kommunalt nøgletal.</p>
+
+  <h3 id="transport" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Transport</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Kun husholdningernes biler
+    tælles.</strong> Danmarks Statistik registrerer firma- og leasingbiler på
+    virksomhedens adresse og ikke der, hvor de bruges. Med alle biler talt med var knap
+    hver tredje bil i Brøndby og Albertslund en erhvervsbil, og Brøndby stod med 0,52
+    biler pr. indbygger mod 0,37, når kun husholdningernes blev talt. Energistyrelsens
+    transportkategori er husholdningernes, så det er dem, der tælles.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Benzin og diesel vises som ét
+    tal.</strong> En dieselbil udleder mindre CO2 pr. kilometer end en benzinbil, men
+    køres til gengæld længere, så fordelingen mellem de to kan ikke tolkes. Samlet som
+    <em>fossil-andel</em> har de en entydig retning. De øvrige drivmidler udgør under
+    0,1 pct. af bilparken i hver kommune, så fossil-andelen er næsten præcis
+    modstykket til el- og plugin-hybridandelen, og de to nøgletal siger det samme fra
+    hver sin ende.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Pendlingsafstanden</strong>
+    dækker kun turen til arbejde og siger ikke noget om transportmidlet.</p>
+
+  <h3 id="foedevarer" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Føde- og drikkevarer</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Nøgletallet <em>Fødevareforbrug pr.
+    indbygger</em> bygger på Danmarks Statistiks Forbrugsundersøgelse (FU17) og følger
+    fordelingsnøglen fra
+    <a href="https://doi.org/10.1016/j.ecolecon.2020.106778" target="_blank" rel="noopener"
+      class="underline decoration-dotted hover:text-gray-900">Osei-Owusu m.fl. (2020)</a>:
+    regionens forbrugskvotient ganges med kommunens egen disponible indkomst. Hvorfor
+    regionens forbrug ikke bruges direkte, står under
+    <a href="#forbrugsundersoegelsen" class="underline decoration-dotted hover:text-gray-900">Forbrugsundersøgelsen</a>.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Tallet gentager i praksis indkomsten:
+    målt over de 98 kommuner følger det disponibel indkomst med r = +0,97. Det er med
+    alligevel, fordi fødevarerne vejer 17 % af det nationale aftryk, og en kategori uden
+    retning let bliver læst som en kategori uden problemer. Forbeholdet står også i
+    nøgletallets begrundelse på kommunesiderne.</p>
+
+  <h3 id="forbrugsprodukter" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Forbrugsprodukter og services</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Disponibel indkomst</strong>
+    står her, fordi CONCITO (2023) s. 27 beskriver, at mennesker med lav indkomst ofte
+    forbruger færre ting og sager og rejser mindre, og NIRAS (2024) s. 27 anbefaler at
+    undersøge, om borgernes øvrige forbrug kan skaleres efter indkomsten. Kilderne
+    kobler også indkomsten til flyrejser (NIRAS s. 20) og regner fødevarer med til det
+    øvrige forbrug (NIRAS s. 22), men nøgletallet står kun ét sted, så det ikke tæller
+    to gange i den samlede retning. Sammenhængen er ikke mekanisk: CONCITO's
+    forbrugsprofiler går fra 8,7 til 15 ton i den laveste indkomstgruppe og fra 12 til
+    25 ton i den højeste (s. 28-29).</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Kategorien har også de to
+    affaldsnøgletal som hjælpetal. De er beskrevet i næste afsnit.</p>
+
+  <h3 id="affald" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Affaldstallene</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Danmarks Statistik oplyser selv, at
+    kommunefordelte affaldsmængder er mere usikre end totalerne for kommunegrupper og
+    hele landet, blandt andet fordi affald kan afleveres i en anden kommune, og fordi
+    genbrugspladser bruges af borgere fra flere kommuner. Forbeholdet står i
+    statistikdokumentationen for affaldsregnskabet og på tonnagetabellen LABY24, men
+    ikke på LABY25, som nøgletallet hentes fra.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">For opgørelsesåret 2023 slår det
+    tydeligt igennem. Flere kommuner, der deler et fælleskommunalt affaldsselskab, har
+    fået hinandens restaffald bogført, så nogle står urealistisk lavt og andre
+    urealistisk højt. Lagt sammen inden for hvert selskab er niveauet normalt, og
+    landsgennemsnittet er upåvirket. Genanvendelsesprocenten rammes også, fordi de
+    genanvendelige fraktioner udgør en kunstigt høj andel, når restaffaldet mangler i
+    regnskabet.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Værktøjet retter aldrig et tal fra en
+    kilde, så tallene står, som Danmarks Statistik har offentliggjort dem. Forbeholdet
+    sættes i stedet pr. kommune efter, hvor stærkt beviset er:</p>
+  <ul class="mt-3 space-y-2 text-sm text-gray-700 max-w-3xl list-disc pl-5">
+    <li><strong>Ejerkommunerne bag Norfors og Reno Djurs</strong> får ikke de to
+      affaldsnøgletal vist. Her er byttet af tonnage eftervist i Danmarks Statistiks
+      egne mængdetal, så tallet beskriver ikke kommunen alene. Hele ejerkredsen er
+      omfattet, også de kommuner, hvis eget tal ser normalt ud det enkelte år, fordi
+      fejlen ligger i selskabets indberetning.</li>
+    <li><strong>Kommuner, hvor tallet skiller sig ud</strong>, beholder retningen og får
+      årsagen oplyst. Enten springer restaffaldet usædvanligt meget fra året før, eller
+      en affaldsfraktion, der fylder meget i alle andre kommuner, er næsten fraværende.
+      Ingen af delene beviser en fejl, og små kommuner svinger naturligt, så tallet
+      bliver stående.</li>
+    <li><strong>De øvrige kommuner</strong> får retningen som ved ethvert andet
+      nøgletal.</li>
+  </ul>
+  <p class="mt-3 text-sm text-gray-700 max-w-3xl">Datapipelinen afgør inddelingen ved
+    hver hentning ud fra to signaler. Det ene sammenligner kommunens restaffald med
+    året før. Det andet ser på, hvor stor en del af kommunens affald der er
+    dagrenovation. Den andel er stor i alle kommuner, på landsplan 27-32 %, fordi
+    dagrenovation er det, der er tilbage, når det sorterbare er sorteret fra. Falder den
+    mod nul, mangler fraktionen i regnskabet. Det signal kan aflæses på ét år og fanger
+    derfor også kommuner, hvor fejlen går igen hvert år og ikke kan ses ved at
+    sammenligne med året før.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hvilke kommuner der deler
+    indberetning, står i pipelinens kildekode med henvisning til selskaberne. Om
+    nøgletallene tages af siden, afgøres hvert år af årets egne tal. Retter et selskab
+    sin indberetning, falder forbeholdet bort, og nøgletallene kommer tilbage på
+    kommunens side. Årets ramte kommuner står i
+    <a href="#forbehold-kommuner" class="underline decoration-dotted hover:text-gray-900">forbeholdstabellen</a>.</p>
+
+  <h3 id="indkoeb" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Offentligt forbrug: kommunens eget indkøb</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Kategorien <em>Offentligt forbrug</em>
+    vejer 11,9 procent af det nationale aftryk. I NIRAS' model fordeles det ligeligt på
+    alle borgere, men det betyder ikke, at kommunernes indkøb er ens. Kommunerne står for
+    42 procent af det offentlige indkøbs klimaaftryk
     (<a href="https://ens.dk/media/2760/download" target="_blank" rel="noopener"
       class="underline decoration-dotted hover:text-gray-900">Energistyrelsen 2023</a>,
-    baggrundsnotat 6, s. 3), og hvad de køber, ligger offentligt fremme i Danmarks
-    Statistiks REGK11 med kroner pr. indbygger som prisenhed. Kategorien har derfor
-    nu fire nøgletal.</p>
+    baggrundsnotat 6, s. 3), og hvad de køber, er offentligt i Danmarks Statistiks
+    REGK11 med kroner pr. indbygger som enhed. Kategorien har derfor fire nøgletal:
+    kommunens driftsindkøb, anlægsindkøb, indkøb af brændsel og drivmidler og indkøb
+    af fødevarer.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Der beregnes ingen ton.</strong>
+    Energistyrelsen ganger indkøbet i kroner med en emissionsfaktor pr. indkøbskategori
+    fra EXIOBASE (s. 5). Modellens indkøbsdata er fakturadata fra SKI, kategoriseret med
+    machine learning på UNSPSC-koder og samlet i SKI's eget varehierarki (s. 8).
+    Hverken fakturadata, hierarki eller emissionsfaktorer er offentligt tilgængelige,
+    og ingen af dem er fordelt på kommuner. Der findes altså ingen offentlig nøgle fra
+    Danmarks Statistiks artskonti til faktorerne, og en hjemmelavet nøgle ville være en
+    ukildebelagt koefficient af samme slags som dem, der er fjernet. Nøgletallene er
+    derfor kroner, og retningen bygger på kildernes egne udsagn om, hvilke
+    indkøbsområder der vejer tungt.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Hvad tallet viser.</strong>
+    Tallet er udløste indkøbskroner pr. borger og siger ikke, om kommunen køber godt
+    eller dårligt ind. Målt over de 98 kommuner følger driftsindkøbet ikke disponibel
+    indkomst (r&nbsp;=&nbsp;−0,10). Til sammenligning: fødevareforbruget ligger på
+    r&nbsp;=&nbsp;+0,97. Driftsindkøbet følger i stedet alderssammensætningen:
+    r&nbsp;=&nbsp;+0,52 mod andelen på 75 år og derover og r&nbsp;=&nbsp;−0,40 mod
+    andelen på 0-16 år (målt på 2025-regnskabet mod folketallet 2026K1). Yderpunkterne
+    er små ø-kommuner. En kommune med mange ældre og få borgere at dele de faste opgaver
+    på bruger flere indkøbskroner pr. indbygger, og de kroner giver reelle udledninger.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Forsyningsvirksomhederne er
+    udeladt for alle 98.</strong> Hovedkonto 1, Forsyningsvirksomheder, tælles ikke med.
+    Nogle kommuner har forsyningen i regnskabet, andre har den i et selskab, og
+    forskellen ligger i bogføringen. Målt på 2025-regnskabet flytter hovedkontoen
+    Albertslund 26 procentpoint, Fredericia 23 og Gentofte 21, og for Fredericia vender
+    fortegnet fra plus 12 til minus 12 procent. Man kunne skjule de kommuner, der ikke
+    har tallet, men Danmarks Statistik markerer ingen af dem som manglende. På
+    2025-regnskabet står 17 kommuner med præcis 0 kroner, 2 med et negativt beløb og 9
+    med under 200 kroner, mens medianen er 1.616 og maksimum 7.104 kroner pr. indbygger.
+    Det er et kontinuum, og en grænse et sted i det ville være en opfundet koefficient.
+    Hovedkontoen udelades derfor for alle 98, og landsgennemsnittet regnes på samme
+    afgrænsning.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Hvad der tælles som
+    indkøb.</strong> Med er artskonti for varekøb og tjenesteydelser hos leverandører:
+    fødevarer, brændsel og drivmidler, anskaffelser, øvrige varekøb, tjenesteydelser
+    uden moms, entreprenør- og håndværkerydelser og øvrige tjenesteydelser. Udeladt er
+    lønninger, køb af jord og bygninger (en formueoverførsel), overførsler til borgere,
+    interne poster og betalinger til stat, kommuner og regioner. Energistyrelsen opgør
+    på samme måde indkøb hos <em>private</em> leverandører og fratrækker interne
+    offentlige betalinger (s. 5). Afgrænsningen har en pris: en kommune, der køber en
+    opgave hos et §60-fællesskab, bogfører det som betaling til kommuner og ser derfor
+    ud til at købe mindre ind end en kommune, der løser opgaven selv.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Drift og anlæg udjævnes
+    forskelligt.</strong> Driftsindkøbet er stabilt: afvigelsen fra landet korrelerer
+    r&nbsp;=&nbsp;+0,98 mellem 2024 og 2025 og r&nbsp;=&nbsp;+0,96 mellem 2021 og 2025, så
+    det vises for det nyeste regnskabsår alene. Anlægsindkøbet svinger med
+    enkeltprojekter, og ét skolebyggeri kan flytte en lille kommune flere hundrede
+    procent. Enkeltår korrelerer kun r&nbsp;=&nbsp;+0,75, mens to adskilte femårsvinduer
+    korrelerer r&nbsp;=&nbsp;+0,71, så der er en vedvarende komponent at få fat i.
+    Anlæg vises derfor som gennemsnit over fem regnskabsår.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Færgekommunerne.</strong>
+    Læsø, Samsø og Ærø bruger 42-52 procent af deres samlede indkøb på hovedkonto 2,
+    Transport og infrastruktur, mod 5,3 procent for landet (2025-regnskabet). Det er
+    færgedrift, en regional transportopgave, som kommunen betaler for en befolkning, der
+    er meget mindre end færgens opland. Næste kommune på listen er Bornholm med 17,4
+    procent samme år. Grænsen for forbeholdet er en tredjedel af indkøbet og ligger i
+    et bredt spring: flyttes den fra 20 til 40 procent, rammer den de samme tre
+    kommuner.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">De tre kommuner beholder deres
+    indkøbstal, for kronerne er brugt og brændstoffet brændt. Færgen gør derimod
+    sammenligningen med landsgennemsnittet skæv. Derfor står alle fire
+    indkøbsnøgletal på deres sider med værdi, landsgennemsnit og afvigelse, men uden
+    retning.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Prisen tæller med.</strong>
+    Energistyrelsen noterer selv, at et dyrere indkøb alt andet lige giver et højere
+    beregnet aftryk, fordi størstedelen af indkøbet opgøres i kroner og ikke i mængder
+    (s. 14). Det gælder især, når en grøn variant er dyrere end en konventionel. Det
+    samme forbehold gælder her: køber kommunen økologisk eller klimavenligt ind til en
+    højere pris, stiger tallet, uden at der er købt mere.</p>
 
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Der beregnes stadig ingen ton</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Energistyrelsen ganger indkøbet i kroner med en emissionsfaktor pr.
-    indkøbskategori fra EXIOBASE (s. 5). Men modellens indkøbsdata er fakturadata
-    leveret af SKI, kategoriseret med machine learning på UNSPSC-koder og aggregeret
-    i SKI's eget varehierarki (s. 8). Hverken fakturadata, hierarkiet eller
-    emissionsfaktorerne er offentligt tilgængelige, og ingen af dem er fordelt på
-    kommuner. Der findes altså ingen offentlig nøgle fra Danmarks Statistiks
-    artskonti til faktorerne, og at bygge en selv ville være præcis den slags
-    ukildebelagte koefficient, værktøjet har fjernet seks af. Nøgletallene er
-    kroner. Retningen kommer fra kildernes egne udsagn om, hvilke indkøbsområder
-    der vejer tungt.</p>
+  <h3 id="energi" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Energi og forsyning</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Husholdningernes energi og
+    udledning</strong> kommer fra Klimaregnskabet.dk, som udstiller Energi- og
+    CO2-regnskabet. NIRAS (2024) s. 18 peger på netop den kilde til energidelen af et
+    kommunalt forbrugsregnskab. Værktøjet bruger kun kategorien Husholdninger, dvs.
+    borgernes eget forbrug af varme, varmt vand og el i boligen. Erhverv,
+    fremstillingsvirksomhed, offentlig service og transport hører til andre kategorier
+    og er ikke med. Det er efterprøvet, at underkategorierne summerer præcis til
+    kommunens samlede forbrug.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Opgørelsen dækker ikke hele
+    livscyklussen.</strong> Den omfatter udledningen fra forbrændingen og fra elnettet,
+    men ikke livscyklussen bag brændslet. Niveauet er derfor lavere end CONCITO's tal
+    for El og varme, og de to må ikke lægges sammen. Sammenligningen mellem kommunen og
+    landsgennemsnittet holder, fordi begge sider opgøres ens.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Tallene fordeles på alle
+    boliger.</strong> Husholdningstallene fordeles på samtlige boliger inklusive
+    fritidshuse og ikke på indbyggere, fordi fritidshusenes ejere er registreret i en
+    anden kommune. Målt over alle 98 kommuner følger tallet pr. indbygger
+    sommerhustætheden næsten lige så tæt som boligstørrelsen. Pr. bolig forsvinder den
+    sammenhæng, og tallet følger boligstørrelse og andelen af fritliggende huse. Til
+    gengæld bruger et fritidshus mindre energi end en helårsbolig, så i kommuner med
+    flere fritidshuse end helårsboliger trækkes gennemsnittet ned med en størrelse, der
+    ikke kan opgøres. Dér tages de to husholdningstal pr. bolig af siden, og fritidshuse
+    pr. helårsbolig står som hjælpetal ved siden af.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Strømmen regnes med landets
+    fælles faktor.</strong> Klimaregnskabet giver hver kommune sin egen el-faktor ud fra
+    den el, der produceres i kommunen, så lokal vind og sol tæller som nul hos
+    kommunens egne forbrugere. I 2024 står fire kommuner på nul, mens Aalborg ligger på
+    418 g CO2e/kWh. Strøm deles på det fælles net, så en vindmølle i én kommune gør hele
+    nettets strøm renere. Værktøjet regner derfor husholdningernes strøm med landets
+    fælles faktor: husholdningernes samlede el-udledning delt med deres samlede
+    elforbrug over alle 98 kommuner, 79 g CO2e/kWh i 2024. Landstallet er det samme, men
+    tallet flytter sig for de kommuner, hvis egen el-faktor ligger langt fra landets.
+    Det er det eneste sted, hvor værktøjet erstatter en del af et kildetal.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Fjernvarmens CO2 pr. kWh er
+    kommunens eget tal.</strong> Fjernvarme leveres fra lokale net. Klimaregnskabet
+    beregner udledningen pr. fjernvarmenet efter Energistyrelsens anbefaling og
+    fordeler den på de kommuner, der aftager varme fra nettet. Tallet viser, hvor ren
+    fjernvarmen er. Hvor meget den fylder, ses i husholdningernes CO2.</p>
+</section>
 
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Hvad tallet er, og hvad det ikke er</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det er udløste indkøbskroner pr. borger, ikke en præstation. Målt over de 98
-    kommuner følger driftsindkøbet <em>ikke</em> disponibel indkomst
-    (r&nbsp;=&nbsp;−0,10), og det er dermed det første nøgletal i værktøjet, som ikke
-    gentager indkomsten - fødevareforbruget ligger på r&nbsp;=&nbsp;+0,97. Til
-    gengæld følger det alderssammensætningen: r&nbsp;=&nbsp;+0,52 mod andelen på 75
-    år og derover og r&nbsp;=&nbsp;−0,40 mod andelen på 0-16 år (målt på 2025-regnskabet
-    mod folketallet 2026K1). Yderpunkterne er
-    små ø-kommuner. En kommune med mange ældre og få borgere at dele de faste
-    opgaver på udløser flere indkøbskroner pr. indbygger, og de kroner giver reelle
-    udledninger - men tallet siger ikke, at kommunen køber dårligt ind.</p>
+<section class="metode-afsnit rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 id="fravalgt" class="nr scroll-mt-4 text-xl font-semibold text-gray-900">Afprøvet og fravalgt</h2>
 
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Forsyningsvirksomhederne er taget ud af alle 98</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hovedkonto 1 er udeladt. Nogle kommuner har forsyningen i regnskabet, andre
-    har den i selskab, og forskellen er bogføring, ikke forbrug. Målt på
-    2025-regnskabet flytter
-    den Albertslund 26 procentpoint, Fredericia 23 og Gentofte 21; for Fredericia
-    vender fortegnet fra plus 12 til minus 12 procent. Den nærliggende løsning - at
-    skjule de kommuner, der ikke har tallet - virker ikke: Danmarks Statistik
-    markerer ingen af dem som manglende. På 2025-regnskabet står 17 kommuner med
-    præcis 0 kroner, 2 med et negativt beløb og 9 med under 200 kroner, mens medianen
-    er 1.616 og maksimum 7.104 kroner pr. indbygger. Det er et kontinuum, og en grænse midt i det ville være en opfundet
-    koefficient. Hovedkontoen udelades derfor for alle 98, så ingen kommune skjules,
-    og landsgennemsnittet regnes på samme afgrænsning.</p>
-
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Hvad der tælles som indkøb</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Med er artskonti for varekøb og tjenesteydelser hos leverandører: fødevarer,
-    brændsel og drivmidler, anskaffelser, øvrige varekøb, tjenesteydelser uden moms,
-    entreprenør- og håndværkerydelser og øvrige tjenesteydelser. Uden er lønninger
-    (ikke et indkøb), køb af jord og bygninger (en formueoverførsel), overførsler til
-    borgere, interne poster, og betalinger til stat, kommuner og regioner -
-    Energistyrelsen opgør tilsvarende indkøb hos <em>private</em> leverandører og
-    fratrækker interne offentlige betalinger (s. 5). Fravalget har en pris, og den
-    skal stå: en kommune, der køber sin opgave hos et §60-fællesskab, bogfører det
-    som betaling til kommuner og ser derfor ud til at købe mindre ind end en kommune,
-    der løser opgaven selv.</p>
-
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Drift og anlæg udjævnes forskelligt</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Driftsindkøbet er stabilt: afvigelsen fra landet korrelerer r&nbsp;=&nbsp;+0,98
-    mellem 2024 og 2025 og r&nbsp;=&nbsp;+0,96 mellem 2021 og 2025. Det vises derfor
-    for det nyeste regnskabsår alene. Anlægsindkøbet svinger med enkeltprojekter -
-    ét skolebyggeri kan flytte en lille kommune flere hundrede procent - og
-    enkeltår korrelerer kun r&nbsp;=&nbsp;+0,75. To adskilte femårsvinduer korrelerer
-    derimod r&nbsp;=&nbsp;+0,71, så der er en vedvarende komponent at få fat i.
-    Anlæg vises som gennemsnit over fem regnskabsår, efter samme logik som
-    forbrugsundersøgelsens ti-årsvindue: udjævn kun det, der kræver det.</p>
-
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Færgekommunerne får et forbehold</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Læsø, Samsø og Ærø bruger 42-52 procent af deres samlede indkøb på hovedkonto
-    2, Transport og infrastruktur, mod 5,3 procent for landet (2025-regnskabet). Det
-    er færgedrift, en
-    regional transportopgave betalt af kommunen for en befolkning, der er meget
-    mindre end færgens opland. Næste kommune på listen er Bornholm med 17,4 procent samme år, så grænsen på en
-    tredjedel ligger i et bredt spring: flyttes den fra 20 til 40 procent, rammer den
-    de samme tre kommuner.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>De tre beholder deres
-    indkøbstal.</strong> Kronerne er udløst, og brændstoffet er brændt - det er
-    sammenligningen med landsgennemsnittet, færgen gør skæv, ikke bogføringen. Derfor
-    står alle fire indkøbsnøgletal på deres sider med værdi, landsgennemsnit og
-    afvigelse. I stedet for et retningsmærkat bærer rækken mærkatet
-    <em>forbehold: ingen retning</em>, og ordlyden står ved ikonet som ved
-    ethvert andet nøgletal. Kategoriens
-    samlede retning siger tilsvarende <em>retningen kan ikke afgøres</em> frem for
-    <em>ingen data</em>: tallene er der, det er sammenligneligheden, der mangler.
-    Værktøjet tog tidligere de fire nøgletal helt af de tre kommuners sider.
-    Det var hverken meningen eller det, dette afsnit lovede: forbeholdet spærrede
-    retningen og skjulte tallet i ét og samme greb, fordi koden ikke skelnede
-    mellem de to.</p>
-
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Prisen tæller, ikke mængden</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Energistyrelsen noterer selv, at et dyrere indkøb alt andet lige giver et
-    højere beregnet aftryk, fordi størstedelen af indkøbet opgøres i kroner og ikke i
-    mængder (s. 14). Det rammer især, når en grøn produktvariant er dyrere end en
-    konventionel. Samme forbehold gælder her: køber kommunen økologisk eller
-    klimavenligt til en højere pris, stiger tallet, uden at der er købt mere.</p>
-</div>
-
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Forbrugsundersøgelsen: hvad der er fravalgt, og hvad der bruges</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Danmarks Statistiks Forbrugsundersøgelse opgør, hvad husstandene bruger penge
-    på, fordelt på forbrugsgrupper. Den er den ene halvdel af NIRAS' anbefaling
-    ovenfor, og den er offentligt tilgængelig. Vi har undersøgt, om den kan bruges
-    uden den kommercielle segmenteringsmodel, der er den anden halvdel. Som en generel
-    erstatning kan den ikke, og grunden er værd at kende, fordi tabellerne umiddelbart
-    ser anvendelige ud.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Én anvendelse er der alligevel.</strong>
-    Nøgletallet <em>Fødevareforbrug pr. indbygger</em> bygger på FU17, men ikke som et
-    regionstal. Det følger fordelingsnøglen fra
-    <a href="https://doi.org/10.1016/j.ecolecon.2020.106778" target="_blank" rel="noopener"
-      class="underline decoration-dotted hover:text-gray-900">Osei-Owusu m.fl. (2020)</a>,
-    hvor regionens forbrugskvotient ganges med <em>kommunens egen</em> disponible
-    indkomst. De to indvendinger nedenfor rammer derfor forskelligt: den om fortegnet
-    gælder ikke, fordi kommunens eget tal bærer variationen, mens den om at tallet er
-    indkomst gælder fuldt ud. Den står skrevet ind i nøgletallets egen begrundelse på
-    kommunesiderne, så læseren ser den dér og ikke kun her.</p>
-
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Regionstallene er reelle, men de er indkomst</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">FU17 opgør forbruget på de fem regioner. Forskellene er ikke stikprøvestøj:
-    måler man over 2015-2024, ligger de samme regioner samme vej år efter år for
+  <h3 id="forbrugsundersoegelsen" class="nr scroll-mt-4 mt-4 font-semibold text-gray-900">Forbrugsundersøgelsen som kommunalt forbrugstal</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Danmarks Statistiks
+    Forbrugsundersøgelse opgør, hvad husstandene bruger penge på, fordelt på
+    forbrugsgrupper. Den er den ene halvdel af NIRAS' anbefaling for øvrigt forbrug og er
+    offentligt tilgængelig. Værktøjet har undersøgt, om den kan bruges uden den
+    kommercielle segmenteringsmodel, der er den anden halvdel. Det kan den ikke, bortset
+    fra i fødevarenøgletallet. Grundene står her, fordi tabellerne umiddelbart ser
+    anvendelige ud.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Regionstallene afspejler
+    indkomsten.</strong> FU17 opgør forbruget på de fem regioner. Forskellene er ikke
+    stikprøvestøj: over 2015-2024 ligger de samme regioner samme vej år efter år for
     fødevarer (spænd 13,6 pct.point mellem yderregionerne), restauranter og hoteller
-    (56,8) og bolig, vand og energi (29,5). Men holder man dem op mod regionernes
-    disponible indkomst, følger de den næsten helt: korrelationen er +0,97 for
-    restauranter og hoteller, +0,97 for bolig og energi og +0,84 for fødevarer.
-    Værktøjet viser i forvejen disponibel indkomst for hver af de 98 kommuner, og
-    CONCITO (2023) s. 6 og s. 30 peger på netop indkomsten som bæreren. Et regionstal
-    ville tilføje den samme oplysning i grovere opløsning.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det gælder også fødevarenøgletallet, som er
-    beholdt alligevel: målt over de 98 kommuner følger det disponibel indkomst med
-    r = +0,97. Det står med, fordi fødevarerne vejer 17 % af det nationale aftryk, og en
-    kategori uden retning læses som en kategori uden problem. Det er et valg om
-    formidling, ikke et tal med ny oplysning i.</p>
-
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">En region beskriver ikke sine kommuner</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Spændet i disponibel indkomst mellem regionsgennemsnittene er 20,9 pct.point.
-    Spændet <em>inde i</em> regionerne er 46,6 pct.point i gennemsnit og 113,8 i Region
-    Hovedstaden. Regionsgennemsnittet beskriver derfor ikke den enkelte kommune, og for
-    en del af dem vender det forkert: Albertslunds egen disponible indkomst ligger 13,5
-    pct. under landsgennemsnittet, mens regionens ligger 11,9 pct. over. Et regionalt
-    forbrugstal ville fortælle Albertslund, at kommunen forbruger mere end
-    landsgennemsnittet. Det er ikke en unøjagtighed, som et forbehold kan dække -
-    fortegnet er forkert.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det er grunden til, at fødevarenøgletallet
-    ikke bruger regionens forbrug, men regionens forbrugskvotient ganget med kommunens
-    egen indkomst. Albertslund lander derfor 17,4 pct. under landsgennemsnittet, i takt med
-    kommunens egen indkomst, og ikke over det.</p>
-
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Transport er tavs</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Transport er den største forbrugskategori, og det er præcis dér,
-    Forbrugsundersøgelsen intet giver. Alle fem regioner svinger fra år til år med mere,
-    end de afviger fra landsgennemsnittet (udsving på ±12 til ±15 pct.point), og
-    korrelationen med indkomst er +0,02. Hverken tallet selv eller indkomsten som
-    stedfortræder kan bruges.</p>
-
-  <h3 class="mt-4 font-semibold text-gray-900 text-sm">Forsøget på at gå uden om segmenteringsmodellen</h3>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">FU15 opgør forbruget efter husstandens indkomst i stedet for efter region, og
+    (56,8) og bolig, vand og energi (29,5). Holdt op mod regionernes disponible indkomst
+    følger de den næsten helt, med en korrelation på +0,97 for restauranter og hoteller,
+    +0,97 for bolig og energi og +0,84 for fødevarer. Værktøjet viser allerede disponibel
+    indkomst for hver af de 98 kommuner, og CONCITO (2023) s. 6 og s. 30 peger på netop
+    indkomsten som bæreren. Et regionstal ville gentage den oplysning i grovere
+    opløsning.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>En region beskriver ikke sine
+    kommuner.</strong> Spændet i disponibel indkomst mellem regionsgennemsnittene er 20,9
+    pct.point. Spændet <em>inde i</em> regionerne er 46,6 pct.point i gennemsnit og 113,8
+    i Region Hovedstaden. Regionsgennemsnittet kan derfor give den enkelte kommune et
+    forkert fortegn: Albertslunds egen disponible indkomst ligger 13,5 pct. under
+    landsgennemsnittet, mens regionens ligger 11,9 pct. over. Et regionalt forbrugstal
+    ville sige, at Albertslund forbruger mere end landsgennemsnittet.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Det er grunden til, at
+    fødevarenøgletallet bruger regionens forbrugskvotient ganget med kommunens egen
+    indkomst. Albertslund lander derfor 17,4 pct. under landsgennemsnittet, i takt med
+    kommunens egen indkomst. Indvendingen om fortegnet gælder altså ikke
+    fødevarenøgletallet, mens indvendingen om, at tallet gentager indkomsten, gælder
+    fuldt ud.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Transport giver intet.</strong>
+    Transport er den største forbrugskategori, men alle fem regioner svinger fra år til
+    år med mere, end de afviger fra landsgennemsnittet (udsving på ±12 til ±15
+    pct.point), og korrelationen med indkomst er +0,02. Hverken tallet selv eller
+    indkomsten som stedfortræder kan bruges.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Forsøget på at gå uden om
+    segmenteringsmodellen.</strong> FU15 opgør forbruget efter husstandens indkomst, og
     DST's INDKF122 opgør, hvor mange familier hver kommune har i hvert indkomstinterval.
-    Sammen udgør de i princippet en vej til et kommunalt forbrugstal, bygget udelukkende
-    af offentlige registre: kommunens indkomstfordeling ganget med forbruget for hver
-    indkomstgruppe.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Den kæde kan efterprøves. Der findes intet observeret kommunalt forbrug at holde
-    den op mod, men der findes observeret <em>regionalt</em> forbrug i FU17. Rammer
-    forudsigelsen ikke regionerne - hvor gennemsnittet af mange kommuner arbejder for
-    den - kan den ikke bruges på en enkelt kommune. Resultatet for 2022-2024:</p>
+    Ganger man kommunens indkomstfordeling med forbruget i hver indkomstgruppe, får man
+    i princippet et kommunalt forbrugstal bygget alene af offentlige registre. Der
+    findes intet observeret kommunalt forbrug at efterprøve det mod, men der findes
+    observeret regionalt forbrug i FU17. Rammer metoden ikke regionerne, hvor
+    gennemsnittet af mange kommuner hjælper den, kan den ikke bruges på den enkelte
+    kommune. Resultatet for 2022-2024:</p>
   <div class="mt-3 overflow-x-auto">
     <table class="w-full text-sm text-gray-700 max-w-3xl">
       <thead><tr class="border-b border-gray-300 text-left">
@@ -315,314 +616,61 @@
       </tbody>
     </table>
   </div>
-  <p class="mt-3 text-sm text-gray-700 max-w-3xl">Metoden sætter regionerne i næsten rigtig rækkefølge, men den rammer kun 12 til 36
-    pct. af den forskel, der faktisk er målt. Den trykker alle områder ind mod
-    landsgennemsnittet. For at lukke afstanden skulle hver forbrugsgruppe ganges med sin
-    egen faktor - mellem cirka 3 og 8 - og den faktor står ikke i nogen kilde. Det er
-    samme slags opfundne koefficient, som resten af værktøjet er indrettet på at undgå.
-    Rækkefølgen alene kan ikke bruges: værktøjet rangordner ikke kommuner.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Konklusionen er, at den kommercielle segmenteringsmodel i NIRAS' anbefaling er
-    bærende og ikke kan erstattes af offentlige registre. Forbrugsundersøgelsen måler
-    husstande, mens indkomstregistret måler familier - der er cirka 8 pct. flere familier
-    end husstande - og de to inddelinger af indkomsten flugter kun delvist. Men det
-    forklarer ikke sammentrykningen. Den skyldes, at forbrug afhænger af mere end
-    indkomst: byhed, boligform og afstand til indkøb og arbejde trækker hver sin vej, og
-    det er dem, en segmenteringsmodel indeholder.</p>
-</div>
+  <p class="mt-3 text-sm text-gray-700 max-w-3xl">Metoden sætter regionerne i næsten
+    rigtig rækkefølge, men rammer kun 12 til 36 pct. af den forskel, der faktisk er målt,
+    og trykker alle områder ind mod landsgennemsnittet. For at lukke afstanden skulle
+    hver forbrugsgruppe ganges med sin egen faktor på mellem cirka 3 og 8, og den faktor
+    står ikke i nogen kilde. Rækkefølgen alene kan heller ikke bruges, fordi værktøjet
+    ikke rangordner kommuner.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Den kommercielle segmenteringsmodel
+    i NIRAS' anbefaling kan altså ikke erstattes af offentlige registre.
+    Forbrugsundersøgelsen måler husstande og indkomstregistret familier (der er cirka 8
+    pct. flere familier end husstande), og de to inddelinger af indkomsten flugter kun
+    delvist. Det forklarer dog ikke sammentrykningen. Den skyldes, at forbrug afhænger af
+    mere end indkomst: byhed, boligform og afstand til indkøb og arbejde trækker hver sin
+    vej, og det er de forhold, en segmenteringsmodel indeholder.</p>
 
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Danmarks forbrugsudledning</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">De nationale vægte kommer fra
-    <strong>Energistyrelsens Globale Afrapportering</strong>. Kategorierne på hver
-    kommuneside står i den rækkefølge, de fylder nationalt, og summerer eksakt til
-    hovedtallet. Grupperingen af Energistyrelsens poster i syv kategorier er vores;
-    tallene er kildens, og posterne bag hver kategori står i tabellen, så enhver sum kan
-    efterprøves.</p>
-  <div id="ens-kategorier" class="mt-4"></div>
-</div>
+  <h3 id="fjernet" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Nøgletal, der er taget af siden</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Fem nøgletal gentog andre
+    tal på siden</strong>, målt over alle 98 kommuner: nettoformuen (gennemsnit og
+    median) følger den disponible indkomst (r = +0,95 og +0,84), befolkningstætheden
+    følger biler pr. indbygger (r = -0,76), boligprisen følger indkomst og tæthed
+    (r = +0,69 og +0,78), og parcelhusandelen følger boligarealet (r = +0,92).</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Gini-koefficienten</strong> er
+    taget af siden, fordi ulighed siger noget om, hvordan forbruget er fordelt, og ikke
+    om hvor stort det er. Den hentes stadig, fordi den hører hjemme i en vurdering af en
+    rimelig og retfærdig omstilling.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>El-CO2 pr. kWh for
+    kommunen.</strong> Værktøjet viste tidligere Energinets lokationsbaserede
+    kommunedeklaration, hvor lokal vedvarende energi, der forbruges i kommunen samme
+    time, regnes som nul-emission. I et forbrugsbaseret regnskab er det en
+    dobbeltregning, fordi strømmen deles på det fælles net. Uden den kreditering viste
+    tallet kun prisområdet: i 2025 lå alle kommuner vest for Storebælt på 64-69 g
+    CO2/kWh og alle øst for på 41-43. Den forskel afhænger desuden af metoden, for
+    Energistyrelsens fremskrivning for 2025 har de to prisområder på 60,0 og 57,3 g
+    CO2e/kWh. Tallet er derfor taget af siden sammen med den lokale VE-dækning, der
+    skulle forklare det.</p>
+</section>
 
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">CONCITO som supplerende kilde</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">CONCITO's opgørelse fra 2023 bruges
-    fortsat til det, Energistyrelsen ikke opgør: fødevarernes sammensætning, herunder
-    oksekødets andel, og forbrugsprofilerne efter indkomst. <strong>De to opgørelser må
-    ikke lægges sammen.</strong> Energistyrelsen holder investeringer og offentligt
-    forbrug ude som egne blokke, mens CONCITO fordeler dem ind i forbrugskategorierne;
-    derfor opgør Energistyrelsen transport til 1,8 ton, hvor CONCITO når 3,1. Forskellen
-    er systemafgrænsning, ikke uenighed.</p>
-  <div id="nationalt" class="mt-4"></div>
-</div>
+<section class="metode-afsnit rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
+  <h2 id="kilder-og-referencer" class="nr scroll-mt-4 text-xl font-semibold text-gray-900">Kilder og referencer</h2>
 
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Nøgletallene og hvordan de sammenlignes</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hvert nøgletal vises som kommunens værdi, landsgennemsnittet og forskellen
-    mellem dem. Forskellen er en relativ afvigelse, altså (kommune minus land) divideret
-    med land, undtagen for befolkningsudvikling, hvor to procenter trækkes fra hinanden
-    og resultatet er procentpoint.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Forskellens fortegn i tabellen viser, om kommunen ligger over eller under landsgennemsnittet.
-    Den siger bevidst <strong>ikke</strong>, om det er godt eller skidt. En høj andel
-    elbiler over landsgennemsnittet er en fordel; en høj andel fossilbiler er ikke.
-    Værktøjet foretager ikke den vurdering, og det rangordner heller ikke kategorier
-    eller kommuner.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Nøgletallene er grupperet efter den forbrugskategori, de vedrører. Grupperingen
-    er beskrivende: den siger hvilken af Energistyrelsens kategorier et tal handler om,
-    ikke hvor meget det betyder for udledningen.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Disponibel indkomst står under
-    Forbrugsprodukter og services.</strong> CONCITO (2023) s. 27 forklarer, at mennesker med
-    lav indkomst ofte forbruger færre ting og sager og rejser mindre, og NIRAS (2024) s. 27
-    anbefaler at undersøge, om borgernes øvrige forbrug kan skaleres efter indkomsten.
-    Kilderne kobler også indkomsten til flyrejser (NIRAS s. 20) og regner fødevarer med til
-    det øvrige forbrug (NIRAS s. 22). Nøgletallet står alligevel kun ét sted, så det ikke
-    tæller med to gange i den samlede retning. Sammenhængen er ikke mekanisk: CONCITO's
-    forbrugsprofiler går fra 8,7 til 15 ton i den laveste indkomstgruppe og fra 12 til 25
-    ton i den højeste (s. 28-29).</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Nøgletal, der er taget af
-    siden.</strong> Fem nøgletal gentog tal, der allerede står på siden, målt over alle 98
-    kommuner: nettoformuen (gennemsnit og median) følger den disponible indkomst (r = +0,95
-    og +0,84), befolkningstætheden følger biler pr. indbygger (r = -0,76), boligprisen
-    følger indkomst og tæthed (r = +0,69 og +0,78), og parcelhus-andelen følger
-    boligarealet (r = +0,92). Gini-koefficienten er også taget af siden: ulighed siger noget om, hvordan forbruget
-    er fordelt, ikke om hvor stort det er. Den hentes stadig, fordi den hører hjemme i en
-    vurdering af rimelig og retfærdig omstilling.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Bilerne er husholdningernes.</strong>
-    Danmarks Statistik registrerer firma- og leasingbiler på virksomhedens adresse, ikke der,
-    hvor de bruges. Med alle biler talt med var knap hver tredje bil i Brøndby og Albertslund
-    en erhvervsbil, og Brøndby stod med 0,52 biler pr. indbygger mod 0,37, når kun
-    husholdningernes blev talt. Energistyrelsens transportkategori er husholdningernes, så
-    det er dem, der tælles.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Mangler et tal, står der en tankestreg. Aldrig et nul.</p>
-</div>
-
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">"Peger mod" - den eneste vurdering i værktøjet</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Nøgletallene er mærket med, hvad afvigelsen peger mod for udledningen:
-    højere eller lavere end landsgennemsnittet. Det er den eneste vurdering, værktøjet
-    foretager, og den er tilføjet, fordi en mur af procenttal ikke er et overblik.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Hver kategori har desuden en
-    samlet retning.</strong> Den tæller kategoriens nøgletal: hvert nøgletal tæller ét,
-    uanset om det afviger 2 eller 40 % fra landsgennemsnittet, og optællingen står ved
-    mærkatet ("3 af 4 nøgletal"), så den kan tælles efter i tabellen nedenunder. Den lige
-    vægtning er et valg: at lade de store udsving veje tungere ville kræve at vide, hvor
-    meget hvert nøgletal betyder for kommunens udledning, og det tal findes ikke i nogen
-    af kilderne. Mærkatet siger derfor, hvad NØGLETALLENE peger mod - ikke at kategorien
-    som helhed ligger over eller under landsgennemsnittet.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Mærkatet handler om udledningen,
-    ikke om værdien.</strong> De to er ikke det samme. En lav andel el- og
-    plugin-hybridbiler er en lav værdi, men peger mod en <em>høj</em> udledning, fordi
-    resten af bilparken kører på benzin og diesel. Derfor står der "peger mod ..." og
-    ikke "højere" eller "lavere" alene. Værdien står i tabellen og taler for sig selv.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Retningen gættes ikke.</strong> Hvert nøgletal bærer sin begrundelse -
-    hold musen over ikonet ved mærkatet. Kan et nøgletals retning slet ikke begrundes
-    af kilderne, står det ikke på nogen kommuneside. Det er en egenskab ved nøgletallet
-    og gælder alle 98 ens.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Derudover kan kommunens egne
-    tal udløse et forbehold</strong>, og de gør tre forskellige ting. Enten er tallet
-    selv ramt, og så tages det af kommunens side med begrundelsen under tabellen.
-    Eller tallet er rigtigt, men ikke sammenligneligt, og så bliver det stående med
-    et mærkat, der siger, at retningen er holdt tilbage - det gælder
-    færgekommunernes indkøb. Eller tal og retning står som
-    ellers, og forbeholdet er en bemærkning, læseren skal have med. Hvilke kommuner der
-    rammes af hvad, står i tabellen nedenfor. Den er regnet af årets datasæt, ikke
-    skrevet i hånden, så den ikke kan komme bagud, når en kilde retter sin
-    indberetning.</p>
-  <div id="forbehold" class="mt-4"></div>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Hjælpetallene er undtaget.</strong>
-    De står i tabellen for at forklare et andet nøgletal, er mærket
-    <em>forklarende</em> og tæller ikke med i kategoriens samlede retning:</p>
-  <ul class="mt-3 space-y-2 text-sm text-gray-700 max-w-3xl list-disc pl-5">
-    <li><strong>Befolkningsudvikling og fritidshuse pr. helårsbolig.</strong> Forklarer
-      byggeaktiviteten og husholdningstallene og peger ikke selv nogen vej. De vises på
-      alle kommunesider, men uden mærkat.</li>
-    <li><strong>Husholdningsaffald og genanvendelsesprocent.</strong> Kontekst, ikke mål for
-      forbruget. De står med mærkat i tabellen, men i den samlede retning er det kun
-      disponibel indkomst, der afgør, hvilken vej Forbrugsprodukter og services peger. Affaldet følger
-      ikke indkomsten (r = -0,25 over de 91 kommuner, hvor det vises), og
-      husholdningsaffaldet rummer haveaffald, hvis andel svinger fra under 1 til knap 50 %
-      mellem kommunerne. Hos kommuner, der deler affaldsindberetning, tages begge af siden,
-      fordi tallene selv er ramt.</li>
-    <li><strong>Gennemsnitligt boligareal.</strong> Står under Energi og forsyning for at
-      forklare husholdningernes energiforbrug: større boliger koster mere varme. Det har
-      et mærkat, fordi retningen er entydig, men tæller ikke med i kategoriens samlede
-      retning - det ville lade boligstørrelsen tælle to gange, én gang som sig selv og
-      én gang gennem energiforbruget, den forklarer.</li>
-  </ul>
-  <p class="mt-3 text-sm text-gray-700 max-w-3xl">Hjælpetallene er mærket
-    <em>forklarende</em> i tabellen på kommunesiden, så optællingen bag den samlede
-    retning kan tælles efter uden at læse denne side først.</p>
-  <p class="mt-3 text-sm text-gray-700 max-w-3xl"><strong>Et nøgletal har fået en
-    retning.</strong> Diesel-andelen stod tidligere som uafklaret: en dieselbil udleder
-    mindre CO2 pr. kilometer end en benzinbil, men køres til gengæld længere, og
-    fordelingen mellem de to kunne derfor ikke tolkes. Benzin- og dieselbiler vises nu
-    som ét tal, <em>fossil-andel</em>, hvor retningen er entydig. Bemærk, at de øvrige
-    drivmidler udgør under 0,1 pct. af bilparken i hver kommune. Fossil-andelen er
-    derfor tæt på præcis komplementet til el- og plugin-hybridandelen, og de to
-    nøgletal siger det samme fra hver sin ende.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Tærsklerne er en præsentationsbeslutning uden kilde.</strong> En
-    afvigelse under 10 % <em>peger lidt</em>, mellem 10 og 33 % peger den mod
-    <em>højere</em> eller <em>lavere</em> udledning, og fra 33 % mod <em>meget</em> højere
-    eller lavere. Kun en afvigelse, der vises som 0,0 %, peger hverken op eller ned.
-    Råtallet står altid ved siden af, så man kan læse gennem båndet.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Tærsklerne gælder det enkelte
-    nøgletal, ikke den samlede retning.</strong> Et nøgletal, der afviger under 10 %,
-    <em>peger lidt</em> og står med en åben trekant. I kategoriens samlede retning tæller
-    det alligevel ét, som alle andre. De to ting siger hver sit: mærkatet ved nøgletallet
-    siger, hvor stort udsvinget er, og den samlede retning siger, hvor mange nøgletal der
-    peger hver vej. Kategorien viste tidligere kun retningen for de nøgletal, der lå 10 %
-    eller mere fra landsgennemsnittet; de små stod i en optælling for sig og flyttede
-    ingenting.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Og tærsklerne er de samme for
-    alle nøgletal, selvom nøgletallene ikke er lige spredte.</strong> Fossil andel af
-    husholdningernes energi ligger mindst 33 % fra landsgennemsnittet i 78 af landets
-    98 kommuner; gennemsnitligt boligareal gør det i ingen. "Meget højere"
-    og "meget lavere" betyder derfor ikke det samme fra nøgletal til nøgletal. Tærskeltabellen
-    i afsnittet nedenfor viser sort på hvidt, hvor skævt det fordeler sig. Kommunesiderne viste tidligere
-    det samme som et spænd ved hvert tal, men det er fjernet: en læser af én kommunes
-    side sammenligner ikke på tværs af kommuner, og spændet lagde blot en tredje
-    talstørrelse oven i kommunens egen værdi og landsgennemsnittet.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>For andele står forskellen
-    også i procentpoint.</strong> Med et landsgennemsnit på 9,2 % bliver kommunen med den
-    højeste fossile andel af husholdningernes energi, 46,7 %, til "+409 %", hvilket lyder
-    ekstremt for en forskel på 38 procentpoint. Begge tal er sande, og begge står der.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Kategorierne lægges ikke sammen.</strong>
-    Den samlede retning <em>tæller</em>, hvor mange nøgletal der peger hver vej - den vejer
-    dem ikke mod hinanden. En samlet score pr. kategori ville kræve en vægtning, der ikke
-    findes i nogen kilde.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Farven forstærker kun. Mærkatet bærer altid sin tekst, og et symbol står ved
-    siden af, så signalet også kan læses uden at kunne skelne farverne.</p>
-</div>
-
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Hvor ofte giver hvert nøgletal et markant udsving?</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Tabellen er regnet ud af de faktiske 98
-    kommuner, ikke skrevet i hånden. Den viser, hvordan kommunerne fordeler sig på hvert
-    nøgletal, så mærkatet kan læses i den rigtige målestok. Et nøgletal, hvor 80 af 98
-    kommuner er markante, siger noget andet end et, hvor ingen er.</p>
-  <div id="taerskelfordeling" class="mt-4"></div>
-</div>
-
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Affaldstallenes kommunefordeling er usikker</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Danmarks Statistik oplyser selv, at
-    kommunefordelte affaldsmængder er mere usikre end totalerne for kommunegrupper og
-    hele landet, blandt andet fordi affald kan afleveres i en anden kommune, og fordi
-    genbrugspladser bruges af borgere fra flere kommuner. Forbeholdet står i
-    statistikdokumentationen for affaldsregnskabet og på tonnage-tabellen LABY24 - men
-    ikke på LABY25, som er den tabel, nøgletallet hentes fra.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">For opgørelsesåret 2023 slår det
-    tydeligt igennem. Flere kommuner, der deler et fælleskommunalt affaldsselskab, har
-    fået hinandens restaffald bogført: nogle står urealistisk lavt, andre urealistisk
-    højt. Lagt sammen inden for hvert selskab er niveauet normalt, og landsgennemsnittet
-    er upåvirket. Genanvendelsesprocenten er ramt af det samme, fordi de genanvendelige
-    fraktioner udgør en kunstigt høj andel, når restaffaldet forsvinder fra regnskabet.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Konsekvensen her:</strong>
-    tallene står, som Danmarks Statistik har offentliggjort dem - værktøjet retter aldrig
-    et tal fra en kilde. Forbeholdet sættes derimod pr. kommune, efter hvor tungt beviset
-    vejer:</p>
-  <ul class="mt-2 ml-5 list-disc text-sm text-gray-700 max-w-3xl space-y-1">
-    <li><strong>Ejerkommunerne bag Norfors og Reno Djurs</strong> får ikke de to
-      affaldsnøgletal vist, fordi tallene selv er ramt. Her er byttet af tonnage eftervist
-      i Danmarks Statistiks egne mængdetal, og tallet beskriver derfor ikke kommunen alene.
-      Hele ejerkredsen er mærket, ikke kun de medlemmer hvis eget tal ser skævt ud det
-      enkelte år: fejlkilden er selskabets indberetning. Hvilke kommuner det er i år,
-      står i forbeholdstabellen ovenfor - navnene skrives ikke her, fordi de så ville
-      blive stående, når et selskab retter sin indberetning.</li>
-    <li><strong>Kommuner, hvor tallet skiller sig ud</strong>, beholder retningen, men
-      får årsagen oplyst. Enten springer restaffaldet usædvanligt meget fra året før,
-      eller også er en affaldsfraktion, der fylder meget i alle andre kommuner, næsten
-      fraværende. Ingen af delene er i sig selv et bevis for en fejl - en lille kommune
-      svinger naturligt - og at tage tallet af siden ville være en påstand, vi heller
-      ikke kan bære.</li>
-    <li><strong>De øvrige kommuner</strong> får retningen som ethvert andet nøgletal.
-      Der er intet, der peger på, at deres tal er forkerte.</li>
-  </ul>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Inddelingen regnes af datapipelinen ved
-    hver hentning, ud fra to signaler. Det ene sammenligner kommunens restaffald med året
-    før. Det andet ser på, hvor stor en del af kommunens affald der er dagrenovation:
-    den andel er stor i enhver kommune - på landsplan 27-32 % - fordi dagrenovation er
-    det, der bliver tilbage, når alt sorterbart er sorteret fra. Falder den mod nul,
-    mangler fraktionen i regnskabet. Det signal kan aflæses på ét år og fanger derfor
-    også de kommuner, hvor fejlen er konstant og dermed usynlig for en
-    år-til-år-sammenligning.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hvilke kommuner der deler indberetning
-    står navngivet i pipelinens kildekode med henvisning til selskaberne. Den liste er en
-    strukturel oplysning om ejerkredse og bliver ikke forældet af et nyt dataår - men om
-    den <em>spærrer</em> et nøgletal afgøres hvert år på ny af årets egne tal. Retter et
-    selskab sin indberetning, falder forbeholdet bort af sig selv, og nøgletallene vender
-    tilbage på kommunens side. Tidligere stod begge
-    nøgletal som <em>uafklarede</em> for alle 98 kommuner; det var for groft, fordi fejlen
-    rammer et mindretal.</p>
-</div>
-
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Kilder</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Årstal og perioder er ikke skrevet i hånden. De genereres af datapipelinen ud
-    fra det, der faktisk blev hentet ved sidste kørsel.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Kilden står også ved hvert
-    enkelt nøgletal på kommunesiden</strong>, med tabel-id og årgang - "DST BIL54
-    2026M01" - og med link til tabellen. Den skrives ikke i hånden dér: hvert nøgletal
-    oplyser, hvilke felter i datasættet det læser, og kataloget nedenfor siger, hvem der
-    ejer hvert felt. Ændrer et regnestykke sig, så det bruger en ny tabel, følger
-    kildeangivelsen med, og en test slår fejl, hvis den ikke gør. Et nøgletal, der er
-    beregnet af flere kilder, nævner dem alle, og fødevareforbruget nævner desuden den
+  <h3 id="datakilder" class="nr scroll-mt-4 mt-4 font-semibold text-gray-900">Datakilder</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Tabellen dannes af datapipelinen ud
+    fra det, der faktisk blev hentet ved sidste kørsel, så årstal og perioder er ikke
+    skrevet i hånden.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Kilden står også ved hvert nøgletal
+    på kommunesiden med tabel-id og årgang, fx "DST BIL54 2026M01", og med link til
+    tabellen. Hvert nøgletal oplyser, hvilke felter i datasættet det læser, og
+    kildekataloget siger, hvem der ejer hvert felt. Skifter et regnestykke tabel, følger
+    kildeangivelsen med, og en automatisk test fejler, hvis den ikke gør. Et nøgletal,
+    der bygger på flere kilder, nævner dem alle, og fødevareforbruget nævner også den
     rapport, fordelingsnøglen kommer fra.</p>
   <div id="kilder" class="mt-4"></div>
-</div>
 
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Faglige referencer</h2>
+  <h3 id="faglige-referencer" class="nr scroll-mt-4 mt-6 font-semibold text-gray-900">Faglige referencer</h3>
   <div id="referencer" class="mt-2"></div>
-</div>
-
-<div class="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
-  <h2 class="text-xl font-semibold text-gray-900">Energi: strøm er fælles, fjernvarme er lokal</h2>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Der er ingen el-CO2 pr. kWh for kommunen.</strong>
-    Strøm deles på det fælles net, og en vindmølle i én kommune gør ikke kommunens eget
-    forbrug renere - den gør alles. Værktøjet viste tidligere Energinets
-    lokationsbaserede kommunedeklaration, hvor lokal vedvarende energi, der forbruges i
-    kommunen samme time, regnes som nul-emission. Set fra et forbrugsbaseret regnskab er
-    det en dobbeltregning. Uden den kreditering viste tallet kun prisområdet: i 2025 lå
-    alle kommuner vest for Storebælt på 64-69 g CO2/kWh og alle øst for på 41-43. Den
-    forskel afhænger desuden af metoden - Energistyrelsens fremskrivning for 2025 har de
-    to prisområder på 60,0 og 57,3 g CO2e/kWh. Tallet er derfor taget af siden sammen
-    med den lokale VE-dækning, der skulle forklare det.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Fjernvarmens CO2 pr. kWh er kommunens eget tal.</strong>
-    Fjernvarme leveres i rør fra lokale net. Klimaregnskabet beregner udledningen pr.
-    fjernvarmenet efter Energistyrelsens anbefaling og fordeler den på de kommuner, der
-    aftager varme fra nettet. Tallet siger, hvor ren fjernvarmen er, ikke hvor meget den
-    fylder - det ses i husholdningernes CO2.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Husholdningernes energi og udledning</strong> kommer fra
-    Klimaregnskabet.dk, som udstiller Energi- og CO2-regnskabet. NIRAS (2024) s. 18 peger
-    på netop den kilde til energidelen af et kommunalt forbrugsregnskab. Vi trækker kun
-    kategorien Husholdninger ud - borgernes eget forbrug af varme, varmt vand og el i
-    boligen. Erhverv, fremstillingsvirksomhed, offentlig service og transport hører til
-    andre kategorier og er ikke med; det er efterprøvet ved, at underkategorierne
-    summerer eksakt til kommunens samlede forbrug.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Tre ting skal læses med. For det første dækker opgørelsen udledningen fra
-    forbrændingen og fra elnettet, ikke hele livscyklussen bag brændslet. Niveauet er
-    derfor lavere end CONCITO's tal for El og varme, og de to må ikke lægges sammen -
-    men sammenligningen mellem kommunen og landsgennemsnittet er gyldig, fordi begge
-    sider opgøres ens.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">For det andet fordeles tallene på <strong>samtlige boliger inklusive
-    fritidshuse</strong>, ikke på indbyggere. Fritidsboliger bruger energi, men deres
-    ejere er registreret i en anden kommune. Målt på tværs af alle 98 kommuner følger
-    tallet pr. indbygger sommerhustætheden næsten lige så tæt, som det følger
-    boligstørrelsen; fordeles det i stedet på alle boliger, forsvinder den sammenhæng,
-    og tallet følger boligstørrelse og andelen af fritliggende huse - altså det, det bør
-    følge. Til gengæld bruger et fritidshus mindre energi end en helårsbolig, så i de få
-    kommuner med flere fritidshuse end helårsboliger trækkes gennemsnittet for langt ned.
-    Derfor står fritidshuse pr. helårsbolig som selvstændigt nøgletal ved siden af, og i
-    de kommuner vises de to husholdningstal pr. bolig ikke, fordi retningen ikke kan
-    afgøres.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl">For det tredje er <strong>strømmen regnet om</strong>.
-    Klimaregnskabet giver hver kommune sin egen el-faktor ud fra den el, der produceres i
-    kommunen, så lokal vind og sol tæller som nul hos kommunens egne forbrugere - i 2024
-    står fire kommuner på nul, mens Aalborg ligger på 418 g CO2e/kWh. Værktøjet regner i
-    stedet husholdningernes strøm med landets fælles faktor: husholdningernes samlede
-    el-udledning delt med deres samlede elforbrug over alle 98 kommuner, 79 g CO2e/kWh
-    i 2024. Landstallet er uændret, men tallet flytter sig for de kommuner, hvis egen
-    el-faktor ligger langt fra landets. Det er det eneste sted, værktøjet erstatter en del
-    af et kildetal, og derfor står det her, så det kan efterprøves.</p>
-</div>
+</section>
 
 </div>
 </main>

@@ -42,6 +42,13 @@ jobs:
         # at alle 98 kommuner kan renderes mod det ægte datasæt.
         run: npm test
 
+      - name: Byg metoden som PDF
+        # Knappen "Hent som PDF" på metodesiden peger på web/metode.pdf. Filen
+        # committes ikke, fordi den rummer tabeller regnet af årets datasæt og
+        # ellers ville kunne komme bagud for siden. Runnerens egen Chrome
+        # trykker den; scriptet fejler, hvis tabellerne ikke kom med.
+        run: npm run pdf
+
       - uses: actions/configure-pages@v5
 
       - name: Pak web-mappen

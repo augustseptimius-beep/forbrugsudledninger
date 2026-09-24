@@ -70,3 +70,98 @@ body.embed .kun-embed { display: block; }
 @media print {
   .tabel-scroll { background: none; }
 }
+
+/* ---------- Metodesiden ----------
+
+   Afsnitsnumre sættes af CSS ud fra rækkefølgen, så indholdsfortegnelsen og
+   overskrifterne ikke kan komme ud af takt, når et afsnit flyttes. Kun
+   overskrifter med .nr tælles - de genererede tabellers egne h3'er er ikke
+   afsnit. Nummeret er med, så en sagsbehandler kan henvise til "afsnit 6.4". */
+.metode-side main { counter-reset: afsnit; }
+.metode-side h2.nr { counter-increment: afsnit; counter-reset: underafsnit; }
+.metode-side h2.nr::before { content: counter(afsnit) ". "; }
+.metode-side h3.nr { counter-increment: underafsnit; }
+.metode-side h3.nr::before { content: counter(afsnit) "." counter(underafsnit) " "; }
+
+.metode-side ol.indhold { counter-reset: toc; list-style: none; padding: 0; }
+.metode-side ol.indhold ol { counter-reset: toc; list-style: none; padding-left: 1.75rem; margin-top: 0.25rem; }
+.metode-side ol.indhold li { counter-increment: toc; }
+.metode-side ol.indhold li > ol > li { margin-top: 0.125rem; }
+.metode-side ol.indhold a::before { content: counters(toc, ".") ". "; color: var(--color-gray-500); }
+.metode-side ol.indhold ol a::before { content: counters(toc, ".") " "; }
+.metode-side ol.indhold a { color: var(--color-gray-700); text-decoration: none; }
+.metode-side ol.indhold a:hover { color: var(--color-gray-900); text-decoration: underline; }
+
+/* Kun på papir og i PDF'en. */
+.kun-print, .kun-print-blok { display: none; }
+
+/* Metodesiden som PDF. Samme regler bruges af browserens udskrift og af
+   scripts/metode-pdf.mjs, som trykker siden med headless Chrome ved
+   udgivelse. Et navngivet sideformat, så sidetal og sidefod kun kommer på
+   metodesiden og ikke på en udskrevet kommuneside. */
+@page metode {
+  size: A4;
+  margin: 2cm 2cm 2.2cm;
+  @bottom-left {
+    content: "Forbrugsbaserede udledninger - Metode og data";
+    font: 8pt ui-sans-serif, system-ui, sans-serif;
+    color: #6b7280;
+  }
+  @bottom-right {
+    content: "Side " counter(page) " af " counter(pages);
+    font: 8pt ui-sans-serif, system-ui, sans-serif;
+    color: #6b7280;
+  }
+}
+@media print {
+  body.metode-side { page: metode; background: white; font-size: 10pt; }
+  .metode-side main { max-width: none; padding: 0; }
+  .metode-side main > div > * + * { margin-top: 0; }
+  .kun-print { display: inline; }
+  .kun-print-blok { display: block; }
+
+  /* Forsiden står alene: titel, oprindelse og indholdsfortegnelse. */
+  .metode-forside { border: 0 !important; padding: 0 !important; break-after: page; }
+  .metode-forside h1 { font-size: 22pt; margin-top: 3cm; }
+
+  /* Afsnittene flyder som et dokument uden kortrammer. Hvert hovedafsnit får
+     en streg over sig i stedet. */
+  .metode-afsnit { border: 0 !important; border-radius: 0 !important; padding: 0 !important;
+    padding-top: 10pt !important; margin-top: 16pt !important; border-top: 1px solid #d1d5db !important; }
+  .metode-side h2, .metode-side h3 { break-after: avoid; }
+  .metode-side h2 { font-size: 14pt; }
+  .metode-side h3 { font-size: 11pt; }
+  .metode-side p, .metode-side li { orphans: 3; widows: 3; }
+  .metode-side .max-w-3xl { max-width: none; }
+
+  /* Tabellerne skal kunne være på siden uden vandret scroll. */
+  .metode-side table { min-width: 0 !important; }
+  .metode-side .overflow-x-auto { overflow: visible; }
+  .metode-side tr { break-inside: avoid; }
+  /* På skærmen holder nowrap kolonnerne pæne og lader tabellen scrolle. På
+     papiret ville de klemme kildenavnet ned til få tegns bredde. */
+  .metode-side td, .metode-side th { white-space: normal !important; }
+  .metode-side td .font-mono { overflow-wrap: anywhere; }
+  /* Kildetabellen får forbeholdene skrevet ud i kildekolonnen (se nedenfor),
+     så den kolonne skal have pladsen. */
+  .metode-side #kilder td { vertical-align: top; }
+  .metode-side #kilder table { table-layout: fixed; }
+  .metode-side #kilder td { overflow-wrap: anywhere; }
+  .metode-side #kilder th { letter-spacing: 0; }
+  .metode-side #kilder th:nth-child(1) { width: 16%; }
+  .metode-side #kilder th:nth-child(2) { width: 36%; }
+  .metode-side #kilder th:nth-child(3) { width: 15%; }
+  .metode-side #kilder th:nth-child(4) { width: 10%; }
+  .metode-side #kilder th:nth-child(5) { width: 12%; }
+  .metode-side #kilder th:nth-child(6) { width: 11%; }
+  .metode-side thead { display: table-header-group; }
+
+  /* Forbeholdene i kildetabellen står i en tooltip på skærmen. På papir er
+     der ingen mus, så teksten skrives ud under kildens navn. */
+  .metode-side [data-tip] svg { display: none; }
+  .metode-side [data-tip]::after {
+    content: attr(data-tip);
+    display: block; margin-top: 2pt; font-size: 8pt; color: #6b7280;
+  }
+  .metode-side [data-tip] { display: block; margin-left: 0; }
+}

@@ -17,8 +17,9 @@
   forklaringen i `pipeline/constants.py`.
 - **Stak:** Vanilla ES-moduler, Tailwind CSS 4 via CLI, Python til pipelinen.
   Ingen React, ingen bundler, ingen runtime-afhængigheder.
-- **Udgivelse:** GitHub Actions bygger CSS, kører testene og udgiver `web/`
-  til GitHub Pages. Push til `main` udgiver.
+- **Udgivelse:** GitHub Actions bygger CSS, kører testene, trykker
+  metodesiden som PDF og udgiver `web/` til GitHub Pages. Push til `main`
+  udgiver.
 - **Sprog i repoet:** dansk i UI, kommentarer og dokumentation. README er på
   engelsk af hensyn til eksterne læsere. **Undgå em-dash, brug enkelt dash.**
 
@@ -37,6 +38,7 @@ Ingen server, ingen database ved kørsel.
 ```
 forbrugsudledninger/
 ├── Start udviklerserver.command   <- dobbeltklik på macOS for lokal preview
+├── scripts/metode-pdf.mjs  <- trykker metodesiden til web/metode.pdf (npm run pdf)
 ├── pipeline/
 │   ├── build.py            <- orkestrerer alt, skriver data.json + sources.json
 │   ├── constants.py        <- ★ ANTAGELSER OG PERIODER. Årets ét sted at redigere.
@@ -172,6 +174,14 @@ artskonti der tælles som kommunens indkøb og hvilke der ikke gør, med
 Energistyrelsens egen formulering som grundlag - og hvorfor hovedkonto 1,
 Forsyningsvirksomheder, udelades for alle 98 kommuner frem for at blive skjult
 for de 17, der står med nul.
+
+Metodesiden kan hentes som PDF til en sag. Filen trykkes af
+`scripts/metode-pdf.mjs` med headless Chrome ved udgivelse og committes ikke,
+fordi den rummer tabeller regnet af årets datasæt. Printlayoutet står i
+`web/styles/input.css` under `@page metode`. Afsnitsnumrene sættes af CSS ud
+fra rækkefølgen, og `test/metodeside.test.js` holder indholdsfortegnelsen i
+takt med de nummererede overskrifter (`class="nr"`). Flytter du et afsnit, så
+flyt linjen i fortegnelsen med.
 
 **2. Manglende data må aldrig vises som nul.**
 

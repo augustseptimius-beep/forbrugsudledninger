@@ -21,3 +21,6 @@ node_modules/
 *.env
 pipeline/.env
 .kr_cache.json
+
+# Bygges af udgivelses-workflowet med npm run pdf. Se scripts/metode-pdf.mjs.
+web/metode.pdf

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { esc, tal, pct, ton, interval, intervalTil } from "../web/render.js";
+import { esc, tal, pct, ton, interval, intervalTil, danskDato } from "../web/render.js";
 
 test("esc: escaper de fem farlige tegn", () => {
   assert.equal(esc('<a href="x">&\'</a>'), "&lt;a href=&quot;x&quot;&gt;&amp;&#39;&lt;/a&gt;");
@@ -62,4 +62,19 @@ test("tal: negativt nul vises som nul", () => {
   // trofast som "-0,0". Byggeeffektens lave ende rammer præcis det.
   assert.equal(tal(-0, 1), "0,0");
   assert.equal(interval(-0, -0.2), "-0,2 - 0,0");
+});
+
+test("danskDato: ISO-dato læses som kalenderdato", () => {
+  // Gennem new Date() ville "2026-09-21" blive den 20. vest for Greenwich.
+  assert.equal(danskDato("2026-09-21"), "21. september 2026");
+  assert.equal(danskDato("2026-01-05"), "5. januar 2026");
+});
+
+test("danskDato: et Date-objekt læses i lokal tid", () => {
+  assert.equal(danskDato(new Date(2026, 11, 31, 23, 59)), "31. december 2026");
+});
+
+test("danskDato: manglende dato giver tankestreg", () => {
+  assert.equal(danskDato(undefined), "–");
+  assert.equal(danskDato("ukendt"), "–");
 });

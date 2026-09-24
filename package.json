@@ -8,7 +8,8 @@
     "test": "node --test",
     "css": "tailwindcss -i web/styles/input.css -o web/styles/styles.css --minify",
     "css:watch": "tailwindcss -i web/styles/input.css -o web/styles/styles.css --watch",
-    "serve": "python3 -m http.server 8000 --directory web"
+    "serve": "python3 -m http.server 8000 --directory web",
+    "pdf": "node scripts/metode-pdf.mjs"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.2.2",
