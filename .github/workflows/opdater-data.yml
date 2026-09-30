@@ -57,6 +57,9 @@ jobs:
           npm ci
 
       - name: Hent alle kilder og skriv datasættet
+        # Kører også historikken bag udviklingspilene (pipeline/historik.py). Klimaregnskabet
+        # giver 196 kald pr. årgang, og historikken går op til ti år tilbage, så trinnet tager
+        # længere tid end før.
         env:
           # Læses af fetch_klimaregnskabet._api_noegle(). Uden den springes
           # kilden over, og husholdningsfelterne står tomme - tjekket nedenfor
@@ -103,6 +106,16 @@ jobs:
               # er alle 98 tomme, og så er det en fejlet hentning, ikke et hul.
               if tomme == len(kommuner):
                   fejl.append(f"{felt} er tomt for alle 98 kommuner - {kilde} leverede intet")
+          # Historikken bag udviklingspilene bygges af samme kørsel. Et felt uden historik
+          # betyder, at en kilde ikke leverede sine tidligere år - oftest Klimaregnskabet,
+          # hvis årgange kræver nøglen. Nøgletallene vises da uden tidsserie, uden at noget
+          # fejler, så kontrollen sker her.
+          h = json.load(open("web/data/historik.json", encoding="utf-8"))
+          mangler = h.get("mangler", [])
+          print(f"  historik.json: {len(h['felter'])} felter, uden historik: "
+                f"{', '.join(mangler) if mangler else 'ingen'}")
+          if mangler:
+              fejl.append(f"historikken mangler for {len(mangler)} felter: {', '.join(mangler)}")
           if fejl:
               print("\nFEJL:")
               for f in fejl:
@@ -156,6 +169,10 @@ jobs:
           Workflowet har kontrolleret, at ingen kilde faldt helt ud, og at CSS
           og begge testsuiter er grønne. Det har ikke vurderet, om tallene
           giver mening - det er læserens opgave.
+
+          Historikken bag udviklingspilene (`web/data/historik.json`) er bygget i
+          samme kørsel. Kontrollen har set, at intet felt mangler, og testene har
+          set, at historikkens seneste punkt er `data.json`'s tal.
 
           **Denne PR viser ingen checks, og det er forventet.** GitHub starter
           ikke workflows af et push, der er lavet med `GITHUB_TOKEN`, så

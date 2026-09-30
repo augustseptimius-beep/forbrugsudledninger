@@ -208,6 +208,27 @@ def udjaevn_over_vindue(pr_aar):
     return sum(vaerdier) / len(vaerdier) if vaerdier else None
 
 
+def indkoeb_felter(aktuelt, anlaeg_pr_aar, vindue):
+    """De fire indkøbsnøgletal for ét område og ét regnskabsår.
+
+    aktuelt:       {art: {hovedkonto: kr.}} for driften i året
+    anlaeg_pr_aar: {år: {art: {hovedkonto: kr.}}} for områdets anlæg
+    vindue:        de år, anlægget udjævnes over, se anlaeg_vindue()
+
+    Drift og de to enkeltarter vises for året selv, anlægget som gennemsnit over
+    vinduet. Et år uden tal springes over - udjaevn_over_vindue() tæller det ikke
+    som nul. build.py bruger funktionen til det nyeste år og historikken til hvert
+    af de foregående, så nøgletallet kun er defineret ét sted."""
+    return {
+        "drift_pr_indb": indkoeb_uden_forsyning(aktuelt),
+        "foedevarer_pr_indb": indkoeb_uden_forsyning(aktuelt, [ART_FOEDEVARER]),
+        "braendsel_pr_indb": indkoeb_uden_forsyning(aktuelt, [ART_BRAENDSEL]),
+        "anlaeg_pr_indb": udjaevn_over_vindue({
+            aar: indkoeb_uden_forsyning(pr_hk)
+            for aar, pr_hk in (anlaeg_pr_aar or {}).items() if aar in vindue}),
+    }
+
+
 def transportandel(pr_hovedkonto):
     """Hovedkonto 2's andel af områdets samlede indkøb.
 

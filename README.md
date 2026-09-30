@@ -19,6 +19,13 @@ Pick a municipality and you get:
 - **The municipality's own key figures** compared against the national average,
   grouped by the consumption category they relate to. Every figure comes straight
   from a named public register.
+- **The direction of travel for every key figure.** An arrow shows whether the
+  municipality has moved towards lower or higher emissions over the last ten
+  years at most (right direction, wrong direction, slower than most, or
+  unchanged), on the same principle as the direction label. Pointing at the arrow
+  draws a small chart of the municipality's and the country's series, and the
+  chart is drawn only then: the history file holds numbers, never graphics.
+  Amounts in kroner are put at the latest year's price level first.
 - **Explicit "not quantified" markers** wherever the underlying data does not
   exist. Never a silent zero.
 - **A spreadsheet export** carrying the same figures, sources and conclusions
@@ -70,7 +77,10 @@ python3 pipeline/build.py
 ```
 
 Review the validation report it prints, commit, and push. Publication is
-automatic via GitHub Actions.
+automatic via GitHub Actions. The run also rebuilds `web/data/historik.json`, the
+yearly series behind the direction arrows; `python3 pipeline/historik.py`
+rebuilds only that file from the committed `data.json`. The Klimaregnskabet.dk
+series need the API key and are 196 calls per year of history.
 
 ## Tests
 
@@ -83,7 +93,9 @@ The export carries each indicator's arithmetic twice, as the engine's `val()`
 and as a spreadsheet formula. `test/formel.test.js` runs both across all 98
 municipalities and fails on the first figure that differs, and
 `test/eksport.test.js` evaluates the generated workbook cell by cell against the
-engine, so the sheet cannot quietly say something the site does not.
+engine, so the sheet cannot quietly say something the site does not. The direction
+arrows have their own guard: `test/historik.test.js` checks that the last point of
+every series is the number the page shows, bit for bit.
 
 The deploy workflow runs the JavaScript tests before publishing. A red test
 stops the release. It then prints the methodology page to `web/metode.pdf` with

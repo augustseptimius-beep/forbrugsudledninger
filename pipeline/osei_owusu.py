@@ -170,6 +170,34 @@ def landets_forbrug_pr_indbygger(pr_kommune, folketal):
     return sum(pr_kommune[n] * folketal[n] for n in navne) / indbyggere
 
 
+def forbrug_for_aar(udjaevnet, landets, region_navne, indkomst_i_alt, folketal,
+                    region_pr_kommune):
+    """Fødevareforbrug pr. indbygger for ét år, for alle kommuner og for landet.
+
+    udjaevnet:      {regionsnavn: udjævnet relativ kvotient}, se udjaevn_kvotient()
+    landets:        landets forbrugskvotient for året, se landets_kvotient()
+    region_navne:   {kort regionsnavn: DST's regionsnavn}, så kvotienten kan slås
+                    op med kommunernes korte navn
+    indkomst_i_alt: {kommunenavn: samlet disponibel indkomst, 1.000 kr.} for året
+    folketal:       {kommunenavn: indbyggere} - det folketal, nøgletallet deles med
+    region_pr_kommune: {kommunenavn: kort regionsnavn}
+
+    Det er den sammensætning build.py bruger til det nyeste år, og historikken
+    bruger den uændret til hvert af de foregående. Så er der kun én definition af
+    nøgletallet, og det sidste punkt i historikken er tallet på kommunesiden.
+
+    Regionens udjævnede placering er den samme i alle år. Kun landets kvotient og
+    kommunens indkomst følger året. Et ti-års gennemsnit, der kun kunne tage de
+    år med, der ligger før, ville være kortere og mere ustabilt jo længere tilbage
+    man kom, og så ville tallet bevæge sig af en grund, der ikke er kommunens."""
+    skaleret = skaler_kvotient(udjaevnet, landets)
+    kvotient = {kort: skaleret[langt] for kort, langt in region_navne.items()
+                if langt in skaleret}
+    pr_kommune = forbrug_pr_indbygger(kvotient, indkomst_i_alt, folketal, region_pr_kommune)
+    pr_kommune["Hele landet"] = landets_forbrug_pr_indbygger(pr_kommune, folketal)
+    return pr_kommune
+
+
 def byg_osei_owusu(seneste_aar):
     """Kildeposten til metodesiden. Ingen tal - de står i data.json."""
     vindue = kvotient_vindue(seneste_aar)

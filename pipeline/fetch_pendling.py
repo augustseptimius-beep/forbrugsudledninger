@@ -29,17 +29,16 @@ REGIONSNAVNE = {
 }
 
 
-def fetch_pendlingsafstand():
-    """{områdenavn: km} for land, regioner og kommuner.
-
-    Regionsnavne normaliseres ("Region Sjælland" -> "Sjælland"), så de matcher
-    kommuner.py. Kommunenavne står som DST skriver dem."""
-    rows = dst_client.fetch(BASE, "AFSTB4", {
+def _pendling_kald(tid):
+    return dst_client.fetch(BASE, "AFSTB4", {
         "BOPOMR": "*",
         "SOCIO": "02",          # beskæftigede i alt
         "KØN": "TOT",
-        "Tid": PERIODER["PENDLING_AAR"],
+        "Tid": tid,
     })
+
+
+def _pendling_af(rows):
     ud = {}
     for r in rows:
         if r["INDHOLD"] in dst_client.INGEN_DATA_MARKORER:
@@ -47,3 +46,17 @@ def fetch_pendlingsafstand():
         omraade = r["BOPOMR"]
         ud[REGIONSNAVNE.get(omraade, omraade)] = _to_float(r["INDHOLD"])
     return ud
+
+
+def fetch_pendlingsafstand():
+    """{områdenavn: km} for land, regioner og kommuner.
+
+    Regionsnavne normaliseres ("Region Sjælland" -> "Sjælland"), så de matcher
+    kommuner.py. Kommunenavne står som DST skriver dem."""
+    return _pendling_af(_pendling_kald(PERIODER["PENDLING_AAR"]))
+
+
+def fetch_pendlingsafstand_serie(perioder):
+    """{aar: {områdenavn: km}}."""
+    rows = _pendling_kald(",".join(perioder))
+    return {p: _pendling_af(rs) for p, rs in dst_client.opdel_paa_tid(rows).items()}

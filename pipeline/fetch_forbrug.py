@@ -43,15 +43,26 @@ def fetch_indkomst_pr_familie(aar):
     }), "OMRÅDE")
 
 
+def _indkomst_i_alt_kald(tid):
+    return dst_client.fetch(BASE, "INDKF111", {
+        "OMRÅDE": "*", "ENHED": "110", "FAMTYP": "FAIA",
+        "INDKOMSTTYPE": "100", "Tid": tid,
+    })
+
+
 def fetch_indkomst_i_alt(aar):
     """INDKF111: samlet disponibel indkomst, 1.000 kr., pr. område.
 
     Beløbet og ikke gennemsnittet, fordi kommunens samlede forbrug skal skaleres
     med kommunens samlede indkomst (ligning S10)."""
-    return _tal(dst_client.fetch(BASE, "INDKF111", {
-        "OMRÅDE": "*", "ENHED": "110", "FAMTYP": "FAIA",
-        "INDKOMSTTYPE": "100", "Tid": aar,
-    }), "OMRÅDE")
+    return _tal(_indkomst_i_alt_kald(aar), "OMRÅDE")
+
+
+def fetch_indkomst_i_alt_serie(aarene):
+    """{aar: {områdenavn: 1.000 kr.}}. Løbende priser, som tabellen står."""
+    rows = _indkomst_i_alt_kald(",".join(aarene))
+    return {p: _tal(rs, "OMRÅDE")
+            for p, rs in dst_client.opdel_paa_tid(rows).items()}
 
 
 def fetch_kvotient_vindue(aarene):

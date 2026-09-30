@@ -6,6 +6,7 @@ dækker to felter). DST's tal bruger komma som decimalseparator i nogle CSV-felt
 import dst_client
 from constants import PERIODER
 from kommuner import KOMMUNER
+from perioder import kvartaler
 
 BASE = dst_client.DST_BASE_URL
 
@@ -14,26 +15,51 @@ def _to_float(s):
     return float(s.replace(",", "."))
 
 
+# Hver hentning er delt i to: et KALD, der siger hvilken tabel og hvilke
+# dimensioner, og en UDREGNING (_xxx_af), der gør rækkerne til nøgletallets tal.
+# Begge bruges af nutidens hentning og af historikken (fetch_xxx_serie), som
+# kalder det samme med en liste af perioder og kører udregningen på hver periodes
+# rækker. Der er dermed kun én definition af hvert felt. Havde historikken sin
+# egen, kunne pilen beskrive et andet tal end det, kommunesiden viser.
+
+def _folketal_kald(tid):
+    return dst_client.fetch(BASE, "FOLK1A", {
+        "OMRÅDE": "*", "KØN": "TOT", "ALDER": "IALT", "CIVILSTAND": "TOT",
+        "Tid": tid,
+    })
+
+
 def fetch_folketal():
     """Returnerer (folketal_nu, folketal_forrige), begge {navn: int}."""
-    rows_nu = dst_client.fetch(BASE, "FOLK1A", {
-        "OMRÅDE": "*", "KØN": "TOT", "ALDER": "IALT", "CIVILSTAND": "TOT",
-        "Tid": PERIODER["FOLK_KVARTAL"],
-    })
-    rows_forrige = dst_client.fetch(BASE, "FOLK1A", {
-        "OMRÅDE": "*", "KØN": "TOT", "ALDER": "IALT", "CIVILSTAND": "TOT",
-        "Tid": PERIODER["FOLK_KVARTAL_FORRIGE"],
-    })
+    rows_nu = _folketal_kald(PERIODER["FOLK_KVARTAL"])
+    rows_forrige = _folketal_kald(PERIODER["FOLK_KVARTAL_FORRIGE"])
     return dst_client.sum_by(rows_nu, ["OMRÅDE"]), dst_client.sum_by(rows_forrige, ["OMRÅDE"])
+
+
+def fetch_folketal_serie(perioder):
+    """{periode: {navn: int}} for de givne kvartaler."""
+    rows = _folketal_kald(",".join(perioder))
+    return {p: dst_client.sum_by(rs, ["OMRÅDE"])
+            for p, rs in dst_client.opdel_paa_tid(rows).items()}
+
+
+def _indkomst_kald(tid):
+    return dst_client.fetch(BASE, "INDKP101", {
+        "OMRÅDE": "*", "ENHED": "116", "KOEN": "MOK", "INDKOMSTTYPE": "100",
+        "Tid": tid,
+    })
 
 
 def fetch_indkomst():
     """Returnerer {navn: disponibel_indkomst (int, kr.)}."""
-    rows = dst_client.fetch(BASE, "INDKP101", {
-        "OMRÅDE": "*", "ENHED": "116", "KOEN": "MOK", "INDKOMSTTYPE": "100",
-        "Tid": PERIODER["INDKOMST_AAR"],
-    })
-    return dst_client.sum_by(rows, ["OMRÅDE"])
+    return dst_client.sum_by(_indkomst_kald(PERIODER["INDKOMST_AAR"]), ["OMRÅDE"])
+
+
+def fetch_indkomst_serie(perioder):
+    """{aar: {navn: disponibel_indkomst}}. Kroner i årets egne priser."""
+    rows = _indkomst_kald(",".join(perioder))
+    return {p: dst_client.sum_by(rs, ["OMRÅDE"])
+            for p, rs in dst_client.opdel_paa_tid(rows).items()}
 
 
 def fetch_gini():
@@ -55,22 +81,44 @@ _BOLIGSTOR_MIDPUNKT = {
 }
 
 
-def fetch_boliger_type():
-    """Returnerer (parcel, raekke, etage), hver {navn: antal boliger (int)}.
-    UDLFORH/EJER/OPFØRELSESÅR har ingen total-VÆRDIKODE, men har elimination=True i
+def _boliger_type_kald(tid):
+    """UDLFORH/EJER/OPFØRELSESÅR har ingen total-VÆRDIKODE, men har elimination=True i
     BOL101's metadata - de UDELADES derfor helt fra forespørgslen (ligesom ANTVÆR/
     HUSSTØR i fetch_boligareal()), så DST's API selv summerer over dem. Wildcarding
     alle tre samtidig (i stedet for at udelade dem) overskrider DST's 1-mio.-
     cellegrænse ved OMRÅDE=* (verificeret: gav HTTP 400 REQUEST-LIMIT live)."""
-    rows = dst_client.fetch(BASE, "BOL101", {
+    return dst_client.fetch(BASE, "BOL101", {
         "OMRÅDE": "*", "BEBO": "1000", "ANVENDELSE": "125,130,140",
-        "Tid": PERIODER["BOLIGER_AAR"],
+        "Tid": tid,
     })
+
+
+def _boliger_type_af(rows):
     sums = dst_client.sum_by(rows, ["OMRÅDE", "ANVENDELSE"])
     parcel = {navn: v for (navn, anv), v in sums.items() if anv == "Parcel/Stuehuse"}
     raekke = {navn: v for (navn, anv), v in sums.items() if anv == "Række-, kæde- og dobbelthuse"}
     etage = {navn: v for (navn, anv), v in sums.items() if anv == "Etageboliger"}
     return parcel, raekke, etage
+
+
+def fetch_boliger_type():
+    """Returnerer (parcel, raekke, etage), hver {navn: antal boliger (int)}.
+    Se _boliger_type_kald for hvorfor tre dimensioner udelades."""
+    return _boliger_type_af(_boliger_type_kald(PERIODER["BOLIGER_AAR"]))
+
+
+def fetch_boliger_type_serie(perioder):
+    """{aar: (parcel, raekke, etage)}."""
+    rows = _boliger_type_kald(",".join(perioder))
+    return {p: _boliger_type_af(rs) for p, rs in dst_client.opdel_paa_tid(rows).items()}
+
+
+def _fritidshuse_params(tid):
+    return {
+        "OMRÅDE": "*", "BEBO": "5000", "ANVENDELSE": "565",
+        "UDLFORH": "*", "EJER": "*", "OPFØRELSESÅR": "*",
+        "Tid": tid,
+    }
 
 
 def fetch_fritidshuse():
@@ -81,21 +129,34 @@ def fetch_fritidshuse():
     kommune. Deler man husholdningstallet ud på indbyggere, følger det
     sommerhustætheden næsten lige så tæt som boligstørrelsen - målt på alle
     98 kommuner. Se fetch_klimaregnskabet.py for tallene."""
-    rows = dst_client.fetch(BASE, "BOL101", {
-        "OMRÅDE": "*", "BEBO": "5000", "ANVENDELSE": "565",
-        "UDLFORH": "*", "EJER": "*", "OPFØRELSESÅR": "*",
-        "Tid": PERIODER["BOLIGER_AAR"],
-    })
+    rows = dst_client.fetch(BASE, "BOL101", _fritidshuse_params(PERIODER["BOLIGER_AAR"]))
     return dst_client.sum_by(rows, ["OMRÅDE"])
 
 
-def fetch_boligareal():
-    """Returnerer {navn: gennemsnitligt boligareal i m² (float)} via midpoint-metoden.
-    IKKE wildcard ANTVÆR/HUSSTØR - de er irrelevante her og blæser cellegrænsen op."""
-    rows = dst_client.fetch(BASE, "BOL103", {
+# Jokertegn på tre dimensioner. DST tæller knap 735.000 celler pr. år i denne
+# forespørgsel (svaret har 91.872 rækker), og grænsen er en million: to år
+# ad gangen gav HTTP 400 REQUEST-LIMIT ved 1.469.952 celler. Derfor ét år ad
+# gangen.
+FRITIDSHUSE_BID_AAR = 1
+
+
+def fetch_fritidshuse_serie(perioder):
+    """{aar: {navn: antal ubeboede fritidshuse}}."""
+    rows = dst_client.fetch_i_bidder(
+        BASE, "BOL101", _fritidshuse_params(None), list(perioder), FRITIDSHUSE_BID_AAR)
+    return {p: dst_client.sum_by(rs, ["OMRÅDE"])
+            for p, rs in dst_client.opdel_paa_tid(rows).items()}
+
+
+def _boligareal_kald(tid):
+    """IKKE wildcard ANTVÆR/HUSSTØR - de er irrelevante her og blæser cellegrænsen op."""
+    return dst_client.fetch(BASE, "BOL103", {
         "AMT": "*", "BEBO": "1000", "ANVENDELSE": "125,130,140",
-        "BOLIGSTØR": "*", "Tid": PERIODER["BOLIGER_AAR"],
+        "BOLIGSTØR": "*", "Tid": tid,
     })
+
+
+def _boligareal_af(rows):
     sum_areal, sum_antal = {}, {}
     for r in rows:
         midt = _BOLIGSTOR_MIDPUNKT.get(r["BOLIGSTØR"])
@@ -110,18 +171,31 @@ def fetch_boligareal():
     return {navn: sum_areal[navn] / sum_antal[navn] for navn in sum_antal if sum_antal[navn] > 0}
 
 
+def fetch_boligareal():
+    """Returnerer {navn: gennemsnitligt boligareal i m² (float)} via midpoint-metoden."""
+    return _boligareal_af(_boligareal_kald(PERIODER["BOLIGER_AAR"]))
+
+
+def fetch_boligareal_serie(perioder):
+    """{aar: {navn: gennemsnitligt boligareal i m²}}."""
+    rows = _boligareal_kald(",".join(perioder))
+    return {p: _boligareal_af(rs) for p, rs in dst_client.opdel_paa_tid(rows).items()}
+
+
 # ANVEND-koder der IKKE er almindelige boliger - udelades fra byggeaktivitet
 # (verificeret: inkl. Kollegier gav 153 for Thisted 2024 i stedet for korrekt 103).
 _BYGGERI_IKKE_BOLIG = {"Kollegier", "Døgninstitutioner", "IKKE-FORDELT, UOPLYST"}
 
 
-def fetch_opvarmning():
-    """Returnerer (ialt, olie, naturgas), hver {navn: antal boliger (int)}.
-    Wildcarder ANVENDELSE, fordi opv_boliger_ialt skal dække ALLE boligtyper."""
-    rows = dst_client.fetch(BASE, "BOL102", {
+def _opvarmning_kald(tid):
+    """Wildcarder ANVENDELSE, fordi opv_boliger_ialt skal dække ALLE boligtyper."""
+    return dst_client.fetch(BASE, "BOL102", {
         "AMT": "*", "BEBO": "1000", "ANVENDELSE": "*", "OPVARMNING": "*",
-        "Tid": PERIODER["OPVARMNING_AAR"],
+        "Tid": tid,
     })
+
+
+def _opvarmning_af(rows):
     ialt = dst_client.sum_by(rows, ["AMT"])
     per_type = dst_client.sum_by(rows, ["AMT", "OPVARMNING"])
     olie = {navn: v for (navn, opv), v in per_type.items() if opv == "Centralvarme med olie"}
@@ -129,17 +203,68 @@ def fetch_opvarmning():
     return ialt, olie, naturgas
 
 
+def fetch_opvarmning():
+    """Returnerer (ialt, olie, naturgas), hver {navn: antal boliger (int)}."""
+    return _opvarmning_af(_opvarmning_kald(PERIODER["OPVARMNING_AAR"]))
+
+
+def fetch_opvarmning_serie(perioder):
+    """{aar: (ialt, olie, naturgas)}."""
+    rows = _opvarmning_kald(",".join(perioder))
+    return {p: _opvarmning_af(rs) for p, rs in dst_client.opdel_paa_tid(rows).items()}
+
+
+def _byggeri_params(tid):
+    return {
+        "OMRÅDE": "*", "BYGFASE": "3", "ANVEND": "*", "BYGHERRE": "*",
+        "Tid": tid,
+    }
+
+
+def _byggeri_kald(aarene):
+    """Alle fire kvartaler i hvert af de givne år."""
+    tid = ",".join(q for aar in aarene for q in kvartaler(aar))
+    return dst_client.fetch(BASE, "BYGV33", _byggeri_params(tid))
+
+
+def _byggeri_af(rows):
+    relevante = [r for r in rows if r["ANVEND"] not in _BYGGERI_IKKE_BOLIG]
+    return dst_client.sum_by(relevante, ["OMRÅDE"])
+
+
 def fetch_byggeri():
     """Returnerer {navn: fuldførte boliger seneste år (int)}. Udelader kollegier/
     døgninstitutioner - se _BYGGERI_IKKE_BOLIG."""
-    aar = PERIODER["BYGGERI_AAR"]
-    kvartaler = ",".join(f"{aar}K{k}" for k in range(1, 5))
-    rows = dst_client.fetch(BASE, "BYGV33", {
-        "OMRÅDE": "*", "BYGFASE": "3", "ANVEND": "*", "BYGHERRE": "*",
-        "Tid": kvartaler,
+    return _byggeri_af(_byggeri_kald([PERIODER["BYGGERI_AAR"]]))
+
+
+# Elleve år ad gangen gav HTTP 400 REQUEST-LIMIT (DST tæller mange gange flere
+# celler, end svaret har rækker); tre år gik igennem.
+BYGGERI_BID_AAR = 3
+
+
+def fetch_byggeri_serie(aarene):
+    """{aar: {navn: fuldførte boliger i året}}. Et år er summen af dets kvartaler."""
+    tid = [q for aar in aarene for q in kvartaler(aar)]
+    rows = dst_client.fetch_i_bidder(
+        BASE, "BYGV33", _byggeri_params(None), tid, 4 * BYGGERI_BID_AAR)
+    return {aar: _byggeri_af(rs)
+            for aar, rs in dst_client.opdel_paa_tid(rows, lambda t: t[:4]).items()}
+
+
+def _biler_kald(tid):
+    return dst_client.fetch(BASE, "BIL54", {
+        "OMRÅDE": "*", "BILTYPE": "4000101002", "BRUG": "1100",
+        "DRIV": "20200,20225,20232,20210,20205", "Tid": tid,
     })
-    relevante = [r for r in rows if r["ANVEND"] not in _BYGGERI_IKKE_BOLIG]
-    return dst_client.sum_by(relevante, ["OMRÅDE"])
+
+
+def _biler_af(rows):
+    per_type = dst_client.sum_by(rows, ["OMRÅDE", "DRIV"])
+    def _uddrag(driv_navn):
+        return {navn: v for (navn, driv), v in per_type.items() if driv == driv_navn}
+    return (_uddrag("Drivmidler i alt"), _uddrag("El"), _uddrag("Pluginhybrid"),
+            _uddrag("Diesel"), _uddrag("Benzin"))
 
 
 def fetch_biler():
@@ -153,28 +278,40 @@ def fetch_biler():
     Benzin og diesel hentes hver for sig, men vises som ét nøgletal. BIL54's
     øvrige drivmidler - F-gas, N-gas, petroleum, brint, metanol, ætanol - udgør
     tilsammen under 0,1 pct. af bilparken i hver kommune og hentes ikke."""
-    rows = dst_client.fetch(BASE, "BIL54", {
-        "OMRÅDE": "*", "BILTYPE": "4000101002", "BRUG": "1100",
-        "DRIV": "20200,20225,20232,20210,20205", "Tid": PERIODER["BILER_MAANED"],
+    return _biler_af(_biler_kald(PERIODER["BILER_MAANED"]))
+
+
+def fetch_biler_serie(perioder):
+    """{maaned: (biler_ialt, el, plugin, diesel, benzin)}. Én måned pr. år, så
+    bilparken sammenlignes januar mod januar."""
+    rows = _biler_kald(",".join(perioder))
+    return {p: _biler_af(rs) for p, rs in dst_client.opdel_paa_tid(rows).items()}
+
+
+def _affald_kald(tid):
+    return dst_client.fetch(BASE, "LABY25", {
+        "KOMGRP": "*", "BNØGLE": "*", "Tid": tid,
     })
-    per_type = dst_client.sum_by(rows, ["OMRÅDE", "DRIV"])
-    def _uddrag(driv_navn):
-        return {navn: v for (navn, driv), v in per_type.items() if driv == driv_navn}
-    return (_uddrag("Drivmidler i alt"), _uddrag("El"), _uddrag("Pluginhybrid"),
-            _uddrag("Diesel"), _uddrag("Benzin"))
+
+
+def _affald_af(rows):
+    per_type = dst_client.sum_by(rows, ["KOMGRP", "BNØGLE"])
+    kg = {navn: v for (navn, n), v in per_type.items() if n == "Husholdningsaffald (kg. pr. indbygger)"}
+    pct = {navn: v for (navn, n), v in per_type.items() if n == "Husholdningsaffald indsamlet til genanvendelse (pct.)"}
+    return kg, pct
 
 
 def fetch_affald():
     """Returnerer (kg_pr_indbygger, genanvendelse_pct), begge {navn: tal (int)}.
     LABY25's KOMGRP-variabel bruger kommunenavne direkte (samme som OMRÅDE i andre
     tabeller), plus nogle kommunegruppe-aggregater vi ikke bruger."""
-    rows = dst_client.fetch(BASE, "LABY25", {
-        "KOMGRP": "*", "BNØGLE": "*", "Tid": PERIODER["AFFALD_AAR"],
-    })
-    per_type = dst_client.sum_by(rows, ["KOMGRP", "BNØGLE"])
-    kg = {navn: v for (navn, n), v in per_type.items() if n == "Husholdningsaffald (kg. pr. indbygger)"}
-    pct = {navn: v for (navn, n), v in per_type.items() if n == "Husholdningsaffald indsamlet til genanvendelse (pct.)"}
-    return kg, pct
+    return _affald_af(_affald_kald(PERIODER["AFFALD_AAR"]))
+
+
+def fetch_affald_serie(perioder):
+    """{aar: (kg_pr_indbygger, genanvendelse_pct)}."""
+    rows = _affald_kald(",".join(perioder))
+    return {p: _affald_af(rs) for p, rs in dst_client.opdel_paa_tid(rows).items()}
 
 
 # Restaffaldets fraktioner i LABY24. En kommune bogfører sit indsamlede
@@ -478,6 +615,17 @@ def spaerrede_selskaber(sammensaetning):
                        if graense is not None and sammensaetning.get(n, 100) < graense)
         ud[selskab] = ramte
     return ud
+
+
+def fetch_priser(aarene):
+    """PRIS8: forbrugerprisindekset, årsgennemsnit. {aar: indeks}.
+
+    Bruges kun af udviklingspilene, til at sætte kronebeløb i samme prisniveau.
+    Indekset er landsdækkende og gælder ens for alle kommuner. Et år uden tal
+    udelades og bliver ikke til nul."""
+    rows = dst_client.fetch(BASE, "PRIS8", {"Tid": ",".join(aarene)})
+    return {r["TID"]: _to_float(r["INDHOLD"]) for r in rows
+            if r["INDHOLD"] not in dst_client.INGEN_DATA_MARKORER}
 
 
 def fetch_all_dst():

@@ -85,6 +85,20 @@ EL_KILDER = ("El til andet", "El til paneler", "El til varmepumpe")
 FJERNVARME = "Fjernvarme"
 
 
+# Kildens felter og de felter i data.json, de ender i. Rækkefølgen er den,
+# build.saml_kommune_post skriver dem i. Historikken bruger samme oversættelse,
+# og en test holder de to i takt.
+KR_FELTER = {
+    "co2_ton": "husholdning_co2_ton",
+    "energi_tj": "husholdning_energi_tj",
+    "fossil_andel": "husholdning_fossil_andel",
+    "el_tj": "husholdning_el_tj",
+    "el_co2_ton": "husholdning_el_co2_ton",
+    "fjernvarme_tj": "husholdning_fjernvarme_tj",
+    "fjernvarme_co2_ton": "husholdning_fjernvarme_co2_ton",
+}
+
+
 def _api_noegle():
     """Nøglen fra miljøvariabel eller fra den gitignorerede pipeline/.env."""
     noegle = os.environ.get("KLIMAREGNSKABET_API_KEY")
@@ -174,4 +188,69 @@ def fetch_husholdninger(kommuneliste, aar, noegle=None, sov=time.sleep):
             **el_og_fjernvarme(energi, udledning),
         }
         sov(PAUSE_SEKUNDER)
+    return ud
+
+
+def sammenlaeg_land_husholdning(husholdning):
+    """Landets husholdningstal som felter i data.json.
+
+    Landet er summen af kommunernes, ikke et selvstændigt opslag - så tæller og
+    nævner dækker præcis det samme område. Landets fossile andel regnes på de
+    samlede mængder, ikke som gennemsnittet af 98 kommuneandele, ellers ville
+    Læsø veje som København. Landets el og fjernvarme er ligeledes summer;
+    motorens fælles el-faktor er landets el-udledning delt med landets elforbrug.
+
+    build.py bruger funktionen til det nyeste år og historikken til hvert af de
+    foregående."""
+    def _sum(felt):
+        vaerdier = [h.get(felt) for h in husholdning.values() if h.get(felt) is not None]
+        return sum(vaerdier) if vaerdier else None
+
+    ud = {
+        "husholdning_co2_ton": _sum("co2_ton"),
+        "husholdning_energi_tj": _sum("energi_tj"),
+        "husholdning_fossil_andel": None,
+    }
+    samlet_tj = _sum("energi_tj")
+    if samlet_tj:
+        fossilt = sum((h.get("energi_tj") or 0) * (h.get("fossil_andel") or 0)
+                      for h in husholdning.values())
+        ud["husholdning_fossil_andel"] = fossilt / samlet_tj
+    for felt in ("el_tj", "el_co2_ton", "fjernvarme_tj", "fjernvarme_co2_ton"):
+        ud[f"husholdning_{felt}"] = _sum(felt)
+    return ud
+
+
+def fetch_husholdninger_serie(kommuneliste, aarene, noegle=None, sov=time.sleep,
+                              allerede=None, gem=None):
+    """{aar: {kommunekode: {...}}} for hver af årgangene, som fetch_husholdninger.
+
+    allerede: {aar: resultat} for årgange, der allerede er hentet - det nyeste
+              år fra build.py, de øvrige fra en cache. De tages med uændret.
+    gem:      kaldes med (aar, resultat), så snart en årgang er hentet, så en
+              afbrudt kørsel ikke mister de år, den nåede.
+
+    Rejser ValueError uden API-nøgle, som fetch_husholdninger. En årgang, der
+    ikke kan hentes, springes over med en advarsel: historikken tåler et hul, og
+    en enkelt død årgang må ikke vælte resten.
+
+    Hvert år er 196 kald. Kilden er prøvet mod de nyeste år; om de ældre
+    årgange er opgjort med samme metode, kan værktøjet ikke selv afgøre."""
+    noegle = noegle or _api_noegle()
+    if not noegle:
+        raise ValueError(
+            "ingen API-nøgle. Sæt KLIMAREGNSKABET_API_KEY eller opret pipeline/.env")
+    ud = {}
+    for aar in aarene:
+        if allerede and aar in allerede:
+            ud[aar] = allerede[aar]
+            continue
+        try:
+            ud[aar] = fetch_husholdninger(kommuneliste, aar, noegle, sov)
+        except Exception as fejl:
+            print(f"  ADVARSEL: Klimaregnskabet {aar} kunne ikke hentes ({fejl}). "
+                  "Årgangen springes over.")
+            continue
+        if gem:
+            gem(aar, ud[aar])
     return ud
