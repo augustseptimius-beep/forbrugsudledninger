@@ -1,5 +1,5 @@
 {
-  "genereret": "2026-09-21",
+  "genereret": "2026-09-30",
   "kilder": [
     {
       "id": "FOLK1A",
@@ -204,6 +204,18 @@
       "felter": [],
       "forbehold": "Leverer både nævneren i regionens forbrugskvotient og kommunens samlede disponible indkomst, som fødevareforbruget skaleres med. Gennemsnittet kan trækkes skævt af få personer med meget stor kapitalindkomst i en lille kommune.",
       "periode": "2024"
+    },
+    {
+      "id": "PRIS8",
+      "navn": "Forbrugerprisindeks, årsgennemsnit",
+      "kort": "DST PRIS8",
+      "udbyder": "Danmarks Statistik",
+      "metode": "api",
+      "licens": "CC BY 4.0",
+      "url": "https://www.statistikbanken.dk/PRIS8",
+      "felter": [],
+      "forbehold": "Bruges kun til udviklingen over tid: kronebeløb fra tidligere år sættes i det nyeste års prisniveau, så en stigning, der blot følger priserne, ikke ligner en udvikling. Indekset er landsdækkende og bruges ens for alle kommuner. Nøgletallenes egne værdier er ikke justeret. Kun nøgletal i kroner er prisjusteret.",
+      "periode": "2025"
     },
     {
       "id": "REGK11",

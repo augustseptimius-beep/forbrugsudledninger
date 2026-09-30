@@ -133,6 +133,12 @@ KILDER = [
                      "skaleres med. Gennemsnittet kan trækkes skævt af få personer "
                      "med meget stor kapitalindkomst i en lille kommune.",
     },
+    dict(_dst("PRIS8", "Forbrugerprisindeks, årsgennemsnit", "PRIS_AAR", []),
+         forbehold="Bruges kun til udviklingen over tid: kronebeløb fra tidligere år "
+                   "sættes i det nyeste års prisniveau, så en stigning, der blot følger "
+                   "priserne, ikke ligner en udvikling. Indekset er landsdækkende og "
+                   "bruges ens for alle kommuner. Nøgletallenes egne værdier er ikke "
+                   "justeret. Kun nøgletal i kroner er prisjusteret."),
     dict(_dst("REGK11", "Kommunernes regnskaber på hovedkonti", "REGNSKAB_AAR",
               ["indkoeb_drift_pr_indb", "indkoeb_anlaeg_pr_indb",
                "indkoeb_foedevarer_pr_indb", "indkoeb_braendsel_pr_indb"]),

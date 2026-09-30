@@ -3,6 +3,7 @@
 
 import csv
 import io
+import json
 import urllib.parse
 import urllib.request
 
@@ -60,3 +61,45 @@ def fetch(base_url, table, params):
     with urllib.request.urlopen(url, timeout=TIMEOUT_SEKUNDER) as resp:
         text = resp.read().decode("utf-8")
     return parse_csv(text)
+
+
+def tabel_perioder(base_url, table):
+    """Alle tidsværdier, tabellen har, som DST staver dem ("2018M01", "2024").
+
+    Historikken beder om en periodekæde bagud fra nøgletallets nuværende
+    periode. En tabel, der er yngre end kæden er lang, ville svare med en fejl
+    på den første ukendte periode, så kæden skæres til det, tabellen faktisk
+    har, før den sendes af sted."""
+    url = f"{base_url}/tableinfo/{table}?lang=da&format=JSON"
+    with urllib.request.urlopen(url, timeout=TIMEOUT_SEKUNDER) as resp:
+        info = json.load(resp)
+    for var in info["variables"]:
+        if var.get("time"):
+            return [v["id"] for v in var["values"]]
+    raise ValueError(f"{table} har ingen tidsvariabel")
+
+
+def opdel_paa_tid(rows, periode=lambda tid: tid):
+    """Deler et svar med flere perioder i {periode: [rækker]}.
+
+    Nøgletallenes egen udregning kender kun ét tidspunkt ad gangen, så den
+    køres uændret på hver periodes rækker. Så er der kun én definition af
+    nøgletallet, og historikkens seneste punkt kan ikke afvige fra tallet på
+    kommunesiden. `periode` bruges, hvor en periode består af flere
+    tidspunkter, fx et års fire kvartaler."""
+    ud = {}
+    for r in rows:
+        ud.setdefault(periode(r["TID"]), []).append(r)
+    return ud
+
+
+def fetch_i_bidder(base_url, table, params, perioder, bid):
+    """Henter perioderne `bid` ad gangen og lægger svarene sammen.
+
+    En forespørgsel med jokertegn på flere dimensioner rammer hurtigt DST's
+    grænse på en million celler, når der også er mange perioder."""
+    rows = []
+    for i in range(0, len(perioder), bid):
+        rows.extend(fetch(base_url, table,
+                          {**params, "Tid": ",".join(perioder[i:i + bid])}))
+    return rows

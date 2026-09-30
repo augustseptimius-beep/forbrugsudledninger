@@ -1,7 +1,9 @@
 """Orkestrerer hele datapipelinen. Kør: python3 pipeline/build.py
 
-Skriver web/data/{data.json, sources.json, concito.json, ens.json} og udskriver en
-valideringsrapport til stdout.
+Skriver web/data/{data.json, historik.json, sources.json, concito.json, ens.json} og
+udskriver en valideringsrapport til stdout. historik.json er årsværdierne bag
+udviklingspilene og bygges sidst, af de samme hentefunktioner som data.json - se
+historik.py.
 
 data.json indeholder udelukkende faktuelle, offentligt tilgængelige nøgletal
 pr. kommune. Der er ingen beregningskoefficienter og intet afledt aftryk i
@@ -20,6 +22,7 @@ import fetch_forbrug
 import fetch_pendling
 import fetch_klimaregnskabet
 import fetch_regk
+import historik
 import sources
 import concito
 import ens
@@ -143,13 +146,8 @@ def _beregn_foedevareforbrug(dst_data):
         # vinduet. Så er den viste værdi kroner brugt på mad i dag, mens
         # forskellen mellem regionerne ikke hænger på én stikprøve.
         seneste = max(raa)
-        kvotient_dst = osei_owusu.skaler_kvotient(
-            osei_owusu.udjaevn_kvotient(kvotient_pr_aar),
-            osei_owusu.landets_kvotient(*raa[seneste]))
-        # Tilbage til KOMMUNER's korte regionsnavne.
-        kvotient = {kort: kvotient_dst[langt]
-                    for kort, langt in fetch_forbrug.REGION_DST.items()
-                    if langt in kvotient_dst}
+        udjaevnet = osei_owusu.udjaevn_kvotient(kvotient_pr_aar)
+        landets = osei_owusu.landets_kvotient(*raa[seneste])
         indkomst_i_alt = fetch_forbrug.fetch_indkomst_i_alt(PERIODER["INDKOMST_AAR"])
     except Exception as fejl:
         print(f"  ADVARSEL: {fejl}. Fødevarenøgletallet står tomt.")
@@ -157,10 +155,10 @@ def _beregn_foedevareforbrug(dst_data):
 
     folketal = {navn: v.get("folketal") for navn, v in dst_data.items()}
     region_pr_kommune = {navn: region for _, navn, region in KOMMUNER}
-    pr_kommune = osei_owusu.forbrug_pr_indbygger(
-        kvotient, indkomst_i_alt, folketal, region_pr_kommune)
-    pr_kommune["Hele landet"] = osei_owusu.landets_forbrug_pr_indbygger(
-        pr_kommune, folketal)
+    # Samme sammensætning som historikken bruger til hvert af de foregående år.
+    pr_kommune = osei_owusu.forbrug_for_aar(
+        udjaevnet, landets, fetch_forbrug.REGION_DST, indkomst_i_alt, folketal,
+        region_pr_kommune)
     print(f"  {len(kvotient_pr_aar)} årgange udjævnet, "
           f"{sum(1 for v in pr_kommune.values() if v is not None)} områder beregnet.")
     return pr_kommune
@@ -192,18 +190,9 @@ def _hent_kommunalt_indkoeb():
         aktuelt = pr_aar.get(seneste)
         if aktuelt is None:
             continue
-        felter[navn] = {
-            "drift_pr_indb": indkoeb.indkoeb_uden_forsyning(aktuelt),
-            "foedevarer_pr_indb": indkoeb.indkoeb_uden_forsyning(
-                aktuelt, [indkoeb.ART_FOEDEVARER]),
-            "braendsel_pr_indb": indkoeb.indkoeb_uden_forsyning(
-                aktuelt, [indkoeb.ART_BRAENDSEL]),
-            # Anlægget udjævnes over vinduet. Et år uden tal springes over -
-            # udjaevn_over_vindue() tæller det ikke som nul.
-            "anlaeg_pr_indb": indkoeb.udjaevn_over_vindue({
-                aar: indkoeb.indkoeb_uden_forsyning(pr_hk)
-                for aar, pr_hk in (anlaeg.get(navn) or {}).items()}),
-        }
+        # Anlægget udjævnes over vinduet. Samme funktion som historikken
+        # bruger til hvert af de foregående år.
+        felter[navn] = indkoeb.indkoeb_felter(aktuelt, anlaeg.get(navn), vindue)
         andele[navn] = indkoeb.transportandel(aktuelt)
 
     forbehold = indkoeb.klassificer_faergedrift(andele)
@@ -305,25 +294,9 @@ def main():
                                   kommunalt_indkoeb=kommunalt_indkoeb,
                                   indkoeb_forbehold=indkoeb_forbehold)
     # Landets husholdningstal er summen af kommunernes, ikke et selvstændigt
-    # opslag - så tæller og nævner dækker præcis det samme område.
-    def _sum(felt):
-        vaerdier = [h.get(felt) for h in husholdning.values() if h.get(felt) is not None]
-        return sum(vaerdier) if vaerdier else None
-
-    land_post["husholdning_co2_ton"] = _sum("co2_ton")
-    land_post["husholdning_energi_tj"] = _sum("energi_tj")
-    # Landets fossile andel beregnes på de samlede mængder, ikke som
-    # gennemsnittet af 98 kommuneandele - ellers ville Læsø veje som København.
-    land_post["husholdning_fossil_andel"] = None
-    samlet_tj = _sum("energi_tj")
-    if samlet_tj:
-        fossilt = sum((h.get("energi_tj") or 0) * (h.get("fossil_andel") or 0)
-                      for h in husholdning.values())
-        land_post["husholdning_fossil_andel"] = fossilt / samlet_tj
-    # Landets el og fjernvarme er ligeledes summen af kommunernes. Motorens
-    # fælles el-faktor er landets el-udledning delt med landets elforbrug.
-    for felt in ("el_tj", "el_co2_ton", "fjernvarme_tj", "fjernvarme_co2_ton"):
-        land_post[f"husholdning_{felt}"] = _sum(felt)
+    # opslag - så tæller og nævner dækker præcis det samme område. Samme
+    # funktion som historikken bruger til hvert af de foregående år.
+    land_post.update(fetch_klimaregnskabet.sammenlaeg_land_husholdning(husholdning))
 
     kommune_poster = []
     for kode, navn, region in KOMMUNER:
@@ -358,6 +331,23 @@ def main():
     with open(ENS_JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(ens.byg_ens(), f, ensure_ascii=False, indent=2)
     print(f"Skrev {ENS_JSON_PATH}")
+
+    # --- Historikken bag udviklingspilene ---
+    # Bygges af de samme hentefunktioner som data.json, og seneste punkt i hver række skal
+    # være data.json's tal. Afviger de, rejser byg_og_skriv en HistorikFejl, og kørslen stopper:
+    # en historik, der beskriver et andet tal end siden viser, må ikke udgives.
+    # Andre fejl, fx at Klimaregnskabet ikke kan nås, er ikke en uoverensstemmelse. De giver en
+    # advarsel, og de berørte nøgletal vises uden tidsserie - samme regel som for de øvrige
+    # valgfrie kilder. Arbejdsgangens kontrol fanger, hvis felter mangler.
+    print("\nBygger historikken bag udviklingspilene...")
+    try:
+        historik.byg_og_skriv(output, husholdning_nu=husholdning or None,
+                              frisk_kr="--frisk-kr" in sys.argv)
+    except historik.HistorikFejl:
+        raise
+    except Exception as fejl:
+        print(f"  ADVARSEL: historikken kunne ikke bygges ({fejl}). "
+              "web/data/historik.json er ikke opdateret og passer ikke til data.json.")
 
     # --- Valideringsrapport ---
     print("\n--- Valideringsrapport ---")

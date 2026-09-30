@@ -52,6 +52,8 @@ forbrugsudledninger/
 │   ├── fetch_klimaregnskabet.py <- husholdningernes energi og CO2 (kræver API-nøgle)
 │   ├── indkoeb.py          <- ★ KOMMUNENS EGET INDKØB: afgrænsning og forbehold
 │   ├── fetch_regk.py       <- DST REGK11, kommunernes regnskaber
+│   ├── historik.py         <- ★ ÅRSVÆRDIER BAG UDVIKLINGSPILENE. Skriver historik.json, kun tal.
+│   ├── perioder.py         <- periodearitmetik: "2026K1" -> "2025K1"
 │   ├── dst_client.py, kommuner.py
 │   └── test/               <- pytest
 ├── web/
@@ -60,11 +62,12 @@ forbrugsudledninger/
 │   ├── beregning.js        <- ★ REN BEREGNINGSMOTOR. Ingen I/O, ingen DOM.
 │   ├── render.js           <- ★ RENE RENDER-FUNKTIONER. Data ind, HTML-streng ud.
 │   ├── eksport.js          <- ★ REGNEARKSEKSPORT. Arkmodel ud, ingen DOM.
+│   ├── tooltip.js          <- egen tooltip; bygger grafen ved udviklingspilen først ved hover
 │   ├── xlsx.js             <- minimal xlsx-skriver. Ingen afhængigheder.
 │   ├── widget.js           <- tyndt DOM-lag. Ingen forretningslogik.
 │   ├── styles/input.css    <- Tailwind-kilde
 │   ├── styles/styles.css   <- genereret, MEN COMMITTET (så repoet virker uden Node)
-│   └── data/               <- data.json, sources.json
+│   └── data/               <- data.json, historik.json, sources.json, ens.json, concito.json
 └── test/                   <- node --test
     └── regneark.js         <- lille regnemotor, så testene kan regne arket efter
 ```
@@ -100,7 +103,8 @@ Kildens tal bliver stående ved siden af, der er en kolonne til ens egen
 kildeangivelse, og arket siger til, hvis den mangler - det er reglen om, at
 intet tal står uden kilde, skrevet i regneark.
 
-Arket viser præcis det, kommunens side viser. Et nøgletal, som et forbehold har
+Arket viser det samme som kommunens side, med den undtagelse at **udviklingen over tid
+ikke er med** (pilene og historikken, se næste afsnit). Et nøgletal, som et forbehold har
 taget af siden, er heller ikke med her, og **dets rådatafelter er ikke med på
 fanebladet Data**: ellers kunne enhver regne det skjulte tal ud af de felter,
 der blev liggende. Den grænse holdes af en test.
@@ -122,6 +126,78 @@ runtime-afhængigheder vil have. Zip-arkivet er ukomprimeret: deflate ville kræ
 enten `CompressionStream`, som er asynkron, eller en egen implementering, og et
 ark på et par hundrede kilobyte er ikke værd at betale nogen af delene for.
 
+## Udviklingen over tid
+
+Hvert nøgletal har en pil, der viser, om kommunen de seneste op til ti år har bevæget sig mod
+lavere udledning (rigtig retning), mod højere (forkert retning) eller ikke ret meget. Peger man
+på pilen, tegnes en lille graf af kommunens og landets tal. Metoden er doughnut-platformens
+retningspile (T1-T4 i dens `docs/arkitektur-og-beregningsregler.md`), med de tilpasninger dette
+værktøjs egne regler kræver. Forklaringen til brugerne står på metodesiden, afsnit 4.5.
+
+**`historik.json` rummer kun tal, og grafen tegnes først ved hover.** Filen har elleve tal pr.
+felt for hver kommune og landet (feltets nuværende værdi og ti år bagud). Pipelinen gemmer aldrig
+SVG. `tooltip.js` beder om grafen med nøglen fra pilens `data-graf`, når pilen får mus, fokus
+eller et tryk, og `renderUdviklingTip()` i `render.js` bygger den af tallene. Kommunesiden rummer kun
+pilen. Filen hentes først, når en kommuneside åbnes, og mangler den, står siden uden kolonnen
+Udvikling frem for med en fejl. `test/render_udvikling.test.js` holder fast, at ingen graf ligger
+i siden på forhånd. Der er derfor intet tegnet at holde ajour ved den årlige opdatering.
+
+**Seneste punkt er tallet i tabellen (doughnuts T9).** `historik.py` kalder de samme
+hentefunktioner som `data.json`, med en liste af perioder i stedet for én: hver `fetch_xxx` er delt
+i et kald og en udregning, og `fetch_xxx_serie` kører den samme udregning på hver periodes rækker.
+Sammensætningerne deles også (`indkoeb.indkoeb_felter`, `osei_owusu.forbrug_for_aar`,
+`fetch_klimaregnskabet.sammenlaeg_land_husholdning`). `afstem_med_data()` stopper kørslen, hvis
+seneste punkt afviger fra `data.json`, og `test/historik.test.js` kører samme kontrol mod de
+committede filer. Motoren regner serien med nøgletallets eget `val()` (`driverSerie`), så tabel og
+pil er ét tal, også bitvis.
+
+**Hvert felt går bagud fra sin egen periode.** Bilerne er fra januar 2026, byggeriet fra 2024,
+affaldet fra 2023 (`FELT_PERIODE` i `historik.py`). Byggeri i 2024 delt med folketallet i 2026 er
+derfor byggeri i 2023 delt med folketallet i 2025 året før, og så videre: samme kombination i alle
+år. Nøgletallets årstal er det ældste af dets felters perioder (`driverAar`).
+
+**Fælder, der allerede er ramt.**
+
+- **Null er nul i JavaScript.** `null / 42572` er 0, og et hul i historikken ville blive en måling.
+  `postVedTrin()` udelader hullet, så regnestykket giver NaN og `sikker()` giver null. En test kører
+  det.
+- **DST's celletælling er højere end svarets rækker.** Fritidshuse (tre jokertegn) må kun hentes ét
+  år ad gangen, byggeri højst tre (`fetch_i_bidder`). Elleve år ad gangen gav HTTP 400.
+- **BOL101 mangler 2021 og 2022.** Boligtallene har derfor et hul, og nøgletal, der bruger dem, står
+  uden punkt de to år. Det er korrekt, ikke en fejl.
+- **Andre Python-versioner summerer floats anderledes.** Fødevareforbruget afviger en enhed i sidste
+  decimal mellem 3.11 og 3.12. `afstem_med_data` sætter `data.json`'s værdi ind, når forskellen er
+  float-støj, og stopper ved alt større.
+- **Kilder, der er yngre end vinduet, giver en kortere række.** BIL54 begynder i 2018, FU17 i 2015.
+  Rækken har stadig elleve led, med hullerne som null.
+
+**Retningen er nøgletallets `paavirkning`, ikke en ny antagelse.** `lavere` betyder, at en stigning er
+rigtig, `hoejere` at et fald er det, `uafklaret` at pilen står uden vurdering (grå). Et forbehold, der
+spærrer retningen, spærrer også pilen; et forbehold, der skjuler nøgletallet, tager også pilen af
+siden. Begge holdes ude af medianen, som "rigtig" og "langsomt" skilles ved. Klassifikationen er
+doughnuts: `ingen`, `stagneret`, `kontekst`, `forkert`, `tempo`, `rigtig`, med endepunkter midlet over
+tre år ved mindst seks punkter. Tærsklerne for "uændret" er tilpasset enhederne (procentpoint for
+andele, 0,1 for vækstrater) og står som konstanter i `beregning.js`.
+
+**Kronebeløb sættes i samme prisniveau.** Nøgletal med `faste: true` (enhed kr.) regnes op til det
+seneste års priser med forbrugerprisindekset (DST PRIS8, årsgennemsnit), som ligger i `historik.json`.
+Ellers ville en stigning, der blot følger priserne, få alle kommuner til at pege samme vej. En test
+holder flaget på præcis de nøgletal, hvis enhed er kroner. Anlægsindkøbet er et femårsgennemsnit og
+sættes i priserne fra vinduets midte (`prisForskydning: 2`, som skal følge `ANLAEG_VINDUE_AAR`).
+Værdierne i `historik.json` er kildens egne, ikke justerede.
+
+**Klimaregnskabets fire nøgletal kræver API-nøglen.** Uden den står de syv `husholdning_*`-felter
+uden historik (`mangler` i filen), og nøgletallene vises med "ingen tidsserie". Workflowet **Årlig
+dataopdatering** bygger historikken med nøglen og fejler, hvis `mangler` ikke er tom. Hver
+Klimaregnskab-årgang er 196 kald, og historikken henter op til seks årgange ud over det nyeste år,
+så kørslen tager markant længere tid end før.
+Årgangene er ikke prøvet mod den levende kilde uden nøgle; om metoden er ens i alle år, kan værktøjet
+ikke selv afgøre, og det står ved nøgletallene.
+
+**Tilføjer du et nøgletal**, skal alle dets felter stå i `FELT_PERIODE` i `historik.py` og i `felter`
+i `beregning.js`, ellers står det uden tidsserie, og `test/historik.test.js` melder det. Et nøgletal
+i kroner skal have `faste: true`.
+
 ## To UI-mønstre der er arvet af faglige grunde
 
 1. **Retning bæres af formen, ikke kun farven.** Signalerne bruger fyldte og
@@ -131,6 +207,10 @@ ark på et par hundrede kilobyte er ikke værd at betale nogen af delene for.
 2. **Egen tooltip frem for `title`.** Browserens native tooltip har 0,5-1
    sekunds forsinkelse og opfører sig forskelligt fra browser til browser.
    Forbeholdene skal vises straks, både ved hover og ved tastaturfokus.
+   Berøringsskærme har ingen hover: et tryk på triggeren viser boksen, og et tryk et andet sted
+   skjuler den. `tooltip.js` lytter derfor på pointer-hændelser (`pointerover`, `pointerout`,
+   `pointerup`) og ikke på mus-hændelser, fordi en berøringsskærm sender et `mouseout` lige efter
+   et tryk, som ellers skjuler boksen igen i samme øjeblik, den blev vist.
 
 Begge er overtaget fra doughnut-projektet, hvor de blev fundet nødvendige.
 
@@ -250,8 +330,8 @@ du alligevel køre lokalt, virker `pipeline/.env` som før.
 ## Cachefiler under udvikling
 
 `pipeline/.kr_cache.json` gemmer Klimaregnskabet.dk, der kræver ét kald pr.
-kommune, så en genkørsel tager sekunder. Den er gitignoreret. Omgå den med
-`--frisk-kr`.
+kommune, så en genkørsel tager sekunder. `pipeline/.kr_historik_cache.json` gør det samme for de
+foregående årgange bag historikken. Begge er gitignoreret. Omgå dem med `--frisk-kr`.
 
 ## Årlig opdatering
 
@@ -261,14 +341,17 @@ begge testsuiter, og åbner en draft-PR med det nye datasæt. Trinene nedenfor
 gælder både den vej og en lokal kørsel.
 
 1. `python3 pipeline/build.py` - genhenter alle API-kilder, skriver
-   `data.json` og `sources.json`, og udskriver en valideringsrapport.
-   I CI står rapporten i kørslens log.
+   `data.json`, `historik.json` og `sources.json`, og udskriver en valideringsrapport.
+   Historikken bygges sidst og følger `PERIODER` bagud af sig selv. I CI står rapporten i
+   kørslens log. Vil du kun genskabe historikken ud fra den committede `data.json`, så kør
+   `python3 pipeline/historik.py`.
 2. Læs rapporten. Den bekræfter, at Thisted stadig rammer golden-tallene, og
    tæller kommuner med manglende drivere. Det trin kan ikke automatiseres:
    testene fanger brudte regnestykker, ikke tal der er rigtige men urimelige.
 3. Opdatér `PERIODER` i `constants.py`, hvis nyere perioder er tilgængelige.
    `REGNSKAB_AAR` styrer både driftsindkøbets år og slutåret i anlæggets
-   femårsvindue.
+   femårsvindue. `PRIS_AAR` skal være mindst lige så ny som `INDKOMST_AAR`, `FORBRUG_AAR`
+   og `REGNSKAB_AAR`, og en test melder det, hvis den ikke er.
 4. Commit og push. Udgivelsen sker automatisk.
 
 `KONSTANTER` i `constants.py` er metodiske antagelser, ikke datapunkter. Ændr
@@ -277,8 +360,8 @@ dem kun hvis metoden selv ændres, og kør golden-testene bagefter.
 ## Tests
 
 ```bash
-npm test                              # 250+ JS-tests: motor, rendering, metodeside, eksport
-cd pipeline && python3 -m pytest -q   # 100+ Python-tests: pipeline
+npm test                              # 350+ JS-tests: motor, rendering, metodeside, eksport, udvikling
+cd pipeline && python3 -m pytest -q   # 200+ Python-tests: pipeline
 ```
 
 Golden-testene i `test/golden.test.js` holder motoren fast på fastfrosne

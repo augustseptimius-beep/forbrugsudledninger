@@ -4,8 +4,8 @@
 // platformen senere flettes ind i doughnut-projektet.
 
 // Optællingen bor i motoren, hvor den er testet - ikke her.
-import { samletRetning, TAERSKEL_NIVEAU, TAERSKEL_MARKANT,
-         FORBEHOLD_VIRKNING } from "./beregning.js";
+import { samletRetning, samletUdvikling, aendring, TAERSKEL_NIVEAU, TAERSKEL_MARKANT,
+         FORBEHOLD_VIRKNING, N_ENDEPUNKT } from "./beregning.js";
 
 // ---------- Formatering ----------
 
@@ -264,7 +264,7 @@ const NEUTRAL_MAERKAT = "bg-gray-50 text-gray-700 border-gray-300";
  *
  *  Optællingen står i selve teksten ("3 af 4 nøgletal"), så læseren kan se den
  *  efter i tabellen nedenunder frem for at tage mærkatet på ordet. */
-function samletMaerkat(s) {
+function samletMaerkat(s, udv = null) {
   const [tekst, klasse, tegn] =
     s.retning === "højere" ? ["peger mod højere udledning", SIGNAL["højere"].klasse, "▲"]
     : s.retning === "lavere" ? ["peger mod lavere udledning", SIGNAL["lavere"].klasse, "▼"]
@@ -299,6 +299,7 @@ function samletMaerkat(s) {
       tegn ? `<span aria-hidden="true" class="text-[11px] leading-none">${tegn}</span>` : ""
     }${esc(tekst)}</span>
     <span class="mt-1 block text-xs text-gray-500 tabular-nums">${esc(led.join(" \u00b7 "))}</span>
+    ${udv ? udviklingLinje(udv) : ""}
   </div>`;
 }
 
@@ -505,8 +506,339 @@ function forbeholdMaerkat() {
     ><span aria-hidden="true" class="text-[11px] leading-none">○</span>${FORBEHOLD_MAERKAT_TEKST}</span>`;
 }
 
+// ---------- Udvikling over tid ----------
+//
+// Pilen ved hvert nøgletal viser, om kommunen de seneste op til ti år har bevæget
+// sig mod lavere udledning, mod højere eller ikke ret meget. Former og farver er
+// doughnut-platformens: en fyldt trekant op eller ned (værdien steg eller faldt),
+// en vandret streg (uændret) og et skraveret felt (ingen tidsserie). Farven siger,
+// om bevægelsen var godt: grøn er rigtig retning, gul er rigtig men langsom, rød
+// er forkert.
+//
+// Farven bærer ikke retningen alene. Teksten står ved siden af pilen, og formen
+// siger op eller ned, fordi cirka 8 % af mænd er farveblinde.
+//
+// GRAFEN TEGNES FØRST VED HOVER. Rækken rummer kun pilen og et nøgle-navn i
+// data-graf. tooltip.js beder om grafen, når pilen får musen eller tastaturfokus, og
+// først da bygger renderUdviklingTip() SVG'en ud fra kommunens og landets tal.
+// Ingen graf ligger i siden på forhånd, og der er ingen tegninger at holde ajour, når
+// datasættet opdateres: siden tegner den udvikling, tallene viser.
+
+const UDVIKLING = {
+  rigtig: { lang: "Rigtig retning: udviklingen peger mod lavere udledning",
+    kort: "rigtig retning", ikon: "text-emerald-600", tekst: "text-emerald-800" },
+  tempo: { lang: "Rigtig retning, men langsommere end i de fleste kommuner",
+    kort: "rigtig, langsomt", ikon: "text-amber-500", tekst: "text-amber-800" },
+  stagneret: { lang: "Stort set uændret",
+    kort: "uændret", ikon: "text-gray-400", tekst: "text-gray-600" },
+  forkert: { lang: "Forkert retning: udviklingen peger mod højere udledning",
+    kort: "forkert retning", ikon: "text-red-500", tekst: "text-red-700" },
+  kontekst: { lang: "Ingen vurdering: nøgletallets retning for udledningen kan ikke afgøres",
+    kort: "ingen vurdering", ikon: "text-gray-400", tekst: "text-gray-600" },
+  ingen: { lang: "Ingen tidsserie for dette nøgletal",
+    kort: "ingen tidsserie", ikon: "text-gray-300", tekst: "text-gray-500" },
+};
+
+// Hvad læseren skal have med, når han læser udviklingen af netop dette nøgletal. Det er
+// ikke nye forbehold: de står allerede ved nøgletallet (DRIVER_FORBEHOLD og
+// begrundelsen). Her står kun det, der gælder ÆNDRINGEN mellem årene og ikke tallet
+// for ét år.
+const UDVIKLING_NOTE = {
+  "Genanvendelsesprocent":
+    "Danmarks Statistiks opgørelse af genanvendelse har skiftet definition i perioden, så et spring mellem to år kan skyldes definitionen og ikke kommunens indsats.",
+  "Fødevareforbrug pr. indbygger":
+    "Tallet er beregnet, ikke målt: regionens forbrugskvotient gange kommunens disponible indkomst. Udviklingen følger derfor indkomsten og landets forbrugsandel.",
+  "Kommunens anlægsindkøb":
+    "Hvert punkt er et gennemsnit over fem regnskabsår, så et enkelt stort anlægsprojekt sætter sit spor i fem punkter.",
+  "Husholdningernes CO2 fra energi":
+    "Klimaregnskabets metode kan have ændret sig mellem årgangene. Værktøjet kan ikke selv efterprøve det.",
+  "Husholdningernes energiforbrug":
+    "Klimaregnskabets metode kan have ændret sig mellem årgangene. Værktøjet kan ikke selv efterprøve det.",
+  "Fossil andel af husholdningernes energi":
+    "Klimaregnskabets metode kan have ændret sig mellem årgangene. Værktøjet kan ikke selv efterprøve det.",
+  "Fjernvarmens CO2 pr. kWh":
+    "Klimaregnskabets metode kan have ændret sig mellem årgangene. Værktøjet kan ikke selv efterprøve det.",
+};
+
+const PIL_OP = "M6 1.5 L10.5 9 L1.5 9 Z";
+const PIL_NED = "M6 10.5 L1.5 3 L10.5 3 Z";
+
+/** Pilens ikon. `op` siger, om værdien steg; farven kommer af klassen. */
+function udviklingsIkon(retning, op) {
+  const indhold = retning === "ingen"
+    ? '<rect x="1" y="1" width="10" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1"/>'
+      + '<line x1="1" y1="11" x2="11" y2="1" stroke="currentColor" stroke-width="1"/>'
+      + '<line x1="1" y1="6" x2="6" y2="1" stroke="currentColor" stroke-width="1"/>'
+      + '<line x1="6" y1="11" x2="11" y2="6" stroke="currentColor" stroke-width="1"/>'
+    : retning === "stagneret"
+      ? '<line x1="1.5" y1="6" x2="10.5" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+      : `<path d="${op ? PIL_OP : PIL_NED}" fill="currentColor"/>`;
+  return `<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"
+    class="shrink-0 ${UDVIKLING[retning].ikon}">${indhold}</svg>`;
+}
+
+const fortegn = (v) => (v > 0 ? "+" : v < 0 ? "-" : "");
+
+// Antallet af midlede år, skrevet som ord. Følger N_ENDEPUNKT, så teksten ikke kan
+// sige "tre", mens motoren midler over fem.
+const ANTAL_ORD = ["nul", "ét", "to", "tre", "fire", "fem", "seks"];
+
+/** Kilden til forbrugerprisindekset, som kildekataloget navngiver den. */
+const priskilde = (sources) => sources?.kilder?.find((k) => k.id === "PRIS8")?.kort ?? "PRIS8";
+
+/** Ændringen mellem endepunkterne, som den står i teksten: procentpoint for
+ *  andelene og vækstraterne, ellers procent. null, hvis den ikke kan regnes. */
+function aendringsTekst(d, u) {
+  if (u.pp != null && (d.andel || d.type === "difference")) {
+    return `${fortegn(u.pp)}${formatér(Math.abs(u.pp), 1)} procentpoint`;
+  }
+  return u.pct == null ? null : pct(u.pct / 100);
+}
+
+/** Pilens tekst til skærmlæsere. Den bærer det samme som grafen: perioden,
+ *  kommunens og landets tal og vurderingen. */
+function udviklingAria(d, navn) {
+  const u = d.udvikling;
+  const m = UDVIKLING[u?.retning ?? "ingen"];
+  if (!u || u.retning === "ingen") return `Udvikling: ${m.lang}.`;
+  const aend = aendringsTekst(d, u);
+  const land = u.landStart != null && u.landSlut != null
+    ? ` Hele landet: ${driverVaerdi(d, u.landStart)} til ${driverVaerdi(d, u.landSlut)}.` : "";
+  return `Udvikling ${u.startLabel} til ${u.slutLabel}: ${m.lang}. ${navn}: `
+    + `${driverVaerdi(d, u.start)} til ${driverVaerdi(d, u.slut)}`
+    + `${aend ? ` (${aend})` : ""}.${land}`;
+}
+
+/** Cellen i kolonnen Udvikling: pilen og en kort tekst. Har nøgletallet en serie,
+ *  bærer pilen data-graf, og grafen tegnes først, når man peger på den. Uden serie
+ *  får den en almindelig tekst-tooltip. */
+function udviklingsCelle(d, navn) {
+  const u = d.udvikling;
+  const retning = u?.retning ?? "ingen";
+  const m = UDVIKLING[retning];
+  const harGraf = u?.serie && u.n >= 2;
+  const trigger = harGraf ? `data-graf="${esc(d.navn)}"` : `data-tip="${esc(m.lang)}"`;
+  return `<span class="inline-flex items-center gap-1.5 text-xs ${m.tekst} cursor-help rounded"
+      tabindex="0" role="img" aria-label="${esc(udviklingAria(d, navn))}" ${trigger}>
+      ${udviklingsIkon(retning, u?.op !== false)}<span aria-hidden="true">${esc(m.kort)}</span></span>`;
+}
+
+/** Forklaringen under tabellerne: hvad pilen viser, og hvordan den læses. */
+function udviklingForklaring() {
+  return `<p class="mt-2 text-xs text-gray-500 max-w-3xl">
+      <strong class="font-semibold text-gray-600">Udvikling.</strong> Pilen viser, om
+      nøgletallet de seneste op til ti år har bevæget sig mod lavere udledning
+      (<span class="text-emerald-800">rigtig retning</span>), mod højere udledning
+      (<span class="text-red-700">forkert retning</span>) eller stort set ikke. Pilen
+      peger op, hvis værdien steg, og ned, hvis den faldt. Peg på pilen for at se
+      kommunens og landets udvikling. Kroner er sat i samme prisniveau. Hjælpetal tæller
+      ikke med i optællingen. Se
+      <a href="metode.html#udvikling" class="underline hover:text-gray-700">metodesiden</a>.</p>`;
+}
+
+/** Kategoriens optælling af udviklingen. Tæller, vejer ikke, og hjælpetal tæller
+ *  ikke med - samme regler som den samlede retning ved siden af. */
+function udviklingLinje(u) {
+  const led = [];
+  if (u.rigtig) {
+    led.push(`${tal(u.rigtig)} i rigtig retning${u.langsomt ? ` (heraf ${tal(u.langsomt)} langsomt)` : ""}`);
+  }
+  if (u.forkert) led.push(`${tal(u.forkert)} i forkert retning`);
+  if (u.uaendret) led.push(`${tal(u.uaendret)} uændret`);
+  if (u.udenVurdering) led.push(`${tal(u.udenVurdering)} uden vurdering`);
+  if (u.udenTidsserie) led.push(`${tal(u.udenTidsserie)} uden tidsserie`);
+  if (led.length === 0) return "";
+  return `<div class="mt-2 text-[10px] font-semibold uppercase tracking-wide text-gray-500">Udvikling over tid</div>
+    <span class="mt-1 block text-xs text-gray-600 tabular-nums">${esc(led.join(" · "))}</span>`;
+}
+
+// Grafens farver. Kommunen er det, siden handler om, og får den ene accentfarve;
+// landet er sammenligningen og er grå og stiplet, så de to kan skelnes uden farve.
+// Ingen af dem er en vurderingsfarve: grøn, gul og rød hører til pilen.
+const GRAF_KOMMUNE = "#2a78d6";
+const GRAF_LAND = "#6b7280";
+const GRAF_GITTER = "#e5e7eb";
+const GRAF_AKSE = "#d1d5db";
+const GRAF_FLADE = "#ffffff";
+
+const GRAF = { b: 288, h: 108, l: 46, r: 12, t: 8, nede: 22 };
+
+/** Runde akseværdier: den mindste trin i 1, 2, 2,5, 5 og 10 gange en tierpotens,
+ *  der dækker værdierne med højst fire intervaller. */
+export function akseTicks(min, max) {
+  if (min === max) {
+    const d = Math.abs(min) * 0.1 || 1;
+    min -= d;
+    max += d;
+  }
+  const span = max - min;
+  const start = Math.floor(Math.log10(span / 8));
+  for (let e = start; e < start + 6; e++) {
+    for (const m of [1, 2, 2.5, 5]) {
+      const trin = m * 10 ** e;
+      const foerste = Math.floor(min / trin + 1e-9) * trin;
+      const sidste = Math.ceil(max / trin - 1e-9) * trin;
+      if (Math.round((sidste - foerste) / trin) <= 4) {
+        const ticks = [];
+        for (let t = foerste; t <= sidste + trin / 2; t += trin) ticks.push(Number(t.toPrecision(12)));
+        const dec = Math.max(0, -Math.floor(Math.log10(trin) + 1e-9), m === 2.5 ? 1 - e : 0);
+        return { ticks, trin, dec: Math.min(dec, 6) };
+      }
+    }
+  }
+  return { ticks: [min, max], trin: span, dec: 1 };
+}
+
+/** Værdien i de enheder, aksen viser: andele og vækstrater står i procent. */
+const visning = (d) => (v) => (d.andel === "0-1" || d.type === "difference" ? v * 100 : v);
+
+/** Linjestykker med huller. Et år uden tal afbryder linjen, og et enkeltstående
+ *  punkt tegnes som en prik, så det ikke forsvinder. */
+function linjeStykker(aar, vaerdier, x, y) {
+  const stykker = [];
+  let aktuelt = [];
+  aar.forEach((a, i) => {
+    if (vaerdier[i] == null) {
+      if (aktuelt.length) stykker.push(aktuelt);
+      aktuelt = [];
+    } else {
+      aktuelt.push([x(a), y(vaerdier[i])]);
+    }
+  });
+  if (aktuelt.length) stykker.push(aktuelt);
+  return stykker;
+}
+
+const fmt1 = (v) => v.toFixed(1);
+
+function seriedele(aar, vaerdier, x, y, farve, stiplet) {
+  const dash = stiplet ? ' stroke-dasharray="4 3"' : "";
+  return linjeStykker(aar, vaerdier, x, y).map((st) => (st.length === 1
+    ? `<circle cx="${fmt1(st[0][0])}" cy="${fmt1(st[0][1])}" r="2.5" fill="${farve}"/>`
+    : `<path d="${st.map(([px, py], i) => `${i ? "L" : "M"}${fmt1(px)} ${fmt1(py)}`).join(" ")}"
+        fill="none" stroke="${farve}" stroke-width="2" stroke-linejoin="round"
+        stroke-linecap="${stiplet ? "butt" : "round"}"${dash}/>`)).join("");
+}
+
+/** Slutpunktet af en serie: en prik med en ring i fladens farve, så den kan ses,
+ *  hvor de to linjer krydser hinanden. */
+function slutpunkt(aar, vaerdier, x, y, farve) {
+  for (let i = vaerdier.length - 1; i >= 0; i--) {
+    if (vaerdier[i] != null) {
+      return `<circle cx="${fmt1(x(aar[i]))}" cy="${fmt1(y(vaerdier[i]))}" r="4"
+        fill="${farve}" stroke="${GRAF_FLADE}" stroke-width="2"/>`;
+    }
+  }
+  return "";
+}
+
+/** Kommunens og landets serie som ét SVG. En akse, to linjer, runde akseværdier og
+ *  første og sidste år; ingen tal på hvert punkt. Værdierne står i teksten under
+ *  grafen og i pilens tekst, så grafen ikke er den eneste vej til dem.
+ *
+ *  Ren funktion: serie ind, streng ud. Kaldes først, når man peger på pilen. */
+export function udviklingsGraf(d, serie, navn) {
+  const v = visning(d);
+  const aar = serie.aar;
+  const kommune = serie.kommune.map((x) => (x == null ? null : v(x)));
+  const land = serie.land.map((x) => (x == null ? null : v(x)));
+  const tal_ = [...kommune, ...land].filter((x) => x != null);
+  const aarMedTal = aar.filter((_, i) => kommune[i] != null || land[i] != null);
+  if (tal_.length < 2 || aarMedTal.length < 2) return "";
+
+  const { ticks, dec } = akseTicks(Math.min(...tal_), Math.max(...tal_));
+  const lo = ticks[0];
+  const hi = ticks.at(-1);
+  const { b, h, l, r, t, nede } = GRAF;
+  const plotB = b - l - r;
+  const plotH = h - t - nede;
+  const foerste = aarMedTal[0];
+  const sidste = aarMedTal.at(-1);
+  const x = (a) => l + (plotB * (a - foerste)) / (sidste - foerste);
+  const y = (val) => t + plotH * (1 - (val - lo) / (hi - lo));
+
+  const gitter = ticks.map((tk) => `<line x1="${l}" x2="${b - r}" y1="${fmt1(y(tk))}" y2="${fmt1(y(tk))}"
+      stroke="${tk === lo ? GRAF_AKSE : GRAF_GITTER}" stroke-width="1"/>
+    <text x="${l - 6}" y="${fmt1(y(tk) + 3.5)}" text-anchor="end" font-size="10"
+      class="fill-gray-500">${esc(formatér(tk, dec))}</text>`).join("");
+
+  // Første og sidste år, og et i midten, når serien er lang nok til at have plads.
+  const aarsmaerker = new Set([foerste, sidste]);
+  if (sidste - foerste >= 6) aarsmaerker.add(Math.round((foerste + sidste) / 2));
+  const xAkse = [...aarsmaerker].map((a) => `<line x1="${fmt1(x(a))}" x2="${fmt1(x(a))}"
+      y1="${t + plotH}" y2="${t + plotH + 3}" stroke="${GRAF_AKSE}" stroke-width="1"/>
+    <text x="${fmt1(x(a))}" y="${t + plotH + 14}" text-anchor="middle" font-size="10"
+      class="fill-gray-500">${a}</text>`).join("");
+
+  const beskrivelse = `${navn} og hele landet, ${foerste} til ${sidste}`;
+  return `<svg viewBox="0 0 ${b} ${h}" width="${b}" height="${h}" role="img"
+      aria-label="${esc(beskrivelse)}" class="block max-w-full">
+    <title>${esc(beskrivelse)}</title>
+    ${gitter}${xAkse}
+    ${seriedele(aar, land, x, y, GRAF_LAND, true)}
+    ${seriedele(aar, kommune, x, y, GRAF_KOMMUNE, false)}
+    ${slutpunkt(aar, land, x, y, GRAF_LAND)}${slutpunkt(aar, kommune, x, y, GRAF_KOMMUNE)}
+  </svg>`;
+}
+
+/** Et linjenøgle i tooltippens forklaring: en kort streg i seriens stil. Nøglen er en
+ *  streg og ikke en firkant, fordi det er en linje, den står for. */
+function graefNoegle(farve, stiplet) {
+  return `<svg width="18" height="8" viewBox="0 0 18 8" aria-hidden="true" class="shrink-0">
+    <line x1="1" x2="17" y1="4" y2="4" stroke="${farve}" stroke-width="2"
+      stroke-linecap="${stiplet ? "butt" : "round"}"${stiplet ? ' stroke-dasharray="4 3"' : ""}/></svg>`;
+}
+
+/** Indholdet af tooltippen ved pilen: nøgletallet, grafen, kommunens og landets
+ *  tal, vurderingen og hvad den bygger på. Bygges først, når pilen får musen eller
+ *  fokus, og returnerer en tom streng, hvis nøgletallet ingen serie har. */
+export function renderUdviklingTip(d, sources, navn) {
+  const u = d?.udvikling;
+  if (!u?.serie || u.n < 2) return "";
+  const m = UDVIKLING[u.retning];
+  const serie = u.serie;
+  const aarMedTal = serie.aar.filter((_, i) => serie.kommune[i] != null || serie.land[i] != null);
+  const periode = `${aarMedTal[0]}-${aarMedTal.at(-1)}`;
+
+  const raekke = (noegle, navnTekst, start, slut, aend) => `<p class="flex items-baseline gap-1.5">
+      <span class="self-center">${noegle}</span>
+      <span class="text-gray-500">${esc(navnTekst)}</span>
+      <span class="font-semibold text-gray-900 tabular-nums">${esc(driverVaerdi(d, start))} &rarr; ${esc(driverVaerdi(d, slut))}</span>
+      ${aend ? `<span class="text-gray-500 tabular-nums">${esc(aend)}</span>` : ""}</p>`;
+
+  const landAend = u.landStart != null && u.landSlut != null
+    ? aendringsTekst(d, aendring(d, u.landStart, u.landSlut)) : null;
+  const priser = serie.faste
+    ? `<p class="mt-1 text-gray-500">Kroner i ${esc(serie.prisAar)}-priser (forbrugerprisindeks, ${
+        esc(priskilde(sources))}).</p>` : "";
+  const kilder = kilderForDriver(d, sources).kilder.map((k) => k.kort ?? k.id);
+  // Tallene ved kommunen og landet er endepunkterne, som pilen bygger på. Er serien lang
+  // nok, er de middel af flere år, og så står de ikke som sidste års tal i tabellen.
+  const grundlag = u.midlet
+    ? `Tallene er middel af ${ANTAL_ORD[N_ENDEPUNKT] ?? N_ENDEPUNKT} år i hver ende `
+      + `(${u.startLabel} og ${u.slutLabel}), så ét afvigende år ikke afgør retningen.`
+    : `Tallene er første og sidste år (${u.startLabel} og ${u.slutLabel}).`;
+
+  return `<div class="w-[18.5rem] max-w-full text-[11px] leading-snug text-gray-700">
+    <p class="text-xs font-semibold text-gray-900">${esc(d.navn)}</p>
+    <p class="text-gray-500">${esc(d.enhed)} &middot; ${esc(periode)}</p>
+    <div class="mt-1.5">${udviklingsGraf(d, serie, navn)}</div>
+    <div class="mt-1.5 space-y-0.5">
+      ${raekke(graefNoegle(GRAF_KOMMUNE, false), navn, u.start, u.slut, aendringsTekst(d, u))}
+      ${u.landStart != null && u.landSlut != null
+        ? raekke(graefNoegle(GRAF_LAND, true), "Hele landet", u.landStart, u.landSlut, landAend) : ""}
+    </div>
+    <p class="mt-1.5 flex items-start gap-1.5 font-medium ${m.tekst}">
+      <span class="mt-[3px]">${udviklingsIkon(u.retning, u.op)}</span><span>${esc(m.lang)}</span></p>
+    <p class="mt-1 text-gray-500">${esc(grundlag)}</p>
+    ${UDVIKLING_NOTE[d.navn] ? `<p class="mt-1 text-gray-500">${esc(UDVIKLING_NOTE[d.navn])}</p>` : ""}
+    ${priser}
+    ${kilder.length ? `<p class="mt-1 text-gray-500">Kilde: ${esc(kilder.join(", "))}, tidligere årgange.</p>` : ""}
+  </div>`;
+}
+
 /** Én række: nøgletallets navn, enhed, kilde, tallene og retningen. */
-function noegletalRaekke(d, sources) {
+function noegletalRaekke(d, sources, navn, medUdvikling) {
   const fb = DRIVER_FORBEHOLD[d.navn];
   const tom = d.kommuneVaerdi == null;
   // Tre tilfælde, og de ser forskellige ud med vilje:
@@ -542,24 +874,29 @@ function noegletalRaekke(d, sources) {
     <td class="py-2.5 px-3 text-right text-sm tabular-nums whitespace-nowrap align-top text-gray-700">
       ${driverAfvigelse(d)}${procentpointNote(d)}</td>
     <td class="py-2.5 pl-3 pr-3 text-right whitespace-nowrap align-top">
-      ${maerkat}${d.begrundelse ? forbehold(d.begrundelse) : ""}</td>
+      ${maerkat}${d.begrundelse ? forbehold(d.begrundelse) : ""}</td>${
+      medUdvikling ? `
+    <td class="py-2.5 pl-3 pr-3 whitespace-nowrap align-top">${udviklingsCelle(d, navn)}</td>` : ""}
   </tr>`;
 }
 
 /** Kategoriens tabel. Hovednøgletallene først, hjælpetallene sidst, så
  *  rækkefølgen svarer til den optælling, mærkatet ovenfor viser. */
 function noegletalTabel(b, drivere, sources) {
+  // Kolonnen Udvikling står kun, når siden har en historik at bygge den på.
+  const medUdvikling = drivere.some((d) => d.udvikling !== undefined);
   const raekker = [...drivere]
     .sort((a, x) => (a.rolle === "hjaelper" ? 1 : 0) - (x.rolle === "hjaelper" ? 1 : 0))
-    .map((d) => noegletalRaekke(d, sources)).join("");
+    .map((d) => noegletalRaekke(d, sources, b.navn, medUdvikling)).join("");
   return `<div class="overflow-x-auto tabel-scroll">
-    <table class="w-full min-w-[38rem]">
+    <table class="w-full ${medUdvikling ? "min-w-[46rem]" : "min-w-[38rem]"}">
       <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
         <th class="py-2 pl-3 pr-3 text-left font-medium">Nøgletal</th>
         <th class="py-2 px-3 text-right font-medium">${esc(b.navn)}</th>
         <th class="py-2 px-3 text-right font-medium">Hele landet</th>
         <th class="py-2 px-3 text-right font-medium">Forskel</th>
-        <th class="py-2 pl-3 pr-3 text-right font-medium">Peger mod</th>
+        <th class="py-2 pl-3 pr-3 text-right font-medium">Peger mod</th>${
+        medUdvikling ? '\n        <th class="py-2 pl-3 pr-3 text-left font-medium">Udvikling</th>' : ""}
       </tr></thead>
       <tbody>${raekker}</tbody>
     </table>
@@ -612,7 +949,10 @@ function kategoriAfsnit(k, b, c, sources, maksPct) {
         note ? ` <span class="text-gray-500">${note}</span>` : ""}</p>`
     : "";
 
-  const retning = blind ? "" : samletMaerkat(samletRetning(drivere));
+  // Optællingen af udviklingen står ved den samlede retning, når siden har en
+  // historik. Uden historik står kategorien som før.
+  const udv = drivere.some((d) => d.udvikling !== undefined) ? samletUdvikling(drivere) : null;
+  const retning = blind ? "" : samletMaerkat(samletRetning(drivere), udv);
 
   const indhold = drivere.length > 0
     ? noegletalTabel(b, drivere, sources)
@@ -722,6 +1062,7 @@ export function renderIndikatorer(b, c, ens, sources) {
       fra landsgennemsnittet, ▲▲ og ▼▼ ${markant}&nbsp;% eller mere. △ og ▽ peger kun lidt,
       altså under ${niveau}&nbsp;%. Retningen handler om udledningen, ikke om værdien:
       færre elbiler er en lavere andel, men peger mod højere udledning.</p>
+    ${b.drivere.some((d) => d.udvikling !== undefined) ? udviklingForklaring() : ""}
     <p class="mt-2 text-xs text-gray-500 max-w-3xl">
       <strong class="font-semibold text-gray-600">Den samlede retning tæller, den vejer
       ikke.</strong> Hvert nøgletal tæller ét, uanset om det afviger 2 eller 40&nbsp;% -
@@ -945,6 +1286,70 @@ export function renderTaerskelfordeling(fordeling) {
     <p class="mt-3 text-xs text-gray-500">Antal kommuner i hvert bånd, samt median og
       90-percentil af den absolutte afvigelse. Tallene beskriver nøgletallet, ikke den
       enkelte kommune, og er ens på alle kommunesider.</p>
+  </div>`;
+}
+
+/** Hvordan kommunerne fordeler sig på hvert nøgletals udvikling, og hvilke år serien dækker.
+ *
+ *  Tabellen er som tærskeltabellen ærlig om, hvad ordene dækker over: den viser sort på hvidt,
+ *  hvor mange kommuner der står på hver retning, og hvor kort en serie kan være. Den regnes
+ *  af de faktiske 98 kommuner og skrives aldrig i hånden, så tallene ikke kan drive fra data.
+ *
+ *  Den beskriver nøgletallet, ikke kommunen: ingen kommune navngives. */
+export function renderUdviklingFordeling(fordeling) {
+  if (!fordeling) {
+    return `<p class="text-sm text-gray-500">Historikken er ikke hentet, så udviklingen kan ikke
+      opgøres.</p>`;
+  }
+  const medianTekst = (f) => {
+    if (f.median == null) return MANGLER;
+    if (f.type === "difference") {
+      return `${fortegn(f.median)}${formatér(Math.abs(f.median), 1)} procentpoint`;
+    }
+    // En andel, der vokser fra næsten nul, har en relativ ændring på tusinder af procent. Så
+    // mange decimaler er falsk præcision.
+    return pct(f.median / 100, Math.abs(f.median) >= 100 ? 0 : 1);
+  };
+  const raekker = fordeling.map((f) => `<tr class="border-t border-gray-100">
+      <td class="py-2 pr-3 text-sm text-gray-900">${esc(f.navn)}${
+        f.faste ? '<span class="block text-xs text-gray-500">faste priser</span>' : ""}</td>
+      <td class="py-2 px-3 text-sm tabular-nums whitespace-nowrap text-gray-600">${
+        f.aarFra == null ? MANGLER : `${f.aarFra}-${f.aarTil}<span class="block text-xs text-gray-500">${
+        f.n} år</span>`}</td>
+      <td class="py-2 px-3 text-right text-sm tabular-nums text-gray-600">${f.rigtig}</td>
+      <td class="py-2 px-3 text-right text-sm tabular-nums text-gray-600">${f.tempo}</td>
+      <td class="py-2 px-3 text-right text-sm tabular-nums text-gray-600">${f.stagneret}</td>
+      <td class="py-2 px-3 text-right text-sm tabular-nums text-gray-600">${f.forkert}</td>
+      <td class="py-2 px-3 text-right text-sm tabular-nums text-gray-600">${f.kontekst}</td>
+      <td class="py-2 px-3 text-right text-sm tabular-nums text-gray-600">${f.ingen}</td>
+      <td class="py-2 pl-3 text-right text-sm tabular-nums whitespace-nowrap text-gray-600">${medianTekst(f)}</td>
+    </tr>`).join("");
+
+  const skjulte = fordeling.filter((f) => f.skjult > 0);
+  const skjultNote = skjulte.length
+    ? `<p class="mt-1 text-xs text-gray-500">Kommuner, hvor nøgletallet er taget af siden, er ikke
+        talt med: ${skjulte.map((f) => `${esc(f.navn)} (${f.skjult})`).join(", ")}.</p>` : "";
+
+  return `<div class="overflow-x-auto tabel-scroll">
+    <table class="w-full min-w-[46rem]">
+      <thead><tr class="text-xs uppercase tracking-wide text-gray-500">
+        <th class="py-2 pr-3 text-left font-medium">Nøgletal</th>
+        <th class="py-2 px-3 text-left font-medium">Periode</th>
+        <th class="py-2 px-3 text-right font-medium">Rigtig</th>
+        <th class="py-2 px-3 text-right font-medium">Langsomt</th>
+        <th class="py-2 px-3 text-right font-medium">Uændret</th>
+        <th class="py-2 px-3 text-right font-medium">Forkert</th>
+        <th class="py-2 px-3 text-right font-medium">Uden vurdering</th>
+        <th class="py-2 px-3 text-right font-medium">Uden tidsserie</th>
+        <th class="py-2 pl-3 text-right font-medium">Median</th>
+      </tr></thead>
+      <tbody>${raekker}</tbody>
+    </table>
+    <p class="mt-3 text-xs text-gray-500">Antal kommuner på hver retning. Perioden er landets:
+      årene, hvor landet har tal, og antallet af dem. Medianen er kommunernes ændring mellem
+      endepunkterne, den værdi <em>rigtig</em> og <em>langsomt</em> skilles ved. Tallene
+      beskriver nøgletallet, ikke den enkelte kommune, og er ens på alle kommunesider.</p>
+    ${skjultNote}
   </div>`;
 }
 

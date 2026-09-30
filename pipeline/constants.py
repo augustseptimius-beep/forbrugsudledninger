@@ -3,6 +3,8 @@
 Ved den årlige genkøring:
 1. Opdatér PERIODER til de nyeste tilgængelige perioder for hver kilde
    (kør build.py - valideringsrapporten viser, om en tabel har nyere data).
+   Historikken bag udviklingspilene følger med af sig selv: den regnes bagud
+   fra de samme perioder, så intet andet skal rettes.
 2. Der er ingen beregningskoefficienter og ingen datapunkter i denne fil.
    De nationale sammenligningstal står afskrevet i ens.py og concito.py."""
 
@@ -25,6 +27,10 @@ PERIODER = {
     # Forbrugsundersøgelsens nyeste år. Regionskvotienten udjævnes over de ti
     # år, der slutter her - se osei_owusu.py.
     "FORBRUG_AAR": "2024",
+    # Nyeste årgang af forbrugerprisindekset (DST PRIS8, årsgennemsnit). Bruges
+    # kun af udviklingspilene, til at sætte kronebeløb i samme prisniveau, og
+    # skal være mindst lige så ny som INDKOMST_AAR, FORBRUG_AAR og REGNSKAB_AAR.
+    "PRIS_AAR": "2025",
 }
 
 # --- INGEN BEREGNINGSKOEFFICIENTER HER ---

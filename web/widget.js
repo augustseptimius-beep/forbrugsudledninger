@@ -2,9 +2,9 @@
 // beregning i beregning.js. Denne fil henter data, læser URL'en og sætter
 // resultatet ind i siden - intet andet.
 
-import { beregnKommune } from "./beregning.js";
-import { renderKommune, renderForside, renderKommuneKort } from "./render.js";
-import { installerTooltips } from "./tooltip.js";
+import { beregnKommune, beregnUdvikling } from "./beregning.js";
+import { renderKommune, renderForside, renderKommuneKort, renderUdviklingTip } from "./render.js";
+import { installerTooltips, saetGrafKilde } from "./tooltip.js";
 import { byggProjektmappe, eksportFilnavn } from "./eksport.js";
 import { bygXlsx } from "./xlsx.js";
 
@@ -122,8 +122,36 @@ function visForside(data) {
   input.focus({ preventScroll: true });
 }
 
-function visKommune(data, concito, ens, sources, kommune) {
-  const b = beregnKommune(kommune, data.land);
+/** Historikken bag udviklingspilene. Hentes kun, når en kommuneside åbnes: forsiden og
+ *  søgningen har ikke brug for den. Kan den ikke hentes, står siden uden udvikling
+ *  frem for at stå med en fejl - pilene er et tillæg til nøgletallene og ikke en
+ *  forudsætning for dem. */
+async function hentHistorik() {
+  try {
+    const svar = await fetch("data/historik.json");
+    if (!svar.ok) throw new Error(`historik.json: HTTP ${svar.status}`);
+    return await svar.json();
+  } catch (fejl) {
+    console.warn("Udviklingen vises ikke:", fejl.message);
+    return null;
+  }
+}
+
+function visKommune(data, concito, ens, sources, kommune, historik) {
+  // Udviklingen for alle kommuner regnes samtidig, fordi "rigtig" og "langsomt" skilles
+  // ad af medianen. Det er kun tal; ingen graf tegnes her.
+  let udvikling = null;
+  if (historik) {
+    try {
+      udvikling = beregnUdvikling(data.kommuner, data.land, historik);
+    } catch (fejl) {
+      // En ødelagt historik koster siden pilene og ikke nøgletallene.
+      console.warn("Udviklingen kunne ikke regnes:", fejl.message);
+    }
+  }
+  const b = udvikling
+    ? beregnKommune(kommune, data.land, udvikling.get(kommune.kode))
+    : beregnKommune(kommune, data.land);
   document.title = `${kommune.navn} - Forbrugsbaserede udledninger`;
   app.innerHTML = `
     <a href="index.html" class="no-embed inline-flex items-center gap-1 text-sm text-gray-500
@@ -132,6 +160,9 @@ function visKommune(data, concito, ens, sources, kommune) {
     </a>
     ${renderKommune(b, concito, ens, sources)}`;
   installerFoldning(app);
+  // Grafen bygges først, når pilen får musen eller fokus: tooltip.js beder om den
+  // med nøglen fra pilens data-graf, og render.js bygger den af tallene.
+  saetGrafKilde((navn) => renderUdviklingTip(b.drivere.find((d) => d.navn === navn), sources, kommune.navn));
   installerEksport(app, () => {
     const genereret = new Date().toISOString().slice(0, 10);
     const ark = byggProjektmappe({
@@ -167,6 +198,8 @@ async function start() {
   // i data.json, og den undgår æ, ø og å i query-strengen.
   const kode = new URLSearchParams(location.search).get("kommune");
   if (!kode) return visForside(data);
+  // Historikken hentes først nu og ikke sammen med resten: forsiden bruger den ikke.
+  const historikSvar = hentHistorik();
 
   const kommune = data.kommuner.find((k) => String(k.kode) === String(kode));
   if (!kommune) {
@@ -174,7 +207,7 @@ async function start() {
       <a href="index.html" class="underline">Se listen over alle kommuner</a>.`);
     return;
   }
-  visKommune(data, concito, ens, sources, kommune);
+  visKommune(data, concito, ens, sources, kommune, await historikSvar);
 }
 
 start();

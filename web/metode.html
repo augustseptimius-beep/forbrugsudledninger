@@ -94,6 +94,7 @@
           <li><a href="#taerskler">Tærskler</a></li>
           <li><a href="#samlet-retning">Kategoriens samlede retning</a></li>
           <li><a href="#hjaelpetal">Hjælpetal</a></li>
+          <li><a href="#udvikling">Udviklingen over tid</a></li>
         </ol></li>
       <li><a href="#forbehold-kommuner">Forbehold for enkelte kommuner</a></li>
       <li><a href="#noegletal">Nøgletallene kategori for kategori</a>
@@ -133,7 +134,7 @@
   <p class="mt-2 text-sm text-gray-700 max-w-3xl">Hver kommuneside kan hentes som
     regneark. Arket indeholder de samme tal, kilder og forbehold som siden, og
     regnestykkerne ligger i det som formler, så man kan erstatte et kildetal med sit
-    eget og se resultatet regne sig om.</p>
+    eget og se resultatet regne sig om. Udviklingen over tid er ikke med i arket.</p>
 </section>
 
 <section class="metode-afsnit rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
@@ -306,6 +307,76 @@
       hvor det vises), og husholdningsaffaldet rummer haveaffald, hvis andel svinger fra
       under 1 til knap 50 % mellem kommunerne.</li>
   </ul>
+
+  <h3 id="udvikling" class="nr scroll-mt-4 mt-5 font-semibold text-gray-900">Udviklingen over tid</h3>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Ved hvert nøgletal står en pil, der viser,
+    hvordan kommunen har bevæget sig de seneste op til ti år. Pilen bygger på samme retning
+    som mærkatet ovenfor: den siger, om udviklingen peger mod lavere eller højere udledning.
+    Peger den mod lavere, står der <em>rigtig retning</em>, og peger den mod højere, står der
+    <em>forkert retning</em>. Går kommunen den rigtige vej, men langsommere end de fleste
+    kommuner, står der <em>rigtig, langsomt</em>. Ændrer nøgletallet sig næsten ikke, står der
+    <em>uændret</em>.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Pilen peger op, hvis værdien steg, og ned,
+    hvis den faldt. Farven siger, om det var godt: grøn er rigtig retning, gul er rigtig men
+    langsom, og rød er forkert retning. Teksten står altid ved siden af pilen, så farven ikke
+    er det eneste, der bærer betydningen. Peger man på pilen, eller går til den med
+    tastaturet, tegnes en lille graf af kommunens og landets tal. Grafen tegnes først da og
+    bygger på de samme tal som pilen.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Kategoriens overskrift tæller udviklingen på
+    samme måde som den samlede retning. Hvert nøgletal tæller ét, hjælpetal tæller ikke med, og
+    nøgletallene vejes ikke mod hinanden.</p>
+  <ul class="mt-3 space-y-2 text-sm text-gray-700 max-w-3xl list-disc pl-5">
+    <li><strong>Serien er nøgletallets eget regnestykke.</strong> For hvert år regnes
+      nøgletallet af det års tal med samme formel som tabellen. Det seneste punkt er derfor
+      tallet i tabellen. Hvert felt går bagud fra sin egen nyeste periode, så et nøgletal, der
+      kombinerer felter fra forskellige perioder, kombinerer dem på samme måde i alle årene.
+      Tabellen nedenfor viser, hvilke år hvert nøgletal dækker. Kilderne begynder i forskellige
+      år, og en yngre kilde giver en kortere serie.</li>
+    <li><strong>Endepunkterne er middel af tre år.</strong> Har serien mindst seks år,
+      sammenlignes gennemsnittet af de tre første år med gennemsnittet af de tre sidste, så ét
+      afvigende år ikke afgør retningen. Er serien kortere, sammenlignes første og sidste år.
+      Med kun ét år er der ingen udvikling. Tallene i grafens forklaring er de endepunkter, pilen
+      bygger på.</li>
+    <li><strong>Uændret betyder under 1 procent.</strong> Ændrer nøgletallet sig mindre end
+      1 procent mellem endepunkterne, står der uændret. For andele er en ændring under 1
+      procentpoint også uændret, når niveauet er mindst 10 procent, og for befolkningsudviklingen
+      gælder det en ændring under 0,1 procentpoint. Grænserne har ingen kilde. De er valgt for at
+      gøre siden læsbar, ligesom tærsklerne for afvigelsen. Starter en serie i nul, kan
+      ændringen ikke opgives i procent. Retningen følger da bare, om værdien steg eller faldt,
+      og ændringen indgår ikke i medianen. Står serien i nul i begge ender, er den uændret.</li>
+    <li><strong>Rigtig eller langsomt afgøres af medianen.</strong> Kommunens ændring holdes op
+      mod medianen af kommunernes ændring for samme nøgletal, med fortegn. Er kommunen mindst
+      lige så hurtig som medianen, står der rigtig retning, og er den langsommere, står der
+      rigtig, langsomt. Bevæger de fleste kommuner sig den forkerte vej, er en kommune, der går
+      den rigtige vej, ikke langsom. Kommuner, hvor nøgletallet er taget af siden, eller hvor et
+      forbehold spærrer retningen, indgår ikke i medianen.</li>
+    <li><strong>Kroner er sat i samme prisniveau.</strong> Kronebeløb fra tidligere år regnes op
+      til det seneste års prisniveau med Danmarks Statistiks forbrugerprisindeks (PRIS8), før de
+      sammenlignes. Uden det ville en stigning, der blot følger priserne, få alle kommuner til at
+      pege samme vej. Indekset er landsdækkende og bruges ens for alle kommuner. Nøgletallene i
+      kroner er mærket i tabellen nedenfor. Tallene i tabellerne på kommunesiden er ikke
+      justeret. Anlægsindkøbet er et femårsgennemsnit og sættes i priserne fra midten af vinduet.</li>
+    <li><strong>Et tal, der mangler, er et hul.</strong> Et år, hvor et felt mangler, står uden
+      punkt i grafen og tæller ikke med i endepunkterne. Det bliver aldrig til nul. Et nøgletal
+      med under to år står som <em>ingen tidsserie</em>.</li>
+    <li><strong>Forbehold følger med.</strong> Et nøgletal, der er taget af kommunens side, har
+      heller ingen pil. Et nøgletal, hvis retning et forbehold spærrer, står som <em>ingen
+      vurdering</em>. Grafen kan stadig ses, fordi tallene er rigtige.</li>
+  </ul>
+  <p class="mt-3 text-sm text-gray-700 max-w-3xl"><strong>Retningsantagelsen følger med.</strong>
+    En stigende disponibel indkomst står som forkert retning, fordi mærkatet ved indkomsten
+    peger mod højere udledning, når indkomsten er høj. Det er kilderne, der kobler højere
+    indkomst til højere forbrug, og begrundelsen står ved nøgletallet. Pilen siger ikke, at en
+    stigende indkomst er dårlig for borgerne. På samme måde peger et stigende boligareal, flere
+    biler og flere kommunale indkøbskroner mod højere udledning.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Pilen viser kommunens udvikling og siger ikke,
+    hvorfor tallet ændrer sig. Kilder ændrer definitioner og indberetning over tid, og flere
+    nøgletal følger indkomsten og borgernes sammensætning mere end kommunale valg. Udviklingen er
+    heller ikke en opgørelse af, hvad kommunen selv har gjort.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl">Tabellen viser for hvert nøgletal, hvilke år
+    serien dækker, og hvordan kommunerne fordeler sig på retningerne i årets datasæt. Den regnes
+    af data, hver gang siden vises.</p>
+  <div id="udviklingsfordeling" class="mt-4"></div>
 </section>
 
 <section class="metode-afsnit rounded-lg border border-gray-200 bg-white p-5 sm:p-6">

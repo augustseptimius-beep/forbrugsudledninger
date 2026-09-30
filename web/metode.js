@@ -4,8 +4,8 @@
 
 import { renderKilder, renderReferencer, renderNationaltAftryk,
          renderTaerskelfordeling, renderEnsKategorier,
-         renderForbehold, danskDato } from "./render.js";
-import { beregnFordeling, beregnForbehold } from "./beregning.js";
+         renderForbehold, renderUdviklingFordeling, danskDato } from "./render.js";
+import { beregnFordeling, beregnForbehold, beregnUdviklingFordeling } from "./beregning.js";
 import { installerTooltips } from "./tooltip.js";
 
 async function hent(sti) {
@@ -47,6 +47,7 @@ const nationaltEl = document.getElementById("nationalt");
 const fordelingEl = document.getElementById("taerskelfordeling");
 const ensEl = document.getElementById("ens-kategorier");
 const forbeholdEl = document.getElementById("forbehold");
+const udviklingEl = document.getElementById("udviklingsfordeling");
 
 try {
   // data.json hentes nu også her, fordi tærskelfordelingen skal REGNES af de
@@ -68,6 +69,18 @@ try {
   if (forbeholdEl) {
     forbeholdEl.innerHTML = renderForbehold(beregnForbehold(data.kommuner, data.land));
   }
+  // Udviklingen regnes af historikken. Den er et tillæg: mangler filen, står afsnittets tabel
+  // med en besked, og resten af siden er upåvirket.
+  if (udviklingEl) {
+    try {
+      const historik = await hent("data/historik.json");
+      udviklingEl.innerHTML = renderUdviklingFordeling(
+        beregnUdviklingFordeling(data.kommuner, data.land, historik));
+    } catch {
+      // Ikke de øvrige tabeller: en manglende eller ødelagt historik rammer kun sin egen.
+      udviklingEl.innerHTML = renderUdviklingFordeling(null);
+    }
+  }
   // Signal til scripts/metode-pdf.mjs: tabellerne er på plads. Uden det kunne
   // PDF'en blive trykt, før data var hentet, og mangle alle genererede tabeller.
   document.body.dataset.klar = "ja";
@@ -80,4 +93,5 @@ try {
   fejl(fordelingEl, besked);
   fejl(ensEl, besked);
   fejl(forbeholdEl, besked);
+  fejl(udviklingEl, besked);
 }

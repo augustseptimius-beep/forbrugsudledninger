@@ -204,6 +204,17 @@ export const KATEGORI = {
 // ogsaaKilder og metodekilde: en kilde, der bidrager uden at eje et felt.
 // Fødevareforbruget er det eneste tilfælde - se nøgletallet nedenfor.
 //
+// prisForskydning: for et nøgletal, der er et gennemsnit over flere år, hører beløbet til
+// prisniveauet i vinduets midte og ikke til slutåret. Antallet af år, midten ligger før
+// slutåret. Uden den ville et femårsgennemsnit blive sat i priser to år for sent, og
+// ændringen mellem to vinduer ville miste to års inflationsforskel.
+//
+// faste: nøgletal i kroner. Historikken bag udviklingspilen står i årets egne
+// priser, og motoren sætter kronebeløbene i det seneste års prisniveau, før de
+// sammenlignes (se driverSerie). Ellers ville en stigning, der blot følger
+// priserne, ligne en udvikling, og alle 98 kommuner ville pege samme vej. En test
+// holder flaget på hvert nøgletal, hvis enhed er kroner.
+//
 // rolle: "hjaelper" markerer nøgletal, der kun findes for at kvalificere et
 // andet tal - fritidshuse pr. helårsbolig forklarer husholdningstallene,
 // befolkningsudviklingen forklarer byggeaktiviteten, affaldstallene er kontekst
@@ -220,6 +231,7 @@ export const DRIVERE = [
   // overblikket. Det lå tidligere i en egen kategori, "På tværs af kategorier",
   // som ikke findes blandt Energistyrelsens - og nåede derfor aldrig overblikket.
   { navn: "Disponibel indkomst", enhed: "kr./år", val: (m) => m.disp_indkomst,
+    faste: true,
     felter: ["disp_indkomst"],
     formel: "disp_indkomst",
     type: "relativ", kategori: KATEGORI.PRODUKTER, paavirkning: "hoejere",
@@ -242,6 +254,7 @@ export const DRIVERE = [
   // kategori uden problem. Dubletten er skrevet ind i begrundelsen, så læseren
   // ser den frem for at opdage den.
   { navn: "Fødevareforbrug pr. indbygger", enhed: "kr./indb./år",
+    faste: true,
     val: (m) => m.foedevare_forbrug_pr_indb,
     felter: ["foedevare_forbrug_pr_indb"],
     formel: "foedevare_forbrug_pr_indb",
@@ -425,6 +438,7 @@ export const DRIVERE = [
   // nøgletal på siden, der ikke er indkomst i forklædning - fødevareforbruget
   // ligger på r = +0,97.
   { navn: "Kommunens driftsindkøb", enhed: "kr./indb./år",
+    faste: true,
     val: (m) => m.indkoeb_drift_pr_indb,
     felter: ["indkoeb_drift_pr_indb"],
     formel: "indkoeb_drift_pr_indb",
@@ -445,6 +459,9 @@ export const DRIVERE = [
   // +0,75, mens to adskilte femårsvinduer når +0,71. Ét skolebyggeri kan
   // flytte en lille kommune flere hundrede procent på et enkelt år.
   { navn: "Kommunens anlægsindkøb", enhed: "kr./indb./år",
+    // Femårsgennemsnit (pipeline/indkoeb.py): tallet for et år er et middel af de fem år, der
+    // slutter i året, og hører til prisniveauet i vinduets midte, to år før slutåret.
+    faste: true, prisForskydning: 2,
     val: (m) => m.indkoeb_anlaeg_pr_indb,
     felter: ["indkoeb_anlaeg_pr_indb"],
     formel: "indkoeb_anlaeg_pr_indb",
@@ -458,6 +475,7 @@ export const DRIVERE = [
       + "nødvendigt, fordi ét enkelt byggeri ellers ville flytte en lille kommune "
       + "flere hundrede procent på ét år." },
   { navn: "Kommunens indkøb af brændsel og drivmidler", enhed: "kr./indb./år",
+    faste: true,
     val: (m) => m.indkoeb_braendsel_pr_indb,
     felter: ["indkoeb_braendsel_pr_indb"],
     formel: "indkoeb_braendsel_pr_indb",
@@ -469,6 +487,7 @@ export const DRIVERE = [
       + "største klimaaftryk pr. indkøbskrone. Tallet er kommunens udgift, ikke "
       + "mængden: falder prisen, falder tallet, uden at der er købt mindre." },
   { navn: "Kommunens indkøb af fødevarer", enhed: "kr./indb./år",
+    faste: true,
     val: (m) => m.indkoeb_foedevarer_pr_indb,
     felter: ["indkoeb_foedevarer_pr_indb"],
     formel: "indkoeb_foedevarer_pr_indb",
@@ -853,10 +872,17 @@ const vises = (d) => !d.skjult
   && (d.rolle === "hjaelper" || d.spaerret || d.signal !== "uafklaret");
 
 /** Fuld sammenligning for én kommune: indikatortabel, gruppering, udeladte
- *  nøgletal og manglende felter. */
-export function beregnKommune(kommune, land) {
+ *  nøgletal og manglende felter.
+ *
+ *  udvikling er kommunens udvikling over tid, {nøgletalsnavn: udvikling}, fra
+ *  beregnUdvikling(). Udelades den, står rækkerne uden udvikling, og siden viser
+ *  hverken kolonne eller optælling - så en historik, der ikke kunne hentes,
+ *  koster siden en kolonne og ikke en fejl. Er den med, får hver række sin
+ *  udvikling, eller null, hvis nøgletallet ikke har nogen. */
+export function beregnKommune(kommune, land, udvikling) {
   const alle = driverTabel(kommune, land);
-  const drivere = alle.filter(vises);
+  const drivere = alle.filter(vises)
+    .map((d) => (udvikling === undefined ? d : { ...d, udvikling: udvikling?.[d.navn] ?? null }));
   return {
     navn: kommune.navn,
     kode: kommune.kode,
@@ -870,4 +896,327 @@ export function beregnKommune(kommune, land) {
     })),
     manglende: FORVENTEDE_FELTER.filter((f) => kommune[f] == null),
   };
+}
+
+// ---------- Udvikling over tid ----------
+//
+// Hvert nøgletal har en historik på op til ti år, og pilen ved siden af siger,
+// om kommunen bevæger sig mod lavere udledning (rigtig retning), mod højere
+// udledning (forkert retning) eller ingen vej. Metoden er doughnut-platformens
+// retningspile (docs/arkitektur-og-beregningsregler.md T1-T4 dér) med de
+// tilpasninger, dette værktøjs egne regler kræver.
+//
+//   Regnet på nøgletallets egen værdi. Serien er nøgletallets regnestykke,
+//   val(), kørt på hvert års felter: samme funktion som rækken i tabellen. Det
+//   seneste punkt er derfor tallet på siden, og pilen kan ikke beskrive et andet
+//   tal end det, læseren har foran sig. test/historik.test.js holder de to fast.
+//
+//   Retningen kommer fra nøgletallets paavirkning, ikke fra en ny antagelse. Et
+//   nøgletal, der peger mod højere udledning, når det stiger, er rigtigt, når det
+//   falder. Et nøgletal, hvis retning kilderne ikke kan begrunde, har ingen
+//   vurdering, kun en grå pil. Værktøjet foretager stadig kun den ene slags
+//   vurdering.
+//
+//   Endepunkterne midles over tre år i hver ende, når serien har mindst seks
+//   punkter, så ét afvigende år ikke afgør billedet. Er den kortere, sammenlignes
+//   første og sidste punkt direkte.
+//
+//   "Rigtig" og "langsomt" skilles ad af medianen for kommunerne. Bevæger en
+//   kommune sig mod lavere udledning, men langsommere end de fleste, er
+//   retningen rigtig og tempoet lavt. Sammenligningen sker med fortegn: når de
+//   fleste kommuner bevæger sig den forkerte vej, er en kommune, der bevæger sig
+//   den rigtige, ikke langsom.
+//
+//   Kronebeløb sættes i samme prisniveau (faste: true). Historikken rummer
+//   forbrugerprisindekset (DST PRIS8), og et beløb fra 2016 regnes op til 2024-
+//   priser, før det sammenlignes med 2024.
+//
+//   Manglende tal er huller, aldrig nul. Et år, hvor et felt mangler, står som
+//   null i serien, og serien tegnes uden det punkt.
+//
+// Nogle nøgletal har ingen tidsserie: Klimaregnskabets årgange kræver en API-
+// nøgle, og en kilde, der er yngre end vinduet, giver en kortere serie. De står
+// som "ingen" og ikke med et opdigtet forløb.
+
+/** Antal år, der midles i hver ende af serien, når den er lang nok. */
+export const N_ENDEPUNKT = 3;
+
+/** Under så mange punkter sammenlignes første og sidste punkt direkte. */
+export const MIN_AAR_FOR_GENNEMSNIT = 6;
+
+/** En relativ ændring under 1 % er "stort set uændret". */
+export const TAERSKEL_UAENDRET_PCT = 1;
+
+/** For andele er en ændring under 1 procentpoint uændret, når niveauet er mindst
+ *  10 %. Ved lave andele er en ændring på 1 procentpoint stor i forhold til
+ *  niveauet og tæller derfor som en ændring. */
+export const TAERSKEL_UAENDRET_PP = 1;
+export const NIVEAU_FOR_PP_REGEL = 10;
+
+/** Vækstrater (befolkningsudviklingen) ligger ved 0-1 %. En ændring på under 0,1
+ *  procentpoint i den gennemsnitlige vækst er uændret. */
+export const TAERSKEL_UAENDRET_VAEKST_PP = 0.1;
+
+export const UDVIKLING_RETNINGER = ["rigtig", "tempo", "stagneret", "forkert", "kontekst", "ingen"];
+
+/** Feltenes værdier ved `trin` år tilbage, som et objekt et nøgletal kan regne på.
+ *
+ *  Et hul UDELADES i stedet for at stå som null. I JavaScripts regnemaskine er
+ *  null nul (null / 42572 er 0), og et manglende tal ville så ende som en
+ *  måling. Et felt, der ikke findes, giver NaN i regnestykket, og sikker() gør
+ *  det til null. */
+function postVedTrin(raekker, trin) {
+  const post = {};
+  for (const [felt, raekke] of Object.entries(raekker ?? {})) {
+    const v = raekke[raekke.length - 1 - trin];
+    if (v != null) post[felt] = v;
+  }
+  return post;
+}
+
+/** Årstallet nøgletallets seneste punkt hører til: det ældste af de perioder, dets
+ *  felter er fra. Byggeri fra 2024 delt med folketallet i 2026 hører til 2024.
+ *  null, hvis et felt ikke har en periode i historikken. */
+export function driverAar(d, historik) {
+  const aar = (d.felter ?? []).map((f) => historik?.felter?.[f]?.aar);
+  return aar.length > 0 && aar.every(Number.isFinite) ? Math.min(...aar) : null;
+}
+
+/** Faktoren, der sætter et beløb fra `aar` i `nu`s prisniveau. null uden indeks. */
+function prisFaktor(priser, nu, aar) {
+  const p = priser?.aar;
+  const a = p?.[String(nu)];
+  const b = p?.[String(aar)];
+  return Number.isFinite(a) && Number.isFinite(b) && b > 0 ? a / b : null;
+}
+
+/** Nøgletallets serie for kommunen og for landet, ældste år først.
+ *
+ *  Hvert punkt er nøgletallets eget regnestykke kørt på det års felter - felterne
+ *  går bagud fra hver deres nyeste periode, så et nøgletal, der kombinerer felter
+ *  fra forskellige perioder, kombinerer dem på samme måde i hvert år. Et år, hvor
+ *  et af felterne mangler, står som null.
+ *
+ *  Returnerer null, hvis historikken ikke kender kommunen eller nøgletallets
+ *  felter. */
+export function driverSerie(d, historik, kode) {
+  const nu = driverAar(d, historik);
+  const kommune = historik?.kommuner?.[String(kode)];
+  if (nu == null || !kommune || !historik.land) return null;
+
+  const fors = d.prisForskydning ?? 0;
+  const aar = [], k = [], l = [];
+  for (let trin = historik.vindue; trin >= 0; trin--) {
+    const kp = postVedTrin(kommune, trin);
+    const lp = postVedTrin(historik.land, trin);
+    const faktor = d.faste ? prisFaktor(historik.priser, nu - fors, nu - fors - trin) : 1;
+    const juster = (v) => (v == null || faktor == null ? null : v * faktor);
+    aar.push(nu - trin);
+    k.push(juster(sikker(d.val, kp, lp)));
+    l.push(juster(sikker(d.val, lp, lp)));
+  }
+  return { aar, kommune: k, land: l, faste: d.faste === true, prisAar: d.faste ? nu - fors : null };
+}
+
+/** Endepunkterne af en serie: første og sidste punkt, eller gennemsnittet af de
+ *  første og sidste tre, når der er mindst seks. Punkter uden tal tælles ikke med.
+ *  null, hvis der er færre end to punkter - ét punkt er ikke en udvikling. */
+export function endepunkter(aar, vaerdier) {
+  const p = [];
+  aar.forEach((a, i) => { if (vaerdier[i] != null) p.push([a, vaerdier[i]]); });
+  const n = p.length;
+  if (n < 2) return null;
+  if (n < MIN_AAR_FOR_GENNEMSNIT) {
+    return { start: p[0][1], slut: p[n - 1][1], n, midlet: false,
+             startLabel: String(p[0][0]), slutLabel: String(p[n - 1][0]) };
+  }
+  const foerste = p.slice(0, N_ENDEPUNKT);
+  const sidste = p.slice(-N_ENDEPUNKT);
+  const snit = (x) => x.reduce((sum, [, v]) => sum + v, 0) / x.length;
+  const label = (x) => (x[0][0] === x.at(-1)[0] ? String(x[0][0]) : `${x[0][0]}-${x.at(-1)[0]}`);
+  return { start: snit(foerste), slut: snit(sidste), n, midlet: true,
+           startLabel: label(foerste), slutLabel: label(sidste) };
+}
+
+/** Ændringen mellem to endepunkter: relativt i procent, og for andele og
+ *  vækstrater også i procentpoint. En relativ ændring fra nul er ikke defineret. */
+export function aendring(d, start, slut) {
+  const pct = start === 0 ? null : ((slut - start) / Math.abs(start)) * 100;
+  const skala = d.andel === "0-1" ? 100 : d.andel === "0-100" ? 1 : d.type === "difference" ? 100 : null;
+  return { pct, pp: skala == null ? null : (slut - start) * skala };
+}
+
+/** Er ændringen så lille, at den ikke skal kaldes en bevægelse? */
+function erUaendret(d, start, slut, { pct, pp }) {
+  if (d.type === "difference") return Math.abs(pp) < TAERSKEL_UAENDRET_VAEKST_PP;
+  // En serie, der står i nul i begge ender, har ingen relativ ændring at måle, men er uændret.
+  if (start === slut) return true;
+  if (pct != null && Math.abs(pct) < TAERSKEL_UAENDRET_PCT) return true;
+  if (d.andel) {
+    const niveau = Math.max(Math.abs(start), Math.abs(slut)) * (d.andel === "0-1" ? 100 : 1);
+    if (niveau >= NIVEAU_FOR_PP_REGEL && Math.abs(pp) < TAERSKEL_UAENDRET_PP) return true;
+  }
+  return false;
+}
+
+/** Stiger værdien mod lavere udledning? true: en stigning er rigtig. false: et
+ *  fald er rigtigt. null: retningen kan ikke afgøres, og nøgletallet står uden
+ *  vurdering. Følger rækkens paavirkning, så et forbehold, der spærrer retningen,
+ *  spærrer den også her. */
+function opErGodt(paavirkning) {
+  return paavirkning === "lavere" ? true : paavirkning === "hoejere" ? false : null;
+}
+
+/** Klassificerer en ændring. Rækkefølgen er doughnut-platformens: uden tal først,
+ *  så uændret, så uden vurdering, og først derefter retning og tempo.
+ *
+ *  refMaal er medianen af kommunernes ændring for samme nøgletal. */
+export function klassificerUdvikling(maal, godtOp, refMaal, uaendret) {
+  if (maal == null) return "ingen";
+  if (uaendret) return "stagneret";
+  if (godtOp == null) return "kontekst";
+  // Mod målet er positiv, uanset om nøgletallet ønskes op eller ned.
+  const m = godtOp ? maal : -maal;
+  const mRef = refMaal == null ? null : (godtOp ? refMaal : -refMaal);
+  if (m <= 0) return "forkert";
+  if (mRef == null || m >= mRef) return "rigtig";
+  return "tempo";
+}
+
+function median(tal) {
+  if (tal.length === 0) return null;
+  const s = [...tal].sort((a, b) => a - b);
+  const mid = s.length >> 1;
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+/** Ændringen, klassifikationen hviler på: relativt for de fleste, procentpoint for
+ *  vækstrater, hvor en relativ ændring af en ændring ikke betyder noget.
+ *
+ *  Starter serien i nul, er den relative ændring ikke defineret, men retningen er det:
+ *  en stigning fra nul er en stigning, uanset hvor stor den er. Ændringen tælles så som
+ *  uendelig med fortegn, så nøgletallet kan få en retning og ikke står som "ingen
+ *  tidsserie", mens grafen ligger lige ved siden af. Den uendelige ændring sætter ikke
+ *  medianen (se beregnUdvikling) og står ikke som et procenttal i teksten. */
+const maalFor = (d, a, ep) => {
+  if (d.type === "difference") return a.pp;
+  if (a.pct != null) return a.pct;
+  return ep.slut === ep.start ? 0 : ep.slut > ep.start ? Infinity : -Infinity;
+};
+
+/** Udviklingen for alle kommuner og alle nøgletal.
+ *
+ *  Returnerer et Map: kommunekode -> {nøgletalsnavn: udvikling}, eller null uden
+ *  historik. En udvikling er
+ *    {retning, n, serie, start, slut, startLabel, slutLabel, midlet, pct, pp,
+ *     op, landStart, landSlut}
+ *  hvor retning er en af UDVIKLING_RETNINGER, serie er {aar, kommune, land, faste,
+ *  prisAar} (eller null uden serie), og op siger, om værdien steg mellem
+ *  endepunkterne - det er pilens retning, mens farven siger, om det var godt.
+ *
+ *  MEDIANEN regnes over kommunerne, hvor nøgletallet vises med en retning. En
+ *  kommune, hvis tal et forbehold har taget af siden, og en, hvis retning et
+ *  forbehold spærrer, sætter ikke målestokken for de andre: deres serie er ikke
+ *  sammenlignelig, og deres pil viser ingen vurdering.
+ *
+ *  Alle kommuner regnes samtidig, fordi medianen kræver dem, men kun den valgte
+ *  kommunes serie tegnes - og først, når man peger på pilen. */
+export function beregnUdvikling(kommuner, land, historik) {
+  if (!historik?.kommuner || !historik.land) return null;
+  const tabeller = kommuner.map((k) => driverTabel(k, land));
+  const resultat = new Map(kommuner.map((k) => [k.kode, {}]));
+
+  DRIVERE.forEach((d, i) => {
+    const poster = kommuner.map((k, j) => {
+      const raekke = tabeller[j][i];
+      const serie = driverSerie(d, historik, k.kode);
+      const ep = serie ? endepunkter(serie.aar, serie.kommune) : null;
+      const a = ep ? aendring(d, ep.start, ep.slut) : null;
+      return { k, raekke, serie, ep, a, maal: a ? maalFor(d, a, ep) : null };
+    });
+    // Kun endelige ændringer: en stigning fra nul har ingen størrelse at sammenligne med.
+    const reference = median(poster
+      .filter((p) => Number.isFinite(p.maal) && !p.raekke.skjult && !p.raekke.spaerret)
+      .map((p) => p.maal));
+
+    for (const p of poster) {
+      const { k, raekke, serie, ep, a } = p;
+      let udvikling;
+      if (!serie || !ep) {
+        udvikling = { retning: "ingen", n: 0, serie: serie ?? null };
+      } else {
+        const lep = endepunkter(serie.aar, serie.land);
+        udvikling = {
+          retning: klassificerUdvikling(
+            p.maal, opErGodt(raekke.paavirkning), reference, erUaendret(d, ep.start, ep.slut, a)),
+          n: ep.n, serie, midlet: ep.midlet,
+          start: ep.start, slut: ep.slut, startLabel: ep.startLabel, slutLabel: ep.slutLabel,
+          pct: a.pct, pp: a.pp, op: ep.slut >= ep.start,
+          landStart: lep?.start ?? null, landSlut: lep?.slut ?? null,
+        };
+      }
+      resultat.get(k.kode)[d.navn] = udvikling;
+    }
+  });
+  return resultat;
+}
+
+/** Kategoriens samlede udvikling: hvor mange nøgletal der bevæger sig hver vej.
+ *  TÆLLER, VEJER IKKE - samme regel som samletRetning(). Hjælpetal tæller ikke
+ *  med, af samme grund. "Rigtig" og "langsomt" lægges sammen, fordi begge går den
+ *  rigtige vej; et nøgletal uden vurdering (uafklaret retning eller et forbehold)
+ *  tælles for sig, og et uden tidsserie for sig. */
+export function samletUdvikling(drivere) {
+  const talte = drivere.filter((d) => d.rolle !== "hjaelper");
+  const retning = (d) => d.udvikling?.retning ?? "ingen";
+  const tael = (...retninger) => talte.filter((d) => retninger.includes(retning(d))).length;
+  return {
+    rigtig: tael("rigtig", "tempo"),
+    langsomt: tael("tempo"),
+    forkert: tael("forkert"),
+    uaendret: tael("stagneret"),
+    udenVurdering: tael("kontekst"),
+    udenTidsserie: tael("ingen"),
+    talte: talte.length,
+  };
+}
+
+/** Hvordan kommunerne fordeler sig på hvert nøgletals udvikling, og hvilken periode
+ *  udviklingen dækker. Til metodesiden, hvor tallene regnes af årets datasæt og
+ *  ikke skrives i hånden. Som beregnFordeling() beskriver den nøgletallet, ikke
+ *  den enkelte kommune: ingen kommune navngives, og ingen rangordnes.
+ *
+ *  Kommuner, hvor nøgletallet er taget af siden, tælles ikke med. */
+export function beregnUdviklingFordeling(kommuner, land, historik) {
+  const udvikling = beregnUdvikling(kommuner, land, historik);
+  if (!udvikling) return null;
+  const tabeller = kommuner.map((k) => driverTabel(k, land));
+
+  return DRIVERE.map((d, i) => {
+    const antal = Object.fromEntries(UDVIKLING_RETNINGER.map((r) => [r, 0]));
+    let skjult = 0;
+    const aendringer = [];
+    kommuner.forEach((k, j) => {
+      const raekke = tabeller[j][i];
+      if (raekke.skjult) { skjult++; return; }
+      const u = udvikling.get(k.kode)[d.navn];
+      antal[u.retning]++;
+      if (u.retning !== "ingen" && !raekke.spaerret) {
+        const m = d.type === "difference" ? u.pp : u.pct;
+        if (m != null) aendringer.push(m);
+      }
+    });
+    // Perioden er landets: alle år i vinduet, hvor landet har tal.
+    const serie = driverSerie(d, historik, kommuner[0].kode);
+    const lep = serie ? endepunkter(serie.aar, serie.land) : null;
+    return {
+      navn: d.navn, kategori: d.kategori, rolle: d.rolle ?? "hoved",
+      faste: d.faste === true, type: d.type, andel: d.andel ?? null,
+      ...antal, skjult,
+      aarFra: lep ? Number(lep.startLabel.slice(0, 4)) : null,
+      aarTil: lep ? Number(lep.slutLabel.slice(-4)) : null,
+      startLabel: lep?.startLabel ?? null, slutLabel: lep?.slutLabel ?? null,
+      n: lep?.n ?? 0, median: median(aendringer),
+    };
+  });
 }
