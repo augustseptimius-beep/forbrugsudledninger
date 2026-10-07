@@ -1,5 +1,5 @@
 {
-  "genereret": "2026-09-30",
+  "genereret": "2026-10-07",
   "kilder": [
     {
       "id": "FOLK1A",
@@ -56,7 +56,7 @@
         "boliger_raekke",
         "boliger_etage"
       ],
-      "periode": "2025"
+      "periode": "2026"
     },
     {
       "id": "BOL103",
@@ -69,7 +69,7 @@
       "felter": [
         "boligareal"
       ],
-      "periode": "2025"
+      "periode": "2026"
     },
     {
       "id": "BOL102",
@@ -97,7 +97,7 @@
       "felter": [
         "byggeri"
       ],
-      "periode": "2024"
+      "periode": "2025"
     },
     {
       "id": "BIL54",
@@ -157,7 +157,7 @@
         "fritidshuse"
       ],
       "forbehold": "Bruges til at fordele husholdningernes energi og udledning på samtlige boliger. Fritidsboliger bruger energi, men deres ejere er registreret i en anden kommune.",
-      "periode": "2025"
+      "periode": "2026"
     },
     {
       "id": "KLIMAREGNSKABET_HUSHOLDNINGER",

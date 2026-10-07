@@ -272,13 +272,16 @@ def test_hentningen_beder_kun_om_perioder_tabellen_har(monkeypatch):
             return [f"{a}M01" for a in range(2018, 2027)]
         if tabel == "BYGV33":
             return [q for a in range(2006, 2025) for q in (f"{a}K1", f"{a}K2", f"{a}K3", f"{a}K4")]
-        return [str(a) for a in range(2007, 2027)] + [f"{a}K1" for a in range(2008, 2027)]
+        return [str(a) for a in range(2007, 2028)] + [
+            f"{a}K{k}" for a in range(2008, 2028) for k in (1, 2, 3, 4)]
 
     kald = _stille_hentninger(monkeypatch, perioder)
     historik.hent_dst()
-    assert kald["biler"][0] == "2018M01" and kald["biler"][-1] == "2026M01"
-    assert kald["indkomst"] == [str(a) for a in range(2014, 2025)]
-    assert kald["folketal"][0] == "2015K1" and kald["folketal"][-1] == "2026K1"
+    assert kald["biler"][0] == "2018M01" and kald["biler"][-1] == PERIODER["BILER_MAANED"]
+    aar = int(PERIODER["INDKOMST_AAR"])
+    assert kald["indkomst"] == [str(a) for a in range(aar - 10, aar + 1)]
+    assert kald["folketal"][0] == trin_tilbage(PERIODER["FOLK_KVARTAL_FORRIGE"], historik.HISTORIK_AAR)
+    assert kald["folketal"][-1] == PERIODER["FOLK_KVARTAL"]
 
 
 def test_byggeri_udelader_et_aar_uden_alle_fire_kvartaler(monkeypatch):
@@ -368,7 +371,8 @@ def _foedevare_grundlag(monkeypatch, aar_fra=2015):
                 for a in range(2014, 2025)}
     monkeypatch.setattr(fetch_forbrug, "fetch_indkomst_i_alt_serie",
                         lambda aarene: {a: indkomst[a] for a in aarene if a in indkomst})
-    folketal = {trin_tilbage("2026K1", k): {"Thisted": 42000 + 100 * k, "Hele landet": 6_000_000}
+    folketal = {trin_tilbage(PERIODER["FOLK_KVARTAL"], k): {"Thisted": 42000 + 100 * k,
+                                                             "Hele landet": 6_000_000}
                 for k in range(0, 11)}
     return raa, indkomst, folketal
 
@@ -381,21 +385,21 @@ def test_foedevareforbruget_for_det_nyeste_aar_er_forbrug_for_aar(monkeypatch):
         a: osei_owusu.relativ_kvotient(f, i, a) for a, (f, i) in raa.items()})
     forventet = osei_owusu.forbrug_for_aar(
         udjaevnet, osei_owusu.landets_kvotient(*raa["2024"]), FORBRUG_REGIONER,
-        indkomst["2024"], folketal["2026K1"],
+        indkomst["2024"], folketal[PERIODER["FOLK_KVARTAL"]],
         {navn: region for _, navn, region in KOMMUNER})
     assert ud["foedevare_forbrug_pr_indb"][THISTED]["2024"] == forventet["Thisted"]
 
 
 def test_foedevareforbruget_deles_med_folketallet_flyttet_lige_langt_tilbage(monkeypatch):
-    """Indkomsten er fra 2024 og folketallet fra 2026K1. To år tidligere er det
-    2022 og 2024K1 - ikke 2022 og 2026K1."""
+    """Indkomsten er fra 2024 og folketallet fra det nuværende kvartal (FOLK_KVARTAL).
+    To år tidligere er det 2022 og kvartalet to år før - ikke 2022 og det nuværende."""
     raa, indkomst, folketal = _foedevare_grundlag(monkeypatch)
     ud = historik.hent_foedevare(folketal)
     v24 = ud["foedevare_forbrug_pr_indb"][THISTED]["2024"]
     v22 = ud["foedevare_forbrug_pr_indb"][THISTED]["2022"]
     k24, k22 = osei_owusu.landets_kvotient(*raa["2024"]), osei_owusu.landets_kvotient(*raa["2022"])
-    forventet_forhold = (k22 * indkomst["2022"]["Thisted"] / folketal["2024K1"]["Thisted"]) / \
-                        (k24 * indkomst["2024"]["Thisted"] / folketal["2026K1"]["Thisted"])
+    forventet_forhold = (k22 * indkomst["2022"]["Thisted"] / folketal[trin_tilbage(PERIODER["FOLK_KVARTAL"], 2)]["Thisted"]) / \
+                        (k24 * indkomst["2024"]["Thisted"] / folketal[PERIODER["FOLK_KVARTAL"]]["Thisted"])
     assert v22 / v24 == pytest.approx(forventet_forhold)
 
 
@@ -407,7 +411,7 @@ def test_regionens_udjaevnede_placering_er_den_samme_i_alle_aar(monkeypatch):
     for aar, v in pr_aar.items():
         k = osei_owusu.landets_kvotient(*raa[aar])
         i = indkomst[aar]["Thisted"]
-        f = folketal[trin_tilbage("2026K1", 2024 - int(aar))]["Thisted"]
+        f = folketal[trin_tilbage(PERIODER["FOLK_KVARTAL"], 2024 - int(aar))]["Thisted"]
         udjaevnet = osei_owusu.udjaevn_kvotient({
             a: osei_owusu.relativ_kvotient(fo, ik, a) for a, (fo, ik) in raa.items()})
         assert v == pytest.approx(k * udjaevnet["Region Nordjylland"] * i * 1000 / f)
