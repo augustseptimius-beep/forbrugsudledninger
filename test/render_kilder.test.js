@@ -13,7 +13,8 @@ test("kilder: hver kilde får en række med id, udbyder og periode", () => {
     assert.ok(h.includes(k.id), `mangler ${k.id}`);
     assert.ok(h.includes(k.udbyder), `mangler udbyder for ${k.id}`);
   }
-  assert.ok(h.includes("2026K1"), "perioden skal komme fra sources.json");
+  const folk = sources.kilder.find((k) => k.id === "FOLK1A").periode;
+  assert.ok(h.includes(folk), "perioden skal komme fra sources.json");
 });
 
 test("kilder: hver kilde bærer sin hentemetode", () => {

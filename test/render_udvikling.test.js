@@ -28,6 +28,24 @@ const side = (navn) => {
   const k = kommune(navn);
   return beregnKommune(k, data.land, udvikling.get(k.kode));
 };
+// En historik, hvor Klimaregnskabets felter kun har det nyeste punkt - som når datasættet
+// bygges uden API-nøglen. Så kan testene af "uden tidsserie" køre, uanset hvad den
+// committede historik rummer.
+const histUdenKlima = (() => {
+  const kopi = structuredClone(hist);
+  const felter = Object.keys(kopi.felter).filter((f) => f.startsWith("husholdning_"));
+  const klip = (raekker) => {
+    for (const f of felter) if (raekker[f]) raekker[f] = raekker[f].map((v, i, a) => (i === a.length - 1 ? v : null));
+  };
+  klip(kopi.land);
+  for (const k of Object.values(kopi.kommuner)) klip(k);
+  return kopi;
+})();
+const udviklingUdenKlima = beregnUdvikling(data.kommuner, data.land, histUdenKlima);
+const sideUdenKlima = (navn) => {
+  const k = kommune(navn);
+  return beregnKommune(k, data.land, udviklingUdenKlima.get(k.kode));
+};
 const html = (b) => renderIndikatorer(b, concito, ens, sources);
 const raekke = (b, navn) => b.drivere.find((d) => d.navn === navn);
 
@@ -182,7 +200,7 @@ test("et tal, der mangler, står som tankestreg i pilens tekst og aldrig som nul
 // ---------- Kategoriens optælling ----------
 
 test("kategorien tæller udviklingen ved siden af den samlede retning", () => {
-  const h = html(side("Thisted"));
+  const h = html(sideUdenKlima("Thisted"));
   assert.ok(h.includes("Udvikling over tid"));
   assert.match(h, /\d+ i rigtig retning/);
   assert.match(h, /\d+ i forkert retning/);
@@ -314,7 +332,7 @@ test("vurderingen står med form og tekst i grafens forklaring", () => {
 });
 
 test("et nøgletal uden serie giver ingen graf", () => {
-  const b = side("Thisted");
+  const b = sideUdenKlima("Thisted");
   const d = raekke(b, "Husholdningernes CO2 fra energi");
   assert.equal(d.udvikling.retning, "ingen");
   assert.equal(renderUdviklingTip(d, sources, "Thisted"), "");

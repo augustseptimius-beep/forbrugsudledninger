@@ -82,20 +82,23 @@ def test_indkomst():
 
 
 def test_folketal_seneste_kvartal_er_det_samme_som_nutidens():
-    rows = [_r("2026K1", **{"OMRÅDE": "Thisted", "INDHOLD": "42572"}),
-            _r("2025K1", **{"OMRÅDE": "Thisted", "INDHOLD": "42698"})]
+    k_nu, k_forrige = PERIODER["FOLK_KVARTAL"], PERIODER["FOLK_KVARTAL_FORRIGE"]
+    rows = [_r(k_nu, **{"OMRÅDE": "Thisted", "INDHOLD": "42572"}),
+            _r(k_forrige, **{"OMRÅDE": "Thisted", "INDHOLD": "42698"})]
     with patch.object(dst_client, "fetch", _kald_med(rows)):
         nu, forrige = fetch_dst.fetch_folketal()
-        serie = fetch_dst.fetch_folketal_serie(["2025K1", "2026K1"])
-    assert serie["2026K1"] == nu and serie["2025K1"] == forrige
+        serie = fetch_dst.fetch_folketal_serie([k_forrige, k_nu])
+    assert serie[k_nu] == nu and serie[k_forrige] == forrige
 
 
 def test_byggeri_er_summen_af_aarets_kvartaler_uden_kollegier():
-    rows = [_r("2024K1", **{"OMRÅDE": "Thisted", "ANVEND": "Parcelhuse", "INDHOLD": "10"}),
-            _r("2024K2", **{"OMRÅDE": "Thisted", "ANVEND": "Etageboliger", "INDHOLD": "5"}),
-            _r("2024K2", **{"OMRÅDE": "Thisted", "ANVEND": "Kollegier", "INDHOLD": "50"}),
-            _r("2023K1", **{"OMRÅDE": "Thisted", "ANVEND": "Parcelhuse", "INDHOLD": "7"}),
-            _r("2023K4", **{"OMRÅDE": "Thisted", "ANVEND": "Parcelhuse", "INDHOLD": "8"})]
+    aar = PERIODER["BYGGERI_AAR"]
+    for_aar = str(int(aar) - 1)
+    rows = [_r(f"{aar}K1", **{"OMRÅDE": "Thisted", "ANVEND": "Parcelhuse", "INDHOLD": "10"}),
+            _r(f"{aar}K2", **{"OMRÅDE": "Thisted", "ANVEND": "Etageboliger", "INDHOLD": "5"}),
+            _r(f"{aar}K2", **{"OMRÅDE": "Thisted", "ANVEND": "Kollegier", "INDHOLD": "50"}),
+            _r(f"{for_aar}K1", **{"OMRÅDE": "Thisted", "ANVEND": "Parcelhuse", "INDHOLD": "7"}),
+            _r(f"{for_aar}K4", **{"OMRÅDE": "Thisted", "ANVEND": "Parcelhuse", "INDHOLD": "8"})]
 
     def fetch(base, tabel, params):
         bedt = set(params["Tid"].split(","))
@@ -103,9 +106,9 @@ def test_byggeri_er_summen_af_aarets_kvartaler_uden_kollegier():
 
     with patch.object(dst_client, "fetch", fetch):
         nu = fetch_dst.fetch_byggeri()
-        serie = fetch_dst.fetch_byggeri_serie(["2023", "2024"])
-    assert serie["2024"] == nu == {"Thisted": 15}
-    assert serie["2023"] == {"Thisted": 15}
+        serie = fetch_dst.fetch_byggeri_serie([for_aar, aar])
+    assert serie[aar] == nu == {"Thisted": 15}
+    assert serie[for_aar] == {"Thisted": 15}
 
 
 def test_byggeriets_serie_beder_om_alle_fire_kvartaler_i_hvert_aar():
@@ -144,30 +147,34 @@ def test_biler_i_serien_er_husholdningernes_og_samme_udtraek_som_nutidens():
 
 
 def test_boligareal_midtpunkter_i_serien():
-    rows = [_r("2025", **{"AMT": "Thisted", "BOLIGSTØR": "100-124 kvm", "INDHOLD": "10"}),
-            _r("2025", **{"AMT": "Thisted", "BOLIGSTØR": "150-174 kvm", "INDHOLD": "5"}),
-            _r("2024", **{"AMT": "Thisted", "BOLIGSTØR": "100-124 kvm", "INDHOLD": "10"}),
-            _r("2024", **{"AMT": "Greve", "BOLIGSTØR": "100-124 kvm", "INDHOLD": "-"})]
+    aar = PERIODER["BOLIGER_AAR"]
+    for_aar = str(int(aar) - 1)
+    rows = [_r(aar, **{"AMT": "Thisted", "BOLIGSTØR": "100-124 kvm", "INDHOLD": "10"}),
+            _r(aar, **{"AMT": "Thisted", "BOLIGSTØR": "150-174 kvm", "INDHOLD": "5"}),
+            _r(for_aar, **{"AMT": "Thisted", "BOLIGSTØR": "100-124 kvm", "INDHOLD": "10"}),
+            _r(for_aar, **{"AMT": "Greve", "BOLIGSTØR": "100-124 kvm", "INDHOLD": "-"})]
     with patch.object(dst_client, "fetch", _kald_med(rows)):
         nu = fetch_dst.fetch_boligareal()
-        serie = fetch_dst.fetch_boligareal_serie(["2024", "2025"])
-    assert serie["2025"] == nu
-    assert serie["2024"] == {"Thisted": 112.0}, "et tal, der mangler, er ikke nul"
+        serie = fetch_dst.fetch_boligareal_serie([for_aar, aar])
+    assert serie[aar] == nu
+    assert serie[for_aar] == {"Thisted": 112.0}, "et tal, der mangler, er ikke nul"
 
 
 def test_boliger_type_opvarmning_og_affald_i_serien_er_som_nutidens():
-    bol = [_r("2025", **{"OMRÅDE": "Thisted", "ANVENDELSE": "Parcel/Stuehuse", "INDHOLD": "100"}),
-           _r("2025", **{"OMRÅDE": "Thisted", "ANVENDELSE": "Etageboliger", "INDHOLD": "40"})]
-    opv = [_r("2026", **{"AMT": "Thisted", "OPVARMNING": "Centralvarme med olie", "INDHOLD": "20"}),
-           _r("2026", **{"AMT": "Thisted", "OPVARMNING": "Fjernvarme", "INDHOLD": "100"})]
-    aff = [_r("2023", **{"KOMGRP": "Thisted", "BNØGLE": "Husholdningsaffald (kg. pr. indbygger)",
-                         "INDHOLD": "508"})]
+    bolig_aar, opv_aar = PERIODER["BOLIGER_AAR"], PERIODER["OPVARMNING_AAR"]
+    affald_aar = PERIODER["AFFALD_AAR"]
+    bol = [_r(bolig_aar, **{"OMRÅDE": "Thisted", "ANVENDELSE": "Parcel/Stuehuse", "INDHOLD": "100"}),
+           _r(bolig_aar, **{"OMRÅDE": "Thisted", "ANVENDELSE": "Etageboliger", "INDHOLD": "40"})]
+    opv = [_r(opv_aar, **{"AMT": "Thisted", "OPVARMNING": "Centralvarme med olie", "INDHOLD": "20"}),
+           _r(opv_aar, **{"AMT": "Thisted", "OPVARMNING": "Fjernvarme", "INDHOLD": "100"})]
+    aff = [_r(affald_aar, **{"KOMGRP": "Thisted", "BNØGLE": "Husholdningsaffald (kg. pr. indbygger)",
+                             "INDHOLD": "508"})]
     with patch.object(dst_client, "fetch", _kald_med(bol)):
-        assert fetch_dst.fetch_boliger_type_serie(["2025"])["2025"] == fetch_dst.fetch_boliger_type()
+        assert fetch_dst.fetch_boliger_type_serie([bolig_aar])[bolig_aar] == fetch_dst.fetch_boliger_type()
     with patch.object(dst_client, "fetch", _kald_med(opv)):
-        assert fetch_dst.fetch_opvarmning_serie(["2026"])["2026"] == fetch_dst.fetch_opvarmning()
+        assert fetch_dst.fetch_opvarmning_serie([opv_aar])[opv_aar] == fetch_dst.fetch_opvarmning()
     with patch.object(dst_client, "fetch", _kald_med(aff)):
-        assert fetch_dst.fetch_affald_serie(["2023"])["2023"] == fetch_dst.fetch_affald()
+        assert fetch_dst.fetch_affald_serie([affald_aar])[affald_aar] == fetch_dst.fetch_affald()
 
 
 def test_fritidshuse_hentes_ét_aar_ad_gangen():
