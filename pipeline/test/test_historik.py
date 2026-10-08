@@ -69,7 +69,11 @@ def test_kr_felterne_er_dem_saml_kommune_post_skriver():
                                    husholdning={THISTED: h})
     for kilde, felt in kr.KR_FELTER.items():
         assert post[felt] == h[kilde], felt
-    assert list(kr.KR_FELTER.values()) == [f for f in post if f.startswith("husholdning_")]
+    # Elens faktor kommer ikke fra Klimaregnskabet men fra Energinet (energinet.py), og
+    # står i data.json mellem Klimaregnskabets el- og fjernvarmefelter.
+    husholdning = [f for f in post if f.startswith("husholdning_")]
+    assert post[historik.EL_FAKTOR_FELT] is None
+    assert list(kr.KR_FELTER.values()) == [f for f in husholdning if f != historik.EL_FAKTOR_FELT]
 
 
 def test_kaeden_ender_paa_feltets_nuvaerende_periode():
@@ -490,6 +494,22 @@ def test_hver_kommunes_felter_folger_kr_felter(monkeypatch):
     assert ud["husholdning_el_tj"][THISTED][aar] == pytest.approx(50.0 * faktor)
     assert ud["husholdning_fjernvarme_tj"][THISTED][aar] == pytest.approx(100.0 * faktor)
     assert ud["husholdning_fossil_andel"][THISTED][aar] == pytest.approx(20.0 / 170.0)
+
+
+def test_elens_faktor_hentes_fra_energinet_for_hvert_aar_og_landet_vejes_paa_elforbrug(monkeypatch):
+    import energinet
+    _kr_api(monkeypatch)
+    ud = _hent_kr()
+    en = energinet.laes()
+    felt = historik.EL_FAKTOR_FELT
+    aar = PERIODER["KLIMAREGNSKAB_AAR"]
+    # Kommunen får Energinets tal for netop det år, ikke seneste års tal.
+    for a in ud[felt][THISTED]:
+        assert ud[felt][THISTED][a] == en["aar"][a][str(THISTED)], a
+    assert ud[felt][THISTED][aar] != ud[felt][THISTED][str(int(aar) - 1)], "samme faktor to år"
+    # Alle kommuner har samme elforbrug i dobbelgængeren, så landet er det simple gennemsnit.
+    snit = sum(en["aar"][aar][str(k)] for k in [k for k, _, _ in KOMMUNER]) / 98
+    assert ud[felt]["land"][aar] == pytest.approx(snit)
 
 
 def test_landet_er_summen_af_kommunerne_hvert_aar(monkeypatch):

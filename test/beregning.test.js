@@ -103,14 +103,14 @@ test("beregnKommune: lister manglende felter", () => {
   }
 });
 
-// --- Husholdningernes energi: strøm er fælles, fjernvarme er lokal ---
+// --- Husholdningernes energi: strøm og fjernvarme har hver sin kommunale faktor ---
 
 const medEnergi = (m, felter) => ({
   ...m, fritidshuse: 0, husholdning_energi_tj: 1000, husholdning_fossil_andel: 0.1, ...felter,
 });
 const landEnergi = medEnergi(land, {
   husholdning_co2_ton: 3000000, husholdning_el_tj: 30000, husholdning_el_co2_ton: 900000,
-  husholdning_fjernvarme_tj: 70000, husholdning_fjernvarme_co2_ton: 1500000,
+  husholdning_el_faktor: 56, husholdning_fjernvarme_tj: 70000, husholdning_fjernvarme_co2_ton: 1500000,
 });
 const vaerdi = (k, navn) => {
   const d = driverTabel(k, landEnergi).find((x) => x.navn === navn);
@@ -118,25 +118,52 @@ const vaerdi = (k, navn) => {
   return d;
 };
 
-test("husholdningernes CO2: strømmen regnes med landets fælles faktor, ikke kommunens egen", () => {
-  // Klimaregnskabet giver hver kommune sin egen el-faktor ud fra den el, der
-  // produceres i kommunen. Strøm deles på det fælles net, så en vindmølle gør
-  // ikke kommunens eget forbrug renere. To kommuner med samme elforbrug og samme
-  // øvrige udledning skal derfor stå ens, uanset hvor ren deres lokale el er.
+const CO2_NAVN = "Husholdningernes CO2 fra energi";
+const KWH_PR_TJ = 1e12 / 3.6e6;
+
+test("husholdningernes CO2: strømmen regnes med kommunens miljødeklaration, ikke Klimaregnskabets el-udledning", () => {
+  // Klimaregnskabet fordeler den el, der produceres i kommunen, på kommunens forbrugere.
+  // Den el-udledning trækkes fra totalen og erstattes af elforbruget gange Energinets
+  // faktor for kommunen. To kommuner med samme elforbrug, samme faktor og samme øvrige
+  // udledning skal derfor stå ens, uanset hvad Klimaregnskabet mener om deres lokale el.
   const vind = medEnergi(thisted, { husholdning_el_tj: 100, husholdning_co2_ton: 5000,
-    husholdning_el_co2_ton: 0 });
+    husholdning_el_co2_ton: 0, husholdning_el_faktor: 50 });
   const kul = medEnergi(thisted, { husholdning_el_tj: 100, husholdning_co2_ton: 8000,
-    husholdning_el_co2_ton: 3000 });
-  const navn = "Husholdningernes CO2 fra energi";
-  naer(vaerdi(vind, navn).kommuneVaerdi, vaerdi(kul, navn).kommuneVaerdi);
+    husholdning_el_co2_ton: 3000, husholdning_el_faktor: 50 });
+  naer(vaerdi(vind, CO2_NAVN).kommuneVaerdi, vaerdi(kul, CO2_NAVN).kommuneVaerdi);
 });
 
-test("husholdningernes CO2: landstallet er det samme med den fælles el-faktor", () => {
-  // Faktoren er landets egen el-udledning delt med landets elforbrug, så den
-  // flytter udledning mellem kommuner uden at ændre summen.
+test("husholdningernes CO2: en renere el hos Energinet giver lavere udledning, regnet i hånden", () => {
+  // 100 TJ el er 100 * 277.777,8 kWh. Ved 50 g/kWh er det 1.388,9 ton, ved 100 g/kWh
+  // dobbelt så meget. Forskellen deles på kommunens boliger.
+  const boliger = thisted.boliger_parcel + thisted.boliger_raekke + thisted.boliger_etage;
+  const fast = { husholdning_el_tj: 100, husholdning_co2_ton: 5000, husholdning_el_co2_ton: 0 };
+  const ren = medEnergi(thisted, { ...fast, husholdning_el_faktor: 50 });
+  const beskidt = medEnergi(thisted, { ...fast, husholdning_el_faktor: 100 });
+  naer(vaerdi(beskidt, CO2_NAVN).kommuneVaerdi - vaerdi(ren, CO2_NAVN).kommuneVaerdi,
+    (100 * KWH_PR_TJ * 50) / 1e6 / boliger);
+});
+
+test("husholdningernes CO2: landstallet bruger landets egen faktor, og hver side bruger sin egen", () => {
+  // Landet har sin faktor som felt i landets række (elforbrugsvægtet gennemsnit af
+  // kommunernes). Kommunens tal må ikke regnes med landets faktor, og omvendt.
   const boliger = land.boliger_parcel + land.boliger_raekke + land.boliger_etage;
-  naer(vaerdi(thisted, "Husholdningernes CO2 fra energi").landVaerdi,
-    landEnergi.husholdning_co2_ton / boliger);
+  const forventetLand = (landEnergi.husholdning_co2_ton - landEnergi.husholdning_el_co2_ton
+    + (landEnergi.husholdning_el_tj * KWH_PR_TJ * landEnergi.husholdning_el_faktor) / 1e6) / boliger;
+  naer(vaerdi(thisted, CO2_NAVN).landVaerdi, forventetLand);
+  const andenFaktor = medEnergi(thisted, { husholdning_el_faktor: 5 });
+  naer(vaerdi(andenFaktor, CO2_NAVN).landVaerdi, forventetLand);
+});
+
+test("husholdningernes CO2: mangler faktoren, står der en streg og ikke et nul", () => {
+  // I JavaScript er null nul. Uden værnet ville en kommune, hvis faktor mangler hos
+  // Energinet, få en elforbruger uden udledning og se renere ud end alle andre.
+  for (const faktor of [null, undefined]) {
+    const k = medEnergi(thisted, { husholdning_el_faktor: faktor });
+    const d = vaerdi(k, CO2_NAVN);
+    assert.equal(d.kommuneVaerdi, null, `faktor ${faktor}`);
+    assert.equal(d.signal, "ukendt", `faktor ${faktor}`);
+  }
 });
 
 test("fjernvarmens CO2 pr. kWh: tons pr. TJ regnes om til gram pr. kWh", () => {

@@ -25,6 +25,7 @@ import fetch_regk
 import historik
 import sources
 import concito
+import energinet
 import ens
 import indkoeb
 import osei_owusu
@@ -45,7 +46,7 @@ FORVENTEDE_FELTER = [
     "opv_naturgas", "affald_kg", "genanvendelse_pct",
     "pendlingsafstand_km", "fritidshuse",
     "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
-    "husholdning_el_tj", "husholdning_el_co2_ton",
+    "husholdning_el_tj", "husholdning_el_co2_ton", "husholdning_el_faktor",
     "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton",
     "foedevare_forbrug_pr_indb",
     "indkoeb_drift_pr_indb", "indkoeb_anlaeg_pr_indb",
@@ -76,10 +77,10 @@ def saml_kommune_post(navn, dst_data, kode=None, region=None,
     post["husholdning_co2_ton"] = h.get("co2_ton")
     post["husholdning_energi_tj"] = h.get("energi_tj")
     post["husholdning_fossil_andel"] = h.get("fossil_andel")
-    # Strøm og fjernvarme hver for sig. Motoren regner strømmen med landets
-    # fælles faktor, fordi Klimaregnskabets el-faktor er kommunens egen
-    # produktion - se fetch_klimaregnskabet.EL_KILDER.
-    for felt in ("el_tj", "el_co2_ton", "fjernvarme_tj", "fjernvarme_co2_ton"):
+    # Strøm og fjernvarme hver for sig. Motoren erstatter Klimaregnskabets el-udledning
+    # med elforbruget gange kommunens miljødeklaration fra Energinet (el_faktor,
+    # g CO2e/kWh) - se energinet.py og fetch_klimaregnskabet.EL_KILDER.
+    for felt in ("el_tj", "el_co2_ton", "el_faktor", "fjernvarme_tj", "fjernvarme_co2_ton"):
         post[f"husholdning_{felt}"] = h.get(felt)
     # Hvor meget affaldstallene kan bære for netop denne kommune. None er den
     # normale tilstand ("intet at bemærke") og må derfor IKKE med i
@@ -224,6 +225,27 @@ def _klassificer_indkomst():
         return {}
 
 
+def _tilfoej_el_faktor(husholdning):
+    """Lægger kommunens el-faktor fra Energinet ind i husholdningsposterne.
+
+    Filen web/data/energinet.json er committet og opdateres for sig
+    (python3 pipeline/energinet.py), ligesom ens.json og concito.json er afskrifter.
+    Mangler året i filen, står faktoren tom for alle kommuner, og
+    husholdningens CO2-nøgletal vises med streg frem for med en gættet faktor."""
+    aar = PERIODER["KLIMAREGNSKAB_AAR"]
+    print(f"Læser Energinets miljødeklaration for {aar} (web/data/energinet.json)...")
+    try:
+        en = energinet.laes()
+    except Exception as fejl:
+        print(f"  ADVARSEL: {fejl}. Elens CO2 pr. kWh står tom.")
+        en = {"aar": {}}
+    if not energinet.faktorer_for_aar(en, aar):
+        print(f"  ADVARSEL: energinet.json har ingen faktorer for {aar}. Kør "
+              "python3 pipeline/energinet.py, eller ret KLIMAREGNSKAB_AAR.")
+    pr_kommune = {kode: husholdning.get(kode, {}) for kode, _, _ in KOMMUNER}
+    return energinet.beriger_husholdning(pr_kommune, en, aar)
+
+
 def find_manglende(post):
     return [felt for felt in FORVENTEDE_FELTER if post.get(felt) is None]
 
@@ -243,7 +265,7 @@ def main():
         print(f"  ADVARSEL: kunne ikke hente AFSTB4 ({fejl}). Feltet står tomt.")
         pendling = {}
 
-    print("Henter DST BOL101 (fritidshuse)...")
+    print(f"Henter DST {fetch_dst.BOLIGTABEL} (fritidshuse)...")
     try:
         fritidshuse = fetch_dst.fetch_fritidshuse()
         print(f"  {len(fritidshuse)} områder hentet.")
@@ -267,6 +289,8 @@ def main():
             # streg. Resten af datasættet er upåvirket.
             print(f"  ADVARSEL: {fejl}. Husholdningsfelterne står tomme.")
             husholdning = {}
+
+    husholdning = _tilfoej_el_faktor(husholdning)
 
     # Affaldsindberetningens pålidelighed pr. kommune. Fejler hentningen, står
     # feltet tomt for alle, og motoren viser retningen som før - tjekket må ikke

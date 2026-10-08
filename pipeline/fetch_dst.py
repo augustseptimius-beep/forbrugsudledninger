@@ -81,20 +81,28 @@ _BOLIGSTOR_MIDPUNKT = {
 }
 
 
+# BOLIGTAL FRA BOL105, IKKE BOL101. BOL101 mangler 2021 og 2022 (verificeret mod den
+# levende tabel), og hullet satte tidsserierne for husholdningernes energi og CO2 til
+# en enkelt isoleret værdi i 2018 og derefter 2021-2024. BOL105 har samme områder,
+# samme beboertyper og samme anvendelser og ingen huller. Tallene er sammenlignet
+# celle for celle med BOL101 for alle områder og alle år, de to deler (2016-2026,
+# uden 2021-2022): ingen afvigelser, hverken i boligtyperne eller i fritidshusene.
+BOLIGTABEL = "BOL105"
+BOLIG_OMRAADE = "AMT"
+
+
 def _boliger_type_kald(tid):
-    """UDLFORH/EJER/OPFØRELSESÅR har ingen total-VÆRDIKODE, men har elimination=True i
-    BOL101's metadata - de UDELADES derfor helt fra forespørgslen (ligesom ANTVÆR/
-    HUSSTØR i fetch_boligareal()), så DST's API selv summerer over dem. Wildcarding
-    alle tre samtidig (i stedet for at udelade dem) overskrider DST's 1-mio.-
-    cellegrænse ved OMRÅDE=* (verificeret: gav HTTP 400 REQUEST-LIMIT live)."""
-    return dst_client.fetch(BASE, "BOL101", {
-        "OMRÅDE": "*", "BEBO": "1000", "ANVENDELSE": "125,130,140",
+    """OPVARMNING/TOILET/BAD/HUSTYP/ANTBØRN har ingen total-VÆRDIKODE, men har
+    elimination=True i BOL105's metadata - de UDELADES derfor helt fra forespørgslen
+    (ligesom ANTVÆR/HUSSTØR i fetch_boligareal()), så DST's API selv summerer over dem."""
+    return dst_client.fetch(BASE, BOLIGTABEL, {
+        BOLIG_OMRAADE: "*", "BEBO": "1000", "ANVENDELSE": "125,130,140",
         "Tid": tid,
     })
 
 
 def _boliger_type_af(rows):
-    sums = dst_client.sum_by(rows, ["OMRÅDE", "ANVENDELSE"])
+    sums = dst_client.sum_by(rows, [BOLIG_OMRAADE, "ANVENDELSE"])
     parcel = {navn: v for (navn, anv), v in sums.items() if anv == "Parcel/Stuehuse"}
     raekke = {navn: v for (navn, anv), v in sums.items() if anv == "Række-, kæde- og dobbelthuse"}
     etage = {navn: v for (navn, anv), v in sums.items() if anv == "Etageboliger"}
@@ -115,8 +123,7 @@ def fetch_boliger_type_serie(perioder):
 
 def _fritidshuse_params(tid):
     return {
-        "OMRÅDE": "*", "BEBO": "5000", "ANVENDELSE": "565",
-        "UDLFORH": "*", "EJER": "*", "OPFØRELSESÅR": "*",
+        BOLIG_OMRAADE: "*", "BEBO": "5000", "ANVENDELSE": "565",
         "Tid": tid,
     }
 
@@ -129,22 +136,17 @@ def fetch_fritidshuse():
     kommune. Deler man husholdningstallet ud på indbyggere, følger det
     sommerhustætheden næsten lige så tæt som boligstørrelsen - målt på alle
     98 kommuner. Se fetch_klimaregnskabet.py for tallene."""
-    rows = dst_client.fetch(BASE, "BOL101", _fritidshuse_params(PERIODER["BOLIGER_AAR"]))
-    return dst_client.sum_by(rows, ["OMRÅDE"])
-
-
-# Jokertegn på tre dimensioner. DST tæller knap 735.000 celler pr. år i denne
-# forespørgsel (svaret har 91.872 rækker), og grænsen er en million: to år
-# ad gangen gav HTTP 400 REQUEST-LIMIT ved 1.469.952 celler. Derfor ét år ad
-# gangen.
-FRITIDSHUSE_BID_AAR = 1
+    rows = dst_client.fetch(BASE, BOLIGTABEL, _fritidshuse_params(PERIODER["BOLIGER_AAR"]))
+    return dst_client.sum_by(rows, [BOLIG_OMRAADE])
 
 
 def fetch_fritidshuse_serie(perioder):
-    """{aar: {navn: antal ubeboede fritidshuse}}."""
-    rows = dst_client.fetch_i_bidder(
-        BASE, "BOL101", _fritidshuse_params(None), list(perioder), FRITIDSHUSE_BID_AAR)
-    return {p: dst_client.sum_by(rs, ["OMRÅDE"])
+    """{aar: {navn: antal ubeboede fritidshuse}}.
+
+    Ét kald for alle årene. Med BOL101 skulle det ske ét år ad gangen, fordi tre
+    jokertegn gav HTTP 400 REQUEST-LIMIT; BOL105 har ingen af dem."""
+    rows = dst_client.fetch(BASE, BOLIGTABEL, _fritidshuse_params(",".join(perioder)))
+    return {p: dst_client.sum_by(rs, [BOLIG_OMRAADE])
             for p, rs in dst_client.opdel_paa_tid(rows).items()}
 
 

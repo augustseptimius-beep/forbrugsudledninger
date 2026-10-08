@@ -93,10 +93,20 @@ test("kommunevisning: intet nøgletal på siden står som uafklaret", () => {
   // (se beregnKommune). Et hjælpetal har aldrig haft en retning at give - det
   // står for at forklare et andet tal - og får derfor intet mærkat. Testen
   // kører både på en kommune uden og en med et spærrende forbehold.
+  //
+  // Undtagelsen er kommunens indkøb: de fire nøgletal står uden retning med vilje, så
+  // kategorien Offentligt forbrug siger "retningen kan ikke afgøres" og kalder dem "uden
+  // vurdering". Mærkatet må stå dér og ingen andre steder.
   const spaerret = beregnKommune({ ...thisted, affald_indberetning: "bekraeftet_fejl" }, land);
   for (const b of [bThisted, spaerret]) {
     const h = side(b);
-    assert.ok(!h.includes("retningen kan ikke afgøres"), `${b.navn}: mærkatet står der stadig`);
+    const udenRetning = b.grupper.filter((g) => samletRetning(g.drivere).retning === "ingen retning");
+    assert.deepEqual(udenRetning.map((g) => g.kategori), ["Offentligt forbrug"],
+      `${b.navn}: kun indkøbskategorien står uden retning`);
+    assert.equal(h.split("retningen kan ikke afgøres").length - 1, 1,
+      `${b.navn}: mærkatet står andre steder end ved indkøbet`);
+    assert.ok(h.includes("4 uden vurdering"), `${b.navn}: indkøbet er optalt som uden vurdering`);
+    assert.ok(!h.includes("med forbehold"), `${b.navn}: indkøbet er ikke et forbehold`);
     assert.ok(!/uafklaret/i.test(h), `${b.navn}: "uafklaret" står der stadig`);
   }
 });
@@ -639,11 +649,12 @@ test("udeladt: den samlede retning tæller ikke nøgletallet med", () => {
 const medHusholdning = (fritidshuse) => ({
   ...thisted, fritidshuse, husholdning_co2_ton: 19000, husholdning_energi_tj: 900,
   husholdning_fossil_andel: 0.05, husholdning_el_tj: 100, husholdning_el_co2_ton: 2000,
+  husholdning_el_faktor: 40,
 });
 const landHusholdning = {
   ...land, fritidshuse: 224795, husholdning_co2_ton: 3343924,
   husholdning_energi_tj: 155250, husholdning_fossil_andel: 0.098,
-  husholdning_el_tj: 30000, husholdning_el_co2_ton: 900000,
+  husholdning_el_tj: 30000, husholdning_el_co2_ton: 900000, husholdning_el_faktor: 56,
 };
 
 test("fritidshuse: flere fritidshuse end helårsboliger holder retningen tilbage pr. bolig", () => {

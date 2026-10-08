@@ -44,22 +44,28 @@ const alleBoliger = (m) => helaarsboliger(m) + (m.fritidshuse ?? 0);
 const husholdningEnergiPrBolig = (m) => (m.husholdning_energi_tj * 1000) / alleBoliger(m);
 const fritidshusPrBolig = (m) => m.fritidshuse / helaarsboliger(m);
 
-// Strøm er fælles, fjernvarme er lokal.
+// Strøm og fjernvarme har hver sin kommunale faktor.
 //
-// Klimaregnskabet giver hver kommune sin egen el-faktor ud fra den el, der
-// produceres i kommunen, så lokal vind og sol tæller som nul hos kommunens egne
-// forbrugere. Strøm deles på det fælles net, og en vindmølle gør ikke kommunens
-// eget forbrug renere - den gør alles. Husholdningernes strøm regnes derfor med
-// landets fælles faktor: landets el-udledning delt med landets elforbrug, fra
-// samme opgørelse og samme år. Summen over landet er uændret.
+// Klimaregnskabet giver hver kommune sin egen el-udledning ud fra den el, der
+// produceres i kommunen. Den bruges ikke: husholdningernes elforbrug (TJ) ganges i
+// stedet med Energinets miljødeklaration for kommunen (husholdning_el_faktor, g CO2e
+// pr. kWh, 125 %-metoden), som er myndighedens eget kommunale tal. Energinet lader
+// vedvarende energi produceret i kommunen dække kommunens forbrug først og dækker
+// resten med transmissionsnettets blanding inklusive import. Landets faktor er det
+// elforbrugsvægtede gennemsnit af kommunernes, så landstallet er summen af
+// kommunernes. Se pipeline/energinet.py og metodesiden.
+//
+// Mangler faktoren, mangler nøgletallet: et felt, der mangler, er null, og null er
+// nul i JavaScript. elFaktor() giver NaN i stedet, så regnestykket ender som "ingen
+// data" og ikke som en elforbruger uden udledning.
 //
 // Fjernvarme leveres i rør fra kommunens eget net, og Klimaregnskabet beregner
 // faktoren pr. net efter Energistyrelsens anbefaling. Den bruges, som den er.
 const KWH_PR_TJ = 1e12 / 3.6e6;
-const faellesElFaktor = (land) => land.husholdning_el_co2_ton / land.husholdning_el_tj;
-const husholdningCo2PrBolig = (m, land) =>
+const elFaktor = (m) => m.husholdning_el_faktor ?? NaN;
+const husholdningCo2PrBolig = (m) =>
   (m.husholdning_co2_ton - m.husholdning_el_co2_ton
-    + m.husholdning_el_tj * faellesElFaktor(land)) / alleBoliger(m);
+    + (m.husholdning_el_tj * KWH_PR_TJ * elFaktor(m)) / 1e6) / alleBoliger(m);
 const fjernvarmeCo2PrKwh = (m) =>
   (m.husholdning_fjernvarme_co2_ton * 1e6) / (m.husholdning_fjernvarme_tj * KWH_PR_TJ);
 
@@ -155,7 +161,8 @@ const indkoebForbehold = (m) => INDKOEB_FORBEHOLD[m.indkoeb_forbehold] ?? null;
 // nøgletal bærer sin begrundelse i PAAVIRKNING nedenfor. Kan retningen ikke
 // begrundes, står den som uafklaret frem for at blive gættet. Et hovednøgletal,
 // der står som uafklaret for en kommune, vises ikke på kommunens side - se
-// beregnKommune.
+// beregnKommune - medmindre det er markeret `kunTal: true`: så er manglen på retning
+// et bevidst valg, og tallet vises som tal uden mærkat.
 export const PAAVIRKNING = {
   hoejere: "hoejere", lavere: "lavere", uafklaret: "uafklaret",
 };
@@ -347,15 +354,17 @@ export const DRIVERE = [
   { navn: "Husholdningernes CO2 fra energi", enhed: "ton CO2e/bolig",
     val: husholdningCo2PrBolig,
     felter: ["husholdning_co2_ton", "husholdning_el_co2_ton", "husholdning_el_tj",
+             "husholdning_el_faktor",
              "boliger_parcel", "boliger_raekke", "boliger_etage", "fritidshuse"],
-    formel: "(husholdning_co2_ton - husholdning_el_co2_ton + husholdning_el_tj"
-      + " * (land.husholdning_el_co2_ton / land.husholdning_el_tj))"
+    formel: "(husholdning_co2_ton - husholdning_el_co2_ton"
+      + " + husholdning_el_tj * (1000000000000 / 3600000) * husholdning_el_faktor / 1000000)"
       + " / (boliger_parcel + boliger_raekke + boliger_etage + fritidshuse)",
     type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere", forbehold: fritidshusForbehold,
     begrundelse: "Udledningen fra borgernes eget energiforbrug i boligen. Strømmen er "
-      + "regnet med samme udledning pr. kWh i alle kommuner, fordi den deles på det "
-      + "fælles net; fjernvarmen med sit lokale nets." },
+      + "regnet med kommunens miljødeklaration fra Energinet, hvor vedvarende energi "
+      + "produceret i kommunen dækker kommunens forbrug først; fjernvarmen med sit "
+      + "lokale nets." },
   { navn: "Husholdningernes energiforbrug", enhed: "GJ/bolig",
     val: husholdningEnergiPrBolig,
     felter: ["husholdning_energi_tj", "boliger_parcel", "boliger_raekke",
@@ -421,7 +430,12 @@ export const DRIVERE = [
   // --- Kommunens eget indkøb ---
   //
   // De fire nøgletal nedenfor er de eneste i værktøjet, der handler om
-  // kommunen som ORGANISATION og ikke om borgerne. De står her, fordi
+  // kommunen som ORGANISATION og ikke om borgerne. De står UDEN RETNING
+  // (`paavirkning: "uafklaret"` med `kunTal: true`): en kommunal udgift i kroner
+  // er stigende eller faldende, men værktøjet er ikke smagsdommer over, om det er
+  // rigtigt eller forkert. Demografi, udlicitering, opgaveflytning og priser flytter
+  // tallet uden at røre ved klimaindsatsen, og et grønt eller rødt signal ville sige
+  // mere, end kronerne kan bære. Det gælder niveauet mod landet og udviklingspilen. De står her, fordi
   // Energistyrelsen henfører det offentlige forbrug til borgernes aftryk
   // (1,15 ton pr. indbygger, 11,9 %), og fordi kommunen selv er den eneste
   // aktør på siden, der kan handle direkte på tallet.
@@ -443,17 +457,17 @@ export const DRIVERE = [
     felter: ["indkoeb_drift_pr_indb"],
     formel: "indkoeb_drift_pr_indb",
     metodekilde: "ENS_GA23_INDKOEB",
-    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
+    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "uafklaret", kunTal: true,
     forbehold: indkoebForbehold,
     begrundelse: "Kommunens eget køb af varer og tjenesteydelser hos leverandører, "
       + "pr. indbygger. Energistyrelsen beregner indkøbets klimaaftryk som kroner "
-      + "gange en emissionsfaktor (baggrundsnotat 6, s. 5), så flere indkøbskroner "
-      + "betyder alt andet lige mere udledning. Tallet er ikke et mål for, om "
-      + "kommunen køber godt ind: det følger ikke indkomsten (r = -0,10 over de 98 "
-      + "kommuner), men det følger alderssammensætningen (r = +0,52 mod andelen på "
-      + "75 år og derover), og en lille kommune har færre borgere at dele de faste "
-      + "opgaver på. Forsyningsvirksomhederne er trukket fra i alle kommuner, fordi "
-      + "nogle har dem i regnskabet og andre i selskab." },
+      + "gange en emissionsfaktor (baggrundsnotat 6, s. 5), men om flere kroner er "
+      + "en forkert eller rigtig retning, kan tallet ikke afgøre: det følger ikke "
+      + "indkomsten (r = -0,10 over de 98 kommuner), men det følger "
+      + "alderssammensætningen (r = +0,52 mod andelen på 75 år og derover), og en "
+      + "lille kommune har færre borgere at dele de faste opgaver på. Derfor står "
+      + "tallet uden retning. Forsyningsvirksomhederne er trukket fra i alle "
+      + "kommuner, fordi nogle har dem i regnskabet og andre i selskab." },
   // Anlæg udjævnes over fem år, drift gør ikke. Grunden står i indkoeb.py:
   // driftens afvigelse korrelerer r = +0,98 fra år til år, anlæggets kun
   // +0,75, mens to adskilte femårsvinduer når +0,71. Ét skolebyggeri kan
@@ -466,39 +480,43 @@ export const DRIVERE = [
     felter: ["indkoeb_anlaeg_pr_indb"],
     formel: "indkoeb_anlaeg_pr_indb",
     metodekilde: "ENS_GA23_INDKOEB",
-    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
+    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "uafklaret", kunTal: true,
     forbehold: indkoebForbehold,
     begrundelse: "Kommunens køb til anlægsprojekter, gennemsnit over fem "
       + "regnskabsår. Byggeri og anlæg er den største enkeltpost i det offentlige "
       + "indkøbs klimaaftryk, og udledningen pr. indkøbskrone er samtidig høj "
-      + "(Energistyrelsen, baggrundsnotat 6, s. 4). Femårsgennemsnittet er "
-      + "nødvendigt, fordi ét enkelt byggeri ellers ville flytte en lille kommune "
-      + "flere hundrede procent på ét år." },
+      + "(Energistyrelsen, baggrundsnotat 6, s. 4). Tallet står uden retning: et "
+      + "stort anlægsår kan være en energirenovering eller et nyt skolebyggeri, og "
+      + "kronerne siger ikke hvilket. Femårsgennemsnittet er nødvendigt, fordi ét "
+      + "enkelt byggeri ellers ville flytte en lille kommune flere hundrede procent "
+      + "på ét år." },
   { navn: "Kommunens indkøb af brændsel og drivmidler", enhed: "kr./indb./år",
     faste: true,
     val: (m) => m.indkoeb_braendsel_pr_indb,
     felter: ["indkoeb_braendsel_pr_indb"],
     formel: "indkoeb_braendsel_pr_indb",
     metodekilde: "KL_2022_INDKOEB",
-    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
+    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "uafklaret", kunTal: true,
     forbehold: indkoebForbehold,
     begrundelse: "Diesel, benzin og fyringsbrændsel til kommunens egen drift. KL "
       + "(2022) fremhæver brændstof og køretøjer som det indkøbsområde, der har det "
       + "største klimaaftryk pr. indkøbskrone. Tallet er kommunens udgift, ikke "
-      + "mængden: falder prisen, falder tallet, uden at der er købt mindre." },
+      + "mængden: falder prisen, falder tallet, uden at der er købt mindre. Derfor "
+      + "står det uden retning." },
   { navn: "Kommunens indkøb af fødevarer", enhed: "kr./indb./år",
     faste: true,
     val: (m) => m.indkoeb_foedevarer_pr_indb,
     felter: ["indkoeb_foedevarer_pr_indb"],
     formel: "indkoeb_foedevarer_pr_indb",
     metodekilde: "ENS_GA23_INDKOEB",
-    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "hoejere",
+    type: "relativ", kategori: KATEGORI.OFFENTLIGT, paavirkning: "uafklaret", kunTal: true,
     forbehold: indkoebForbehold,
     begrundelse: "Mad til plejehjem, daginstitutioner, skoler og kantiner. "
       + "Energistyrelsen opgør fødevarer og kantinedrift som eget indkøbsområde "
       + "(baggrundsnotat 6, s. 4). Tallet afhænger stærkt af, hvor mange borgere "
       + "kommunen bespiser, og af om køkkendriften er udliciteret: er den lagt ud, "
-      + "bogføres maden som en tjenesteydelse og ikke her." },
+      + "bogføres maden som en tjenesteydelse og ikke her. Et fald kan derfor være "
+      + "en bogføringsændring, og tallet står uden retning." },
 ];
 
 // Tærskler for, hvornår en afvigelse kaldes markant. De er en PRÆSENTATIONS-
@@ -571,7 +589,8 @@ export function udledningsSignal(afvigelse, paavirkning) {
 
 /** Sikker beregning: returnerer null hvis resultatet ikke er et endeligt tal
  *  (manglende felt giver NaN/Infinity, som Number.isFinite fanger). Landet gives
- *  med, fordi husholdningernes strøm regnes med landets fælles el-faktor. */
+ *  med, så et nøgletal kan læse landets tal (`land.felt` i formlen); ingen gør det
+ *  lige nu, for el-faktoren er kommunens egen og landets er et felt i landets række. */
 function sikker(fn, m, land) {
   const v = fn(m, land);
   return Number.isFinite(v) ? v : null;
@@ -724,6 +743,8 @@ export function driverTabel(kommune, land) {
     return {
       navn: d.navn, enhed: d.enhed, type: d.type, kategori: d.kategori,
       rolle: d.rolle ?? "hoved",
+      // Bevidst uden retning: tallet vises, men vurderes ikke (kommunale udgifter).
+      kunTal: d.kunTal === true,
       // Kildeangivelsen følger nøgletallet hele vejen ud i tabellen.
       felter: d.felter ?? [],
       // Regnestykket og andelsformen følger med ud i tabellen af samme grund
@@ -812,13 +833,16 @@ export function samletRetning(drivere) {
   const ned = medData.filter((d) => d.signal.endsWith("lavere")).length;
   const paaNiveau = medData.filter((d) => d.signal === "på niveau").length;
   const udenRetning = talte.filter((d) => d.signal === "uafklaret").length;
+  // Del af udenRetning: tal, der står uden retning med vilje og uden forbehold.
+  // Rendering skal kunne skille dem fra dem, et forbehold holder tilbage.
+  const udenVurdering = talte.filter((d) => d.signal === "uafklaret" && d.kunTal && !d.spaerret).length;
   const udenData = talte.filter((d) => d.signal === "ukendt").length;
   const retning =
     medData.length > 0 ? (op > ned ? "højere" : ned > op ? "lavere"
                           : op > 0 ? "delt" : "på niveau")
     : udenRetning > 0 ? "ingen retning"
     : "ingen data";
-  return { retning, op, ned, paaNiveau, udenData, udenRetning, talte: medData.length };
+  return { retning, op, ned, paaNiveau, udenData, udenRetning, udenVurdering, talte: medData.length };
 }
 
 export function driverePrKategori(drivere) {
@@ -844,7 +868,7 @@ const FORVENTEDE_FELTER = [
   "indkoeb_drift_pr_indb", "indkoeb_anlaeg_pr_indb",
   "indkoeb_foedevarer_pr_indb", "indkoeb_braendsel_pr_indb",
   "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
-  "husholdning_el_tj", "husholdning_el_co2_ton",
+  "husholdning_el_tj", "husholdning_el_co2_ton", "husholdning_el_faktor",
   "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton",
 ];
 
@@ -863,13 +887,15 @@ const FORVENTEDE_FELTER = [
  *
  *    Et hovednøgletal, hvis retning slet ikke kan begrundes af kilderne, vises
  *    ikke. Den regel er værktøjets egen og har intet med kommunen at gøre.
+ *    Undtaget er nøgletal markeret `kunTal`: de er kommunale udgifter, hvor
+ *    værktøjet bevidst ikke vurderer retningen. De vises som tal.
  *
  *  Hjælpetal uden retning er undtaget den sidste regel: de fleste har aldrig en
  *  retning, fordi de står for at forklare et andet nøgletal, og ville ellers
  *  forsvinde fra alle 98 sider.
  *  Manglende data ("ukendt") rammes heller ikke - dér står en tankestreg. */
 const vises = (d) => !d.skjult
-  && (d.rolle === "hjaelper" || d.spaerret || d.signal !== "uafklaret");
+  && (d.rolle === "hjaelper" || d.kunTal || d.spaerret || d.signal !== "uafklaret");
 
 /** Fuld sammenligning for én kommune: indikatortabel, gruppering, udeladte
  *  nøgletal og manglende felter.

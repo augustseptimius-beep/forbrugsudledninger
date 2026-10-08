@@ -1,5 +1,5 @@
 {
-  "genereret": "2026-10-07",
+  "genereret": "2026-10-08",
   "kilder": [
     {
       "id": "FOLK1A",
@@ -44,13 +44,13 @@
       "periode": "2024"
     },
     {
-      "id": "BOL101",
+      "id": "BOL105",
       "navn": "Boliger efter anvendelse",
-      "kort": "DST BOL101",
+      "kort": "DST BOL105",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
-      "url": "https://www.statistikbanken.dk/BOL101",
+      "url": "https://www.statistikbanken.dk/BOL105",
       "felter": [
         "boliger_parcel",
         "boliger_raekke",
@@ -146,13 +146,13 @@
       "periode": "2024"
     },
     {
-      "id": "BOL101_FRITID",
+      "id": "BOL105_FRITID",
       "navn": "Fritidshuse uden CPR-tilmeldte personer",
-      "kort": "DST BOL101 (fritidshuse)",
+      "kort": "DST BOL105 (fritidshuse)",
       "udbyder": "Danmarks Statistik",
       "metode": "api",
       "licens": "CC BY 4.0",
-      "url": "https://www.statistikbanken.dk/BOL101",
+      "url": "https://www.statistikbanken.dk/BOL105",
       "felter": [
         "fritidshuse"
       ],
@@ -176,7 +176,21 @@
         "husholdning_fjernvarme_tj",
         "husholdning_fjernvarme_co2_ton"
       ],
-      "forbehold": "Kun kategorien Husholdninger - erhverv, fremstilling, offentlig service og transport hører til andre kategorier og er ikke med. Opgørelsen dækker udledningen fra forbrændingen og fra elnettet, ikke hele livscyklussen bag brændslet, og niveauet er derfor lavere end CONCITO's tal for El og varme. Sammenligningen med landsgennemsnittet er gyldig, fordi begge sider opgøres ens. NIRAS (2024) s. 18 peger på Energi- og CO2-Regnskabet som den rigtige kilde til energidelen. Klimaregnskabets el-faktor er kommunens egen produktion; værktøjet regner husholdningernes strøm med landets fælles faktor i stedet, fordi strøm deles på det fælles net. Fjernvarmens faktor er fjernvarmenettets egen og bruges, som den er.",
+      "forbehold": "Kun kategorien Husholdninger - erhverv, fremstilling, offentlig service og transport hører til andre kategorier og er ikke med. Opgørelsen dækker udledningen fra forbrændingen og fra elnettet, ikke hele livscyklussen bag brændslet, og niveauet er derfor lavere end CONCITO's tal for El og varme. Sammenligningen med landsgennemsnittet er gyldig, fordi begge sider opgøres ens. NIRAS (2024) s. 18 peger på Energi- og CO2-Regnskabet som den rigtige kilde til energidelen. Klimaregnskabets egen el-udledning bruges ikke: den fordeler kommunens egen elproduktion på kommunens forbrugere. Værktøjet tager elforbruget herfra og ganger det med Energinets miljødeklaration for kommunen, se ENERGINET_MILJODEKLARATION. Fjernvarmens faktor er fjernvarmenettets egen og bruges, som den er.",
+      "periode": "2024"
+    },
+    {
+      "id": "ENERGINET_MILJODEKLARATION",
+      "navn": "Miljødeklaration pr. kommune: CO2e pr. kWh el, årsgennemsnit",
+      "kort": "Energinet",
+      "udbyder": "Energinet",
+      "metode": "fil",
+      "licens": "Åbne data fra Energinet (Energi Data Service)",
+      "url": "https://www.energinet.dk/data-om-energi/data-til-dit-klimaregnskab/lokationsbaseret-deklaration-miljodeklaration/",
+      "felter": [
+        "husholdning_el_faktor"
+      ],
+      "forbehold": "Energinets lokationsbaserede deklaration efter 125 %-metoden, i g CO2e pr. kWh forbrugt el. Strøm, der produceres af vedvarende energi i kommunen, forbruges først dér, og resten dækkes af transmissionsnettets blanding inklusive import; kommuner med meget lokal vind og sol får derfor en lav faktor. Tallet er Energinets modelberegning og ikke en måling. Årsgennemsnittene er endelige i juni året efter og foreløbige før. Landets faktor er elforbrugsvægtet gennemsnit af de 98 kommuners. Filen opdateres for sig med pipeline/energinet.py.",
       "periode": "2024"
     },
     {

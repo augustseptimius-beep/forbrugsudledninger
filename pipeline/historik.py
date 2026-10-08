@@ -50,6 +50,7 @@ import time
 from datetime import date
 
 import dst_client
+import energinet
 import fetch_dst
 import fetch_forbrug
 import fetch_klimaregnskabet
@@ -106,6 +107,9 @@ FELT_PERIODE = {
     "genanvendelse_pct": "AFFALD_AAR",
     "pendlingsafstand_km": "PENDLING_AAR",
     **{felt: "KLIMAREGNSKAB_AAR" for felt in fetch_klimaregnskabet.KR_FELTER.values()},
+    # Elens CO2 pr. kWh fra Energinet følger Klimaregnskabets år: faktoren ganges på
+    # elforbruget fra Klimaregnskabet, så de to skal høre til samme år.
+    "husholdning_el_faktor": "KLIMAREGNSKAB_AAR",
     "indkoeb_drift_pr_indb": "REGNSKAB_AAR",
     "indkoeb_anlaeg_pr_indb": "REGNSKAB_AAR",
     "indkoeb_foedevarer_pr_indb": "REGNSKAB_AAR",
@@ -113,8 +117,10 @@ FELT_PERIODE = {
 }
 HISTORIK_FELTER = list(FELT_PERIODE)
 
-# Felterne, der kommer fra Klimaregnskabet.dk.
-KR_POSTFELTER = list(fetch_klimaregnskabet.KR_FELTER.values())
+# Felterne, der kommer fra Klimaregnskabet.dk, og elfaktoren fra Energinet, som hentes
+# sammen med dem: faktoren lægges ind i hver årgang, før landet summeres.
+EL_FAKTOR_FELT = "husholdning_el_faktor"
+KR_POSTFELTER = list(fetch_klimaregnskabet.KR_FELTER.values()) + [EL_FAKTOR_FELT]
 
 # Forskellen mellem to udregninger af samme tal, som kun er float-støj. Alt
 # større er en forskel i definitionen og stopper kørslen.
@@ -198,9 +204,9 @@ def hent_dst(tabeller=None):
 
     _indsaet_flere(ud, ("boliger_parcel", "boliger_raekke", "boliger_etage"),
                    fetch_dst.fetch_boliger_type_serie(
-                       perioder_for("BOL101", felt_kaede("boliger_parcel"))))
+                       perioder_for(fetch_dst.BOLIGTABEL, felt_kaede("boliger_parcel"))))
     _indsaet(ud, "fritidshuse", fetch_dst.fetch_fritidshuse_serie(
-        perioder_for("BOL101", felt_kaede("fritidshuse"))))
+        perioder_for(fetch_dst.BOLIGTABEL, felt_kaede("fritidshuse"))))
     _indsaet(ud, "boligareal", fetch_dst.fetch_boligareal_serie(
         perioder_for("BOL103", felt_kaede("boligareal"))))
     _indsaet_flere(ud, ("opv_boliger_ialt", "opv_olie", "opv_naturgas"),
@@ -327,13 +333,17 @@ def hent_kr(nuvaerende=None, frisk=False, cache=True, sov=time.sleep):
     serie = fetch_klimaregnskabet.fetch_husholdninger_serie(
         KOMMUNER, aarene, sov=sov, allerede=allerede, gem=gem)
 
+    en = energinet.laes()
     ud = {}
     for aar, pr_kode in serie.items():
         # En kommune uden hverken udledning eller energi i året har ikke en
         # årgang, og dens nuller (el, fjernvarme) må ikke læses som målinger.
         med_tal = {kode: h for kode, h in pr_kode.items()
                    if h.get("co2_ton") is not None or h.get("energi_tj") is not None}
-        for kilde_felt, felt in fetch_klimaregnskabet.KR_FELTER.items():
+        # Samme funktion som build.py bruger til det nyeste år.
+        med_tal = energinet.beriger_husholdning(med_tal, en, aar)
+        for kilde_felt, felt in {**fetch_klimaregnskabet.KR_FELTER,
+                                 "el_faktor": EL_FAKTOR_FELT}.items():
             for kode, h in med_tal.items():
                 if h.get(kilde_felt) is not None:
                     ud.setdefault(felt, {}).setdefault(kode, {})[aar] = h[kilde_felt]

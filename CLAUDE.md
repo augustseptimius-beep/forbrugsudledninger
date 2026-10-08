@@ -50,6 +50,7 @@ forbrugsudledninger/
 │   ├── fetch_forbrug.py    <- DST FU17 og INDKF111 bag fødevareforbruget
 │   ├── osei_owusu.py       <- fødevareforbruget efter Osei-Owusu m.fl. (2020)
 │   ├── fetch_klimaregnskabet.py <- husholdningernes energi og CO2 (kræver API-nøgle)
+│   ├── energinet.py        <- Energinets miljødeklaration pr. kommune (CO2e pr. kWh el). Skriver energinet.json
 │   ├── indkoeb.py          <- ★ KOMMUNENS EGET INDKØB: afgrænsning og forbehold
 │   ├── fetch_regk.py       <- DST REGK11, kommunernes regnskaber
 │   ├── historik.py         <- ★ ÅRSVÆRDIER BAG UDVIKLINGSPILENE. Skriver historik.json, kun tal.
@@ -67,7 +68,7 @@ forbrugsudledninger/
 │   ├── widget.js           <- tyndt DOM-lag. Ingen forretningslogik.
 │   ├── styles/input.css    <- Tailwind-kilde
 │   ├── styles/styles.css   <- genereret, MEN COMMITTET (så repoet virker uden Node)
-│   └── data/               <- data.json, historik.json, sources.json, ens.json, concito.json
+│   └── data/               <- data.json, historik.json, sources.json, ens.json, concito.json, energinet.json
 └── test/                   <- node --test
     └── regneark.js         <- lille regnemotor, så testene kan regne arket efter
 ```
@@ -163,8 +164,12 @@ derfor byggeri i 2023 delt med folketallet i 2025 året før, og så videre: sam
   det.
 - **DST's celletælling er højere end svarets rækker.** Fritidshuse (tre jokertegn) må kun hentes ét
   år ad gangen, byggeri højst tre (`fetch_i_bidder`). Elleve år ad gangen gav HTTP 400.
-- **BOL101 mangler 2021 og 2022.** Boligtallene har derfor et hul, og nøgletal, der bruger dem, står
-  uden punkt de to år. Det er korrekt, ikke en fejl.
+- **BOL101 mangler 2021 og 2022, derfor bruges BOL105.** DST's tabel BOL101 har et hul i de to år
+  (verificeret mod den levende tabel), og det klippede tidsserierne for husholdningernes energi og CO2
+  op. BOL105 har samme områder, beboertyper og anvendelser uden huller, og er sammenlignet celle for
+  celle med BOL101 for alle områder og alle år, de deler: ingen afvigelser. `BOLIGTABEL` i
+  `fetch_dst.py` er det ene sted, tabellen står. Fritidshuse hentes i ét kald; det "ét år ad gangen",
+  der var nødvendigt med BOL101, er væk.
 - **Andre Python-versioner summerer floats anderledes.** Fødevareforbruget afviger en enhed i sidste
   decimal mellem 3.11 og 3.12. `afstem_med_data` sætter `data.json`'s værdi ind, når forskellen er
   float-støj, og stopper ved alt større.
@@ -193,6 +198,18 @@ Klimaregnskab-årgang er 196 kald, og historikken henter op til seks årgange ud
 så kørslen tager markant længere tid end før.
 Årgangene er ikke prøvet mod den levende kilde uden nøgle; om metoden er ens i alle år, kan værktøjet
 ikke selv afgøre, og det står ved nøgletallene.
+
+**Elens CO2 pr. kWh er kommunens egen, fra Energinet.** Husholdningernes CO2 pr. bolig regnes som
+Klimaregnskabets total, minus dets egen el-udledning, plus elforbruget gange Energinets
+miljødeklaration for kommunen (`husholdning_el_faktor`, g CO2e/kWh, 125 %-metoden). Klimaregnskabets
+el-udledning fordeler den el, der produceres i kommunen, på kommunens forbrugere; Energinets faktor er
+myndighedens eget kommunale tal. Landets faktor er det elforbrugsvægtede gennemsnit af kommunernes
+(`sammenlaeg_land_husholdning`), så landstallet er summen af kommunernes. `energinet.py` læser
+regnearket fra Energinets side med standardbiblioteket og skriver den lille `web/data/energinet.json`,
+som `build.py` og `historik.py` læser (`beriger_husholdning` er den ene funktion, der lægger faktoren
+ind, så tabel og pilens serie er ét tal). Faktoren hører til `KLIMAREGNSKAB_AAR`. Mangler en kommune sin
+faktor, er den `null`, og nøgletallet står med streg: `null` er nul i JavaScript, og `elFaktor()` i
+`beregning.js` giver derfor NaN. Det seneste år i Energinets fil er foreløbigt indtil juni.
 
 **Tilføjer du et nøgletal**, skal alle dets felter stå i `FELT_PERIODE` i `historik.py` og i `felter`
 i `beregning.js`, ellers står det uden tidsserie, og `test/historik.test.js` melder det. Et nøgletal
@@ -301,6 +318,14 @@ fire indkøbsnøgletal fra Læsø, Samsø og Ærø, mens metodesiden lovede det
 modsatte. `samletRetning` tæller dem tilsvarende hver for sig, så en kategori
 med spærrede nøgletal siger "retningen kan ikke afgøres" og ikke "ingen data".
 
+**`kunTal` er en tredje ting: bevidst uden retning.** Kommunens fire indkøbsnøgletal er udgifter i
+kroner, og værktøjet er ikke smagsdommer over, om en stigende eller faldende udgift er rigtig eller
+forkert (demografi, udlicitering, opgaveflytning og priser flytter tallet uden at røre klimaindsatsen).
+De har `paavirkning: "uafklaret"` og `kunTal: true`. Flaget holder dem på siden, selv om et
+hovednøgletal uden retning ellers tages af (`vises` i `beregning.js`), og `samletRetning` tæller dem i
+`udenVurdering`, så de ikke forveksles med `udenRetning` fra et forbehold. Pilen står grå. Et nyt
+nøgletal for kommunale udgifter skal følge samme valg.
+
 ## API-nøgler
 
 Klimaregnskabet.dk kræver en personlig API-nøgle. Den læses fra miljøvariablen
@@ -340,6 +365,10 @@ kilder med nøglen, kontrollerer at ingen kilde faldt tavst ud, kører CSS og
 begge testsuiter, og åbner en draft-PR med det nye datasæt. Trinene nedenfor
 gælder både den vej og en lokal kørsel.
 
+0. `python3 pipeline/energinet.py` - henter Energinets nye regneark med årsgennemsnit og skriver
+   `web/data/energinet.json`. Energinet giver filen et nyt navn hver gang; adressen findes på siden.
+   Workflowet **Årlig dataopdatering** gør det som første trin. Står `KLIMAREGNSKAB_AAR` på et år,
+   filen ikke har, advarer `build.py`, og nøgletallet står med streg.
 1. `python3 pipeline/build.py` - genhenter alle API-kilder, skriver
    `data.json`, `historik.json` og `sources.json`, og udskriver en valideringsrapport.
    Historikken bygges sidst og følger `PERIODER` bagud af sig selv. I CI står rapporten i

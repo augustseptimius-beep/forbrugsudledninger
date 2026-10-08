@@ -54,7 +54,7 @@ be computed without inventing coefficients, and this tool does not.
 
 ## Method
 
-Data comes from Statistics Denmark and Klimaregnskabet.dk. Every source is
+Data comes from Statistics Denmark, Klimaregnskabet.dk and Energinet (the municipal electricity declaration, CO2e per kWh). Every source is
 listed with table id and period on the method page, which also documents the
 methodological choices.
 
@@ -73,6 +73,7 @@ Then open http://127.0.0.1:8000
 ## Updating the data (once a year)
 
 ```bash
+python3 pipeline/energinet.py   # Energinet's municipal CO2 per kWh, writes web/data/energinet.json
 python3 pipeline/build.py
 ```
 

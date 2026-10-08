@@ -163,8 +163,8 @@ def test_boligareal_midtpunkter_i_serien():
 def test_boliger_type_opvarmning_og_affald_i_serien_er_som_nutidens():
     bolig_aar, opv_aar = PERIODER["BOLIGER_AAR"], PERIODER["OPVARMNING_AAR"]
     affald_aar = PERIODER["AFFALD_AAR"]
-    bol = [_r(bolig_aar, **{"OMRÅDE": "Thisted", "ANVENDELSE": "Parcel/Stuehuse", "INDHOLD": "100"}),
-           _r(bolig_aar, **{"OMRÅDE": "Thisted", "ANVENDELSE": "Etageboliger", "INDHOLD": "40"})]
+    bol = [_r(bolig_aar, **{"AMT": "Thisted", "ANVENDELSE": "Parcel/Stuehuse", "INDHOLD": "100"}),
+           _r(bolig_aar, **{"AMT": "Thisted", "ANVENDELSE": "Etageboliger", "INDHOLD": "40"})]
     opv = [_r(opv_aar, **{"AMT": "Thisted", "OPVARMNING": "Centralvarme med olie", "INDHOLD": "20"}),
            _r(opv_aar, **{"AMT": "Thisted", "OPVARMNING": "Fjernvarme", "INDHOLD": "100"})]
     aff = [_r(affald_aar, **{"KOMGRP": "Thisted", "BNØGLE": "Husholdningsaffald (kg. pr. indbygger)",
@@ -177,18 +177,18 @@ def test_boliger_type_opvarmning_og_affald_i_serien_er_som_nutidens():
         assert fetch_dst.fetch_affald_serie([affald_aar])[affald_aar] == fetch_dst.fetch_affald()
 
 
-def test_fritidshuse_hentes_ét_aar_ad_gangen():
+def test_fritidshuse_hentes_i_ét_kald_fra_boligtabellen_uden_huller():
     kaldt = []
 
     def fetch(base, tabel, params):
-        kaldt.append(params["Tid"])
-        return [_r(params["Tid"], **{"OMRÅDE": "Thisted", "INDHOLD": "3789"})]
+        kaldt.append((tabel, params["Tid"]))
+        return [_r(t, **{"AMT": "Thisted", "INDHOLD": "3789"}) for t in params["Tid"].split(",")]
 
     with patch.object(dst_client, "fetch", fetch):
-        serie = fetch_dst.fetch_fritidshuse_serie(["2023", "2024", "2025"])
-    assert kaldt == ["2023", "2024", "2025"], (
-        "to år ad gangen gav HTTP 400 REQUEST-LIMIT mod den levende tabel")
-    assert serie["2025"] == {"Thisted": 3789}
+        serie = fetch_dst.fetch_fritidshuse_serie(["2021", "2022", "2025"])
+    # BOL101 mangler 2021 og 2022 og krævede ét år ad gangen. BOL105 har ingen af delene.
+    assert kaldt == [("BOL105", "2021,2022,2025")]
+    assert serie["2021"] == {"Thisted": 3789} and serie["2022"] == {"Thisted": 3789}
 
 
 def test_pendling_i_serien_har_regionsnavne_som_nutidens():
@@ -260,7 +260,22 @@ def test_landets_husholdningstal_er_summer_og_fossil_andel_er_vaegtet():
     # Vægtet på energi, ikke gennemsnit af to andele: (10*0,5 + 30*0,1) / 40.
     assert abs(land["husholdning_fossil_andel"] - 0.2) < 1e-12
     assert land["husholdning_fjernvarme_tj"] == 3.0
-    assert set(land) == set(kr.KR_FELTER.values())
+    assert set(land) == set(kr.KR_FELTER.values()) | {"husholdning_el_faktor"}
+    assert land["husholdning_el_faktor"] is None, "uden faktorer er der intet at veje"
+
+
+def test_landets_el_faktor_er_det_elforbrugsvaegtede_gennemsnit():
+    # (4 * 50 + 6 * 100) / 10 = 80. Et uvægtet gennemsnit af to kommuner ville give 75.
+    hush = {1: {"el_tj": 4.0, "el_faktor": 50.0}, 2: {"el_tj": 6.0, "el_faktor": 100.0}}
+    assert abs(kr.sammenlaeg_land_husholdning(hush)["husholdning_el_faktor"] - 80.0) < 1e-12
+
+
+def test_landets_el_faktor_springer_kommuner_uden_faktor_over_og_gaetter_ikke():
+    # Kommune 3 har elforbrug men ingen faktor. Den må hverken veje med nul eller
+    # trække landets faktor ned: den står uden for både tæller og nævner.
+    hush = {1: {"el_tj": 4.0, "el_faktor": 50.0}, 2: {"el_tj": 6.0, "el_faktor": 100.0},
+            3: {"el_tj": 90.0, "el_faktor": None}}
+    assert abs(kr.sammenlaeg_land_husholdning(hush)["husholdning_el_faktor"] - 80.0) < 1e-12
 
 
 def test_landets_husholdningstal_uden_data_er_none():

@@ -56,6 +56,13 @@ jobs:
           pip install pytest
           npm ci
 
+      - name: Hent Energinets miljødeklaration pr. kommune
+        # Elens CO2 pr. kWh for hver kommune. Regnearket får et nyt navn hver gang, så
+        # skriptet finder adressen på Energinets side. Fejler det, stopper kørslen: en
+        # gammel fil ville give husholdningernes CO2 en faktor fra et andet år.
+        working-directory: pipeline
+        run: python3 energinet.py
+
       - name: Hent alle kilder og skriv datasættet
         # Kører også historikken bag udviklingspilene (pipeline/historik.py). Klimaregnskabet
         # giver 196 kald pr. årgang, og historikken går op til ti år tilbage, så trinnet tager
@@ -94,6 +101,7 @@ jobs:
           krav = {
               "husholdning_co2_ton": "Klimaregnskabet.dk",
               "husholdning_energi_tj": "Klimaregnskabet.dk",
+              "husholdning_el_faktor": "Energinet (web/data/energinet.json)",
               "indkoeb_drift_pr_indb": "DST REGK11",
               "foedevare_forbrug_pr_indb": "DST FU17 + INDKF111",
               "pendlingsafstand_km": "DST AFSTB4",
