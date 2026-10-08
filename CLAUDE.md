@@ -301,6 +301,14 @@ fire indkøbsnøgletal fra Læsø, Samsø og Ærø, mens metodesiden lovede det
 modsatte. `samletRetning` tæller dem tilsvarende hver for sig, så en kategori
 med spærrede nøgletal siger "retningen kan ikke afgøres" og ikke "ingen data".
 
+**`kunTal` er en tredje ting: bevidst uden retning.** Kommunens fire indkøbsnøgletal er udgifter i
+kroner, og værktøjet er ikke smagsdommer over, om en stigende eller faldende udgift er rigtig eller
+forkert (demografi, udlicitering, opgaveflytning og priser flytter tallet uden at røre klimaindsatsen).
+De har `paavirkning: "uafklaret"` og `kunTal: true`. Flaget holder dem på siden, selv om et
+hovednøgletal uden retning ellers tages af (`vises` i `beregning.js`), og `samletRetning` tæller dem i
+`udenVurdering`, så de ikke forveksles med `udenRetning` fra et forbehold. Pilen står grå. Et nyt
+nøgletal for kommunale udgifter skal følge samme valg.
+
 ## API-nøgler
 
 Klimaregnskabet.dk kræver en personlig API-nøgle. Den læses fra miljøvariablen
