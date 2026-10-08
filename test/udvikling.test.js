@@ -440,36 +440,55 @@ test("udvikling: alle retninger er en af de kendte", () => {
 
 // ---------- Forbehold ----------
 
-test("udvikling: en kommune, hvis nøgletal er spærret, står uden vurdering", () => {
-  const { kommuner, h } = femKommuner();
-  // Færgeforbeholdet spærrer retningen på indkøbsnøgletallene.
+test("udvikling: kommunens indkøbsnøgletal står uden vurdering for alle, men med graf", () => {
+  // Kommunale udgifter i kroner vurderes ikke som rigtige eller forkerte (kunTal i
+  // beregning.js), hverken med eller uden færgeforbehold. Tallene er rigtige, så grafen
+  // kan stadig tegnes.
+  const { kommuner } = femKommuner();
   const faerge = mk(1, { indkoeb_forbehold: "faergedrift" });
-  const felter = {
-    indkoeb_drift_pr_indb: { land: trin(17000, 17054) },
-  };
-  for (const k of [faerge, ...kommuner.slice(1)]) felter.indkoeb_drift_pr_indb[k.kode] = trin(15000, 20000);
+  const alle = [faerge, ...kommuner.slice(1)];
+  const felter = { indkoeb_drift_pr_indb: { land: trin(17000, 17054) } };
+  for (const k of alle) felter.indkoeb_drift_pr_indb[k.kode] = trin(15000, 20000);
   const hh = historik(felter, { priser: { kilde: "PRIS8", aar: Object.fromEntries(
     Array.from({ length: 12 }, (_, i) => [2014 + i, 100])) } });
-  const u = beregnUdvikling([faerge, ...kommuner.slice(1)], land, hh);
+  const u = beregnUdvikling(alle, land, hh);
   const d = "Kommunens driftsindkøb";
-  assert.equal(u.get(1)[d].retning, "kontekst", "retningen er holdt tilbage");
-  assert.ok(u.get(1)[d].serie, "men tallene står, og grafen kan tegnes");
-  assert.equal(u.get(2)[d].retning, "forkert", "de øvrige får deres vurdering");
+  for (const k of alle) {
+    assert.equal(u.get(k.kode)[d].retning, "kontekst", `${k.navn}: ingen vurdering`);
+    assert.ok(u.get(k.kode)[d].serie, `${k.navn}: tallene står, og grafen kan tegnes`);
+  }
 });
 
-test("udvikling: spærrede og skjulte kommuner sætter ikke målestokken for de andre", () => {
-  // Tre kommuner falder 10, 20 og 30 %. To spærrede kommuner falder 80 %. Er de med, er
-  // medianen -30 og kommune med -10 er "langsomt". Uden dem er medianen -20.
-  const rene = [mk(1), mk(2), mk(3)];
-  const spaerrede = [mk(4, { indkoeb_forbehold: "faergedrift" }), mk(5, { indkoeb_forbehold: "faergedrift" })];
-  const alle = [...rene, ...spaerrede];
-  const felt = { land: trin(1000, 1000) };
+test("udvikling: kommunale indkøbsnøgletal er markeret kunTal og står uden retning", () => {
+  const indkoeb = DRIVERE.filter((d) => d.navn.startsWith("Kommunens "));
+  assert.equal(indkoeb.length, 4);
+  for (const d of indkoeb) {
+    assert.equal(d.paavirkning, "uafklaret", d.navn);
+    assert.equal(d.kunTal, true, d.navn);
+  }
+  // Ingen andre nøgletal er undtaget fra reglen om, at et retningsløst hovednøgletal
+  // ikke vises.
+  assert.deepEqual(DRIVERE.filter((d) => d.kunTal).map((d) => d.navn), indkoeb.map((d) => d.navn));
+});
+
+test("udvikling: skjulte kommuner sætter ikke målestokken for de andre", () => {
+  // Tre kommuner falder 10, 20 og 30 %. To kommuner med flere fritidshuse end helårsboliger
+  // (nøgletallet er taget af deres side) falder 80 %. Er de med, er medianen -30 og kommune
+  // 1 med -10 er "langsomt". Uden dem er medianen -20.
+  const bolig = { boliger_parcel: 100, boliger_raekke: 0, boliger_etage: 0 };
+  const rene = [1, 2, 3].map((n) => mk(n, { ...bolig, fritidshuse: 0, husholdning_energi_tj: 1000 }));
+  const skjulte = [4, 5].map((n) => mk(n, { ...bolig, fritidshuse: 1000, husholdning_energi_tj: 1000 }));
+  const alle = [...rene, ...skjulte];
   const slut = [900, 800, 700, 200, 200];
-  alle.forEach((k, i) => { felt[k.kode] = trin(1000, slut[i]); });
-  const priser = { kilde: "PRIS8", aar: Object.fromEntries(Array.from({ length: 12 }, (_, i) => [2014 + i, 1])) };
-  const u = beregnUdvikling(alle, land, historik({ indkoeb_drift_pr_indb: felt }, { priser }));
-  const d = "Kommunens driftsindkøb";
-  // Driftsindkøb ønskes ned. -10 % er +10 mod målet; medianen af de rene er +20.
+  const tj = { land: trin(1000, 1000) };
+  alle.forEach((k, i) => { tj[k.kode] = trin(1000, slut[i]); });
+  const fast = (v) => ({ land: trin(v, v), ...Object.fromEntries(alle.map((k) => [k.kode, trin(v, v)])) });
+  const u = beregnUdvikling(alle, land, historik({
+    husholdning_energi_tj: tj, boliger_parcel: fast(100), boliger_raekke: fast(0),
+    boliger_etage: fast(0), fritidshuse: fast(0),
+  }));
+  const d = "Husholdningernes energiforbrug";
+  // Energiforbruget ønskes ned. -10 % er +10 mod målet; medianen af de rene er +20.
   assert.equal(u.get(1)[d].retning, "tempo");
   assert.equal(u.get(2)[d].retning, "rigtig");
 });

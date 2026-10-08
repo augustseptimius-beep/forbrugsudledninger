@@ -339,6 +339,10 @@ test("et hovednøgletal uden retning vises kun, når et forbehold bevidst behold
   // af, fordi tallet er rigtigt. Blandes de to, forsvinder færgekommunernes
   // indkøb igen, sådan som de gjorde før.
   //
+  // Kommunens indkøbsnøgletal (kunTal) er en tredje slags: de står uden retning med
+  // vilje, for alle 98, og bærer deres forklaring i begrundelsen i stedet for i et
+  // kommuneforbehold.
+  //
   // BEMÆRK, hvad der IKKE står nedenfor. At et vist, retningsløst hovednøgletal
   // har spaerret sat, følger af vises() selv og kan ikke fejle - den slags
   // assertion ser streng ud og beviser ingenting. Det, der kan fejle, er om
@@ -350,7 +354,8 @@ test("et hovednøgletal uden retning vises kun, når et forbehold bevidst behold
     const vist = b.drivere.filter((d) => d.signal === "uafklaret" && d.rolle !== "hjaelper");
     visteUdenRetning += vist.length;
     for (const d of vist) {
-      assert.ok(d.forbeholdNote, `${k.navn}/${d.navn}: står uden retning og uden forklaring`);
+      assert.ok(d.forbeholdNote || (d.kunTal && d.begrundelse),
+        `${k.navn}/${d.navn}: står uden retning og uden forklaring`);
       assert.notEqual(d.kommuneVaerdi, null,
         `${k.navn}/${d.navn}: beholdt uden retning, men har intet tal at vise`);
     }

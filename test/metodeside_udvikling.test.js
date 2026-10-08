@@ -52,13 +52,17 @@ test("metodesiden: prisindekset står i kildekataloget under det navn, prosaen b
 });
 
 test("metodesiden: retningsantagelserne, prosaen nævner, er dem motoren bruger", () => {
-  // Siden siger, at indkomst, boligareal, biler og kommunale indkøbskroner peger mod højere
-  // udledning, når de stiger. Skifter et af dem paavirkning, er sætningen forkert.
+  // Siden siger, at indkomst, boligareal og biler peger mod højere udledning, når de stiger,
+  // og at kommunens indkøb i kroner står uden retning. Skifter et af dem paavirkning, er
+  // sætningen forkert.
   const paavirkning = (navn) => DRIVERE.find((d) => d.navn === navn).paavirkning;
-  for (const navn of ["Disponibel indkomst", "Gennemsnitligt boligareal", "Biler pr. indbygger",
-    "Kommunens driftsindkøb"]) {
+  for (const navn of ["Disponibel indkomst", "Gennemsnitligt boligareal", "Biler pr. indbygger"]) {
     assert.equal(paavirkning(navn), "hoejere", navn);
   }
+  for (const d of DRIVERE.filter((x) => x.navn.startsWith("Kommunens "))) {
+    assert.equal(d.paavirkning, "uafklaret", d.navn);
+  }
+  assert.ok(afsnit.includes("Kommunens eget indkøb i kroner står derimod uden retning"));
   assert.ok(afsnit.includes("En stigende disponibel indkomst står som forkert retning"));
 });
 

@@ -285,8 +285,12 @@ function samletMaerkat(s, udv = null) {
   else if (s.retning === "højere") led.push(enige(s.op));
   else if (s.retning === "lavere") led.push(enige(s.ned));
   else if (s.retning === "på niveau") led.push(enige(s.paaNiveau));
-  if (s.udenRetning > 0) {
-    led.push(s.udenRetning === 1 ? "1 med forbehold" : `${tal(s.udenRetning)} med forbehold`);
+  const medForbehold = s.udenRetning - (s.udenVurdering ?? 0);
+  if (medForbehold > 0) {
+    led.push(medForbehold === 1 ? "1 med forbehold" : `${tal(medForbehold)} med forbehold`);
+  }
+  if (s.udenVurdering > 0) {
+    led.push(`${tal(s.udenVurdering)} uden vurdering`);
   }
   if (s.udenData > 0) {
     led.push(`${tal(s.udenData)} uden data`);
