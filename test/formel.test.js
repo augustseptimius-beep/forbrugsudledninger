@@ -64,14 +64,14 @@ test("formel: formlen læser præcis de felter, nøgletallet oplyser", () => {
   }
 });
 
-test("formel: kun landets fælles el-faktor henter tal fra landet", () => {
+test("formel: intet nøgletal henter tal fra landet", () => {
   // Et bart feltnavn er kommunens. Sneg der sig et `land.`-opslag ind i et
-  // andet nøgletal, ville kommunens kolonne i arket stille regne på landets
-  // tal, og afvigelsen ville blive nul uden at nogen kunne se hvorfor.
+  // nøgletal, ville kommunens kolonne i arket stille regne på landets tal, og
+  // afvigelsen ville blive nul uden at nogen kunne se hvorfor. Elens faktor var
+  // tidligere landets fælles; den er nu kommunens egen, og landets står som felt i
+  // landets række, så ingen formel behøver `land.`.
   const med = DRIVERE.filter((d) => formelFelter(d.formel).land.length > 0);
-  assert.deepEqual(med.map((d) => d.navn), ["Husholdningernes CO2 fra energi"]);
-  assert.deepEqual(formelFelter(med[0].formel).land.sort(),
-    ["husholdning_el_co2_ton", "husholdning_el_tj"]);
+  assert.deepEqual(med.map((d) => d.navn), []);
 });
 
 test("formel: intet regnestykke bruger en funktion, et regneark ikke har", () => {

@@ -60,7 +60,8 @@ export const FELTTEKST = {
   husholdning_energi_tj: ["Husholdningernes energiforbrug", "TJ"],
   husholdning_fossil_andel: ["Fossil andel af husholdningernes energi", "andel (0-1)"],
   husholdning_el_tj: ["Husholdningernes elforbrug", "TJ"],
-  husholdning_el_co2_ton: ["Husholdningernes CO2 fra el", "ton CO2e"],
+  husholdning_el_co2_ton: ["Husholdningernes CO2 fra el (Klimaregnskabet, bruges ikke)", "ton CO2e"],
+  husholdning_el_faktor: ["Elens CO2 pr. kWh i kommunen (Energinet)", "g CO2e/kWh"],
   husholdning_fjernvarme_tj: ["Husholdningernes fjernvarmeforbrug", "TJ"],
   husholdning_fjernvarme_co2_ton: ["Husholdningernes CO2 fra fjernvarme", "ton CO2e"],
   indkoeb_drift_pr_indb: ["Kommunens driftsindkøb", "kr./indb./år"],
@@ -104,8 +105,9 @@ export function formelFelter(formel) {
 /** Oversæt en driverformel til en Excel-formel over arket Data.
  *
  *  `side` vælger, hvilken kolonne bare feltnavne peger på: kommunens anvendte
- *  værdi eller landets. Præfikset `land.` peger altid på landets, uanset side -
- *  den fælles el-faktor er landets, også i kommunens egen række.
+ *  værdi eller landets. Præfikset `land.` peger altid på landets, uanset side.
+ *  Ingen formel bruger det lige nu, men oversættelsen kan det, og en test holder
+ *  øje med, at det ikke sniger sig ind uden at nogen har valgt det.
  *
  *  Hele udtrykket pakkes i to værn, som er selve reglen "manglende data må
  *  aldrig vises som nul", skrevet i regneark: er blot ét af felterne tomt,
@@ -523,7 +525,7 @@ function kilderArk(sources, felter) {
       celler: r(
         { v: k.id, stil: "lille" }, { v: k.navn, stil: "tekst" },
         { v: k.udbyder ?? "", stil: "tekst" },
-        { v: k.metode === "api" ? "API" : "manuelt", stil: "tekst" },
+        { v: k.metode === "api" ? "API" : k.metode === "fil" ? "fil" : "manuelt", stil: "tekst" },
         { v: k.licens ?? "", stil: "tekst" }, { v: k.periode ?? "", stil: "tekst" },
         { v: egne.join(", "), stil: "lille" },
         { v: egne.some((f) => brugt.has(f)) ? "ja" : "nej", stil: "tekst" },

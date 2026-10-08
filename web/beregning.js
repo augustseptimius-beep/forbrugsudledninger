@@ -44,22 +44,28 @@ const alleBoliger = (m) => helaarsboliger(m) + (m.fritidshuse ?? 0);
 const husholdningEnergiPrBolig = (m) => (m.husholdning_energi_tj * 1000) / alleBoliger(m);
 const fritidshusPrBolig = (m) => m.fritidshuse / helaarsboliger(m);
 
-// Strøm er fælles, fjernvarme er lokal.
+// Strøm og fjernvarme har hver sin kommunale faktor.
 //
-// Klimaregnskabet giver hver kommune sin egen el-faktor ud fra den el, der
-// produceres i kommunen, så lokal vind og sol tæller som nul hos kommunens egne
-// forbrugere. Strøm deles på det fælles net, og en vindmølle gør ikke kommunens
-// eget forbrug renere - den gør alles. Husholdningernes strøm regnes derfor med
-// landets fælles faktor: landets el-udledning delt med landets elforbrug, fra
-// samme opgørelse og samme år. Summen over landet er uændret.
+// Klimaregnskabet giver hver kommune sin egen el-udledning ud fra den el, der
+// produceres i kommunen. Den bruges ikke: husholdningernes elforbrug (TJ) ganges i
+// stedet med Energinets miljødeklaration for kommunen (husholdning_el_faktor, g CO2e
+// pr. kWh, 125 %-metoden), som er myndighedens eget kommunale tal. Energinet lader
+// vedvarende energi produceret i kommunen dække kommunens forbrug først og dækker
+// resten med transmissionsnettets blanding inklusive import. Landets faktor er det
+// elforbrugsvægtede gennemsnit af kommunernes, så landstallet er summen af
+// kommunernes. Se pipeline/energinet.py og metodesiden.
+//
+// Mangler faktoren, mangler nøgletallet: et felt, der mangler, er null, og null er
+// nul i JavaScript. elFaktor() giver NaN i stedet, så regnestykket ender som "ingen
+// data" og ikke som en elforbruger uden udledning.
 //
 // Fjernvarme leveres i rør fra kommunens eget net, og Klimaregnskabet beregner
 // faktoren pr. net efter Energistyrelsens anbefaling. Den bruges, som den er.
 const KWH_PR_TJ = 1e12 / 3.6e6;
-const faellesElFaktor = (land) => land.husholdning_el_co2_ton / land.husholdning_el_tj;
-const husholdningCo2PrBolig = (m, land) =>
+const elFaktor = (m) => m.husholdning_el_faktor ?? NaN;
+const husholdningCo2PrBolig = (m) =>
   (m.husholdning_co2_ton - m.husholdning_el_co2_ton
-    + m.husholdning_el_tj * faellesElFaktor(land)) / alleBoliger(m);
+    + (m.husholdning_el_tj * KWH_PR_TJ * elFaktor(m)) / 1e6) / alleBoliger(m);
 const fjernvarmeCo2PrKwh = (m) =>
   (m.husholdning_fjernvarme_co2_ton * 1e6) / (m.husholdning_fjernvarme_tj * KWH_PR_TJ);
 
@@ -348,15 +354,17 @@ export const DRIVERE = [
   { navn: "Husholdningernes CO2 fra energi", enhed: "ton CO2e/bolig",
     val: husholdningCo2PrBolig,
     felter: ["husholdning_co2_ton", "husholdning_el_co2_ton", "husholdning_el_tj",
+             "husholdning_el_faktor",
              "boliger_parcel", "boliger_raekke", "boliger_etage", "fritidshuse"],
-    formel: "(husholdning_co2_ton - husholdning_el_co2_ton + husholdning_el_tj"
-      + " * (land.husholdning_el_co2_ton / land.husholdning_el_tj))"
+    formel: "(husholdning_co2_ton - husholdning_el_co2_ton"
+      + " + husholdning_el_tj * (1000000000000 / 3600000) * husholdning_el_faktor / 1000000)"
       + " / (boliger_parcel + boliger_raekke + boliger_etage + fritidshuse)",
     type: "relativ", kategori: KATEGORI.ENERGI,
     paavirkning: "hoejere", forbehold: fritidshusForbehold,
     begrundelse: "Udledningen fra borgernes eget energiforbrug i boligen. Strømmen er "
-      + "regnet med samme udledning pr. kWh i alle kommuner, fordi den deles på det "
-      + "fælles net; fjernvarmen med sit lokale nets." },
+      + "regnet med kommunens miljødeklaration fra Energinet, hvor vedvarende energi "
+      + "produceret i kommunen dækker kommunens forbrug først; fjernvarmen med sit "
+      + "lokale nets." },
   { navn: "Husholdningernes energiforbrug", enhed: "GJ/bolig",
     val: husholdningEnergiPrBolig,
     felter: ["husholdning_energi_tj", "boliger_parcel", "boliger_raekke",
@@ -581,7 +589,8 @@ export function udledningsSignal(afvigelse, paavirkning) {
 
 /** Sikker beregning: returnerer null hvis resultatet ikke er et endeligt tal
  *  (manglende felt giver NaN/Infinity, som Number.isFinite fanger). Landet gives
- *  med, fordi husholdningernes strøm regnes med landets fælles el-faktor. */
+ *  med, så et nøgletal kan læse landets tal (`land.felt` i formlen); ingen gør det
+ *  lige nu, for el-faktoren er kommunens egen og landets er et felt i landets række. */
 function sikker(fn, m, land) {
   const v = fn(m, land);
   return Number.isFinite(v) ? v : null;
@@ -859,7 +868,7 @@ const FORVENTEDE_FELTER = [
   "indkoeb_drift_pr_indb", "indkoeb_anlaeg_pr_indb",
   "indkoeb_foedevarer_pr_indb", "indkoeb_braendsel_pr_indb",
   "husholdning_co2_ton", "husholdning_energi_tj", "husholdning_fossil_andel",
-  "husholdning_el_tj", "husholdning_el_co2_ton",
+  "husholdning_el_tj", "husholdning_el_co2_ton", "husholdning_el_faktor",
   "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton",
 ];
 

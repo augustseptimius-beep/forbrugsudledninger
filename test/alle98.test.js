@@ -9,6 +9,8 @@ import { renderKommune } from "../web/render.js";
 const data = JSON.parse(readFileSync(new URL("../web/data/data.json", import.meta.url)));
 const concito = JSON.parse(readFileSync(new URL("../web/data/concito.json", import.meta.url)));
 const ens = JSON.parse(readFileSync(new URL("../web/data/ens.json", import.meta.url)));
+const energinet = JSON.parse(readFileSync(new URL("../web/data/energinet.json", import.meta.url)));
+const sources = JSON.parse(readFileSync(new URL("../web/data/sources.json", import.meta.url)));
 
 test("datasættet indeholder alle 98 kommuner", () => {
   assert.equal(data.kommuner.length, 98);
@@ -201,8 +203,8 @@ test("fossil andel af husholdningernes energi ligger mellem 0 og 1", () => {
 });
 
 test("landets el og fjernvarme er summen af kommunernes", () => {
-  // Den fælles el-faktor og fjernvarmens landstal regnes af landets summer. Er
-  // landet et selvstændigt opslag, dækker tæller og nævner ikke det samme.
+  // Fjernvarmens landstal regnes af landets summer. Er landet et selvstændigt opslag,
+  // dækker tæller og nævner ikke det samme.
   for (const felt of ["husholdning_el_tj", "husholdning_el_co2_ton",
                       "husholdning_fjernvarme_tj", "husholdning_fjernvarme_co2_ton"]) {
     const sum = data.kommuner.reduce((s, k) => s + k[felt], 0);
@@ -211,9 +213,41 @@ test("landets el og fjernvarme er summen af kommunernes", () => {
   }
 });
 
-test("husholdningernes CO2 følger ikke kommunens egen el-faktor", () => {
-  // Kernen i omregningen: kommunens lokale el-udledning må ikke slå igennem.
-  // Fjernes den helt fra kommunens tal, skal nøgletallet stå præcis som før.
+test("kommunens el-faktor er Energinets miljødeklaration for Klimaregnskabets år", () => {
+  // Faktoren i data.json er en afskrift fra energinet.json, ikke et tal, der er regnet
+  // eller rettet undervejs. Året er det samme som Klimaregnskabets, fordi faktoren
+  // ganges på elforbruget derfra.
+  const periode = sources.kilder.find((k) => k.id === "ENERGINET_MILJODEKLARATION").periode;
+  assert.equal(periode, sources.kilder.find((k) => k.id === "KLIMAREGNSKABET_HUSHOLDNINGER").periode);
+  const aar = energinet.aar[periode];
+  assert.ok(aar, `energinet.json har ikke ${periode}`);
+  for (const k of data.kommuner) {
+    assert.equal(k.husholdning_el_faktor, aar[String(k.kode)], k.navn);
+    assert.ok(k.husholdning_el_faktor > 0 && k.husholdning_el_faktor < 1000,
+      `${k.navn}: ${k.husholdning_el_faktor} g CO2e/kWh ligger uden for det rimelige`);
+  }
+});
+
+test("landets el-faktor er det elforbrugsvægtede gennemsnit af kommunernes", () => {
+  // Så landstallet for husholdningernes CO2 er summen af kommunernes og ikke et
+  // selvstændigt opslag: tæller og nævner dækker præcis det samme.
+  const tj = data.kommuner.reduce((s, k) => s + k.husholdning_el_tj, 0);
+  const vaegtet = data.kommuner.reduce((s, k) => s + k.husholdning_el_tj * k.husholdning_el_faktor, 0) / tj;
+  assert.ok(Math.abs(vaegtet - data.land.husholdning_el_faktor) <= 1e-9 * vaegtet,
+    `${vaegtet} mod ${data.land.husholdning_el_faktor}`);
+  const navn = "Husholdningernes CO2 fra energi";
+  const kWh = 1e12 / 3.6e6;
+  const boliger = (m) => m.boliger_parcel + m.boliger_raekke + m.boliger_etage + (m.fritidshuse ?? 0);
+  const sumCo2 = data.kommuner.reduce((s, k) => s + k.husholdning_co2_ton - k.husholdning_el_co2_ton
+    + (k.husholdning_el_tj * kWh * k.husholdning_el_faktor) / 1e6, 0);
+  const landCo2 = driverTabel(data.land, data.land).find((d) => d.navn === navn).kommuneVaerdi * boliger(data.land);
+  assert.ok(Math.abs(landCo2 - sumCo2) <= 1e-6 * sumCo2, `${landCo2} mod ${sumCo2}`);
+});
+
+test("husholdningernes CO2 følger ikke Klimaregnskabets egen el-udledning", () => {
+  // Klimaregnskabets lokale el-udledning må ikke slå igennem: den trækkes fra totalen
+  // og erstattes af elforbruget gange Energinets faktor. Fjernes den helt fra
+  // kommunens tal, skal nøgletallet stå præcis som før.
   const navn = "Husholdningernes CO2 fra energi";
   let maalt = 0;
   for (const k of data.kommuner) {

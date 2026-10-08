@@ -649,11 +649,12 @@ test("udeladt: den samlede retning tæller ikke nøgletallet med", () => {
 const medHusholdning = (fritidshuse) => ({
   ...thisted, fritidshuse, husholdning_co2_ton: 19000, husholdning_energi_tj: 900,
   husholdning_fossil_andel: 0.05, husholdning_el_tj: 100, husholdning_el_co2_ton: 2000,
+  husholdning_el_faktor: 40,
 });
 const landHusholdning = {
   ...land, fritidshuse: 224795, husholdning_co2_ton: 3343924,
   husholdning_energi_tj: 155250, husholdning_fossil_andel: 0.098,
-  husholdning_el_tj: 30000, husholdning_el_co2_ton: 900000,
+  husholdning_el_tj: 30000, husholdning_el_co2_ton: 900000, husholdning_el_faktor: 56,
 };
 
 test("fritidshuse: flere fritidshuse end helårsboliger holder retningen tilbage pr. bolig", () => {

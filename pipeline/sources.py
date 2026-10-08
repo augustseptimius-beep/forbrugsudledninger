@@ -52,7 +52,7 @@ KILDER = [
          forbehold="Vises ikke på kommunesiden. Ulighed siger noget om fordelingen af "
                    "forbruget, ikke om niveauet. Tallet hentes til en vurdering af "
                    "rimelig og retfærdig omstilling."),
-    _dst("BOL101", "Boliger efter anvendelse", "BOLIGER_AAR",
+    _dst("BOL105", "Boliger efter anvendelse", "BOLIGER_AAR",
          ["boliger_parcel", "boliger_raekke", "boliger_etage"]),
     _dst("BOL103", "Boliger efter størrelse", "BOLIGER_AAR", ["boligareal"]),
     _dst("BOL102", "Boliger efter opvarmningsform", "OPVARMNING_AAR",
@@ -69,9 +69,9 @@ KILDER = [
          forbehold="Afstanden til arbejde for beskæftigede med bopæl i kommunen. "
                    "Den siger intet om transportmiddel og dækker kun arbejdsturen, "
                    "ikke indkøb, fritid og andre ærinder."),
-    dict(_dst("BOL101_FRITID", "Fritidshuse uden CPR-tilmeldte personer",
-              "BOLIGER_AAR", ["fritidshuse"], kort="DST BOL101 (fritidshuse)"),
-         url="https://www.statistikbanken.dk/BOL101",
+    dict(_dst("BOL105_FRITID", "Fritidshuse uden CPR-tilmeldte personer",
+              "BOLIGER_AAR", ["fritidshuse"], kort="DST BOL105 (fritidshuse)"),
+         url="https://www.statistikbanken.dk/BOL105",
          forbehold="Bruges til at fordele husholdningernes energi og udledning på "
                    "samtlige boliger. Fritidsboliger bruger energi, men deres ejere "
                    "er registreret i en anden kommune."),
@@ -94,11 +94,33 @@ KILDER = [
                      "lavere end CONCITO's tal for El og varme. Sammenligningen med "
                      "landsgennemsnittet er gyldig, fordi begge sider opgøres ens. "
                      "NIRAS (2024) s. 18 peger på Energi- og CO2-Regnskabet som den "
-                     "rigtige kilde til energidelen. Klimaregnskabets el-faktor er "
-                     "kommunens egen produktion; værktøjet regner husholdningernes "
-                     "strøm med landets fælles faktor i stedet, fordi strøm deles på "
-                     "det fælles net. Fjernvarmens faktor er fjernvarmenettets egen og "
-                     "bruges, som den er.",
+                     "rigtige kilde til energidelen. Klimaregnskabets egen el-udledning "
+                     "bruges ikke: den fordeler kommunens egen elproduktion på "
+                     "kommunens forbrugere. Værktøjet tager elforbruget herfra og "
+                     "ganger det med Energinets miljødeklaration for kommunen, se "
+                     "ENERGINET_MILJODEKLARATION. Fjernvarmens faktor er "
+                     "fjernvarmenettets egen og bruges, som den er.",
+    },
+    {
+        "id": "ENERGINET_MILJODEKLARATION",
+        "navn": "Miljødeklaration pr. kommune: CO2e pr. kWh el, årsgennemsnit",
+        "kort": "Energinet",
+        "udbyder": "Energinet",
+        "metode": "fil",
+        "periode_noegle": "KLIMAREGNSKAB_AAR",
+        "licens": "Åbne data fra Energinet (Energi Data Service)",
+        "url": "https://www.energinet.dk/data-om-energi/data-til-dit-klimaregnskab/"
+               "lokationsbaseret-deklaration-miljodeklaration/",
+        "felter": ["husholdning_el_faktor"],
+        "forbehold": "Energinets lokationsbaserede deklaration efter 125 %-metoden, "
+                     "i g CO2e pr. kWh forbrugt el. Strøm, der produceres af "
+                     "vedvarende energi i kommunen, forbruges først dér, og resten "
+                     "dækkes af transmissionsnettets blanding inklusive import; "
+                     "kommuner med meget lokal vind og sol får derfor en lav faktor. "
+                     "Tallet er Energinets modelberegning og ikke en måling. "
+                     "Årsgennemsnittene er endelige i juni året efter og foreløbige "
+                     "før. Landets faktor er elforbrugsvægtet gennemsnit af de 98 "
+                     "kommuners. Filen opdateres for sig med pipeline/energinet.py.",
     },
     {
         "id": "FU17",

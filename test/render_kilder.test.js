@@ -19,7 +19,7 @@ test("kilder: hver kilde får en række med id, udbyder og periode", () => {
 
 test("kilder: hver kilde bærer sin hentemetode", () => {
   const h = renderKilder(sources);
-  const maerkater = h.match(/>(API|Manuel)</g) || [];
+  const maerkater = h.match(/>(API|Manuel|Fil)</g) || [];
   assert.equal(maerkater.length, sources.kilder.length);
 });
 

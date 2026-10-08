@@ -185,23 +185,28 @@ test("serie: et hul i nævneren er også et hul", () => {
   assert.equal(s.kommune.at(-1), 0.5);
 });
 
-test("serie: nøgletal, der bruger landets tal, bruger landets tal for samme år", () => {
-  // Husholdningernes CO2 pr. bolig regnes med landets fælles el-faktor, som ændrer sig
-  // fra år til år. Faktoren for 2023 må ikke bruges på 2024.
+test("serie: elens faktor følger året, og kommunen og landet bruger hver sin", () => {
+  // Husholdningernes CO2 pr. bolig regnes med Energinets faktor for kommunen, som ændrer
+  // sig fra år til år. Faktoren for 2023 må ikke bruges på 2024, og landets faktor må
+  // ikke bruges på kommunen.
+  const KWH_PR_TJ = 1e12 / 3.6e6;
   const felt = (kommune, land) => ({ 1: kommune, land });
   const h = historik({
     husholdning_co2_ton: felt(raekke(1000, 1000), raekke(2000, 2000)),
     husholdning_el_co2_ton: felt(raekke(100, 100), raekke(400, 300)),
     husholdning_el_tj: felt(raekke(10, 10), raekke(20, 20)),
+    husholdning_el_faktor: felt(raekke(60, 40), raekke(80, 70)),
     boliger_parcel: felt(raekke(100, 100), raekke(200, 200)),
     boliger_raekke: felt(raekke(0, 0), raekke(0, 0)),
     boliger_etage: felt(raekke(0, 0), raekke(0, 0)),
     fritidshuse: felt(raekke(0, 0), raekke(0, 0)),
   });
   const s = driverSerie(drv("Husholdningernes CO2 fra energi"), h, 1);
-  // (1000 - 100 + 10 * faktor) / 100. Faktor 2023: 400/20 = 20. Faktor 2024: 300/20 = 15.
-  assert.equal(s.kommune.at(-2), (1000 - 100 + 10 * 20) / 100);
-  assert.equal(s.kommune.at(-1), (1000 - 100 + 10 * 15) / 100);
+  // (co2 - el_co2 + el_tj * kWh pr. TJ * faktor / 1e6) / boliger, med årets egne tal.
+  assert.equal(s.kommune.at(-2), (1000 - 100 + (10 * KWH_PR_TJ * 60) / 1e6) / 100);
+  assert.equal(s.kommune.at(-1), (1000 - 100 + (10 * KWH_PR_TJ * 40) / 1e6) / 100);
+  assert.equal(s.land.at(-2), (2000 - 400 + (20 * KWH_PR_TJ * 80) / 1e6) / 200);
+  assert.equal(s.land.at(-1), (2000 - 300 + (20 * KWH_PR_TJ * 70) / 1e6) / 200);
 });
 
 test("serie: kronebeløb sættes i det seneste års prisniveau", () => {

@@ -555,7 +555,7 @@ const UDVIKLING_NOTE = {
   "Kommunens anlægsindkøb":
     "Hvert punkt er et gennemsnit over fem regnskabsår, så et enkelt stort anlægsprojekt sætter sit spor i fem punkter.",
   "Husholdningernes CO2 fra energi":
-    "Klimaregnskabets metode kan have ændret sig mellem årgangene. Værktøjet kan ikke selv efterprøve det.",
+    "Klimaregnskabets metode kan have ændret sig mellem årgangene. Værktøjet kan ikke selv efterprøve det. Elens CO2 pr. kWh (Energinet) falder i hele landet i perioden, så udviklingen afspejler også nettet og ikke kun kommunens valg.",
   "Husholdningernes energiforbrug":
     "Klimaregnskabets metode kan have ændret sig mellem årgangene. Værktøjet kan ikke selv efterprøve det.",
   "Fossil andel af husholdningernes energi":
@@ -1219,6 +1219,7 @@ export function renderKommune(b, c, ens, sources) {
 const METODE_MAERKAT = {
   api: { tekst: "API", klasse: "bg-gray-100 text-gray-700" },
   manuel: { tekst: "Manuel", klasse: "bg-amber-100 text-amber-800" },
+  fil: { tekst: "Fil", klasse: "bg-gray-100 text-gray-700" },
 };
 
 /** Kildetabellen. Perioder kommer fra sources.json, som pipelinen genererer,

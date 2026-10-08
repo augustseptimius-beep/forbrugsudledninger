@@ -50,13 +50,14 @@ test("kildeangivelse: kilden linker til sit ophav", () => {
 });
 
 test("kildeangivelse: et nøgletal med flere kilder nævner dem alle", () => {
-  // Husholdningernes CO2 pr. bolig er Klimaregnskabets udledning fordelt på
-  // Danmarks Statistiks boligtal. Nævnte siden kun den ene, ville nævneren i
-  // regnestykket være usynlig.
+  // Husholdningernes CO2 pr. bolig er Klimaregnskabets udledning og elforbrug, med
+  // elens faktor fra Energinet, fordelt på Danmarks Statistiks boligtal. Nævnte siden
+  // kun den ene, ville en del af regnestykket være usynlig.
   const d = tabel.find((x) => x.navn === "Husholdningernes CO2 fra energi");
   const ids = kilderForDriver(d, sources).kilder.map((k) => k.id);
   assert.deepEqual(ids.sort(),
-    ["BOL101", "BOL101_FRITID", "KLIMAREGNSKABET_HUSHOLDNINGER"].sort());
+    ["BOL105", "BOL105_FRITID", "ENERGINET_MILJODEKLARATION",
+      "KLIMAREGNSKABET_HUSHOLDNINGER"].sort());
 });
 
 test("kildeangivelse: fødevareforbruget nævner både data og metode", () => {
@@ -85,8 +86,8 @@ test("kildeangivelse: hvert nøgletal oplyser præcis de felter, det læser", ()
   // regnestykke - et nøgletal, der begynder at dividere med folketallet - må
   // ikke kunne slippe igennem uden at kilden følger med.
   //
-  // Opslagene spores med en proxy over både kommunen og landet, fordi et par
-  // nøgletal læser landets tal med (den fælles el-faktor).
+  // Opslagene spores med en proxy over både kommunen og landet, så et nøgletal, der
+  // begynder at læse landets tal, også bliver fanget.
   const laest = new Set();
   const spor = (o) => new Proxy(o, {
     get(maal, noegle) {

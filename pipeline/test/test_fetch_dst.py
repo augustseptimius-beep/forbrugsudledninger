@@ -45,11 +45,11 @@ class TestFetchDelA(unittest.TestCase):
         self.assertAlmostEqual(result["Thisted"], 26.42)
 
 
-BOL101_CSV = (
-    "﻿OMRÅDE;BEBO;ANVENDELSE;UDLFORH;EJER;OPFØRELSESÅR;TID;INDHOLD\n"
-    "Thisted;Boliger med CPR tilmeldte personer (beboede boliger);Parcel/Stuehuse;Beboet af ejer;Privatpersoner inkl I/S;2010;2025;100\n"
-    "Thisted;Boliger med CPR tilmeldte personer (beboede boliger);Parcel/Stuehuse;Beboet af lejer;Privatpersoner inkl I/S;2011;2025;46\n"
-    "Thisted;Boliger med CPR tilmeldte personer (beboede boliger);Række-, kæde- og dobbelthuse;Beboet af ejer;Privatpersoner inkl I/S;2010;2025;50\n"
+BOL105_CSV = (
+    "﻿AMT;BEBO;ANVENDELSE;TID;INDHOLD\n"
+    "Thisted;Boliger med CPR tilmeldte personer (beboede boliger);Parcel/Stuehuse;2025;100\n"
+    "Thisted;Boliger med CPR tilmeldte personer (beboede boliger);Parcel/Stuehuse;2025;46\n"
+    "Thisted;Boliger med CPR tilmeldte personer (beboede boliger);Række-, kæde- og dobbelthuse;2025;50\n"
 )
 BOL103_CSV = (
     "﻿AMT;BEBO;ANVENDELSE;BOLIGSTØR;TID;INDHOLD\n"
@@ -66,23 +66,21 @@ BOL103_CSV_MED_MANGLENDE_DATA = (
 class TestFetchDelB(unittest.TestCase):
     @patch("fetch_dst.dst_client.fetch")
     def test_boliger_type(self, mock_fetch):
-        mock_fetch.return_value = fetch_dst.dst_client.parse_csv(BOL101_CSV)
+        mock_fetch.return_value = fetch_dst.dst_client.parse_csv(BOL105_CSV)
         parcel, raekke, etage = fetch_dst.fetch_boliger_type()
         self.assertEqual(parcel["Thisted"], 146)  # 100+46
         self.assertEqual(raekke["Thisted"], 50)
 
     @patch("fetch_dst.dst_client.fetch")
     def test_boliger_type_udelader_elimination_dimensioner(self, mock_fetch):
-        """UDLFORH/EJER/OPFØRELSESÅR har elimination=True i BOL101's metadata (verificeret
-        mod den levende API) - PX-Web summerer selv over dem når de UDELADES fra
-        forespørgslen, samme mønster som ANTVÆR/HUSSTØR allerede udelades i fetch_boligareal().
-        Wildcarding alle tre samtidig (i stedet for at udelade dem) overskrider i praksis DST's
-        1-mio.-cellegrænse for OMRÅDE=* (fejlede live med HTTP 400 REQUEST-LIMIT ved 98 kommuner)."""
-        mock_fetch.return_value = fetch_dst.dst_client.parse_csv(BOL101_CSV)
+        """OPVARMNING/TOILET/BAD/HUSTYP/ANTBØRN har elimination=True i BOL105's metadata
+        (verificeret mod den levende API) - PX-Web summerer selv over dem når de UDELADES
+        fra forespørgslen, samme mønster som ANTVÆR/HUSSTØR udelades i fetch_boligareal()."""
+        mock_fetch.return_value = fetch_dst.dst_client.parse_csv(BOL105_CSV)
         fetch_dst.fetch_boliger_type()
         args, _ = mock_fetch.call_args
         params = args[2]
-        for felt in ("UDLFORH", "EJER", "OPFØRELSESÅR"):
+        for felt in ("OPVARMNING", "TOILET", "BAD", "HUSTYP", "ANTBØRN"):
             self.assertNotIn(felt, params)
 
     @patch("fetch_dst.dst_client.fetch")

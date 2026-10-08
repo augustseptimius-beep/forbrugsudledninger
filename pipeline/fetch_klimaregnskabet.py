@@ -27,10 +27,11 @@ TRE FORBEHOLD, DER FØLGER MED.
    hentes også antal fritidshuse, så tallet kan fordeles på samtlige boliger
    frem for på indbyggere. Se `_maalte_sammenhaenge` nedenfor.
 
-3. Klimaregnskabets el-faktor er kommunens egen: den el, der produceres i
-   kommunen, fordeles på kommunens forbrugere, så lokal vind og sol tæller som
-   nul. Strøm deles på det fælles net, så motoren regner strømmen med landets
-   fælles faktor i stedet. Se EL_KILDER nedenfor.
+3. Klimaregnskabets el-udledning bruges ikke. Klimaregnskabet fordeler den el, der
+   produceres i kommunen, på kommunens forbrugere, så lokal vind og sol tæller som
+   nul. Motoren tager i stedet elforbruget (el_tj) herfra og ganger det med Energinets
+   miljødeklaration for kommunen, som er myndighedens eget kommunale tal for CO2 pr.
+   kWh el. Se energinet.py og EL_KILDER nedenfor.
 
 API-NØGLE. Læses fra miljøvariablen KLIMAREGNSKABET_API_KEY eller fra
 pipeline/.env, som er gitignoreret. Nøglen må aldrig committes. Mangler den,
@@ -76,11 +77,11 @@ FOSSILE_KILDER = {
 # Klimaregnskabet beregner el-faktoren pr. kommune ud fra den el, der produceres
 # i kommunen (Energistyrelsens metode til strategisk energiplanlægning), så lokal
 # vind og sol tæller som nul hos kommunens egne forbrugere - i 2024 står fire
-# kommuner på nul, mens Aalborg ligger på 418 g CO2e/kWh. Strøm deles på det
-# fælles net, så motoren regner strømmen med landets fælles faktor: summen af
-# el-udledningen delt med summen af elforbruget. Fjernvarme leveres i rør fra
-# kommunens eget net, og Klimaregnskabet beregner faktoren pr. net; den er
-# kommunens egen.
+# kommuner på nul, mens Aalborg ligger på 418 g CO2e/kWh. El-udledningen
+# (el_co2_ton) læses stadig ud, fordi den skal trækkes fra totalen, men motoren
+# erstatter den med elforbruget gange Energinets miljødeklaration for kommunen -
+# se energinet.py. Fjernvarme leveres i rør fra kommunens eget net, og
+# Klimaregnskabet beregner faktoren pr. net; den er kommunens egen.
 EL_KILDER = ("El til andet", "El til paneler", "El til varmepumpe")
 FJERNVARME = "Fjernvarme"
 
@@ -197,8 +198,10 @@ def sammenlaeg_land_husholdning(husholdning):
     Landet er summen af kommunernes, ikke et selvstændigt opslag - så tæller og
     nævner dækker præcis det samme område. Landets fossile andel regnes på de
     samlede mængder, ikke som gennemsnittet af 98 kommuneandele, ellers ville
-    Læsø veje som København. Landets el og fjernvarme er ligeledes summer;
-    motorens fælles el-faktor er landets el-udledning delt med landets elforbrug.
+    Læsø veje som København. Landets el og fjernvarme er ligeledes summer.
+    Landets el-faktor er det elforbrugsvægtede gennemsnit af kommunernes faktorer fra
+    Energinet (`el_faktor`, lagt ind af energinet.beriger_husholdning), så landstallet
+    er summen af kommunernes og ikke et selvstændigt opslag.
 
     build.py bruger funktionen til det nyeste år og historikken til hvert af de
     foregående."""
@@ -218,6 +221,12 @@ def sammenlaeg_land_husholdning(husholdning):
         ud["husholdning_fossil_andel"] = fossilt / samlet_tj
     for felt in ("el_tj", "el_co2_ton", "fjernvarme_tj", "fjernvarme_co2_ton"):
         ud[f"husholdning_{felt}"] = _sum(felt)
+    # Kun kommuner, der har både et elforbrug og en faktor, indgår i vægtningen.
+    vaegte = [(h["el_tj"], h["el_faktor"]) for h in husholdning.values()
+              if h.get("el_tj") is not None and h.get("el_faktor") is not None]
+    samlet_el = sum(tj for tj, _ in vaegte)
+    ud["husholdning_el_faktor"] = (
+        sum(tj * f for tj, f in vaegte) / samlet_el if samlet_el else None)
     return ud
 
 

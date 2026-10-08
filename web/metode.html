@@ -617,16 +617,28 @@
     flere fritidshuse end helårsboliger trækkes gennemsnittet ned med en størrelse, der
     ikke kan opgøres. Dér tages de to husholdningstal pr. bolig af siden, og fritidshuse
     pr. helårsbolig står som hjælpetal ved siden af.</p>
-  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Strømmen regnes med landets
-    fælles faktor.</strong> Klimaregnskabet giver hver kommune sin egen el-faktor ud fra
-    den el, der produceres i kommunen, så lokal vind og sol tæller som nul hos
-    kommunens egne forbrugere. I 2024 står fire kommuner på nul, mens Aalborg ligger på
-    418 g CO2e/kWh. Strøm deles på det fælles net, så en vindmølle i én kommune gør hele
-    nettets strøm renere. Værktøjet regner derfor husholdningernes strøm med landets
-    fælles faktor: husholdningernes samlede el-udledning delt med deres samlede
-    elforbrug over alle 98 kommuner, 79 g CO2e/kWh i 2024. Landstallet er det samme, men
-    tallet flytter sig for de kommuner, hvis egen el-faktor ligger langt fra landets.
-    Det er det eneste sted, hvor værktøjet erstatter en del af et kildetal.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Strømmen regnes med kommunens
+    miljødeklaration fra Energinet.</strong> Klimaregnskabets egen el-udledning bruges
+    ikke, fordi den fordeler den el, der produceres i kommunen, på kommunens forbrugere.
+    Værktøjet tager i stedet husholdningernes elforbrug fra Klimaregnskabet og ganger det
+    med Energinets miljødeklaration for kommunen: CO2e pr. kWh el, årsgennemsnit efter
+    125 %-metoden. Energinet lader vedvarende energi produceret i kommunen dække
+    kommunens forbrug først og dækker resten med transmissionsnettets blanding,
+    herunder import. I 2024 ligger faktoren fra 10 g CO2e/kWh i Lolland til 100 g
+    CO2e/kWh i Horsens, og landets er 57 g CO2e/kWh, regnet som det elforbrugsvægtede
+    gennemsnit af de 98 kommuner, så landstallet er summen af kommunernes. Værktøjet
+    regnede tidligere alle kommuner med én fælles faktor og bruger nu kommunens eget tal,
+    hvor det findes.</p>
+  <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Hvad faktoren siger, og hvad
+    den ikke gør.</strong> Tallet er Energinets modelberegning og ikke en måling.
+    Kommuner med meget lokal vind og sol får en lav faktor, også selv om strømmen deles
+    på det fælles net, og en kommune, der importerer meget, får en høj. Faktoren belønner
+    altså lokal produktion, ikke borgernes forbrug. Årsgennemsnittene er endelige i juni
+    året efter og foreløbige før; det seneste år i filen er foreløbigt, og værktøjet bruger
+    det år, der svarer til Klimaregnskabet. Energinets tal er i CO2-ækvivalenter, og
+    Klimaregnskabets øvrige tal er opgjort efter dets egen metode, så niveauet læses som
+    en sammenligning mellem kommuner og ikke som en absolut udledning. Det er det eneste
+    sted, hvor værktøjet erstatter en del af et kildetal med et tal fra en anden kilde.</p>
   <p class="mt-2 text-sm text-gray-700 max-w-3xl"><strong>Fjernvarmens CO2 pr. kWh er
     kommunens eget tal.</strong> Fjernvarme leveres fra lokale net. Klimaregnskabet
     beregner udledningen pr. fjernvarmenet efter Energistyrelsens anbefaling og

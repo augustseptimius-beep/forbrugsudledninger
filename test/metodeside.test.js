@@ -124,10 +124,9 @@ const afvPct = (v, landVaerdi) => ((v - landVaerdi) / landVaerdi) * 100;
 
 const REGIONER = [...new Set(K.map((k) => k.region))];
 
-const elFaktor = (k) =>
-  k.husholdning_el_tj
-    ? (k.husholdning_el_co2_ton * 1e6) / (k.husholdning_el_tj * KWH_PR_TJ)
-    : null;
+// Energinets miljødeklaration pr. kommune, g CO2e/kWh (data.json: husholdning_el_faktor).
+const elFaktorer = () => K.map((k) => ({ f: k.husholdning_el_faktor, navn: k.navn }))
+  .filter((x) => x.f != null);
 
 // Hvert punkt: hvad tallet er, hvordan det genberegnes, og den sætning det
 // skal stå i. Sætningen er med, fordi et bart tal som "+0,97" optræder flere
@@ -156,26 +155,17 @@ const PAASTANDE = [
     },
   },
   {
-    navn: "kommuner hvis egen el-faktor er nul",
+    navn: "laveste og højeste kommunale el-faktor fra Energinet",
     frase: () => {
-      const antal = K.map(elFaktor).filter((v) => v != null && v < 0.005).length;
-      return `står ${TAL_ORD[antal] ?? antal} kommuner på nul`;
+      const v = elFaktorer();
+      const lav = v.reduce((a, b) => (b.f < a.f ? b : a));
+      const hoej = v.reduce((a, b) => (b.f > a.f ? b : a));
+      return `faktoren fra ${Math.round(lav.f)} g CO2e/kWh i ${lav.navn} til ${Math.round(hoej.f)} g CO2e/kWh i ${hoej.navn}`;
     },
   },
   {
-    navn: "højeste kommunale el-faktor",
-    frase: () => {
-      const v = K.map((k) => ({ f: elFaktor(k), navn: k.navn })).filter((x) => x.f != null);
-      const top = v.reduce((a, b) => (b.f > a.f ? b : a));
-      return `${top.navn} ligger på ${Math.round(top.f)} g CO2e/kWh`;
-    },
-  },
-  {
-    navn: "landets fælles el-faktor",
-    frase: () => {
-      const f = (LAND.husholdning_el_co2_ton * 1e6) / (LAND.husholdning_el_tj * KWH_PR_TJ);
-      return `over alle 98 kommuner, ${Math.round(f)} g CO2e/kWh`;
-    },
+    navn: "landets el-faktor, elforbrugsvægtet gennemsnit af kommunernes",
+    frase: () => `og landets er ${Math.round(LAND.husholdning_el_faktor)} g CO2e/kWh`,
   },
   {
     navn: "landets fossile andel, brugt som eksempel på procentpoint",
